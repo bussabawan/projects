@@ -273,9 +273,8 @@
 .statsGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 4rem;
+  gap: 3.5rem;
   flex: 1;
-  width: 100%;
 }
 
 .statCard {
@@ -297,14 +296,14 @@
 }
 
 .statLabel {
-  font-size: clamp(1.8rem, 2.5vw, 3rem);
+  font-size: 2.2rem;
   color: #111;
   font-weight: 500;
   margin-bottom: 2rem;
 }
 
 .statValue {
-  font-size: clamp(6rem, 10vw, 10rem);
+  font-size: 8rem;
   font-weight: 400;
   color: #111;
   line-height: 1;
