@@ -2,6 +2,55 @@
 
 โปรเจกต์นี้ถูกออกแบบและพัฒนาด้วย **Next.js (App Router)** ซึ่งมีแนวคิดการจัดการไฟล์ที่ค่อนข้างแตกต่างจาก Framework แบบดั้งเดิม แต่สามารถนำมาเทียบเคียงกับโครงสร้าง **MVC (Model-View-Controller)** ได้ดังนี้ครับ
 
+## 🚀 วิธีการเริ่มต้นโปรเจกต์หลังจาก Clone (Getting Started)
+
+คุณสามารถเลือกรันโปรเจกต์ได้ 2 แบบ ตามวัตถุประสงค์การใช้งานครับ:
+
+### แบบที่ 1: โหมดนักพัฒนา (Development) - สำหรับเขียนโค้ดและแก้ไข
+ในโหมดนี้เราจะรันฐานข้อมูลด้วย Docker และรันตัวเว็บด้วยคำสั่ง `npm run dev` ในเครื่องของเราเพื่อให้มันอัปเดตโค้ดแบบ Real-time (Hot Reload)
+
+1. **ติดตั้ง Dependencies:**
+   ```bash
+   npm install
+   ```
+2. **ตั้งค่าไฟล์ .env:**
+   สร้างหรือแก้ไขไฟล์ `.env` โดยกำหนด Host เป็น `localhost` เพื่อให้เครื่องเราเชื่อมกับ Docker ได้:
+   ```env
+   PORT=3000
+   MYSQL_ROOT_PASSWORD=password
+   MYSQL_DATABASE=ot_project_db
+   MYSQL_USER=admin
+   MYSQL_PASSWORD=password
+   MYSQL_HOST=localhost
+   MYSQL_PORT=3306
+   ```
+3. **รันเฉพาะ Database และ phpMyAdmin ใน Docker:**
+   ```bash
+   docker compose up -d mysql phpmyadmin
+   ```
+4. **รันเว็บเซิร์ฟเวอร์สำหรับการพัฒนา:**
+   ```bash
+   npm run dev
+   ```
+   *เข้าใช้งานเว็บไซต์: http://localhost:3000*
+   *จัดการฐานข้อมูล: http://localhost:8081*
+
+---
+
+### แบบที่ 2: โหมดใช้งานจริง (Production / Docker All-in-one)
+หากต้องการรันเพื่อดูผลลัพธ์อย่างเดียว (ไม่เขียนโค้ด) คุณสามารถรันทุกอย่าง (รวมถึง Next.js) ผ่าน Docker ได้เลย:
+
+1. แก้ไขไฟล์ `.env` (ไม่จำเป็นต้องเปลี่ยน `MYSQL_HOST` เพราะ Docker จะจัดการให้)
+2. รันคำสั่งเดียวจบ:
+   ```bash
+   docker compose up -d
+   ```
+   *(รอให้ระบบ Build และทำงานสักครู่)*
+3. เข้าใช้งานเว็บไซต์ได้เลยที่ http://localhost:3000 และจัดการฐานข้อมูลที่ http://localhost:8081
+**(หมายเหตุ: หากรันด้วยวิธีนี้ คุณจะใช้คำสั่ง `npm run dev` ซ้ำไม่ได้ เพราะ Port 3000 จะถูกใช้งานโดย Docker ไปแล้ว และจะเกิด Error: `EADDRINUSE`)**
+
+---
+
 ## 📂 โครงสร้างโฟลเดอร์และไฟล์ (เทียบเคียง MVC)
 
 ```text
