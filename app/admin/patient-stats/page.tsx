@@ -6,6 +6,8 @@ import { PatientStatInfo } from '@/lib/models/patientStats';
 
 export default function PatientStatsPage() {
   const [patients, setPatients] = useState<PatientStatInfo[]>([]);
+  const [filteredPatients, setFilteredPatients] = useState<PatientStatInfo[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -18,6 +20,7 @@ export default function PatientStatsPage() {
         }
         const data = await response.json();
         setPatients(data);
+        setFilteredPatients(data);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -28,12 +31,34 @@ export default function PatientStatsPage() {
     fetchStats();
   }, []);
 
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    
+    if (query.trim() === '') {
+      setFilteredPatients(patients);
+    } else {
+      const lowerQuery = query.toLowerCase();
+      const filtered = patients.filter(patient => 
+        (patient.name && patient.name.toLowerCase().includes(lowerQuery)) || 
+        (patient.patientId && patient.patientId.toLowerCase().includes(lowerQuery))
+      );
+      setFilteredPatients(filtered);
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.headerArea}>
         <h1 className={styles.title}>สถิติผู้ป่วยรายบุคคล</h1>
         <div className={styles.searchContainer}>
-          <input type="text" className={styles.searchInput} placeholder="ค้นหา" />
+          <input 
+            type="text" 
+            className={styles.searchInput} 
+            placeholder="ค้นหา" 
+            value={searchQuery}
+            onChange={handleSearch}
+          />
           <svg className={styles.searchIcon} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -56,7 +81,7 @@ export default function PatientStatsPage() {
               <div className={styles.headerCell}>รายละเอียด</div>
             </div>
             <div className={styles.tableBody}>
-              {patients.length > 0 ? patients.map((patient) => (
+              {filteredPatients.length > 0 ? filteredPatients.map((patient) => (
                 <div key={`desktop-${patient.id}`} className={styles.tableRow}>
                   <div className={styles.cell}>{patient.name}</div>
                   <div className={styles.cell}>{patient.patientId}</div>
@@ -86,7 +111,7 @@ export default function PatientStatsPage() {
 
           {/* Mobile Grid View */}
           <div className={styles.mobileGrid}>
-            {patients.length > 0 ? patients.map((patient) => (
+            {filteredPatients.length > 0 ? filteredPatients.map((patient) => (
               <div key={`mobile-${patient.id}`} className={styles.patientCard}>
                 <div className={styles.cardInfo}>
                   <span className={styles.patientName}>{patient.name}</span>
