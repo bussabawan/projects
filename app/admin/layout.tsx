@@ -99,7 +99,7 @@ export default function AdminLayout({
                 <circle cx="12" cy="7" r="4"></circle>
               </svg>
             </div>
-            <div className={styles.userName}>User 10</div>
+            <div className={styles.userName}>Test12345678</div>
             <button className={styles.logoutBtn} aria-label="Logout" title="Logout">
               <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>

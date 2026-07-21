@@ -7,23 +7,23 @@ export default function AdminPage() {
       
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
-          <div className={styles.statLabel}>ผู้ป่วยทั้งหมด</div>
-          <div className={styles.statValue}>123</div>
+          <div className={styles.statLabel}>ผู้ป่วย<br/>ทั้งหมด</div>
+          <div className={styles.statValue}>159</div>
         </div>
         
         <div className={styles.statCard}>
-          <div className={styles.statLabel}>หมวดหมู่ทั้งหมด</div>
-          <div className={styles.statValue}>123</div>
+          <div className={styles.statLabel}>หมวดหมู่<br/>ทั้งหมด</div>
+          <div className={styles.statValue}>159</div>
         </div>
         
         <div className={styles.statCard}>
-          <div className={styles.statLabel}>รูปภาพทั้งหมด</div>
-          <div className={styles.statValue}>123</div>
+          <div className={styles.statLabel}>รูปภาพ<br/>ทั้งหมด</div>
+          <div className={styles.statValue}>159</div>
         </div>
         
         <div className={styles.statCard}>
-          <div className={styles.statLabel}>ชุดแบบฝึกหัดทั้งหมด</div>
-          <div className={styles.statValue}>123</div>
+          <div className={styles.statLabel}>ชุดแบบฝึกหัด<br/>ทั้งหมด</div>
+          <div className={styles.statValue}>159</div>
         </div>
       </div>
     </>
