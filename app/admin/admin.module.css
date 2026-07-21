@@ -309,6 +309,28 @@
   line-height: 1;
 }
 
+/* Full HD Desktop Responsive (1920x1080) */
+@media (min-width: 1400px) {
+  .statsGrid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    align-content: start;
+  }
+  .statCard {
+    padding: 2.5rem 1.5rem;
+  }
+  .statLabel {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+  }
+  .statValue {
+    font-size: 5.5rem;
+  }
+  .mainContent {
+    padding: 5rem 6rem;
+  }
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .layoutContainer {
