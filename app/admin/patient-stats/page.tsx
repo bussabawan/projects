@@ -7,31 +7,39 @@ import PatientStatsPopup from './components/PatientStatsPopup';
 
 const extractCategory = (testSet?: string) => {
   if (!testSet) return '';
-  const match = testSet.match(/หมวด(.*?)\s?เลเวล/);
+  const match = testSet.match(/หมวด(.*?)(?:\s+เลเวล|$)/);
   return match ? match[1].trim() : testSet;
 };
 
-const renderTestSetTag = (testSet?: string) => {
-  const tagText = extractCategory(testSet);
-  if (!tagText) return null;
-  return <span className={styles.testSetTag}>{tagText}</span>;
+const renderTestSetTags = (testSets?: string[]) => {
+  if (!testSets || testSets.length === 0) return null;
+  const tags = Array.from(new Set(testSets.map(ts => extractCategory(ts)).filter(Boolean)));
+  return (
+    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+      {tags.map((tag, idx) => (
+        <span key={idx} className={styles.testSetTag}>{tag}</span>
+      ))}
+    </div>
+  );
 };
 
 export default function PatientStatsPage() {
   const [patients, setPatients] = useState<PatientStatInfo[]>([]);
   const [filteredPatients, setFilteredPatients] = useState<PatientStatInfo[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [selectedPatientId, setSelectedPatientId] = useState<string | undefined>();
 
   const uniqueCategories = Array.from(new Set(
-    patients.map(p => extractCategory(p.testSet)).filter(Boolean)
+    patients.flatMap(p => (p.testSets || []).map(ts => extractCategory(ts))).filter(Boolean)
   ));
 
   const uniqueExerciseSets = Array.from(new Set(
-    patients.map(p => p.testSet).filter(Boolean)
+    patients.flatMap(p => p.testSets || []).filter(Boolean)
   ));
 
   const openPopup = (id: string) => {
@@ -75,7 +83,11 @@ export default function PatientStatsPage() {
     }
 
     setFilteredPatients(result);
+    setCurrentPage(1);
   }, [searchQuery, patients]);
+
+  const totalPages = Math.ceil(filteredPatients.length / itemsPerPage);
+  const currentPatients = filteredPatients.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -117,11 +129,11 @@ export default function PatientStatsPage() {
               <div className={styles.headerCell}>รายละเอียด</div>
             </div>
             <div className={styles.tableBody}>
-              {filteredPatients.length > 0 ? filteredPatients.map((patient) => (
+              {currentPatients.length > 0 ? currentPatients.map((patient) => (
                 <div key={`desktop-${patient.id}`} className={styles.tableRow}>
                   <div className={styles.cell}>{patient.name}</div>
                   <div className={styles.cell}>{patient.patientId}</div>
-                  <div className={styles.cell}>{renderTestSetTag(patient.testSet)}</div>
+                  <div className={styles.cell}>{renderTestSetTags(patient.testSets)}</div>
                   <div className={styles.cell}>
                     <button className={styles.playBtn} aria-label="Play" onClick={() => openPopup(String(patient.id))}>
                       <svg viewBox="0 0 24 24">
@@ -134,15 +146,32 @@ export default function PatientStatsPage() {
                 <div style={{ padding: '2rem', textAlign: 'center' }}>ไม่พบข้อมูลผู้ป่วย</div>
               )}
             </div>
-            <div className={styles.pagination}>
-              <span className={styles.pageNav}>◀</span>
-              <span className={`${styles.pageNumber} ${styles.activePage}`}>1</span>
-              <span className={styles.pageNumber}>2</span>
-              <span className={styles.pageNumber}>3</span>
-              <span className={styles.pageNumber}>4</span>
-              <span className={styles.pageNumber}>5...</span>
-              <span className={styles.pageNav}>▶</span>
-            </div>
+            {totalPages > 0 && (
+              <div className={styles.pagination}>
+                <span 
+                  className={styles.pageNav} 
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  style={{ cursor: currentPage > 1 ? 'pointer' : 'not-allowed', opacity: currentPage > 1 ? 1 : 0.5 }}
+                >◀</span>
+                
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <span 
+                    key={page}
+                    className={`${styles.pageNumber} ${currentPage === page ? styles.activePage : ''}`}
+                    onClick={() => setCurrentPage(page)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    {page}
+                  </span>
+                ))}
+
+                <span 
+                  className={styles.pageNav}
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  style={{ cursor: currentPage < totalPages ? 'pointer' : 'not-allowed', opacity: currentPage < totalPages ? 1 : 0.5 }}
+                >▶</span>
+              </div>
+            )}
           </div>
 
           {/* Mobile Grid View */}

@@ -5,7 +5,7 @@ export interface PatientStatInfo {
   id: number;
   name: string;
   patientId: string;
-  testSet: string;
+  testSets: string[];
 }
 
 export class PatientStatsModel {
@@ -18,7 +18,7 @@ export class PatientStatsModel {
         SELECT 
           u.user_id as id,
           u.full_name as name,
-          p.patient_id as patientId,
+          u.user_id as patientId,
           IFNULL(ex.exercises_name, '-') as testSet
         FROM users_data u
         INNER JOIN patient_data p ON u.user_id = p.user_id
@@ -29,12 +29,25 @@ export class PatientStatsModel {
       
       const [rows] = await db.execute<RowDataPacket[]>(query);
       
-      return rows.map((row) => ({
-        id: row.id,
-        name: row.name || 'Unknown',
-        patientId: row.patientId != null ? String(row.patientId) : 'N/A',
-        testSet: row.testSet
-      }));
+      const patientMap = new Map<number, PatientStatInfo>();
+      rows.forEach((row) => {
+        if (!patientMap.has(row.id)) {
+          patientMap.set(row.id, {
+            id: row.id,
+            name: row.name || 'Unknown',
+            patientId: row.patientId != null ? String(row.patientId) : 'N/A',
+            testSets: []
+          });
+        }
+        if (row.testSet && row.testSet !== '-') {
+          const patient = patientMap.get(row.id)!;
+          if (!patient.testSets.includes(row.testSet)) {
+            patient.testSets.push(row.testSet);
+          }
+        }
+      });
+      
+      return Array.from(patientMap.values());
     } catch (error) {
       console.error('Error fetching patient stats:', error);
       throw new Error('Failed to fetch patient statistics');
