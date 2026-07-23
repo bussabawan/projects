@@ -222,6 +222,43 @@ export class PatientDetailStatsModel {
       };
     });
 
+    const scatterQuery = `
+      SELECT 
+        DATE_FORMAT(m.test_date, '%Y-%m-%d') as dateStr,
+        TIME_TO_SEC(TIME(m.test_date))/3600 as timeOfDay,
+        TIME_FORMAT(TIME(m.test_date), '%H:%i') as timeStr,
+        SUM(TIME_TO_SEC(t.time_per_question)) as duration
+      FROM matching_exercises_log m
+      JOIN matching_question_time_log t ON m.id_matching = t.id_matching
+      WHERE m.user_id = ? AND m.remove = 0 AND t.remove = 0
+      ${mDateFilter}
+      ${mMatchingExtra}
+      GROUP BY m.id_matching
+      
+      UNION ALL
+      
+      SELECT 
+        DATE_FORMAT(m.test_date, '%Y-%m-%d') as dateStr,
+        TIME_TO_SEC(TIME(m.test_date))/3600 as timeOfDay,
+        TIME_FORMAT(TIME(m.test_date), '%H:%i') as timeStr,
+        SUM(TIME_TO_SEC(t.time_per_question)) as duration
+      FROM memory_exercises_log m
+      JOIN memory_question_time_log t ON m.id_memory = t.id_memory
+      WHERE m.user_id = ? AND m.remove = 0 AND t.remove = 0
+      ${mDateFilter}
+      ${mMemoryExtra}
+      GROUP BY m.id_memory
+    `;
+
+    const [scatterRows] = await db.execute<RowDataPacket[]>(scatterQuery, timeParams);
+    
+    const scatterStats = scatterRows.map(row => ({
+      dateStr: row.dateStr,
+      timeOfDay: Number(row.timeOfDay || 0),
+      timeStr: row.timeStr,
+      duration: Number(row.duration || 0)
+    }));
+
     return {
       scoreStats: {
         total: { correct: totalCorrect, incorrect: totalIncorrect },
@@ -230,7 +267,8 @@ export class PatientDetailStatsModel {
           memory: { correct: memoryCorrect, incorrect: memoryIncorrect }
         }
       },
-      dailyStats: fullDailyStats
+      dailyStats: fullDailyStats,
+      scatterStats
     };
   }
 }

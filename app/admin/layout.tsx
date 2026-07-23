@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import styles from "./admin.module.css";
@@ -12,7 +12,36 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [userName, setUserName] = useState("กำลังโหลด...");
   const pathname = usePathname();
+
+  useEffect(() => {
+    // Check for user in localStorage
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        // Assuming fullName or username is available
+        setUserName(`คุณ ${user.fullName || user.username}`);
+      } catch (e) {
+        setUserName("คุณ สมชาย");
+      }
+    } else {
+      // Default if no login data found
+      setUserName("Admin");
+    }
+  }, []);
+
+  const handleLogout = async () => {
+    localStorage.removeItem('user');
+    // We can also redirect here, but we will try next-auth signOut first
+    try {
+      const { signOut } = await import('next-auth/react');
+      await signOut({ callbackUrl: '/login' });
+    } catch (error) {
+      window.location.href = '/login';
+    }
+  };
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -99,8 +128,8 @@ export default function AdminLayout({
                 <circle cx="12" cy="7" r="4"></circle>
               </svg>
             </div>
-            <div className={styles.userName}>Test12345678</div>
-            <button className={styles.logoutBtn} aria-label="Logout" title="Logout">
+            <div className={styles.userName}>{userName}</div>
+            <button className={styles.logoutBtn} aria-label="Logout" title="Logout" onClick={handleLogout}>
               <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
                 <path d="M12 8l4 4-4 4M16 12H8"></path>

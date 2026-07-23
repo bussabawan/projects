@@ -25,10 +25,10 @@ const renderTestSetTags = (patient: PatientStatInfo) => {
         const isAssigned = assignedCategories.includes(tag);
         const isPlayed = playedCategories.includes(tag);
         
-        // If it's assigned but hasn't been played yet
+        // If it has been played (has data)
         let tagClass = styles.testSetTag;
-        if (isAssigned && !isPlayed) {
-          tagClass = `${styles.testSetTag} ${styles.assignedTag}`;
+        if (isPlayed) {
+          tagClass = `${styles.testSetTag} ${styles.playedTag}`;
         }
         
         return (
@@ -50,12 +50,14 @@ export default function PatientStatsPage() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [selectedPatientId, setSelectedPatientId] = useState<string | undefined>();
 
+  const selectedPatient = patients.find(p => String(p.id) === String(selectedPatientId));
+
   const uniqueCategories = Array.from(new Set(
-    patients.flatMap(p => (p.testSets || []).map(ts => extractCategory(ts))).filter(Boolean)
+    (selectedPatient?.testSets || []).map(ts => extractCategory(ts)).filter(Boolean)
   ));
 
   const uniqueExerciseSets = Array.from(new Set(
-    patients.flatMap(p => p.testSets || []).filter(Boolean)
+    (selectedPatient?.testSets || []).filter(Boolean)
   ));
 
   const openPopup = (id: string) => {

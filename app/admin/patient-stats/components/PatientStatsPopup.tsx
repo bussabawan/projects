@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import styles from './PatientStatsPopup.module.css';
 import { 
   PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, ComposedChart, Legend
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, ComposedChart, Legend,
+  ScatterChart, Scatter, ZAxis
 } from 'recharts';
 
 interface PatientStatsPopupProps {
@@ -166,15 +167,15 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                 <div className={styles.statItem}>
                   <div className={styles.statIcon}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <ComposedChart data={data.dailyStats}>
+                      <BarChart data={data.dailyStats}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis dataKey="dateStr" tick={{fontSize: 12}} />
                         <YAxis tick={{fontSize: 12}} />
                         <RechartsTooltip />
                         <Legend verticalAlign="bottom" height={36} />
-                        <Bar dataKey="answers" fill="#4B5563" barSize={15} radius={[2,2,0,0]} name="จำนวนคำตอบ" />
-                        <Line type="monotone" dataKey="correct" stroke="#10B981" strokeWidth={3} dot={{r: 2}} name="ตอบถูก" />
-                      </ComposedChart>
+                        <Bar dataKey="correct" stackId="a" fill="#10B981" name="ตอบถูก" />
+                        <Bar dataKey="incorrect" stackId="a" fill="#EF4444" name="ตอบผิด" />
+                      </BarChart>
                     </ResponsiveContainer>
                   </div>
                   <span className={styles.statLabel}>สถิติคำตอบ</span>
@@ -199,17 +200,50 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                 <div className={styles.statItem}>
                   <div className={styles.statIcon}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={data.dailyStats}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                        <XAxis dataKey="dateStr" tick={{fontSize: 12}} />
-                        <YAxis tick={{fontSize: 12}} />
-                        <RechartsTooltip />
-                        <Legend verticalAlign="bottom" height={36} />
-                        <Line type="linear" dataKey="totalSeconds" stroke="#374151" strokeWidth={2} dot={{r: 4, fill: 'white', stroke: '#374151', strokeWidth: 2}} name="เวลารวม (วินาที)" />
-                      </LineChart>
+                      <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis 
+                          type="number" 
+                          dataKey="timeOfDay" 
+                          name="เวลา" 
+                          domain={[0, 24]} 
+                          tickFormatter={(val) => `${Math.floor(val)}:00`} 
+                          tick={{fontSize: 12}} 
+                        />
+                        <YAxis 
+                          type="category" 
+                          dataKey="dateStr" 
+                          name="วันที่" 
+                          tick={{fontSize: 12}} 
+                          width={80}
+                        />
+                        <ZAxis 
+                          type="number" 
+                          dataKey="duration" 
+                          range={[60, 400]} 
+                          name="ระยะเวลา (วินาที)" 
+                        />
+                        <RechartsTooltip 
+                          cursor={{ strokeDasharray: '3 3' }} 
+                          content={({ active, payload }) => {
+                            if (active && payload && payload.length) {
+                              const pData = payload[0].payload;
+                              return (
+                                <div style={{ backgroundColor: 'white', padding: '10px', border: '1px solid #ccc', borderRadius: '5px' }}>
+                                  <p style={{margin: 0, fontWeight: 'bold'}}>{pData.dateStr}</p>
+                                  <p style={{margin: 0}}>เวลา: {pData.timeStr}</p>
+                                  <p style={{margin: 0}}>ระยะเวลา: {pData.duration} วินาที</p>
+                                </div>
+                              );
+                            }
+                            return null;
+                          }}
+                        />
+                        <Scatter data={data.scatterStats} fill="#8884d8" name="ประวัติการเล่น" />
+                      </ScatterChart>
                     </ResponsiveContainer>
                   </div>
-                  <span className={styles.statLabel}>สถิติระยะเวลา/ช่วงเวลา</span>
+                  <span className={styles.statLabel}>สถิติช่วงเวลา</span>
                 </div>
 
                 <div className={styles.statItem}>
