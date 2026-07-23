@@ -12,7 +12,15 @@ export async function GET(
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
-    const responseData = await PatientDetailStatsModel.getPatientDetailStats(userId);
+    const searchParams = request.nextUrl.searchParams;
+    const period = searchParams.get('period') || 'all';
+    const category = searchParams.get('category') || 'all';
+    const exerciseSet = searchParams.get('exerciseSet') || 'all';
+    const startDate = searchParams.get('startDate') || undefined;
+    const endDate = searchParams.get('endDate') || undefined;
+
+    const filters = { period, category, exerciseSet, startDate, endDate };
+    const responseData = await PatientDetailStatsModel.getPatientDetailStats(userId, filters);
     return NextResponse.json(responseData);
     
   } catch (error: any) {

@@ -137,10 +137,11 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                   <div className={styles.statIcon}>
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
-                        <Pie data={pieTotalData} cx="50%" cy="50%" innerRadius={0} outerRadius={40} dataKey="value" stroke="none">
+                        <Pie data={pieTotalData} cx="50%" cy="50%" innerRadius={0} outerRadius={80} dataKey="value" stroke="none" label>
                           {pieTotalData.map((entry, index) => <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />)}
                         </Pie>
                         <RechartsTooltip />
+                        <Legend verticalAlign="bottom" height={36} />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
@@ -151,10 +152,11 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                   <div className={styles.statIcon}>
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
-                        <Pie data={pieSepData} cx="50%" cy="50%" innerRadius={10} outerRadius={40} dataKey="value" stroke="#fff">
+                        <Pie data={pieSepData} cx="50%" cy="50%" innerRadius={40} outerRadius={80} dataKey="value" stroke="#fff" label>
                           {pieSepData.map((entry, index) => <Cell key={`cell-${index}`} fill={SEP_COLORS[index % SEP_COLORS.length]} />)}
                         </Pie>
                         <RechartsTooltip />
+                        <Legend verticalAlign="bottom" height={36} />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
@@ -165,11 +167,13 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                   <div className={styles.statIcon}>
                     <ResponsiveContainer width="100%" height="100%">
                       <ComposedChart data={data.dailyStats}>
-                        <XAxis dataKey="dateStr" hide />
-                        <YAxis hide />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                        <XAxis dataKey="dateStr" tick={{fontSize: 12}} />
+                        <YAxis tick={{fontSize: 12}} />
                         <RechartsTooltip />
-                        <Bar dataKey="answers" fill="#4B5563" barSize={15} radius={[2,2,0,0]} />
-                        <Line type="monotone" dataKey="correct" stroke="#10B981" strokeWidth={3} dot={{r: 2}} />
+                        <Legend verticalAlign="bottom" height={36} />
+                        <Bar dataKey="answers" fill="#4B5563" barSize={15} radius={[2,2,0,0]} name="จำนวนคำตอบ" />
+                        <Line type="monotone" dataKey="correct" stroke="#10B981" strokeWidth={3} dot={{r: 2}} name="ตอบถูก" />
                       </ComposedChart>
                     </ResponsiveContainer>
                   </div>
@@ -180,10 +184,12 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                   <div className={styles.statIcon}>
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={data.dailyStats}>
-                        <XAxis dataKey="dateStr" hide />
-                        <YAxis hide />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                        <XAxis dataKey="dateStr" tick={{fontSize: 12}} />
+                        <YAxis tick={{fontSize: 12}} />
                         <RechartsTooltip />
-                        <Line type="monotone" dataKey="avgSeconds" stroke="#6B7280" strokeWidth={3} dot={false} />
+                        <Legend verticalAlign="bottom" height={36} />
+                        <Line type="monotone" dataKey="avgSeconds" stroke="#6B7280" strokeWidth={3} dot={{r: 3}} name="เวลาเฉลี่ย (วินาที)" />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
@@ -195,10 +201,11 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={data.dailyStats}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                        <XAxis dataKey="dateStr" hide />
-                        <YAxis hide />
+                        <XAxis dataKey="dateStr" tick={{fontSize: 12}} />
+                        <YAxis tick={{fontSize: 12}} />
                         <RechartsTooltip />
-                        <Line type="linear" dataKey="totalSeconds" stroke="#374151" strokeWidth={2} dot={{r: 4, fill: 'white', stroke: '#374151', strokeWidth: 2}} />
+                        <Legend verticalAlign="bottom" height={36} />
+                        <Line type="linear" dataKey="totalSeconds" stroke="#374151" strokeWidth={2} dot={{r: 4, fill: 'white', stroke: '#374151', strokeWidth: 2}} name="เวลารวม (วินาที)" />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
@@ -209,11 +216,14 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                   <div className={styles.statIcon}>
                     <ResponsiveContainer width="100%" height="100%">
                       <ComposedChart data={data.dailyStats}>
-                        <XAxis dataKey="dateStr" hide />
-                        <YAxis hide />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                        <XAxis dataKey="dateStr" tick={{fontSize: 12}} />
+                        <YAxis yAxisId="left" tick={{fontSize: 12}} />
+                        <YAxis yAxisId="right" orientation="right" tick={{fontSize: 12}} />
                         <RechartsTooltip />
-                        <Bar dataKey="totalSeconds" fill="transparent" stroke="#60A5FA" strokeWidth={3} barSize={10} />
-                        <Line type="monotone" dataKey="answers" stroke="#4B5563" strokeWidth={3} dot={{r: 4, fill: 'white', stroke: '#4B5563', strokeWidth: 3}} />
+                        <Legend verticalAlign="bottom" height={36} />
+                        <Bar yAxisId="left" dataKey="totalSeconds" fill="transparent" stroke="#60A5FA" strokeWidth={3} barSize={10} name="เวลารวม (วินาที)" />
+                        <Line yAxisId="right" type="monotone" dataKey="answers" stroke="#4B5563" strokeWidth={3} dot={{r: 4, fill: 'white', stroke: '#4B5563', strokeWidth: 3}} name="จำนวนคำตอบ" />
                       </ComposedChart>
                     </ResponsiveContainer>
                   </div>
