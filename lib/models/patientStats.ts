@@ -6,6 +6,8 @@ export interface PatientStatInfo {
   name: string;
   patientId: string;
   testSets: string[];
+  assignedSets: string[];
+  playedSets: string[];
 }
 
 export class PatientStatsModel {
@@ -55,11 +57,16 @@ export class PatientStatsModel {
             id: row.id,
             name: row.name || 'Unknown',
             patientId: row.patientId != null ? String(row.patientId) : 'N/A',
-            testSets: []
+            testSets: [],
+            assignedSets: [],
+            playedSets: []
           });
         }
         if (row.testSet && row.testSet !== '-') {
           const patient = patientMap.get(row.id)!;
+          if (!patient.assignedSets.includes(row.testSet)) {
+            patient.assignedSets.push(row.testSet);
+          }
           if (!patient.testSets.includes(row.testSet)) {
             patient.testSets.push(row.testSet);
           }
@@ -69,6 +76,9 @@ export class PatientStatsModel {
       const addPlayedSet = (row: RowDataPacket) => {
         if (patientMap.has(row.id) && row.testSet) {
           const patient = patientMap.get(row.id)!;
+          if (!patient.playedSets.includes(row.testSet)) {
+            patient.playedSets.push(row.testSet);
+          }
           if (!patient.testSets.includes(row.testSet)) {
             patient.testSets.push(row.testSet);
           }

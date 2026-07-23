@@ -138,6 +138,13 @@
   font-size: 0.95rem;
 }
 
+.assignedTag {
+  border-color: #9c6c9c;
+  background-color: #fcf4fc;
+  color: #8a4b8a;
+  font-weight: 500;
+}
+
 .playBtn {
   background: none;
   border: none;

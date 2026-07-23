@@ -11,14 +11,30 @@ const extractCategory = (testSet?: string) => {
   return match ? match[1].trim() : testSet;
 };
 
-const renderTestSetTags = (testSets?: string[]) => {
+const renderTestSetTags = (patient: PatientStatInfo) => {
+  const testSets = patient.testSets;
   if (!testSets || testSets.length === 0) return null;
+  
+  const assignedCategories = Array.from(new Set((patient.assignedSets || []).map(ts => extractCategory(ts)).filter(Boolean)));
+  const playedCategories = Array.from(new Set((patient.playedSets || []).map(ts => extractCategory(ts)).filter(Boolean)));
   const tags = Array.from(new Set(testSets.map(ts => extractCategory(ts)).filter(Boolean)));
+  
   return (
     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-      {tags.map((tag, idx) => (
-        <span key={idx} className={styles.testSetTag}>{tag}</span>
-      ))}
+      {tags.map((tag, idx) => {
+        const isAssigned = assignedCategories.includes(tag);
+        const isPlayed = playedCategories.includes(tag);
+        
+        // If it's assigned but hasn't been played yet
+        let tagClass = styles.testSetTag;
+        if (isAssigned && !isPlayed) {
+          tagClass = `${styles.testSetTag} ${styles.assignedTag}`;
+        }
+        
+        return (
+          <span key={idx} className={tagClass}>{tag}</span>
+        );
+      })}
     </div>
   );
 };
@@ -133,7 +149,7 @@ export default function PatientStatsPage() {
                 <div key={`desktop-${patient.id}`} className={styles.tableRow}>
                   <div className={styles.cell}>{patient.name}</div>
                   <div className={styles.cell}>{patient.patientId}</div>
-                  <div className={styles.cell}>{renderTestSetTags(patient.testSets)}</div>
+                  <div className={styles.cell}>{renderTestSetTags(patient)}</div>
                   <div className={styles.cell}>
                     <button className={styles.playBtn} aria-label="Play" onClick={() => openPopup(String(patient.id))}>
                       <svg viewBox="0 0 24 24">
