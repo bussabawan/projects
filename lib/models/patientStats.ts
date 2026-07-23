@@ -27,9 +27,28 @@ export class PatientStatsModel {
         ORDER BY u.user_id ASC
       `;
       
+      const playedMatchingQuery = `
+        SELECT DISTINCT m.user_id as id, ed.exercises_name as testSet
+        FROM matching_exercises_log m
+        JOIN matching_question_time_log mt ON m.id_matching = mt.id_matching
+        JOIN exercises_data ed ON mt.photo_id = ed.photo_id
+        WHERE m.remove = 0 AND mt.remove = 0
+      `;
+      
+      const playedMemoryQuery = `
+        SELECT DISTINCT m.user_id as id, ed.exercises_name as testSet
+        FROM memory_exercises_log m
+        JOIN memory_question_time_log mt ON m.id_memory = mt.id_memory
+        JOIN exercises_data ed ON mt.photo_id = ed.photo_id
+        WHERE m.remove = 0 AND mt.remove = 0
+      `;
+      
       const [rows] = await db.execute<RowDataPacket[]>(query);
+      const [matchingRows] = await db.execute<RowDataPacket[]>(playedMatchingQuery);
+      const [memoryRows] = await db.execute<RowDataPacket[]>(playedMemoryQuery);
       
       const patientMap = new Map<number, PatientStatInfo>();
+      
       rows.forEach((row) => {
         if (!patientMap.has(row.id)) {
           patientMap.set(row.id, {
@@ -46,6 +65,18 @@ export class PatientStatsModel {
           }
         }
       });
+      
+      const addPlayedSet = (row: RowDataPacket) => {
+        if (patientMap.has(row.id) && row.testSet) {
+          const patient = patientMap.get(row.id)!;
+          if (!patient.testSets.includes(row.testSet)) {
+            patient.testSets.push(row.testSet);
+          }
+        }
+      };
+      
+      matchingRows.forEach(addPlayedSet);
+      memoryRows.forEach(addPlayedSet);
       
       return Array.from(patientMap.values());
     } catch (error) {
