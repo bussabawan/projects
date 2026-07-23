@@ -23,7 +23,7 @@ export class AdminStatsModel {
       const [allExercises] = await db.execute<RowDataPacket[]>('SELECT exercises_name FROM exercises_data WHERE remove = 0');
       const uniqueCategories = new Set(
         allExercises.map((row: any) => {
-          const match = row.exercises_name?.match(/หมวด(.*?)\s?เลเวล/);
+          const match = row.exercises_name?.match(/หมวด(.*?)(?:\s+เลเวล|$)/);
           return match ? match[1].trim() : row.exercises_name;
         }).filter(Boolean)
       );
