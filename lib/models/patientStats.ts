@@ -53,4 +53,5 @@ export class PatientStatsModel {
       throw new Error('Failed to fetch patient statistics');
     }
   }
+
 }
