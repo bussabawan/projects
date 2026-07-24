@@ -72,6 +72,7 @@ export class PatientDetailStatsModel {
         SUM(correct_count) as totalCorrect, 
         SUM(incorrect_count) as totalIncorrect,
         SUM(total_answers) as totalAnswers,
+        COUNT(id_matching) as playCount,
         DATE_FORMAT(test_date, '%Y-%m-%d') as dateStr
       FROM matching_exercises_log
       WHERE user_id = ? AND remove = 0
@@ -86,6 +87,7 @@ export class PatientDetailStatsModel {
         SUM(correct_count) as totalCorrect, 
         SUM(incorrect_count) as totalIncorrect,
         SUM(total_answers) as totalAnswers,
+        COUNT(id_memory) as playCount,
         DATE_FORMAT(test_date, '%Y-%m-%d') as dateStr
       FROM memory_exercises_log
       WHERE user_id = ? AND remove = 0
@@ -113,6 +115,13 @@ export class PatientDetailStatsModel {
       answers: number;
       correct: number;
       incorrect: number;
+      plays: number;
+      matchingCorrect: number;
+      matchingIncorrect: number;
+      memoryCorrect: number;
+      memoryIncorrect: number;
+      matchingPlays: number;
+      memoryPlays: number;
     }>();
 
     // Process matching
@@ -120,6 +129,7 @@ export class PatientDetailStatsModel {
       const correct = Number(row.totalCorrect || 0);
       const incorrect = Number(row.totalIncorrect || 0);
       const answers = Number(row.totalAnswers || 0);
+      const plays = Number(row.playCount || 0);
       const date = row.dateStr;
       if (!date) return;
       
@@ -129,12 +139,16 @@ export class PatientDetailStatsModel {
       totalIncorrect += incorrect;
       
       if (!dailyStatsMap.has(date)) {
-        dailyStatsMap.set(date, { dateStr: date, answers: 0, correct: 0, incorrect: 0 });
+        dailyStatsMap.set(date, { dateStr: date, answers: 0, correct: 0, incorrect: 0, plays: 0, matchingCorrect: 0, matchingIncorrect: 0, memoryCorrect: 0, memoryIncorrect: 0, matchingPlays: 0, memoryPlays: 0 });
       }
       const day = dailyStatsMap.get(date)!;
       day.answers += answers;
       day.correct += correct;
       day.incorrect += incorrect;
+      day.plays += plays;
+      day.matchingCorrect += correct;
+      day.matchingIncorrect += incorrect;
+      day.matchingPlays += plays;
     });
 
     // Process memory
@@ -142,6 +156,7 @@ export class PatientDetailStatsModel {
       const correct = Number(row.totalCorrect || 0);
       const incorrect = Number(row.totalIncorrect || 0);
       const answers = Number(row.totalAnswers || 0);
+      const plays = Number(row.playCount || 0);
       const date = row.dateStr;
       if (!date) return;
       
@@ -151,12 +166,16 @@ export class PatientDetailStatsModel {
       totalIncorrect += incorrect;
       
       if (!dailyStatsMap.has(date)) {
-        dailyStatsMap.set(date, { dateStr: date, answers: 0, correct: 0, incorrect: 0 });
+        dailyStatsMap.set(date, { dateStr: date, answers: 0, correct: 0, incorrect: 0, plays: 0, matchingCorrect: 0, matchingIncorrect: 0, memoryCorrect: 0, memoryIncorrect: 0, matchingPlays: 0, memoryPlays: 0 });
       }
       const day = dailyStatsMap.get(date)!;
       day.answers += answers;
       day.correct += correct;
       day.incorrect += incorrect;
+      day.plays += plays;
+      day.memoryCorrect += correct;
+      day.memoryIncorrect += incorrect;
+      day.memoryPlays += plays;
     });
 
     const dailyStats = Array.from(dailyStatsMap.values()).sort((a, b) => a.dateStr.localeCompare(b.dateStr));
@@ -169,7 +188,8 @@ export class PatientDetailStatsModel {
     const timeQuery = `
       SELECT 
         DATE_FORMAT(m.test_date, '%Y-%m-%d') as dateStr,
-        TIME_TO_SEC(t.time_per_question) as seconds
+        TIME_TO_SEC(t.time_per_question) as seconds,
+        'จับคู่' as mode
       FROM matching_exercises_log m
       JOIN matching_question_time_log t ON m.id_matching = t.id_matching
       WHERE m.user_id = ? AND m.remove = 0 AND t.remove = 0
@@ -180,7 +200,8 @@ export class PatientDetailStatsModel {
       
       SELECT 
         DATE_FORMAT(m.test_date, '%Y-%m-%d') as dateStr,
-        TIME_TO_SEC(t.time_per_question) as seconds
+        TIME_TO_SEC(t.time_per_question) as seconds,
+        'ความจำ' as mode
       FROM memory_exercises_log m
       JOIN memory_question_time_log t ON m.id_memory = t.id_memory
       WHERE m.user_id = ? AND m.remove = 0 AND t.remove = 0
@@ -191,25 +212,36 @@ export class PatientDetailStatsModel {
     const timeParams = [...matchingParams, ...memoryParams];
     const [timeRows] = await db.execute<RowDataPacket[]>(timeQuery, timeParams);
     
-    const timeMap = new Map<string, { totalSeconds: number; count: number }>();
+    const timeMap = new Map<string, { totalSeconds: number; count: number; matchingSeconds: number; matchingCount: number; memorySeconds: number; memoryCount: number }>();
     
     timeRows.forEach(row => {
       const date = row.dateStr;
       const secs = Number(row.seconds || 0);
+      const mode = row.mode;
       if (!date) return;
       
       if (!timeMap.has(date)) {
-        timeMap.set(date, { totalSeconds: 0, count: 0 });
+        timeMap.set(date, { totalSeconds: 0, count: 0, matchingSeconds: 0, matchingCount: 0, memorySeconds: 0, memoryCount: 0 });
       }
       const t = timeMap.get(date)!;
       t.totalSeconds += secs;
       t.count += 1;
+      
+      if (mode === 'จับคู่') {
+        t.matchingSeconds += secs;
+        t.matchingCount += 1;
+      } else if (mode === 'ความจำ') {
+        t.memorySeconds += secs;
+        t.memoryCount += 1;
+      }
     });
     
     const dailyTimeStats = Array.from(timeMap.entries()).map(([dateStr, data]) => ({
       dateStr,
       totalSeconds: data.totalSeconds,
-      avgSeconds: data.count > 0 ? (data.totalSeconds / data.count).toFixed(2) : 0
+      avgSeconds: data.count > 0 ? (data.totalSeconds / data.count).toFixed(2) : 0,
+      matchingAvgSeconds: data.matchingCount > 0 ? (data.matchingSeconds / data.matchingCount).toFixed(2) : 0,
+      memoryAvgSeconds: data.memoryCount > 0 ? (data.memorySeconds / data.memoryCount).toFixed(2) : 0
     })).sort((a, b) => a.dateStr.localeCompare(b.dateStr));
 
     // For cases where there's no time data, we can merge with dailyStats
@@ -219,6 +251,8 @@ export class PatientDetailStatsModel {
         ...stat,
         totalSeconds: timeStat ? timeStat.totalSeconds : 0,
         avgSeconds: timeStat ? Number(timeStat.avgSeconds) : 0,
+        matchingAvgSeconds: timeStat ? Number(timeStat.matchingAvgSeconds) : 0,
+        memoryAvgSeconds: timeStat ? Number(timeStat.memoryAvgSeconds) : 0,
       };
     });
 
@@ -227,7 +261,8 @@ export class PatientDetailStatsModel {
         DATE_FORMAT(m.test_date, '%Y-%m-%d') as dateStr,
         TIME_TO_SEC(TIME(m.test_date))/3600 as timeOfDay,
         TIME_FORMAT(TIME(m.test_date), '%H:%i') as timeStr,
-        SUM(TIME_TO_SEC(t.time_per_question)) as duration
+        SUM(TIME_TO_SEC(t.time_per_question)) as duration,
+        'จับคู่' as mode
       FROM matching_exercises_log m
       JOIN matching_question_time_log t ON m.id_matching = t.id_matching
       WHERE m.user_id = ? AND m.remove = 0 AND t.remove = 0
@@ -241,7 +276,8 @@ export class PatientDetailStatsModel {
         DATE_FORMAT(m.test_date, '%Y-%m-%d') as dateStr,
         TIME_TO_SEC(TIME(m.test_date))/3600 as timeOfDay,
         TIME_FORMAT(TIME(m.test_date), '%H:%i') as timeStr,
-        SUM(TIME_TO_SEC(t.time_per_question)) as duration
+        SUM(TIME_TO_SEC(t.time_per_question)) as duration,
+        'ความจำ' as mode
       FROM memory_exercises_log m
       JOIN memory_question_time_log t ON m.id_memory = t.id_memory
       WHERE m.user_id = ? AND m.remove = 0 AND t.remove = 0
@@ -256,7 +292,8 @@ export class PatientDetailStatsModel {
       dateStr: row.dateStr,
       timeOfDay: Number(row.timeOfDay || 0),
       timeStr: row.timeStr,
-      duration: Number(row.duration || 0)
+      duration: Number(row.duration || 0),
+      mode: row.mode || 'ไม่ระบุ'
     }));
 
     return {
