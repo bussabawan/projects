@@ -122,15 +122,15 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
 
         <form onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
-            <label className={styles.label}>รหัส{role === 1 ? 'ผู้ป่วย' : 'เจ้าหน้าที่'}</label>
+            <label className={styles.label}>{role === 1 ? 'รหัสผู้ป่วย' : 'อีเมล (บัญชี Google)'}</label>
             <input 
-              type="text" 
+              type={role === 1 ? "text" : "email"}
               name="user_name"
               className={styles.input}
               value={formData.user_name}
               onChange={handleChange}
               required
-              placeholder={`กรอกรหัส${role === 1 ? 'ผู้ป่วย' : 'เจ้าหน้าที่'}`}
+              placeholder={role === 1 ? 'กรอกรหัสผู้ป่วย' : 'example@gmail.com'}
             />
           </div>
 
@@ -147,19 +147,21 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
             />
           </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.label}>
-              รหัสผ่าน {isEditing && <span style={{fontSize: '0.85em', color: '#888'}}>(เว้นว่างไว้หากไม่ต้องการเปลี่ยน)</span>}
-            </label>
-            <input 
-              type="password" 
-              name="password"
-              className={styles.input}
-              value={formData.password}
-              onChange={handleChange}
-              placeholder={isEditing ? "ตั้งรหัสผ่านใหม่" : "ตั้งรหัสผ่าน (ถ้าว่างจะใช้รหัสผู้ใช้)"}
-            />
-          </div>
+          {role === 1 && (
+            <div className={styles.formGroup}>
+              <label className={styles.label}>
+                รหัสผ่าน {isEditing && <span style={{fontSize: '0.85em', color: '#888'}}>(เว้นว่างไว้หากไม่ต้องการเปลี่ยน)</span>}
+              </label>
+              <input 
+                type="password" 
+                name="password"
+                className={styles.input}
+                value={formData.password}
+                onChange={handleChange}
+                placeholder={isEditing ? "ตั้งรหัสผ่านใหม่" : "ตั้งรหัสผ่าน (ถ้าว่างจะใช้รหัสผู้ใช้)"}
+              />
+            </div>
+          )}
 
           {role === 1 && (
             <div className={styles.formGroup}>

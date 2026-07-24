@@ -7,7 +7,7 @@ export interface UserInfo {
   full_name: string;
   role: number;
   update_time: Date;
-  exercises_id?: number | null;
+  exercises_id?: number | string | null;
   exercises_name?: string | null;
 }
 
@@ -38,11 +38,13 @@ export class ManageUsersModel {
       baseQuery = `
         SELECT 
           u.user_id, u.user_name, u.full_name, u.role, u.update_time,
-          p.exercises_id, ex.exercises_name
+          GROUP_CONCAT(p.exercises_id) as exercises_id,
+          GROUP_CONCAT(ex.exercises_name SEPARATOR '||') as exercises_name
         FROM users_data u
         LEFT JOIN patient_data p ON u.user_id = p.user_id AND p.remove = 0
         LEFT JOIN exercises_data ex ON p.exercises_id = ex.exercises_id
         WHERE u.role = ? AND u.remove = 0
+        GROUP BY u.user_id, u.user_name, u.full_name, u.role, u.update_time
       `;
       countQuery = `
         SELECT COUNT(u.user_id) as total
@@ -75,7 +77,7 @@ export class ManageUsersModel {
       countParams.push(searchPattern, searchPattern);
     }
 
-    baseQuery += ` ORDER BY u.user_id DESC LIMIT ? OFFSET ?`;
+    baseQuery += ` ORDER BY u.user_id ASC LIMIT ? OFFSET ?`;
     queryParams.push(limit, offset);
 
     const [rows] = await db.query<RowDataPacket[]>(baseQuery, queryParams);
