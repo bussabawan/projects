@@ -332,7 +332,7 @@
 }
 
 /* Mobile Responsive */
-@media (max-width: 768px) {
+@media (max-width: 768px), (max-width: 950px) and (max-height: 500px) {
   .layoutContainer {
     flex-direction: column;
     background-color: #fadff8;
@@ -342,28 +342,29 @@
     overflow-x: hidden;
   }
 
-  .sidebar {
+  .sidebar, .sidebar.collapsed {
     position: fixed;
     bottom: 1rem;
     left: 1rem;
     right: 1rem;
-    width: calc(100% - 2rem);
+    width: calc(100% - 2rem) !important;
     height: 65px;
     background-color: white;
     border-radius: 35px;
     flex-direction: row;
     padding: 0 1.5rem;
     align-items: center;
+    justify-content: center;
     z-index: 100;
     box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     box-sizing: border-box;
   }
 
-  .toggleBtn, .logoContainer, .manualBtn {
+  .toggleBtn, .logoContainer, .manualBtn, .collapsed .logoContainer, .collapsed .manualBtn {
     display: none !important;
   }
 
-  .menu {
+  .menu, .collapsed .menu {
     flex-direction: row;
     justify-content: space-between;
     width: 100%;
@@ -371,24 +372,27 @@
     margin: 0;
   }
 
-  .menuItem {
+  .menuItem, .collapsed .menuItem {
     padding: 0;
     background: transparent;
     width: 45px;
     height: 45px;
     border-radius: 50%;
     gap: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
-  .menuItem.active {
+  .menuItem.active, .collapsed .menuItem.active {
     background-color: #d8d8d8;
   }
 
-  .menuText {
-    display: none;
+  .menuText, .collapsed .menuText {
+    display: none !important;
   }
 
-  .sidebarBottom {
+  .sidebarBottom, .collapsed .sidebarBottom {
     position: fixed;
     top: 1.5rem;
     right: 1.5rem;

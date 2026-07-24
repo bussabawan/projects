@@ -45,6 +45,7 @@ export default function PatientStatsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [mobileVisibleCount, setMobileVisibleCount] = useState(20);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -69,6 +70,19 @@ export default function PatientStatsPage() {
     setIsPopupOpen(false);
     setSelectedPatientId(undefined);
   };
+
+  const observer = React.useRef<IntersectionObserver | null>(null);
+  const lastElementRef = React.useCallback((node: HTMLDivElement | null) => {
+    if (observer.current) observer.current.disconnect();
+    
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) {
+        setMobileVisibleCount(prev => prev + 10);
+      }
+    }, { rootMargin: '100px' });
+    
+    if (node) observer.current.observe(node);
+  }, []);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -102,6 +116,7 @@ export default function PatientStatsPage() {
 
     setFilteredPatients(result);
     setCurrentPage(1);
+    setMobileVisibleCount(10);
   }, [searchQuery, patients]);
 
   const totalPages = Math.ceil(filteredPatients.length / itemsPerPage);
@@ -109,6 +124,26 @@ export default function PatientStatsPage() {
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
+  };
+
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        pages.push(1, 2, 3, '...', totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1, '...', totalPages - 2, totalPages - 1, totalPages);
+      } else {
+        pages.push(1, '...', currentPage, '...', totalPages);
+      }
+    }
+    return pages;
   };
 
   return (
@@ -166,35 +201,57 @@ export default function PatientStatsPage() {
             </div>
             {totalPages > 0 && (
               <div className={styles.pagination}>
-                <span 
-                  className={styles.pageNav} 
+                <button 
+                  className={styles.pageBtn} 
+                  onClick={() => setCurrentPage(1)}
+                  disabled={currentPage === 1}
+                  aria-label="First page"
+                >
+                  &laquo;
+                </button>
+                <button 
+                  className={styles.pageBtn} 
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  style={{ cursor: currentPage > 1 ? 'pointer' : 'not-allowed', opacity: currentPage > 1 ? 1 : 0.5 }}
-                >◀</span>
+                  disabled={currentPage === 1}
+                  aria-label="Previous page"
+                >
+                  &lsaquo;
+                </button>
                 
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                  <span 
-                    key={page}
-                    className={`${styles.pageNumber} ${currentPage === page ? styles.activePage : ''}`}
-                    onClick={() => setCurrentPage(page)}
-                    style={{ cursor: 'pointer' }}
+                {getPageNumbers().map((page, index) => (
+                  <button 
+                    key={index}
+                    className={`${styles.pageBtn} ${currentPage === page ? styles.activePage : ''} ${page === '...' ? styles.dotsBtn : ''}`}
+                    onClick={() => typeof page === 'number' && setCurrentPage(page)}
+                    disabled={page === '...'}
                   >
                     {page}
-                  </span>
+                  </button>
                 ))}
 
-                <span 
-                  className={styles.pageNav}
+                <button 
+                  className={styles.pageBtn}
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                  style={{ cursor: currentPage < totalPages ? 'pointer' : 'not-allowed', opacity: currentPage < totalPages ? 1 : 0.5 }}
-                >▶</span>
+                  disabled={currentPage === totalPages}
+                  aria-label="Next page"
+                >
+                  &rsaquo;
+                </button>
+                <button 
+                  className={styles.pageBtn}
+                  onClick={() => setCurrentPage(totalPages)}
+                  disabled={currentPage === totalPages}
+                  aria-label="Last page"
+                >
+                  &raquo;
+                </button>
               </div>
             )}
           </div>
 
           {/* Mobile Grid View */}
           <div className={styles.mobileGrid}>
-            {filteredPatients.length > 0 ? filteredPatients.map((patient) => (
+            {filteredPatients.length > 0 ? filteredPatients.slice(0, mobileVisibleCount).map((patient) => (
               <div key={`mobile-${patient.id}`} className={styles.patientCard}>
                 <div className={styles.cardInfo}>
                   <span className={styles.patientName}>{patient.name}</span>
@@ -208,6 +265,12 @@ export default function PatientStatsPage() {
               </div>
             )) : (
               <div style={{ padding: '2rem', textAlign: 'center', gridColumn: '1 / -1' }}>ไม่พบข้อมูลผู้ป่วย</div>
+            )}
+
+            {mobileVisibleCount < filteredPatients.length && (
+              <div ref={lastElementRef} style={{ padding: '1rem', textAlign: 'center', gridColumn: '1 / -1', color: '#666', fontSize: '0.9rem' }}>
+                กำลังโหลดเพิ่มเติม...
+              </div>
             )}
           </div>
         </>
