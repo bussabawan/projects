@@ -200,10 +200,18 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                 <div className={styles.statItem}>
                   <div className={styles.statIcon}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={data.dailyStats}>
+                      <LineChart data={data.dailyStats} margin={{ top: 20, right: 20, bottom: 30, left: 20 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                        <XAxis dataKey="dateStr" tick={{fontSize: 12}} padding={{ left: 30, right: 30 }} />
-                        <YAxis tick={{fontSize: 12}} />
+                        <XAxis 
+                          dataKey="dateStr" 
+                          tick={{fontSize: 12}} 
+                          padding={{ left: 30, right: 30 }} 
+                          label={{ value: 'วันที่', position: 'bottom', offset: 5, fontSize: 12, fill: '#666' }}
+                        />
+                        <YAxis 
+                          tick={{fontSize: 12}} 
+                          label={{ value: 'เวลา (วินาที)', angle: -90, position: 'insideLeft', offset: 15, fontSize: 12, fill: '#666' }}
+                        />
                         <RechartsTooltip 
                           content={({ active, payload, label }) => {
                             if (active && payload && payload.length) {
@@ -231,7 +239,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                 <div className={styles.statItem}>
                   <div className={styles.statIcon}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                      <ScatterChart margin={{ top: 20, right: 20, bottom: 30, left: 20 }}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis 
                           type="category" 
@@ -239,6 +247,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                           name="วันที่" 
                           tick={{fontSize: 12}} 
                           padding={{ left: 40, right: 40 }}
+                          label={{ value: 'วันที่', position: 'bottom', offset: 5, fontSize: 12, fill: '#666' }}
                         />
                         <YAxis 
                           type="number" 
@@ -249,6 +258,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                           tick={{fontSize: 12}} 
                           width={60}
                           padding={{ top: 20, bottom: 20 }}
+                          label={{ value: 'เวลา (น.)', angle: -90, position: 'insideLeft', offset: -5, fontSize: 12, fill: '#666' }}
                         />
                         <ZAxis 
                           type="number" 
@@ -283,7 +293,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                 <div className={styles.statItem}>
                   <div className={styles.statIcon}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                      <ScatterChart margin={{ top: 20, right: 20, bottom: 30, left: 20 }}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis 
                           type="category" 
@@ -291,6 +301,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                           name="วันที่" 
                           tick={{fontSize: 12}} 
                           padding={{ left: 40, right: 40 }}
+                          label={{ value: 'วันที่', position: 'bottom', offset: 5, fontSize: 12, fill: '#666' }}
                         />
                         <YAxis 
                           type="number" 
@@ -298,6 +309,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                           name="เวลารวม (นาที)" 
                           tick={{fontSize: 12}} 
                           padding={{ top: 30, bottom: 20 }}
+                          label={{ value: 'เวลารวม (นาที)', angle: -90, position: 'insideLeft', offset: 15, fontSize: 12, fill: '#666' }}
                         />
                         <ZAxis 
                           type="number" 
