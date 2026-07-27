@@ -228,8 +228,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                             return null;
                           }}
                         />
-                        <Legend verticalAlign="bottom" height={36} />
-                        <Line type="monotone" dataKey="avgSeconds" stroke="#6B7280" strokeWidth={3} dot={{r: 3}} name="เวลาเฉลี่ย (วินาที)" />
+                        <Line type="monotone" dataKey="avgSeconds" stroke="#6B7280" strokeWidth={3} dot={{r: 3}} name="เวลาเฉลี่ยต่อรอบ (วินาที)" />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
