@@ -44,7 +44,6 @@ export class ManageUsersModel {
         LEFT JOIN patient_data p ON u.user_id = p.user_id AND p.remove = 0
         LEFT JOIN exercises_data ex ON p.exercises_id = ex.exercises_id
         WHERE u.role = ? AND u.remove = 0
-        GROUP BY u.user_id, u.user_name, u.full_name, u.role, u.update_time
       `;
       countQuery = `
         SELECT COUNT(u.user_id) as total
@@ -75,6 +74,10 @@ export class ManageUsersModel {
       countQuery += ` AND (u.user_name LIKE ? OR u.full_name LIKE ?)`;
       queryParams.push(searchPattern, searchPattern);
       countParams.push(searchPattern, searchPattern);
+    }
+
+    if (role === 1) {
+      baseQuery += ` GROUP BY u.user_id, u.user_name, u.full_name, u.role, u.update_time`;
     }
 
     baseQuery += ` ORDER BY u.user_id ASC LIMIT ? OFFSET ?`;
