@@ -83,7 +83,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                 <option value="today">วันนี้</option>
                 <option value="last7">7 วันล่าสุด</option>
                 <option value="last30">30 วันล่าสุด</option>
-                <option value="thisMonth">เดือนนี้</option>
+                <option value="thisYear">ปีนี้</option>
                 <option value="custom">กำหนดเอง</option>
               </select>
               <select 
@@ -234,21 +234,21 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                       <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis 
+                          type="category" 
+                          dataKey="dateStr" 
+                          name="วันที่" 
+                          tick={{fontSize: 12}} 
+                          padding={{ left: 40, right: 40 }}
+                        />
+                        <YAxis 
                           type="number" 
                           dataKey="timeOfDay" 
                           name="เวลา" 
                           domain={[0, 24]} 
                           tickFormatter={(val) => `${Math.floor(val)}:00`} 
                           tick={{fontSize: 12}} 
-                          padding={{ left: 20, right: 20 }}
-                        />
-                        <YAxis 
-                          type="category" 
-                          dataKey="dateStr" 
-                          name="วันที่" 
-                          tick={{fontSize: 12}} 
-                          width={80}
-                          padding={{ top: 30, bottom: 30 }}
+                          width={60}
+                          padding={{ top: 20, bottom: 20 }}
                         />
                         <ZAxis 
                           type="number" 
@@ -294,8 +294,8 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                         />
                         <YAxis 
                           type="number" 
-                          dataKey="totalSeconds" 
-                          name="เวลารวม (วินาที)" 
+                          dataKey="totalMinutes" 
+                          name="เวลารวม (นาที)" 
                           tick={{fontSize: 12}} 
                           padding={{ top: 30, bottom: 20 }}
                         />
@@ -313,7 +313,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                               return (
                                 <div style={{ backgroundColor: 'white', padding: '10px', border: '1px solid #ccc', borderRadius: '5px' }}>
                                   <p style={{margin: 0, fontWeight: 'bold'}}>{pData.dateStr}</p>
-                                  <p style={{margin: 0}}>เวลารวม: {pData.totalSeconds} วินาที</p>
+                                  <p style={{margin: 0}}>เวลารวม: {pData.totalMinutes} นาที</p>
                                   <p style={{margin: 0}}>จำนวนที่เล่นรวม: {pData.plays} รอบ</p>
                                   <p style={{margin: 0, fontSize: '0.85em', color: '#666'}}>- จับคู่: {pData.matchingPlays} รอบ</p>
                                   <p style={{margin: 0, fontSize: '0.85em', color: '#666'}}>- ความจำ: {pData.memoryPlays} รอบ</p>

@@ -19,8 +19,8 @@ export class PatientDetailStatsModel {
         dateFilter = ' AND test_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)';
       } else if (filters.period === 'last30') {
         dateFilter = ' AND test_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)';
-      } else if (filters.period === 'thisMonth') {
-        dateFilter = ' AND MONTH(test_date) = MONTH(CURDATE()) AND YEAR(test_date) = YEAR(CURDATE())';
+      } else if (filters.period === 'thisYear') {
+        dateFilter = ' AND YEAR(test_date) = YEAR(CURDATE())';
       } else if (filters.period === 'custom' && filters.startDate && filters.endDate) {
         dateFilter = ' AND DATE(test_date) >= ? AND DATE(test_date) <= ?';
         matchingParams.push(filters.startDate, filters.endDate);
@@ -250,6 +250,7 @@ export class PatientDetailStatsModel {
       return {
         ...stat,
         totalSeconds: timeStat ? timeStat.totalSeconds : 0,
+        totalMinutes: timeStat ? Number((timeStat.totalSeconds / 60).toFixed(2)) : 0,
         avgSeconds: timeStat ? Number(timeStat.avgSeconds) : 0,
         matchingAvgSeconds: timeStat ? Number(timeStat.matchingAvgSeconds) : 0,
         memoryAvgSeconds: timeStat ? Number(timeStat.memoryAvgSeconds) : 0,
