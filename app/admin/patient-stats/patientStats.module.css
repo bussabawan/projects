@@ -190,7 +190,8 @@
 }
 
 .pageBtn:hover:not(:disabled):not(.dotsBtn) {
-  background-color: #f5f5f5;
+  background-color: #94B3F5;
+  color: white;
 }
 
 .pageBtn:disabled {
