@@ -398,6 +398,114 @@
   cursor: not-allowed;
 }
 
+/* Staff Modal Styles */
+.modalContentStaff {
+  background: #fff;
+  border-radius: 20px;
+  width: 450px;
+  max-width: 90vw;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 0;
+  overflow: hidden;
+}
+
+.modalHeaderStaff {
+  background: #dfc2df;
+  padding: 1.2rem 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.modalTitleStaff {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #111;
+  margin: 0;
+}
+
+.closeBtnStaff {
+  position: absolute;
+  right: 1.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #555;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modalBodyStaff {
+  padding: 2rem 2rem;
+}
+
+.labelStaff {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #111;
+}
+
+.inputStaff {
+  width: 90%;
+  padding: 0.8rem 1.2rem;
+  border: none;
+  background-color: #f3e6f3;
+  border-radius: 30px;
+  font-size: 1rem;
+  outline: none;
+  transition: box-shadow 0.3s;
+}
+
+.inputStaff:focus {
+  box-shadow: 0 0 0 3px rgba(212, 174, 212, 0.4);
+}
+
+.modalActionsStaff {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.8rem;
+  margin-top: 2rem;
+}
+
+.saveBtnStaff {
+  padding: 0.6rem 1.5rem;
+  border: none;
+  background: #00ff00;
+  color: #000;
+  border-radius: 30px;
+  font-weight: 500;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.saveBtnStaff:hover {
+  background: #00cc00;
+}
+
+.cancelBtnStaff {
+  padding: 0.6rem 1.5rem;
+  border: 1px solid #7e22ce;
+  background: #fff;
+  color: #111;
+  border-radius: 30px;
+  font-weight: 500;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.cancelBtnStaff:hover {
+  background: #f3e8ff;
+}
+
 .tag {
   background-color: #f3e8ff;
   color: #7e22ce;

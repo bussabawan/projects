@@ -103,6 +103,67 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
     }
   };
 
+  if (role === 2) {
+    return (
+      <div className={styles.modalOverlay} onClick={onClose}>
+        <div className={styles.modalContentStaff} onClick={e => e.stopPropagation()}>
+          <div className={styles.modalHeaderStaff}>
+            <h2 className={styles.modalTitleStaff}>
+              {isEditing ? 'แก้ไขข้อมูลเจ้าหน้าที่' : 'เพิ่มข้อมูลเจ้าหน้าที่'}
+            </h2>
+            <button className={styles.closeBtnStaff} onClick={onClose}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+
+          <div className={styles.modalBodyStaff}>
+            {error && <div style={{ color: '#ef4444', marginBottom: '1rem', padding: '0.5rem', background: '#fee2e2', borderRadius: '8px' }}>{error}</div>}
+
+            <form onSubmit={handleSubmit}>
+              <div className={styles.formGroup}>
+                <label className={styles.labelStaff}>ชื่อ - นามสกุล</label>
+                <input 
+                  type="text" 
+                  name="full_name"
+                  className={styles.inputStaff}
+                  value={formData.full_name}
+                  onChange={handleChange}
+                  required
+                  placeholder="กรอกชื่อ - นามสกุล"
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.labelStaff}>อีเมล (บัญชี Google)</label>
+                <input 
+                  type="email"
+                  name="user_name"
+                  className={styles.inputStaff}
+                  value={formData.user_name}
+                  onChange={handleChange}
+                  required
+                  placeholder="example@gmail.com"
+                />
+              </div>
+
+              <div className={styles.modalActionsStaff}>
+                <button type="submit" className={styles.saveBtnStaff} disabled={loading}>
+                  {loading ? 'กำลังบันทึก...' : 'บันทึก'}
+                </button>
+                <button type="button" className={styles.cancelBtnStaff} onClick={onClose} disabled={loading}>
+                  ยกเลิก
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={e => e.stopPropagation()}>

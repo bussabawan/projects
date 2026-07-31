@@ -40,11 +40,14 @@ export async function POST(request: Request) {
       );
     }
 
+    const roleId = parseInt(body.role, 10);
+    const password = roleId === 2 ? 'API Login google' : body.password;
+
     const userId = await ManageUsersModel.createUser({
       user_name: body.user_name,
       full_name: body.full_name,
-      role: parseInt(body.role, 10),
-      password: body.password,
+      role: roleId,
+      password: password,
       exercises_id: body.exercises_id ? parseInt(body.exercises_id, 10) : undefined
     });
 
