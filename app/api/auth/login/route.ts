@@ -23,8 +23,6 @@ export async function POST(request: Request) {
     }
 
     // Login successful
-    await UserModel.recordLogin(user.user_id);
-    
     // NOTE: In a real application, you should create a session or JWT token here
     // and set it in a cookie. For now, we just return the user data.
     return NextResponse.json({

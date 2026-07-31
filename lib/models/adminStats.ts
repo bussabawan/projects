@@ -14,10 +14,11 @@ export class AdminStatsModel {
    */
   static async getOverviewStats(): Promise<AdminStats> {
     try {
-      // Query counts from each table, ignoring removed items if applicable
-      const [patientRows] = await db.execute<RowDataPacket[]>('SELECT COUNT(DISTINCT u.user_id) as count FROM users_data u INNER JOIN patient_data p ON u.user_id = p.user_id WHERE u.role = 1 AND u.remove = 0 AND p.remove = 0');
+      // Query counts from each table ignoring removed items if applicable
+      const [patientRows] = await db.execute<RowDataPacket[]>('SELECT COUNT(*) as count FROM users_data WHERE role = 1 AND remove = 0');
       const [exerciseRows] = await db.execute<RowDataPacket[]>('SELECT COUNT(*) as count FROM exercises_data WHERE remove = 0');
       const [photoRows] = await db.execute<RowDataPacket[]>('SELECT COUNT(*) as count FROM photo_data WHERE remove = 0');
+
       
       // Get unique categories by extracting tags from exercises_name
       const [allExercises] = await db.execute<RowDataPacket[]>('SELECT exercises_name FROM exercises_data WHERE remove = 0');

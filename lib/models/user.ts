@@ -44,14 +44,4 @@ export class UserModel {
     
     return rows[0] as User;
   }
-
-  /**
-   * Record user login time
-   */
-  static async recordLogin(userId: number): Promise<void> {
-    await db.execute(
-      'INSERT INTO login_logs (user_id) VALUES (?)',
-      [userId]
-    );
-  }
 }
