@@ -691,3 +691,153 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* Delete Confirmation Modal Styles */
+.deleteModalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.deleteModalContent {
+  background: #fdfdfd;
+  border-radius: 20px;
+  width: 400px;
+  max-width: 90vw;
+  padding: 3rem 2.5rem;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.deleteModalIcon {
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.deleteModalTitle {
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: #111;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.deleteModalActions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.deleteBtnConfirm {
+  padding: 0.5rem 1.8rem;
+  border: 1px solid #7c3aed;
+  background: #f5f3ff;
+  color: #000;
+  border-radius: 30px;
+  font-weight: 500;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.deleteBtnConfirm:hover {
+  background: #ede9fe;
+}
+
+.deleteBtnCancel {
+  padding: 0.5rem 1.8rem;
+  border: none;
+  background: #ff0000;
+  color: #fff;
+  border-radius: 30px;
+  font-weight: 500;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.deleteBtnCancel:hover {
+  background: #cc0000;
+}
+
+/* Restore Confirmation Modal Styles */
+.restoreModalOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1010;
+  border-radius: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+.restoreModalContent {
+  background: #fdfdfd;
+  border-radius: 20px;
+  width: 400px;
+  max-width: 90vw;
+  padding: 3rem 2.5rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.restoreModalIcon {
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.restoreModalTitle {
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: #111;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.restoreModalSubTitle {
+  font-size: 1rem;
+  color: #444;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.restoreBtnConfirm {
+  padding: 0.5rem 1.8rem;
+  border: 1px solid #0000ff;
+  background: #00ff00;
+  color: #000;
+  border-radius: 30px;
+  font-weight: 500;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.restoreBtnConfirm:hover {
+  background: #00cc00;
+}

@@ -28,6 +28,7 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
   const [loading, setLoading] = useState(false);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [error, setError] = useState("");
+  const [restoreUserId, setRestoreUserId] = useState<number | null>(null);
 
   const [formData, setFormData] = useState({
     user_name: user?.user_name || "",
@@ -93,6 +94,8 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
       const result = await res.json();
       if (result.success) {
         onSave();
+      } else if (result.requireRestore) {
+        setRestoreUserId(result.existingUserId);
       } else {
         setError(result.error || "เกิดข้อผิดพลาดในการบันทึกข้อมูล");
       }
@@ -101,6 +104,59 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRestore = async () => {
+    if (!restoreUserId) return;
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/admin/users/${restoreUserId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'restore' })
+      });
+      const result = await res.json();
+      if (result.success) {
+        onSave(); // Close modal and refresh users list
+      } else {
+        setError(result.error || "เกิดข้อผิดพลาดในการกู้คืนข้อมูล");
+        setRestoreUserId(null);
+      }
+    } catch (err: any) {
+      setError(err.message || "เกิดข้อผิดพลาดในการเชื่อมต่อ");
+      setRestoreUserId(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderRestoreModal = () => {
+    if (!restoreUserId) return null;
+    return (
+      <div className={styles.restoreModalOverlay} onClick={() => setRestoreUserId(null)}>
+        <div className={styles.restoreModalContent} onClick={e => e.stopPropagation()}>
+          <div className={styles.restoreModalIcon}>
+            <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17 2.1l4 4-4 4"/>
+              <path d="M3 12.2v-2a4 4 0 0 1 4-4h14"/>
+              <path d="M7 21.9l-4-4 4-4"/>
+              <path d="M21 11.8v2a4 4 0 0 1-4 4H3"/>
+            </svg>
+          </div>
+          <h2 className={styles.restoreModalTitle}>พบข้อมูลเดิมในระบบ</h2>
+          <p className={styles.restoreModalSubTitle}>ต้องการกู้คืนข้อมูลที่เคยลบหรือไม่</p>
+          <div className={styles.deleteModalActions}>
+            <button className={styles.restoreBtnConfirm} onClick={handleRestore} disabled={loading}>
+              {loading ? 'กำลังกู้คืน...' : 'กู้คืนข้อมูล'}
+            </button>
+            <button className={styles.deleteBtnConfirm} onClick={() => setRestoreUserId(null)} disabled={loading}>
+              ยกเลิก
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   if (role === 2) {
@@ -159,6 +215,7 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
               </div>
             </form>
           </div>
+          {renderRestoreModal()}
         </div>
       </div>
     );
@@ -253,6 +310,7 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
             </button>
           </div>
         </form>
+        {renderRestoreModal()}
       </div>
     </div>
   );

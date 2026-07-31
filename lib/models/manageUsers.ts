@@ -109,6 +109,15 @@ export class ManageUsersModel {
         throw new Error('Username already exists');
       }
 
+      // Check if full_name OR user_name exists and is removed
+      const [removedUser] = await connection.execute<RowDataPacket[]>(
+        'SELECT user_id FROM users_data WHERE (full_name = ? OR user_name = ?) AND remove = 1 LIMIT 1',
+        [userData.full_name, userData.user_name]
+      );
+      if (removedUser.length > 0) {
+        throw new Error(`RESTORE_REQUIRED:${removedUser[0].user_id}`);
+      }
+
       const defaultPassword = userData.password || userData.user_name; // Default password to username if not provided
       
       const [userResult] = await connection.execute<ResultSetHeader>(
@@ -226,6 +235,35 @@ export class ManageUsersModel {
       // Also soft delete patient data if it exists
       await connection.execute(
         'UPDATE patient_data SET remove = 1 WHERE user_id = ?',
+        [userId]
+      );
+
+      await connection.commit();
+      return true;
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
+
+  /**
+   * Restore user
+   */
+  static async restoreUser(userId: number): Promise<boolean> {
+    const connection = await db.getConnection();
+    try {
+      await connection.beginTransaction();
+
+      await connection.execute(
+        'UPDATE users_data SET remove = 0 WHERE user_id = ?',
+        [userId]
+      );
+
+      // Also restore patient data if it exists
+      await connection.execute(
+        'UPDATE patient_data SET remove = 0 WHERE user_id = ?',
         [userId]
       );
 

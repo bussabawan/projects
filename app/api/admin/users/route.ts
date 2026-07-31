@@ -58,9 +58,20 @@ export async function POST(request: Request) {
     }, { status: 201 });
   } catch (error: any) {
     console.error('Error in POST /api/admin/users:', error);
+    if (error.message && error.message.startsWith('RESTORE_REQUIRED:')) {
+      const existingUserId = error.message.split(':')[1];
+      return NextResponse.json(
+        { success: false, requireRestore: true, existingUserId: parseInt(existingUserId, 10) },
+        { status: 409 }
+      );
+    }
     const status = error.message === 'Username already exists' ? 409 : 500;
+    const errorMessage = error.message === 'Username already exists' 
+      ? 'รหัสผู้ป่วยหรืออีเมลนี้มีอยู่ในระบบแล้ว' 
+      : error.message || 'Internal Server Error';
+      
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal Server Error' },
+      { success: false, error: errorMessage },
       { status }
     );
   }

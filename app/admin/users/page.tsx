@@ -32,6 +32,10 @@ export default function ManageUsersPage() {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const isLoadMoreRef = useRef(false);
 
+  // Delete Modal State
+  const [deleteUserId, setDeleteUserId] = useState<number | null>(null);
+  const [deleteUserRole, setDeleteUserRole] = useState<number>(1);
+
   const fetchUsers = useCallback(async () => {
     const isLoadMore = isLoadMoreRef.current;
     if (isLoadMore) {
@@ -123,20 +127,25 @@ export default function ManageUsersPage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (userId: number) => {
-    if (confirm("คุณต้องการลบผู้ใช้นี้ใช่หรือไม่?")) {
-      try {
-        const res = await fetch(`/api/admin/users/${userId}`, { method: 'DELETE' });
-        const result = await res.json();
-        if (result.success) {
-          // Remove from local state to preserve infinite scroll items
-          setUsers(prev => prev.filter(u => u.user_id !== userId));
-        } else {
-          alert("ลบข้อมูลไม่สำเร็จ: " + result.error);
-        }
-      } catch (error) {
-        console.error("Error deleting user:", error);
+  const handleDeleteClick = (userId: number, role: number) => {
+    setDeleteUserId(userId);
+    setDeleteUserRole(role);
+  };
+
+  const confirmDelete = async () => {
+    if (deleteUserId === null) return;
+    try {
+      const res = await fetch(`/api/admin/users/${deleteUserId}`, { method: 'DELETE' });
+      const result = await res.json();
+      if (result.success) {
+        // Remove from local state to preserve infinite scroll items
+        setUsers(prev => prev.filter(u => u.user_id !== deleteUserId));
+        setDeleteUserId(null);
+      } else {
+        alert("ลบข้อมูลไม่สำเร็จ: " + result.error);
       }
+    } catch (error) {
+      console.error("Error deleting user:", error);
     }
   };
 
@@ -297,7 +306,7 @@ export default function ManageUsersPage() {
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                       </svg>
                     </button>
-                    <button className={`${styles.actionBtn} ${styles.deleteBtn}`} onClick={() => handleDelete(user.user_id)} title="ลบ">
+                    <button className={`${styles.actionBtn} ${styles.deleteBtn}`} onClick={() => handleDeleteClick(user.user_id, 1)} title="ลบ">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="3 6 5 6 21 6"></polyline>
                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -326,7 +335,7 @@ export default function ManageUsersPage() {
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                       </svg>
                     </button>
-                    <button className={`${styles.actionBtn} ${styles.deleteBtn}`} onClick={() => handleDelete(user.user_id)} title="ลบ">
+                    <button className={`${styles.actionBtn} ${styles.deleteBtn}`} onClick={() => handleDeleteClick(user.user_id, 2)} title="ลบ">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="3 6 5 6 21 6"></polyline>
                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -402,6 +411,33 @@ export default function ManageUsersPage() {
           onClose={() => setIsModalOpen(false)}
           onSave={handleModalSave}
         />
+      )}
+
+      {deleteUserId !== null && (
+        <div className={styles.deleteModalOverlay} onClick={() => setDeleteUserId(null)}>
+          <div className={styles.deleteModalContent} onClick={e => e.stopPropagation()}>
+            <div className={styles.deleteModalIcon}>
+              <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 6h18"></path>
+                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                <line x1="10" y1="11" x2="10" y2="17"></line>
+                <line x1="14" y1="11" x2="14" y2="17"></line>
+              </svg>
+            </div>
+            <h2 className={styles.deleteModalTitle}>
+              {deleteUserRole === 2 ? 'ยืนยันการลบข้อมูลเจ้าหน้าที่' : 'ยืนยันการลบข้อมูลผู้ป่วย'}
+            </h2>
+            <div className={styles.deleteModalActions}>
+              <button className={styles.deleteBtnConfirm} onClick={confirmDelete}>
+                ตกลง
+              </button>
+              <button className={styles.deleteBtnCancel} onClick={() => setDeleteUserId(null)}>
+                ยกเลิก
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
