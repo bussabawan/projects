@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { getSession } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
 import styles from "./admin.module.css";
@@ -16,20 +17,43 @@ export default function AdminLayout({
   const pathname = usePathname();
 
   useEffect(() => {
-    // Check for user in localStorage
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        const user = JSON.parse(storedUser);
-        // Assuming fullName or username is available
-        setUserName(`คุณ ${user.fullName || user.username}`);
-      } catch (e) {
-        setUserName("คุณ สมชาย");
+    const fetchUser = async () => {
+      // Check for user in localStorage first
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try {
+          const user = JSON.parse(storedUser);
+          if (user.role === 2) {
+            setUserName(`คุณ ${user.fullName || user.username}`);
+            return;
+          }
+        } catch (e) {
+          console.error("Failed to parse localStorage user:", e);
+        }
       }
-    } else {
+      
+      // Fallback to NextAuth session (for Google login)
+      try {
+        const session = await getSession();
+        if (session && session.user) {
+          const user = session.user as any;
+          if (user.role === 2) {
+            setUserName(`คุณ ${user.fullName || user.name}`);
+            return;
+          }
+          // If role is missing but we have a session, we can still show their name
+          setUserName(`คุณ ${user.fullName || user.name}`);
+          return;
+        }
+      } catch (e) {
+        console.error("Failed to get NextAuth session:", e);
+      }
+      
       // Default if no login data found
       setUserName("Admin");
-    }
+    };
+
+    fetchUser();
   }, []);
 
   const handleLogout = async () => {

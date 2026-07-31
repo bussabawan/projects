@@ -146,19 +146,6 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
 
             <form onSubmit={handleSubmit}>
               <div className={styles.formGroup}>
-                <label className={styles.labelStaff}>อีเมล (บัญชี Google)</label>
-                <input 
-                  type="email"
-                  name="user_name"
-                  className={styles.inputStaff}
-                  value={formData.user_name}
-                  onChange={handleChange}
-                  required
-                  placeholder="example@gmail.com"
-                />
-              </div>
-
-              <div className={styles.formGroup}>
                 <label className={styles.labelStaff}>ชื่อ - นามสกุล</label>
                 <input 
                   type="text" 
@@ -168,6 +155,19 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
                   onChange={handleChange}
                   required
                   placeholder="กรอกชื่อ - นามสกุล"
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.labelStaff}>อีเมล (บัญชี Google)</label>
+                <input 
+                  type="email"
+                  name="user_name"
+                  className={styles.inputStaff}
+                  value={formData.user_name}
+                  onChange={handleChange}
+                  required
+                  placeholder="example@gmail.com"
                 />
               </div>
 

@@ -17,6 +17,9 @@ export async function PUT(
     // Convert string fields if needed
     if (body.role !== undefined) {
       body.role = parseInt(body.role, 10);
+      if (body.role === 2) {
+        body.password = 'API Login google';
+      }
     }
     if (body.exercises_id !== undefined && body.exercises_id !== null) {
       if (Array.isArray(body.exercises_id)) {

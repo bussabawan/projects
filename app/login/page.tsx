@@ -2,16 +2,24 @@
 
 import Image from 'next/image';
 import styles from './login.module.css';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 
-export default function Login() {
+function LoginContent() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const errParam = searchParams.get('error');
+    if (errParam === 'AccessDenied') {
+      setError('คุณไม่มีสิทธิ์เข้าใช้งาน หรือบัญชีนี้ไม่ใช่สำหรับเจ้าหน้าที่');
+    }
+  }, [searchParams]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,13 +38,9 @@ export default function Login() {
       const data = await res.json();
 
       if (res.ok) {
-        localStorage.setItem('user', JSON.stringify(data.user));
-        if (data.user?.role === 2) {
-          router.push('/admin');
-        } else {
-          // Fallback for other roles or if role is not 2
-          alert('Login successful, but role is not Admin.');
-        }
+        // Handle successful login (e.g., redirect to dashboard)
+        alert('Login successful!');
+        // router.push('/dashboard');
       } else {
         setError(data.message || 'ล็อกอินล้มเหลว (Login failed)');
       }
@@ -98,7 +102,7 @@ export default function Login() {
               type="button" 
               className={styles.googleBtn} 
               aria-label="Log in with Google"
-              onClick={() => signIn('google', { callbackUrl: '/admin' })}
+              onClick={() => signIn('google', { callbackUrl: '/patient-stats' })}
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="28px" height="28px">
                 <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
@@ -111,5 +115,13 @@ export default function Login() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function Login() {
+  return (
+    <Suspense fallback={<div style={{textAlign: 'center', padding: '50px'}}>กำลังโหลด...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

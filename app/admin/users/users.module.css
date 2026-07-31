@@ -398,26 +398,7 @@
   cursor: not-allowed;
 }
 
-/* Patient Modal Styles (Custom) */
-.modalContentPatient {
-  background: #fff;
-  border-radius: 20px;
-  width: 500px;
-  max-width: 90vw;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  padding: 0;
-  overflow: visible; /* To allow dropdown to overflow if needed */
-}
-
-.formRow2Col {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-/* Shared Modal Styles (Staff & Patient) */
+/* Staff Modal Styles */
 .modalContentStaff {
   background: #fff;
   border-radius: 20px;
@@ -430,30 +411,28 @@
 }
 
 .modalHeaderStaff {
+  background: #dfc2df;
+  padding: 1.2rem 2rem;
   display: flex;
-  justify-content: center; /* Center the title */
-  position: relative; /* For absolute close button */
+  justify-content: center;
   align-items: center;
-  padding: 1.5rem 2rem;
-  background-color: #e5cce5;
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
+  position: relative;
 }
 
 .modalTitleStaff {
-  font-size: 1.6rem;
-  font-weight: 600;
+  font-size: 1.5rem;
+  font-weight: 500;
   color: #111;
   margin: 0;
-  text-align: center;
 }
 
 .closeBtnStaff {
   position: absolute;
-  right: 1.5rem;
+  right: 1.2rem;
+  top: 50%;
+  transform: translateY(-50%);
   background: none;
   border: none;
-  font-size: 1.5rem;
   color: #555;
   cursor: pointer;
   display: flex;
@@ -461,20 +440,16 @@
   justify-content: center;
 }
 
-.closeBtnStaff:hover {
-  color: #111;
-}
-
 .modalBodyStaff {
-  padding: 2rem;
+  padding: 2rem 2rem;
 }
 
 .labelStaff {
   display: block;
+  font-size: 1.1rem;
   font-weight: 500;
   margin-bottom: 0.5rem;
-  color: #444;
-  font-size: 1.1rem;
+  color: #111;
 }
 
 .inputStaff {
@@ -482,32 +457,33 @@
   padding: 0.8rem 1.2rem;
   border: none;
   background-color: #f0f0f0;
-  border-radius: 20px;
+  border-radius: 30px;
   font-size: 1rem;
   outline: none;
   transition: box-shadow 0.3s;
 }
 
 .inputStaff:focus {
-  box-shadow: 0 0 0 3px rgba(150, 150, 150, 0.3);
+  box-shadow: 0 0 0 3px rgba(212, 174, 212, 0.4);
 }
 
 .modalActionsStaff {
   display: flex;
   justify-content: flex-end;
-  gap: 1rem;
+  gap: 0.8rem;
   margin-top: 2rem;
 }
 
 .saveBtnStaff {
-  padding: 0.6rem 2rem;
+  padding: 0.6rem 1.5rem;
   border: none;
   background: #00ff00;
   color: #000;
-  border-radius: 20px;
+  border-radius: 30px;
   font-weight: 500;
+  font-size: 1rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background 0.2s;
 }
 
 .saveBtnStaff:hover {
@@ -515,87 +491,19 @@
 }
 
 .cancelBtnStaff {
-  padding: 0.6rem 2rem;
-  border: 1px solid #8b5cf6;
-  background: transparent;
-  border-radius: 20px;
+  padding: 0.6rem 1.5rem;
+  border: 1px solid #7e22ce;
+  background: #fff;
+  color: #111;
+  border-radius: 30px;
   font-weight: 500;
-  color: #000;
+  font-size: 1rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background 0.2s;
 }
 
 .cancelBtnStaff:hover {
-  background: #f5f3ff;
-}
-
-/* Custom Multi-select Dropdown */
-.multiSelectContainer {
-  position: relative;
-  width: 100%;
-}
-
-.multiSelectInput {
-  width: 90%;
-  padding: 0.8rem 1.2rem;
-  padding-right: 2.5rem;
-  border: none;
-  background-color: #f0f0f0;
-  border-radius: 20px;
-  font-size: 1rem;
-  outline: none;
-  cursor: pointer;
-  transition: box-shadow 0.3s;
-}
-
-.multiSelectInput:focus {
-  box-shadow: 0 0 0 3px rgba(150, 150, 150, 0.3);
-}
-
-.multiSelectArrow {
-  position: absolute;
-  right: 1.2rem;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-  font-size: 1.2rem;
-}
-
-.multiSelectDropdown {
-  position: absolute;
-  top: calc(100% + 5px);
-  left: 0;
-  width: 100%;
-  background: #f0f0f0;
-  border-radius: 20px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-  z-index: 100;
-  padding: 1rem;
-  border: 1px solid #ccc;
-}
-
-.multiSelectGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 0.8rem;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.checkboxItem {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.95rem;
-  color: #333;
-  cursor: pointer;
-}
-
-.checkboxItem input[type="checkbox"] {
-  accent-color: #4CAF50;
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
+  background: #f3e8ff;
 }
 
 .tag {
