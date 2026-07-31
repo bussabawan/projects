@@ -8,8 +8,8 @@ export class PatientDetailStatsModel {
   static async getPatientDetailStats(userId: string, filters?: { period?: string, category?: string, exerciseSet?: string, startDate?: string, endDate?: string }) {
     if (!userId) throw new Error('User ID is required');
 
-    let matchingParams: any[] = [userId];
-    let memoryParams: any[] = [userId];
+    const matchingParams: any[] = [userId];
+    const memoryParams: any[] = [userId];
     let dateFilter = '';
     
     if (filters?.period) {
@@ -100,6 +100,22 @@ export class PatientDetailStatsModel {
     const [matchingRows] = await db.execute<RowDataPacket[]>(matchingQuery, matchingParams);
     const [memoryRows] = await db.execute<RowDataPacket[]>(memoryQuery, memoryParams);
 
+    const loginQuery = `
+      SELECT 
+        COUNT(id) as loginCount,
+        DATE_FORMAT(login_time, '%Y-%m-%d') as dateStr
+      FROM login_logs
+      WHERE user_id = ?
+      ${dateFilter.replace(/test_date/g, 'login_time')}
+      GROUP BY DATE_FORMAT(login_time, '%Y-%m-%d')
+      ORDER BY dateStr ASC
+    `;
+    const loginParams: any[] = [userId];
+    if (filters?.period === 'custom' && filters.startDate && filters.endDate) {
+      loginParams.push(filters.startDate, filters.endDate);
+    }
+    const [loginRows] = await db.execute<RowDataPacket[]>(loginQuery, loginParams);
+
     // 2. Aggregate data for the charts
     let totalCorrect = 0;
     let totalIncorrect = 0;
@@ -116,6 +132,7 @@ export class PatientDetailStatsModel {
       correct: number;
       incorrect: number;
       plays: number;
+      logins: number;
       matchingCorrect: number;
       matchingIncorrect: number;
       memoryCorrect: number;
@@ -139,7 +156,7 @@ export class PatientDetailStatsModel {
       totalIncorrect += incorrect;
       
       if (!dailyStatsMap.has(date)) {
-        dailyStatsMap.set(date, { dateStr: date, answers: 0, correct: 0, incorrect: 0, plays: 0, matchingCorrect: 0, matchingIncorrect: 0, memoryCorrect: 0, memoryIncorrect: 0, matchingPlays: 0, memoryPlays: 0 });
+        dailyStatsMap.set(date, { dateStr: date, answers: 0, correct: 0, incorrect: 0, plays: 0, logins: 0, matchingCorrect: 0, matchingIncorrect: 0, memoryCorrect: 0, memoryIncorrect: 0, matchingPlays: 0, memoryPlays: 0 });
       }
       const day = dailyStatsMap.get(date)!;
       day.answers += answers;
@@ -166,7 +183,7 @@ export class PatientDetailStatsModel {
       totalIncorrect += incorrect;
       
       if (!dailyStatsMap.has(date)) {
-        dailyStatsMap.set(date, { dateStr: date, answers: 0, correct: 0, incorrect: 0, plays: 0, matchingCorrect: 0, matchingIncorrect: 0, memoryCorrect: 0, memoryIncorrect: 0, matchingPlays: 0, memoryPlays: 0 });
+        dailyStatsMap.set(date, { dateStr: date, answers: 0, correct: 0, incorrect: 0, plays: 0, logins: 0, matchingCorrect: 0, matchingIncorrect: 0, memoryCorrect: 0, memoryIncorrect: 0, matchingPlays: 0, memoryPlays: 0 });
       }
       const day = dailyStatsMap.get(date)!;
       day.answers += answers;
@@ -176,6 +193,19 @@ export class PatientDetailStatsModel {
       day.memoryCorrect += correct;
       day.memoryIncorrect += incorrect;
       day.memoryPlays += plays;
+    });
+
+    // Process logins
+    loginRows.forEach(row => {
+      const logins = Number(row.loginCount || 0);
+      const date = row.dateStr;
+      if (!date) return;
+      
+      if (!dailyStatsMap.has(date)) {
+        dailyStatsMap.set(date, { dateStr: date, answers: 0, correct: 0, incorrect: 0, plays: 0, logins: 0, matchingCorrect: 0, matchingIncorrect: 0, memoryCorrect: 0, memoryIncorrect: 0, matchingPlays: 0, memoryPlays: 0 });
+      }
+      const day = dailyStatsMap.get(date)!;
+      day.logins += logins;
     });
 
     const dailyStats = Array.from(dailyStatsMap.values()).sort((a, b) => a.dateStr.localeCompare(b.dateStr));

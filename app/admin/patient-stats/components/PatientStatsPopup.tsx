@@ -72,9 +72,25 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
         </div>
 
         <div className={styles.content}>
-          <div className={styles.filtersWrapper}>
-            <div className={styles.filters}>
-              <select 
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px', flexWrap: 'wrap-reverse', gap: '15px' }}>
+            <div style={{ marginTop: '5px' }}>
+              {!loading && data && data.dailyStats && (
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                  <div style={{ background: '#f3f4f6', padding: '6px 15px', borderRadius: '20px', fontSize: '0.9rem', color: '#374151' }}>
+                    จำนวน Login: <b>{data.dailyStats.reduce((acc: number, cur: any) => acc + (cur.logins || 0), 0)}</b> ครั้ง
+                  </div>
+                  <div style={{ background: '#ede9fe', padding: '6px 15px', borderRadius: '20px', fontSize: '0.9rem', color: '#5b21b6' }}>
+                    ความจำ: <b>{data.dailyStats.reduce((acc: number, cur: any) => acc + (cur.memoryPlays || 0), 0)}</b> ครั้ง
+                  </div>
+                  <div style={{ background: '#dbeafe', padding: '6px 15px', borderRadius: '20px', fontSize: '0.9rem', color: '#1e40af' }}>
+                    จับคู่: <b>{data.dailyStats.reduce((acc: number, cur: any) => acc + (cur.matchingPlays || 0), 0)}</b> ครั้ง
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className={styles.filtersWrapper} style={{ marginBottom: 0 }}>
+              <div className={styles.filters}>
+                <select 
                 className={styles.filterSelect}
                 value={periodFilter}
                 onChange={(e) => setPeriodFilter(e.target.value)}
@@ -126,6 +142,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
               </div>
             )}
           </div>
+          </div>
 
           <div className={styles.statsSection}>
             <h3 className={styles.sectionTitle}>สถิติคะแนน</h3>
@@ -167,7 +184,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                 <div className={styles.statItem}>
                   <div className={styles.statIcon}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={data.dailyStats}>
+                      <BarChart data={data.dailyStats} maxBarSize={50}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis dataKey="dateStr" tick={{fontSize: 12}} />
                         <YAxis tick={{fontSize: 12}} />
@@ -209,7 +226,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                 <div className={styles.statItem}>
                   <div className={styles.statIcon}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={data.dailyStats} margin={{ top: 20, right: 20, bottom: 30, left: 20 }}>
+                      <BarChart data={data.dailyStats} margin={{ top: 20, right: 20, bottom: 30, left: 20 }} maxBarSize={50}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis 
                           dataKey="dateStr" 
@@ -252,7 +269,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                           dataKey="dateStr" 
                           name="วันที่" 
                           tick={{fontSize: 12}} 
-                          padding={{ left: 40, right: 40 }}
+                          padding={{ left: 15, right: 15 }}
                           label={{ value: 'วันที่', position: 'bottom', offset: 5, fontSize: 12, fill: '#666' }}
                         />
                         <YAxis 
@@ -299,7 +316,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                           dataKey="dateStr" 
                           name="วันที่" 
                           tick={{fontSize: 12}} 
-                          padding={{ left: 40, right: 40 }}
+                          padding={{ left: 15, right: 15 }}
                           label={{ value: 'วันที่', position: 'bottom', offset: 5, fontSize: 12, fill: '#666' }}
                         />
                         <YAxis 
