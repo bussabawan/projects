@@ -19,7 +19,11 @@ export async function PUT(
       body.role = parseInt(body.role, 10);
     }
     if (body.exercises_id !== undefined && body.exercises_id !== null) {
-      body.exercises_id = parseInt(body.exercises_id, 10);
+      if (Array.isArray(body.exercises_id)) {
+        body.exercises_id = body.exercises_id.map((id: string | number) => typeof id === 'string' ? parseInt(id, 10) : id);
+      } else {
+        body.exercises_id = parseInt(body.exercises_id, 10);
+      }
     }
 
     await ManageUsersModel.updateUser(userId, body);

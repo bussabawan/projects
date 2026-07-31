@@ -40,12 +40,19 @@ export async function POST(request: Request) {
       );
     }
 
+    let exercisesIdToSave: number | number[] | undefined;
+    if (Array.isArray(body.exercises_id)) {
+      exercisesIdToSave = body.exercises_id.map((id: string | number) => typeof id === 'string' ? parseInt(id, 10) : id);
+    } else if (body.exercises_id) {
+      exercisesIdToSave = parseInt(body.exercises_id, 10);
+    }
+
     const userId = await ManageUsersModel.createUser({
       user_name: body.user_name,
       full_name: body.full_name,
       role: parseInt(body.role, 10),
       password: body.password,
-      exercises_id: body.exercises_id ? parseInt(body.exercises_id, 10) : undefined
+      exercises_id: exercisesIdToSave
     });
 
     return NextResponse.json({
