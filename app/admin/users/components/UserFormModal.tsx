@@ -30,12 +30,34 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
   const [error, setError] = useState("");
   const [restoreUserId, setRestoreUserId] = useState<number | null>(null);
 
+  const initialExercises = user?.exercises_id
+    ? String(user.exercises_id).split(',').map(id => parseInt(id, 10)).filter(id => !isNaN(id))
+    : [];
+
   const [formData, setFormData] = useState({
     user_name: user?.user_name || "",
     full_name: user?.full_name || "",
     password: "", // Only set if changing/creating
-    exercises_id: user?.exercises_id || "",
+    exercises_id: initialExercises as number[],
   });
+
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [searchExercise, setSearchExercise] = useState("");
+
+  const handleCheckboxChange = (exId: number) => {
+    setFormData(prev => {
+      const isSelected = prev.exercises_id.includes(exId);
+      if (isSelected) {
+        return { ...prev, exercises_id: prev.exercises_id.filter((id: number) => id !== exId) };
+      } else {
+        return { ...prev, exercises_id: [...prev.exercises_id, exId] };
+      }
+    });
+  };
+
+  const filteredExercises = exercises.filter(ex => 
+    ex.exercises_name.toLowerCase().includes(searchExercise.toLowerCase())
+  );
 
   useEffect(() => {
     if (role === 1) {
@@ -223,12 +245,12 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
-        <div className={styles.modalHeader}>
-          <h2 className={styles.modalTitle}>
-            {isEditing ? 'แก้ไข' : 'เพิ่ม'}{role === 1 ? 'ผู้ป่วย' : 'เจ้าหน้าที่'}
+      <div className={styles.modalContentPatient} onClick={e => e.stopPropagation()}>
+        <div className={styles.modalHeaderStaff}>
+          <h2 className={styles.modalTitleStaff}>
+            {isEditing ? 'แก้ไขข้อมูลผู้ป่วย' : 'เพิ่มข้อมูลผู้ป่วย'}
           </h2>
-          <button className={styles.closeBtn} onClick={onClose}>
+          <button className={styles.closeBtnStaff} onClick={onClose}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -236,81 +258,111 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
           </button>
         </div>
 
-        {error && <div style={{ color: '#ef4444', marginBottom: '1rem', padding: '0.5rem', background: '#fee2e2', borderRadius: '8px' }}>{error}</div>}
+        <div className={styles.modalBodyStaff}>
+          {error && <div style={{ color: '#ef4444', marginBottom: '1rem', padding: '0.5rem', background: '#fee2e2', borderRadius: '8px' }}>{error}</div>}
 
-        <form onSubmit={handleSubmit}>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>{role === 1 ? 'รหัสผู้ป่วย' : 'อีเมล (บัญชี Google)'}</label>
-            <input 
-              type={role === 1 ? "text" : "email"}
-              name="user_name"
-              className={styles.input}
-              value={formData.user_name}
-              onChange={handleChange}
-              required
-              placeholder={role === 1 ? 'กรอกรหัสผู้ป่วย' : 'example@gmail.com'}
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label className={styles.label}>ชื่อ - นามสกุล</label>
-            <input 
-              type="text" 
-              name="full_name"
-              className={styles.input}
-              value={formData.full_name}
-              onChange={handleChange}
-              required
-              placeholder="กรอกชื่อ - นามสกุล"
-            />
-          </div>
-
-          {role === 1 && (
+          <form onSubmit={handleSubmit}>
             <div className={styles.formGroup}>
-              <label className={styles.label}>
-                รหัสผ่าน {isEditing && <span style={{fontSize: '0.85em', color: '#888'}}>(เว้นว่างไว้หากไม่ต้องการเปลี่ยน)</span>}
-              </label>
+              <label className={styles.labelStaff}>ชื่อ - นามสกุล</label>
               <input 
-                type="password" 
-                name="password"
-                className={styles.input}
-                value={formData.password}
-                onChange={handleChange}
-                placeholder={isEditing ? "ตั้งรหัสผ่านใหม่" : "ตั้งรหัสผ่าน (ถ้าว่างจะใช้รหัสผู้ใช้)"}
-              />
-            </div>
-          )}
-
-          {role === 1 && (
-            <div className={styles.formGroup}>
-              <label className={styles.label}>ชุดแบบฝึกหัด</label>
-              <select 
-                name="exercises_id" 
-                className={styles.select}
-                value={formData.exercises_id}
+                type="text" 
+                name="full_name"
+                className={styles.inputStaff}
+                value={formData.full_name}
                 onChange={handleChange}
                 required
-              >
-                <option value="">-- เลือกชุดแบบฝึกหัด --</option>
-                {exercises.map(ex => (
-                  <option key={ex.exercises_id} value={ex.exercises_id}>
-                    {ex.exercises_name}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
-          )}
 
-          <div className={styles.modalActions}>
-            <button type="button" className={styles.cancelBtn} onClick={onClose} disabled={loading}>
-              ยกเลิก
-            </button>
-            <button type="submit" className={styles.saveBtn} disabled={loading}>
-              {loading ? 'กำลังบันทึก...' : 'บันทึก'}
-            </button>
-          </div>
-        </form>
-        {renderRestoreModal()}
+            <div className={styles.formRow2Col}>
+              <div className={styles.formGroup} style={{marginBottom: 0}}>
+                <label className={styles.labelStaff}>รหัสผู้ป่วย</label>
+                <input 
+                  type="text"
+                  name="user_name"
+                  className={styles.inputStaff}
+                  value={formData.user_name}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className={styles.formGroup} style={{marginBottom: 0}}>
+                <label className={styles.labelStaff}>
+                  รหัสผ่าน
+                </label>
+                <input 
+                  type="password" 
+                  name="password"
+                  className={styles.inputStaff}
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder={isEditing ? "(เว้นว่างถ้าไม่เปลี่ยน)" : ""}
+                />
+              </div>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.labelStaff}>ชุดแบบฝึกหัดเริ่มต้น</label>
+              <div className={styles.multiSelectContainer}>
+                <input 
+                  type="text"
+                  className={styles.multiSelectInput}
+                  placeholder={
+                    formData.exercises_id.length > 0
+                      ? `เลือกแล้ว ${formData.exercises_id.length} ชุด (สามารถกรอกเพื่อค้นหาได้)`
+                      : "สามารถกรอกเพื่อค้นหาได้"
+                  }
+                  value={searchExercise}
+                  onChange={(e) => {
+                    setSearchExercise(e.target.value);
+                    setDropdownOpen(true);
+                  }}
+                  onClick={() => setDropdownOpen(true)}
+                />
+                <span className={styles.multiSelectArrow}>▼</span>
+                
+                {dropdownOpen && (
+                  <div className={styles.multiSelectDropdown}>
+                    {filteredExercises.length > 0 ? (
+                      <div className={styles.multiSelectGrid}>
+                        {filteredExercises.map(ex => (
+                          <label key={ex.exercises_id} className={styles.checkboxItem}>
+                            <input 
+                              type="checkbox"
+                              checked={formData.exercises_id.includes(ex.exercises_id)}
+                              onChange={() => handleCheckboxChange(ex.exercises_id)}
+                            />
+                            {ex.exercises_name}
+                          </label>
+                        ))}
+                      </div>
+                    ) : (
+                      <div style={{textAlign: 'center', color: '#666', padding: '0.5rem'}}>ไม่พบแบบฝึกหัด</div>
+                    )}
+                  </div>
+                )}
+              </div>
+              
+              {/* Overlay to close dropdown when clicking outside */}
+              {dropdownOpen && (
+                <div 
+                  style={{position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 99}} 
+                  onClick={() => setDropdownOpen(false)}
+                />
+              )}
+            </div>
+
+            <div className={styles.modalActionsStaff}>
+              <button type="submit" className={styles.saveBtnStaff} disabled={loading}>
+                {loading ? 'กำลังบันทึก...' : 'บันทึก'}
+              </button>
+              <button type="button" className={styles.cancelBtnStaff} onClick={onClose} disabled={loading}>
+                ยกเลิก
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

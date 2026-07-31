@@ -72,9 +72,25 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
         </div>
 
         <div className={styles.content}>
-          <div className={styles.filtersWrapper}>
-            <div className={styles.filters}>
-              <select 
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px', flexWrap: 'wrap-reverse', gap: '15px' }}>
+            <div style={{ marginTop: '5px' }}>
+              {!loading && data && data.dailyStats && (
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                  <div style={{ background: '#f3f4f6', padding: '6px 15px', borderRadius: '20px', fontSize: '0.9rem', color: '#374151' }}>
+                    จำนวน Login: <b>{data.dailyStats.reduce((acc: number, cur: any) => acc + (cur.logins || 0), 0)}</b> ครั้ง
+                  </div>
+                  <div style={{ background: '#ede9fe', padding: '6px 15px', borderRadius: '20px', fontSize: '0.9rem', color: '#5b21b6' }}>
+                    ความจำ: <b>{data.dailyStats.reduce((acc: number, cur: any) => acc + (cur.memoryPlays || 0), 0)}</b> ครั้ง
+                  </div>
+                  <div style={{ background: '#dbeafe', padding: '6px 15px', borderRadius: '20px', fontSize: '0.9rem', color: '#1e40af' }}>
+                    จับคู่: <b>{data.dailyStats.reduce((acc: number, cur: any) => acc + (cur.matchingPlays || 0), 0)}</b> ครั้ง
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className={styles.filtersWrapper} style={{ marginBottom: 0 }}>
+              <div className={styles.filters}>
+                <select 
                 className={styles.filterSelect}
                 value={periodFilter}
                 onChange={(e) => setPeriodFilter(e.target.value)}
@@ -83,7 +99,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                 <option value="today">วันนี้</option>
                 <option value="last7">7 วันล่าสุด</option>
                 <option value="last30">30 วันล่าสุด</option>
-                <option value="thisMonth">เดือนนี้</option>
+                <option value="thisYear">ปีนี้</option>
                 <option value="custom">กำหนดเอง</option>
               </select>
               <select 
@@ -126,6 +142,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
               </div>
             )}
           </div>
+          </div>
 
           <div className={styles.statsSection}>
             <h3 className={styles.sectionTitle}>สถิติคะแนน</h3>
@@ -167,7 +184,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                 <div className={styles.statItem}>
                   <div className={styles.statIcon}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={data.dailyStats}>
+                      <BarChart data={data.dailyStats} maxBarSize={50}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis dataKey="dateStr" tick={{fontSize: 12}} />
                         <YAxis tick={{fontSize: 12}} />
@@ -178,19 +195,28 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                               return (
                                 <div style={{ backgroundColor: 'white', padding: '10px', border: '1px solid #ccc', borderRadius: '5px' }}>
                                   <p style={{margin: 0, fontWeight: 'bold'}}>{label}</p>
-                                  <p style={{margin: 0, color: '#10B981'}}>ตอบถูกรวม: {pData.correct}</p>
-                                  <p style={{margin: 0, fontSize: '0.85em', color: '#666', paddingLeft: '10px'}}>- จับคู่: {pData.matchingCorrect} | ความจำ: {pData.memoryCorrect}</p>
-                                  <p style={{margin: 0, color: '#EF4444', marginTop: '5px'}}>ตอบผิดรวม: {pData.incorrect}</p>
-                                  <p style={{margin: 0, fontSize: '0.85em', color: '#666', paddingLeft: '10px'}}>- จับคู่: {pData.matchingIncorrect} | ความจำ: {pData.memoryIncorrect}</p>
+                                  <div style={{ marginTop: '5px' }}>
+                                    <p style={{margin: 0, color: '#3B82F6', fontSize: '0.9em'}}>จับคู่-ถูก: {pData.matchingCorrect}</p>
+                                    <p style={{margin: 0, color: '#93C5FD', fontSize: '0.9em'}}>จับคู่-ผิด: {pData.matchingIncorrect}</p>
+                                  </div>
+                                  <div style={{ marginTop: '5px' }}>
+                                    <p style={{margin: 0, color: '#8B5CF6', fontSize: '0.9em'}}>ความจำ-ถูก: {pData.memoryCorrect}</p>
+                                    <p style={{margin: 0, color: '#C4B5FD', fontSize: '0.9em'}}>ความจำ-ผิด: {pData.memoryIncorrect}</p>
+                                  </div>
+                                  <p style={{margin: 0, marginTop: '8px', fontWeight: 'bold', fontSize: '0.9em', color: '#333'}}>
+                                    รวม: ถูก {pData.correct} / ผิด {pData.incorrect}
+                                  </p>
                                 </div>
                               );
                             }
                             return null;
                           }}
                         />
-                        <Legend verticalAlign="bottom" height={36} />
-                        <Bar dataKey="correct" stackId="a" fill="#10B981" name="ตอบถูก" />
-                        <Bar dataKey="incorrect" stackId="a" fill="#EF4444" name="ตอบผิด" />
+                        <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: '12px' }} />
+                        <Bar dataKey="matchingCorrect" stackId="matching" fill="#3B82F6" name="จับคู่-ถูก" />
+                        <Bar dataKey="matchingIncorrect" stackId="matching" fill="#93C5FD" name="จับคู่-ผิด" />
+                        <Bar dataKey="memoryCorrect" stackId="memory" fill="#8B5CF6" name="ความจำ-ถูก" />
+                        <Bar dataKey="memoryIncorrect" stackId="memory" fill="#C4B5FD" name="ความจำ-ผิด" />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -200,10 +226,17 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                 <div className={styles.statItem}>
                   <div className={styles.statIcon}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={data.dailyStats}>
+                      <BarChart data={data.dailyStats} margin={{ top: 20, right: 20, bottom: 30, left: 20 }} maxBarSize={50}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                        <XAxis dataKey="dateStr" tick={{fontSize: 12}} padding={{ left: 30, right: 30 }} />
-                        <YAxis tick={{fontSize: 12}} />
+                        <XAxis 
+                          dataKey="dateStr" 
+                          tick={{fontSize: 12}} 
+                          label={{ value: 'วันที่', position: 'bottom', offset: 5, fontSize: 12, fill: '#666' }}
+                        />
+                        <YAxis 
+                          tick={{fontSize: 12}} 
+                          label={{ value: 'เวลา (วินาที)', angle: -90, position: 'insideLeft', offset: 15, fontSize: 12, fill: '#666' }}
+                        />
                         <RechartsTooltip 
                           content={({ active, payload, label }) => {
                             if (active && payload && payload.length) {
@@ -220,9 +253,8 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                             return null;
                           }}
                         />
-                        <Legend verticalAlign="bottom" height={36} />
-                        <Line type="monotone" dataKey="avgSeconds" stroke="#6B7280" strokeWidth={3} dot={{r: 3}} name="เวลาเฉลี่ย (วินาที)" />
-                      </LineChart>
+                        <Bar dataKey="avgSeconds" fill="#6B7280" name="เวลาเฉลี่ยต่อรอบ (วินาที)" radius={[4, 4, 0, 0]} />
+                      </BarChart>
                     </ResponsiveContainer>
                   </div>
                   <span className={styles.statLabel}>สถิติเวลาเล่นเฉลี่ย</span>
@@ -231,30 +263,25 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                 <div className={styles.statItem}>
                   <div className={styles.statIcon}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                      <LineChart data={data.scatterStats} margin={{ top: 20, right: 20, bottom: 30, left: 20 }}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis 
+                          dataKey="dateStr" 
+                          name="วันที่" 
+                          tick={{fontSize: 12}} 
+                          padding={{ left: 15, right: 15 }}
+                          label={{ value: 'วันที่', position: 'bottom', offset: 5, fontSize: 12, fill: '#666' }}
+                        />
+                        <YAxis 
                           type="number" 
                           dataKey="timeOfDay" 
                           name="เวลา" 
                           domain={[0, 24]} 
                           tickFormatter={(val) => `${Math.floor(val)}:00`} 
                           tick={{fontSize: 12}} 
-                          padding={{ left: 20, right: 20 }}
-                        />
-                        <YAxis 
-                          type="category" 
-                          dataKey="dateStr" 
-                          name="วันที่" 
-                          tick={{fontSize: 12}} 
-                          width={80}
-                          padding={{ top: 30, bottom: 30 }}
-                        />
-                        <ZAxis 
-                          type="number" 
-                          dataKey="duration" 
-                          range={[60, 400]} 
-                          name="ระยะเวลา (วินาที)" 
+                          width={60}
+                          padding={{ top: 20, bottom: 20 }}
+                          label={{ value: 'เวลา (น.)', angle: -90, position: 'insideLeft', offset: -5, fontSize: 12, fill: '#666' }}
                         />
                         <RechartsTooltip 
                           cursor={{ strokeDasharray: '3 3' }} 
@@ -273,8 +300,8 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                             return null;
                           }}
                         />
-                        <Scatter data={data.scatterStats} fill="#8884d8" name="ประวัติการเล่น" />
-                      </ScatterChart>
+                        <Line type="monotone" dataKey="timeOfDay" stroke="#8884d8" strokeWidth={2} dot={{r: 4}} activeDot={{r: 6}} name="ประวัติการเล่น" />
+                      </LineChart>
                     </ResponsiveContainer>
                   </div>
                   <span className={styles.statLabel}>สถิติช่วงเวลา</span>
@@ -283,27 +310,22 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                 <div className={styles.statItem}>
                   <div className={styles.statIcon}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                      <LineChart data={data.dailyStats} margin={{ top: 20, right: 20, bottom: 30, left: 20 }}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis 
-                          type="category" 
                           dataKey="dateStr" 
                           name="วันที่" 
                           tick={{fontSize: 12}} 
-                          padding={{ left: 40, right: 40 }}
+                          padding={{ left: 15, right: 15 }}
+                          label={{ value: 'วันที่', position: 'bottom', offset: 5, fontSize: 12, fill: '#666' }}
                         />
                         <YAxis 
                           type="number" 
-                          dataKey="totalSeconds" 
-                          name="เวลารวม (วินาที)" 
+                          dataKey="totalMinutes" 
+                          name="เวลารวม (นาที)" 
                           tick={{fontSize: 12}} 
                           padding={{ top: 30, bottom: 20 }}
-                        />
-                        <ZAxis 
-                          type="number" 
-                          dataKey="plays" 
-                          range={[60, 400]} 
-                          name="จำนวนที่เล่น" 
+                          label={{ value: 'เวลารวม (นาที)', angle: -90, position: 'insideLeft', offset: 15, fontSize: 12, fill: '#666' }}
                         />
                         <RechartsTooltip 
                           cursor={{ strokeDasharray: '3 3' }} 
@@ -313,7 +335,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                               return (
                                 <div style={{ backgroundColor: 'white', padding: '10px', border: '1px solid #ccc', borderRadius: '5px' }}>
                                   <p style={{margin: 0, fontWeight: 'bold'}}>{pData.dateStr}</p>
-                                  <p style={{margin: 0}}>เวลารวม: {pData.totalSeconds} วินาที</p>
+                                  <p style={{margin: 0}}>เวลารวม: {pData.totalMinutes} นาที</p>
                                   <p style={{margin: 0}}>จำนวนที่เล่นรวม: {pData.plays} รอบ</p>
                                   <p style={{margin: 0, fontSize: '0.85em', color: '#666'}}>- จับคู่: {pData.matchingPlays} รอบ</p>
                                   <p style={{margin: 0, fontSize: '0.85em', color: '#666'}}>- ความจำ: {pData.memoryPlays} รอบ</p>
@@ -323,8 +345,8 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                             return null;
                           }}
                         />
-                        <Scatter data={data.dailyStats} fill="#8884d8" name="สถิติผลรวมช่วงเวลา" />
-                      </ScatterChart>
+                        <Line type="monotone" dataKey="totalMinutes" stroke="#8884d8" strokeWidth={2} dot={{r: 4}} activeDot={{r: 6}} name="สถิติผลรวมช่วงเวลา" />
+                      </LineChart>
                     </ResponsiveContainer>
                   </div>
                   <span className={styles.statLabel}>สถิติผลรวมช่วงเวลา</span>

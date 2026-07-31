@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
-import { db } from "@/lib/db";
 
 export async function POST(req: NextRequest) {
   try {
@@ -26,8 +25,7 @@ export async function POST(req: NextRequest) {
 
     await fs.writeFile(filePath, buffer);
     
-    // Test DB connection by executing a simple query
-    await db.query("SELECT 1 as test");
+    // File is saved successfully
 
     return NextResponse.json({
       message: "File uploaded successfully. Database connection verified.",

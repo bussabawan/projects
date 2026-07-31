@@ -95,7 +95,7 @@ export class ManageUsersModel {
   /**
    * Create a new user (and patient data if role === 1)
    */
-  static async createUser(userData: { user_name: string, full_name: string, role: number, password?: string, exercises_id?: number }): Promise<number> {
+  static async createUser(userData: { user_name: string, full_name: string, role: number, password?: string, exercises_id?: number | number[] }): Promise<number> {
     const connection = await db.getConnection();
     try {
       await connection.beginTransaction();
@@ -128,10 +128,19 @@ export class ManageUsersModel {
       const userId = userResult.insertId;
 
       if (userData.role === 1 && userData.exercises_id) {
-        await connection.execute(
-          'INSERT INTO patient_data (user_id, exercises_id, remove) VALUES (?, ?, 0)',
-          [userId, userData.exercises_id]
-        );
+        let exercisesArray: number[] = [];
+        if (Array.isArray(userData.exercises_id)) {
+          exercisesArray = userData.exercises_id;
+        } else {
+          exercisesArray = [userData.exercises_id];
+        }
+
+        if (exercisesArray.length > 0) {
+          const insertQueries = exercisesArray.map(exId => 
+            connection.execute('INSERT INTO patient_data (user_id, exercises_id, remove) VALUES (?, ?, 0)', [userId, exId])
+          );
+          await Promise.all(insertQueries);
+        }
       }
 
       await connection.commit();
@@ -147,7 +156,7 @@ export class ManageUsersModel {
   /**
    * Update existing user
    */
-  static async updateUser(userId: number, userData: { user_name?: string, full_name?: string, role?: number, password?: string, exercises_id?: number }): Promise<boolean> {
+  static async updateUser(userId: number, userData: { user_name?: string, full_name?: string, role?: number, password?: string, exercises_id?: number | number[] }): Promise<boolean> {
     const connection = await db.getConnection();
     try {
       await connection.beginTransaction();
@@ -191,21 +200,25 @@ export class ManageUsersModel {
       );
       
       if (userRows.length > 0 && userRows[0].role === 1 && userData.exercises_id !== undefined) {
-        // Check if patient_data exists
-        const [patientRows] = await connection.execute<RowDataPacket[]>(
-          'SELECT user_id FROM patient_data WHERE user_id = ?', [userId]
+        let exercisesArray: number[] = [];
+        if (Array.isArray(userData.exercises_id)) {
+          exercisesArray = userData.exercises_id;
+        } else if (userData.exercises_id !== null) {
+          exercisesArray = [userData.exercises_id];
+        }
+
+        // Delete existing patient_data rows for this user
+        await connection.execute(
+          'DELETE FROM patient_data WHERE user_id = ?',
+          [userId]
         );
         
-        if (patientRows.length > 0) {
-          await connection.execute(
-            'UPDATE patient_data SET exercises_id = ?, remove = 0 WHERE user_id = ?',
-            [userData.exercises_id, userId]
+        // Insert new exercises
+        if (exercisesArray.length > 0) {
+          const insertQueries = exercisesArray.map(exId => 
+            connection.execute('INSERT INTO patient_data (user_id, exercises_id, remove) VALUES (?, ?, 0)', [userId, exId])
           );
-        } else {
-          await connection.execute(
-            'INSERT INTO patient_data (user_id, exercises_id, remove) VALUES (?, ?, 0)',
-            [userId, userData.exercises_id]
-          );
+          await Promise.all(insertQueries);
         }
       }
 
