@@ -12,8 +12,31 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   pages: {
     signIn: '/login', // Use our custom login page
+    error: '/login', // Redirect to custom login page on error
   },
   callbacks: {
+    async signIn({ user, account, profile }) {
+      if (account?.provider === "google") {
+        try {
+          if (!user.email) return false;
+          
+          const [rows] = await db.execute<RowDataPacket[]>(
+            'SELECT role FROM users_data WHERE user_name = ? AND remove = 0',
+            [user.email]
+          );
+          
+          if (rows.length > 0 && rows[0].role === 2) {
+            return true; // Allow login for staff
+          }
+          
+          return false; // Deny login for others (patients or non-existent)
+        } catch (error) {
+          console.error("Error during signIn callback:", error);
+          return false;
+        }
+      }
+      return true;
+    },
     async session({ session, token }) {
       if (session.user && session.user.email) {
         try {
