@@ -13,11 +13,10 @@
 }
 
 .title {
-  font-size: 2.8rem;
-  font-weight: 700;
+  font-size: 3.5rem;
+  font-weight: 500;
   color: #111;
   margin: 0;
-  font-family: inherit;
 }
 
 .addButton {
@@ -220,7 +219,13 @@
   display: flex;
   justify-content: center;
   gap: 0.5rem;
-  margin-top: 1.5rem;
+  margin-top: auto;
+  position: sticky;
+  bottom: -1.5rem;
+  background-color: #fafafa;
+  padding: 1.5rem 0;
+  z-index: 10;
+  border-top: 1px solid #eaeaea;
 }
 
 .pageBtn {
@@ -240,7 +245,8 @@
 }
 
 .pageBtn:hover:not(:disabled) {
-  background: #f0f0f0;
+  background: #6A95F1;
+  color: white;
 }
 
 .pageBtn.activePage {
