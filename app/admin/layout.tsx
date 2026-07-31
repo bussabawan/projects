@@ -142,6 +142,10 @@ export default function AdminLayout({
       <main className={styles.mainContent}>
         {children}
       </main>
+      
+      <Link href="/admin/manual" className={styles.mobileManualBtn} aria-label="คู่มือ">
+        ?
+      </Link>
     </div>
   );
 }
