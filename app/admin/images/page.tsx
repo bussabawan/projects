@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import styles from "./images.module.css";
 import ImageFormModal from "./components/ImageFormModal";
+import DeleteConfirmModal from "../components/DeleteConfirmModal";
+import RestoreConfirmModal from "../components/RestoreConfirmModal";
 
 function CardImage({ src, alt }: { src: string; alt: string }) {
   const [error, setError] = useState(false);
@@ -57,6 +59,8 @@ export default function ManageImagesPage() {
   }, []);
 
   const [editingImage, setEditingImage] = useState<ImageData | null>(null);
+  const [deletingImageId, setDeletingImageId] = useState<number | null>(null);
+  const [duplicateToRestore, setDuplicateToRestore] = useState<{ id: number; data: any } | null>(null);
 
   const handleAdd = () => {
     setEditingImage(null);
@@ -68,19 +72,24 @@ export default function ManageImagesPage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: number) => {
-    if (confirm("ยืนยันการลบรูปภาพ? (Confirm delete?)")) {
-      try {
-        const res = await fetch(`/api/admin/images/${id}`, { method: 'DELETE' });
-        const data = await res.json();
-        if (data.success) {
-          fetchImages();
-        } else {
-          alert("ลบข้อมูลไม่สำเร็จ");
-        }
-      } catch (err) {
-        console.error(err);
+  const handleDeleteClick = (id: number) => {
+    setDeletingImageId(id);
+  };
+
+  const confirmDelete = async () => {
+    if (deletingImageId === null) return;
+    try {
+      const res = await fetch(`/api/admin/images/${deletingImageId}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        fetchImages();
+      } else {
+        alert("ลบข้อมูลไม่สำเร็จ");
       }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setDeletingImageId(null);
     }
   };
 
@@ -90,26 +99,52 @@ export default function ManageImagesPage() {
       const url = isEdit ? `/api/admin/images/${editingImage.id}` : "/api/admin/images";
       const method = isEdit ? "PUT" : "POST";
       
+      const payload = {
+        title: data.imageName,
+        imageUrl: data.imageUrl,
+        audioUrl: data.audioUrl,
+        audioTitle: data.speechText || "",
+        audioGen: data.useAutoSpeech ? 1 : 0
+      };
+
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: data.imageName,
-          imageUrl: data.imageUrl,
-          audioUrl: data.audioUrl,
-          audioTitle: data.speechText || "",
-          audioGen: data.useAutoSpeech ? 1 : 0
-        })
+        body: JSON.stringify(payload)
+      });
+      const result = await res.json();
+      if (result.success) {
+        fetchImages();
+      } else if (result.isDuplicateDeleted) {
+        setDuplicateToRestore({ id: result.duplicateId, data: payload });
+      } else {
+        alert(result.error || "บันทึกข้อมูลไม่สำเร็จ");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("เกิดข้อผิดพลาดในการบันทึก");
+    }
+  };
+
+  const confirmRestore = async () => {
+    if (!duplicateToRestore) return;
+    try {
+      const res = await fetch(`/api/admin/images/${duplicateToRestore.id}`, {
+        method: 'PUT',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(duplicateToRestore.data)
       });
       const result = await res.json();
       if (result.success) {
         fetchImages();
       } else {
-        alert("บันทึกข้อมูลไม่สำเร็จ");
+        alert(result.error || "กู้คืนข้อมูลไม่สำเร็จ");
       }
     } catch (err) {
       console.error(err);
-      alert("เกิดข้อผิดพลาดในการบันทึก");
+      alert("เกิดข้อผิดพลาดในการกู้คืน");
+    } finally {
+      setDuplicateToRestore(null);
     }
   };
 
@@ -196,7 +231,7 @@ export default function ManageImagesPage() {
                     </svg>
                   </button>
                   
-                  <button className={`${styles.actionBtn} ${styles.deleteBtn}`} onClick={() => handleDelete(img.id)} title="ลบ (Delete)">
+                  <button className={`${styles.actionBtn} ${styles.deleteBtn}`} onClick={() => handleDeleteClick(img.id)} title="ลบ (Delete)">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="3 6 5 6 21 6"></polyline>
                       <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -216,6 +251,20 @@ export default function ManageImagesPage() {
           image={editingImage}
           onClose={() => setIsModalOpen(false)}
           onSave={handleModalSave}
+        />
+      )}
+
+      {deletingImageId !== null && (
+        <DeleteConfirmModal 
+          onConfirm={confirmDelete}
+          onCancel={() => setDeletingImageId(null)}
+        />
+      )}
+
+      {duplicateToRestore !== null && (
+        <RestoreConfirmModal 
+          onConfirm={confirmRestore}
+          onCancel={() => setDuplicateToRestore(null)}
         />
       )}
     </div>

@@ -30,6 +30,29 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
     }
 
+    // Check if the title already exists (including deleted ones)
+    const [existingRows]: any = await db.query(
+      `SELECT photo_id as id, remove FROM photo_data WHERE photo_title = ?`,
+      [title]
+    );
+
+    if (existingRows.length > 0) {
+      const existing = existingRows[0];
+      if (existing.remove === 1) {
+        // Return a special status indicating it was deleted and can be restored
+        return NextResponse.json({ 
+          success: false, 
+          isDuplicateDeleted: true, 
+          duplicateId: existing.id 
+        });
+      } else {
+        return NextResponse.json({ 
+          success: false, 
+          error: "มีชื่อรูปภาพนี้อยู่ในระบบแล้ว (Image title already exists)" 
+        }, { status: 400 });
+      }
+    }
+
     // Insert into database
     const [result] = await db.query(
       `INSERT INTO photo_data (photo_name, photo_title, audio_name, audio_title, audio_gen, remove) 

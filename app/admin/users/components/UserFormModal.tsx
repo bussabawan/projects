@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import styles from "../users.module.css";
+import RestoreConfirmModal from "../../components/RestoreConfirmModal";
 
 interface User {
   user_id: number;
@@ -141,10 +142,24 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
     setLoading(true);
     setError("");
     try {
+      const payload: Record<string, unknown> = {
+        user_name: formData.user_name,
+        full_name: formData.full_name,
+        role: role
+      };
+
+      if (formData.password) {
+        payload.password = formData.password;
+      }
+      
+      if (role === 1 && formData.exercises_id) {
+        payload.exercises_id = formData.exercises_id;
+      }
+
       const res = await fetch(`/api/admin/users/${restoreUserId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'restore' })
+        body: JSON.stringify({ action: 'restore', data: payload })
       });
       const result = await res.json();
       if (result.success) {
@@ -165,28 +180,10 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
   const renderRestoreModal = () => {
     if (!restoreUserId) return null;
     return (
-      <div className={styles.restoreModalOverlay} onClick={() => setRestoreUserId(null)}>
-        <div className={styles.restoreModalContent} onClick={e => e.stopPropagation()}>
-          <div className={styles.restoreModalIcon}>
-            <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M17 2.1l4 4-4 4"/>
-              <path d="M3 12.2v-2a4 4 0 0 1 4-4h14"/>
-              <path d="M7 21.9l-4-4 4-4"/>
-              <path d="M21 11.8v2a4 4 0 0 1-4 4H3"/>
-            </svg>
-          </div>
-          <h2 className={styles.restoreModalTitle}>พบข้อมูลเดิมในระบบ</h2>
-          <p className={styles.restoreModalSubTitle}>ต้องการกู้คืนข้อมูลที่เคยลบหรือไม่</p>
-          <div className={styles.deleteModalActions}>
-            <button className={styles.restoreBtnConfirm} onClick={handleRestore} disabled={loading}>
-              {loading ? 'กำลังกู้คืน...' : 'กู้คืนข้อมูล'}
-            </button>
-            <button className={styles.deleteBtnConfirm} onClick={() => setRestoreUserId(null)} disabled={loading}>
-              ยกเลิก
-            </button>
-          </div>
-        </div>
-      </div>
+      <RestoreConfirmModal 
+        onConfirm={handleRestore}
+        onCancel={() => setRestoreUserId(null)}
+      />
     );
   };
 
@@ -405,6 +402,7 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
             </div>
           </form>
         </div>
+        {renderRestoreModal()}
       </div>
     </div>
   );

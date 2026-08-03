@@ -90,6 +90,20 @@ export async function PATCH(
     const body = await request.json();
     if (body.action === 'restore') {
       await ManageUsersModel.restoreUser(userId);
+      if (body.data) {
+        // Convert string fields if needed
+        if (body.data.role !== undefined) {
+          body.data.role = parseInt(body.data.role, 10);
+        }
+        if (body.data.exercises_id !== undefined && body.data.exercises_id !== null) {
+          if (Array.isArray(body.data.exercises_id)) {
+            body.data.exercises_id = body.data.exercises_id.map((exId: string | number) => typeof exId === 'string' ? parseInt(exId, 10) : exId);
+          } else {
+            body.data.exercises_id = parseInt(body.data.exercises_id, 10);
+          }
+        }
+        await ManageUsersModel.updateUser(userId, body.data);
+      }
       return NextResponse.json({
         success: true,
         message: 'User restored successfully'
