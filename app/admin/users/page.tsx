@@ -173,25 +173,19 @@ export default function ManageUsersPage() {
   };
 
   const getPageNumbers = () => {
-    const delta = 2; // how many pages around current page
-    const range = [];
-    for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
-      range.push(i);
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
     }
 
-    if (currentPage - delta > 2) {
-      range.unshift("...");
-    }
-    if (currentPage + delta < totalPages - 1) {
-      range.push("...");
+    if (currentPage <= 4) {
+      return [1, 2, 3, 4, 5, "...", totalPages];
     }
 
-    range.unshift(1);
-    if (totalPages > 1) {
-      range.push(totalPages);
+    if (currentPage >= totalPages - 3) {
+      return [1, "...", totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
     }
 
-    return range;
+    return [1, "...", currentPage - 1, currentPage, currentPage + 1, "...", totalPages];
   };
 
   return (
@@ -281,7 +275,7 @@ export default function ManageUsersPage() {
                   <div className={`${styles.cell} ${styles.desktopOnly}`}>
                     {user.exercises_name ? (
                       <div className={styles.tagsContainer}>
-                        {user.exercises_name.split('||').map((exName, idx) => (
+                        {Array.from(new Set(user.exercises_name.split('||'))).map((exName, idx) => (
                           <span key={idx} className={styles.tag}>{exName}</span>
                         ))}
                       </div>

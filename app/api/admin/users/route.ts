@@ -43,12 +43,28 @@ export async function POST(request: Request) {
     const roleId = parseInt(body.role, 10);
     const password = roleId === 2 ? 'API Login google' : body.password;
 
+    if (roleId === 1 && (!body.exercises_id || (Array.isArray(body.exercises_id) && body.exercises_id.length === 0))) {
+      return NextResponse.json(
+        { success: false, error: 'กรุณาเลือกชุดแบบฝึกหัดเริ่มต้นอย่างน้อย 1 ชุด' },
+        { status: 400 }
+      );
+    }
+
+      let parsedExercisesId: number | number[] | undefined = undefined;
+      if (body.exercises_id !== undefined && body.exercises_id !== null) {
+        if (Array.isArray(body.exercises_id)) {
+          parsedExercisesId = body.exercises_id.map((id: string | number) => typeof id === 'string' ? parseInt(id, 10) : id);
+        } else {
+          parsedExercisesId = parseInt(body.exercises_id, 10);
+        }
+      }
+
     const userId = await ManageUsersModel.createUser({
       user_name: body.user_name,
       full_name: body.full_name,
       role: roleId,
       password: password,
-      exercises_id: body.exercises_id ? parseInt(body.exercises_id, 10) : undefined
+      exercises_id: parsedExercisesId
     });
 
     return NextResponse.json({

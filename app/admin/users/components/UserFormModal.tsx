@@ -43,6 +43,7 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchExercise, setSearchExercise] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleCheckboxChange = (exId: number) => {
     setFormData(prev => {
@@ -82,6 +83,12 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
     e.preventDefault();
     setError("");
     setLoading(true);
+
+    if (role === 1 && (!formData.exercises_id || formData.exercises_id.length === 0)) {
+      setError("กรุณาเลือกชุดแบบฝึกหัดเริ่มต้นอย่างน้อย 1 ชุด");
+      setLoading(false);
+      return;
+    }
 
     try {
       const payload: any = {
@@ -245,7 +252,7 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalContentPatient} onClick={e => e.stopPropagation()}>
+      <div className={styles.modalContentStaff} onClick={e => e.stopPropagation()}>
         <div className={styles.modalHeaderStaff}>
           <h2 className={styles.modalTitleStaff}>
             {isEditing ? 'แก้ไขข้อมูลผู้ป่วย' : 'เพิ่มข้อมูลผู้ป่วย'}
@@ -291,14 +298,47 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
                 <label className={styles.labelStaff}>
                   รหัสผ่าน
                 </label>
-                <input 
-                  type="password" 
-                  name="password"
-                  className={styles.inputStaff}
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder={isEditing ? "(เว้นว่างถ้าไม่เปลี่ยน)" : ""}
-                />
+                <div style={{ position: 'relative' }}>
+                  <input 
+                    type={showPassword ? "text" : "password"} 
+                    name="password"
+                    className={styles.inputStaff}
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder={isEditing ? "(เว้นว่างถ้าไม่เปลี่ยน)" : ""}
+                    style={{ paddingRight: '2.5rem' }}
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{
+                      position: 'absolute',
+                      right: '0.8rem',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      color: '#666',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: 0
+                    }}
+                  >
+                    {showPassword ? (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                      </svg>
+                    ) : (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -307,7 +347,7 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
               <div className={styles.multiSelectContainer}>
                 <input 
                   type="text"
-                  className={styles.multiSelectInput}
+                  className={`${styles.multiSelectInput} ${dropdownOpen ? styles.multiSelectInputOpen : ''}`}
                   placeholder={
                     formData.exercises_id.length > 0
                       ? `เลือกแล้ว ${formData.exercises_id.length} ชุด (สามารถกรอกเพื่อค้นหาได้)`
