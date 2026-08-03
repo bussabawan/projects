@@ -31,10 +31,11 @@ export async function POST(req: NextRequest) {
       message: "File uploaded successfully. Database connection verified.",
       url: `/uploads/${filename}`,
     });
-  } catch (error: any) {
-    console.error("Upload error:", error);
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error("Upload error:", err);
     return NextResponse.json(
-      { error: "Error uploading file or connecting to database.", details: error.message },
+      { error: "Error uploading file or connecting to database.", details: err.message },
       { status: 500 }
     );
   }

@@ -1,33 +1,108 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./images.module.css";
+import ImageFormModal from "./components/ImageFormModal";
 
-// Temporary mock data to match the design
-const mockImages = [
-  { id: 1, title: "ร่างกาย", imageUrl: "https://api.dicebear.com/7.x/shapes/svg?seed=body&backgroundColor=transparent" },
-  { id: 2, title: "ของใช้", imageUrl: "https://api.dicebear.com/7.x/shapes/svg?seed=items&backgroundColor=transparent" },
-];
+interface ImageData {
+  id: number;
+  title: string;
+  imageUrl: string;
+  audioUrl?: string;
+  audioTitle?: string;
+  audioGen?: number;
+}
 
 export default function ManageImagesPage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingImageId, setEditingImageId] = useState<number | null>(null);
+  const [images, setImages] = useState<ImageData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchImages = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/admin/images");
+      const json = await res.json();
+      if (json.success) {
+        setImages(json.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch images", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchImages();
+  }, []);
 
   const handleAdd = () => {
-    // Add logic here later
-    alert("เพิ่มรูปภาพ (Add Image)");
+    setEditingImageId(null);
+    setIsModalOpen(true);
   };
 
   const handleEdit = (id: number) => {
-    // Edit logic here later
-    alert(`แก้ไขรูปภาพ (Edit Image) ID: ${id}`);
+    setEditingImageId(id);
+    setIsModalOpen(true);
   };
 
-  const handleDelete = (id: number) => {
-    // Delete logic here later
+  const handleDelete = async (id: number) => {
     if (confirm("ยืนยันการลบรูปภาพ? (Confirm delete?)")) {
-      alert(`ลบรูปภาพ (Delete Image) ID: ${id}`);
+      try {
+        const res = await fetch(`/api/admin/images/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (data.success) {
+          fetchImages();
+        } else {
+          alert("ลบข้อมูลไม่สำเร็จ");
+        }
+      } catch (err) {
+        console.error(err);
+      }
     }
   };
+
+  const handleModalSave = async (data: any) => {
+    try {
+      const res = await fetch("/api/admin/images", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: data.imageName,
+          imageUrl: data.imageUrl,
+          audioUrl: data.audioUrl,
+          audioTitle: data.speechText || "",
+          audioGen: data.useAutoSpeech
+        })
+      });
+      const result = await res.json();
+      if (result.success) {
+        fetchImages();
+      } else {
+        alert("บันทึกข้อมูลไม่สำเร็จ");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("เกิดข้อผิดพลาดในการบันทึก");
+    }
+  };
+
+  const playAudio = (audioUrl?: string) => {
+    if (!audioUrl) {
+      alert("ไม่มีไฟล์เสียง");
+      return;
+    }
+    const audio = new Audio(audioUrl);
+    audio.play().catch(e => {
+      console.error(e);
+      alert("ไม่สามารถเล่นเสียงได้");
+    });
+  };
+
+  const filteredImages = images.filter(img => img.title.toLowerCase().includes(searchQuery.toLowerCase()));
 
   return (
     <div className={styles.container}>
@@ -59,21 +134,30 @@ export default function ManageImagesPage() {
       </div>
 
       <div className={styles.grid}>
-        {mockImages.map((img) => (
-          <div key={img.id} className={styles.card}>
-            <div className={styles.imageContainer}>
-              <img src={img.imageUrl} alt={img.title} />
-            </div>
-            <div className={styles.cardTitle}>{img.title}</div>
-            
-            <div className={styles.cardActions}>
-              <button className={styles.actionBtn} title="เล่นเสียง (Play sound)">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
-                </svg>
-              </button>
+        {isLoading ? (
+          <div>กำลังโหลดข้อมูล...</div>
+        ) : filteredImages.length === 0 ? (
+          <div>ไม่พบรูปภาพ</div>
+        ) : (
+          filteredImages.map((img) => (
+            <div key={img.id} className={styles.card}>
+              <div className={styles.imageContainer}>
+                <img src={img.imageUrl} alt={img.title} />
+              </div>
+              <div className={styles.cardTitle}>{img.title}</div>
+              
+              <div className={styles.cardActions}>
+                <button 
+                  className={styles.actionBtn} 
+                  title="เล่นเสียง (Play sound)"
+                  onClick={() => playAudio(img.audioUrl)}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                  </svg>
+                </button>
               
               <button className={styles.actionBtn} onClick={() => handleEdit(img.id)} title="แก้ไข (Edit)">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -92,8 +176,16 @@ export default function ManageImagesPage() {
               </button>
             </div>
           </div>
-        ))}
+          ))
+        )}
       </div>
+
+      {isModalOpen && (
+        <ImageFormModal 
+          onClose={() => setIsModalOpen(false)}
+          onSave={handleModalSave}
+        />
+      )}
     </div>
   );
 }

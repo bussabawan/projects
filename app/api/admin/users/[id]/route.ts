@@ -35,12 +35,13 @@ export async function PUT(
       success: true,
       message: 'User updated successfully'
     });
-  } catch (error: any) {
-    console.error('Error in PUT /api/admin/users/[id]:', error);
-    const status = error.message === 'Username already exists' ? 409 : 500;
-    const errorMessage = error.message === 'Username already exists' 
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error('Error in PUT /api/admin/users/[id]:', err);
+    const status = err.message === 'Username already exists' ? 409 : 500;
+    const errorMessage = err.message === 'Username already exists' 
       ? 'รหัสผู้ป่วยหรืออีเมลนี้มีอยู่ในระบบแล้ว' 
-      : error.message || 'Internal Server Error';
+      : err.message || 'Internal Server Error';
     return NextResponse.json(
       { success: false, error: errorMessage },
       { status }
@@ -65,10 +66,11 @@ export async function DELETE(
       success: true,
       message: 'User deleted successfully'
     });
-  } catch (error: any) {
-    console.error('Error in DELETE /api/admin/users/[id]:', error);
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error('Error in DELETE /api/admin/users/[id]:', err);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal Server Error' },
+      { success: false, error: err.message || 'Internal Server Error' },
       { status: 500 }
     );
   }
@@ -95,10 +97,11 @@ export async function PATCH(
     }
 
     return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 });
-  } catch (error: any) {
-    console.error('Error in PATCH /api/admin/users/[id]:', error);
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error('Error in PATCH /api/admin/users/[id]:', err);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal Server Error' },
+      { success: false, error: err.message || 'Internal Server Error' },
       { status: 500 }
     );
   }

@@ -69,6 +69,7 @@ export default function ManageUsersPage() {
   }, [activeTab, currentPage, itemsPerPage, debouncedSearchQuery]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchUsers();
     isLoadMoreRef.current = false;
   }, [fetchUsers]);
@@ -83,6 +84,7 @@ export default function ManageUsersPage() {
 
   // Reset to page 1 when the debounced search term changes or tab changes
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentPage(1);
   }, [debouncedSearchQuery, activeTab]);
 

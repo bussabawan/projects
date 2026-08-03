@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import styles from './login.module.css';
 import { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 
 function LoginContent() {
@@ -11,12 +11,13 @@ function LoginContent() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+
   const searchParams = useSearchParams();
 
   useEffect(() => {
     const errParam = searchParams.get('error');
     if (errParam === 'AccessDenied') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setError('คุณไม่มีสิทธิ์เข้าใช้งาน หรือบัญชีนี้ไม่ใช่สำหรับเจ้าหน้าที่');
     }
   }, [searchParams]);

@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const mysql = require('mysql2/promise');
 
 async function checkSchema() {

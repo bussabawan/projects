@@ -22,7 +22,7 @@ const renderTestSetTags = (patient: PatientStatInfo) => {
   return (
     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
       {tags.map((tag, idx) => {
-        const isAssigned = assignedCategories.includes(tag);
+
         const isPlayed = playedCategories.includes(tag);
         
         // If it has been played (has data)
@@ -93,8 +93,9 @@ export default function PatientStatsPage() {
         }
         const data = await response.json();
         setPatients(data);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        const error = err as Error;
+        setError(error.message);
       } finally {
         setLoading(false);
       }
@@ -114,6 +115,7 @@ export default function PatientStatsPage() {
       );
     }
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setFilteredPatients(result);
     setCurrentPage(1);
     setMobileVisibleCount(10);

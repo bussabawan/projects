@@ -15,7 +15,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     error: '/login', // Redirect to custom login page on error
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       if (account?.provider === "google") {
         try {
           if (!user.email) return false;
@@ -37,7 +37,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return true;
     },
-    async session({ session, token }) {
+    async session({ session }) {
       if (session.user && session.user.email) {
         try {
           const [rows] = await db.execute<RowDataPacket[]>(
@@ -45,9 +45,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             [session.user.email]
           );
           if (rows.length > 0) {
-            (session.user as any).id = rows[0].user_id;
-            (session.user as any).fullName = rows[0].full_name;
-            (session.user as any).role = rows[0].role;
+            const extendedUser = session.user as unknown as Record<string, string | number | undefined | null>;
+            extendedUser.id = rows[0].user_id;
+            extendedUser.fullName = rows[0].full_name;
+            extendedUser.role = rows[0].role;
           }
         } catch (error) {
           console.error("Error fetching user for session:", error);

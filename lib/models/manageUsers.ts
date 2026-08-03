@@ -29,8 +29,8 @@ export class ManageUsersModel {
     
     let baseQuery = '';
     let countQuery = '';
-    const queryParams: any[] = [];
-    const countParams: any[] = [];
+    const queryParams: (string | number | boolean | null)[] = [];
+    const countParams: (string | number | boolean | null)[] = [];
 
     // Assuming staff role is 2 or 0. We'll search exactly the role passed.
     if (role === 1) {
@@ -162,7 +162,7 @@ export class ManageUsersModel {
       await connection.beginTransaction();
 
       const updateFields: string[] = [];
-      const updateValues: any[] = [];
+      const updateValues: (string | number | boolean | null)[] = [];
 
       if (userData.user_name) {
         // Check for duplicates

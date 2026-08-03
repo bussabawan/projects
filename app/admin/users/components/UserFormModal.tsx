@@ -91,7 +91,7 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
     }
 
     try {
-      const payload: any = {
+      const payload: Record<string, unknown> = {
         user_name: formData.user_name,
         full_name: formData.full_name,
         role: role
@@ -128,8 +128,9 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
       } else {
         setError(result.error || "เกิดข้อผิดพลาดในการบันทึกข้อมูล");
       }
-    } catch (err: any) {
-      setError(err.message || "เกิดข้อผิดพลาดในการเชื่อมต่อ");
+    } catch (err: unknown) {
+      const error = err as Error;
+      setError(error.message || "เกิดข้อผิดพลาดในการเชื่อมต่อ");
     } finally {
       setLoading(false);
     }
@@ -152,8 +153,9 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
         setError(result.error || "เกิดข้อผิดพลาดในการกู้คืนข้อมูล");
         setRestoreUserId(null);
       }
-    } catch (err: any) {
-      setError(err.message || "เกิดข้อผิดพลาดในการเชื่อมต่อ");
+    } catch (err: unknown) {
+      const error = err as Error;
+      setError(error.message || "เกิดข้อผิดพลาดในการเชื่อมต่อ");
       setRestoreUserId(null);
     } finally {
       setLoading(false);
