@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import styles from './PatientStatsPopup.module.css';
 import { 
   PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, ComposedChart, Legend,
-  ScatterChart, Scatter
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, Legend
 } from 'recharts';
 
 interface PatientStatsPopupProps {

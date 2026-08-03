@@ -16,7 +16,7 @@ interface ImageData {
 export default function ManageImagesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingImageId, setEditingImageId] = useState<number | null>(null);
+
   const [images, setImages] = useState<ImageData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -36,16 +36,15 @@ export default function ManageImagesPage() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchImages();
   }, []);
 
   const handleAdd = () => {
-    setEditingImageId(null);
     setIsModalOpen(true);
   };
 
-  const handleEdit = (id: number) => {
-    setEditingImageId(id);
+  const handleEdit = () => {
     setIsModalOpen(true);
   };
 
@@ -65,7 +64,7 @@ export default function ManageImagesPage() {
     }
   };
 
-  const handleModalSave = async (data: any) => {
+  const handleModalSave = async (data: Record<string, unknown>) => {
     try {
       const res = await fetch("/api/admin/images", {
         method: "POST",
@@ -142,6 +141,7 @@ export default function ManageImagesPage() {
           filteredImages.map((img) => (
             <div key={img.id} className={styles.card}>
               <div className={styles.imageContainer}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={img.imageUrl} alt={img.title} />
               </div>
               <div className={styles.cardTitle}>{img.title}</div>
@@ -159,7 +159,7 @@ export default function ManageImagesPage() {
                   </svg>
                 </button>
               
-              <button className={styles.actionBtn} onClick={() => handleEdit(img.id)} title="แก้ไข (Edit)">
+              <button className={styles.actionBtn} onClick={() => handleEdit()} title="แก้ไข (Edit)">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                   <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>

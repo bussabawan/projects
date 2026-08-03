@@ -27,8 +27,8 @@ export default function AdminLayout({
             setUserName(`คุณ ${user.fullName || user.username}`);
             return;
           }
-        } catch (e) {
-          console.error("Failed to parse localStorage user:", e);
+        } catch {
+        // Handle error silently
         }
       }
       
@@ -36,7 +36,7 @@ export default function AdminLayout({
       try {
         const session = await getSession();
         if (session && session.user) {
-          const user = session.user as any;
+          const user = session.user as Record<string, unknown>;
           if (user.role === 2) {
             setUserName(`คุณ ${user.fullName || user.name}`);
             return;
@@ -62,7 +62,7 @@ export default function AdminLayout({
     try {
       const { signOut } = await import('next-auth/react');
       await signOut({ callbackUrl: '/login' });
-    } catch (error) {
+    } catch {
       window.location.href = '/login';
     }
   };

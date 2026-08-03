@@ -5,7 +5,7 @@ import styles from "./ImageFormModal.module.css";
 
 interface ImageFormModalProps {
   onClose: () => void;
-  onSave?: (data: any) => void;
+  onSave?: (data: Record<string, unknown>) => void;
 }
 
 export default function ImageFormModal({ onClose, onSave }: ImageFormModalProps) {
@@ -184,7 +184,10 @@ export default function ImageFormModal({ onClose, onSave }: ImageFormModalProps)
             <div className={styles.rightCol}>
               <div className={styles.imagePreview}>
                 {imagePreviewUrl ? (
-                  <img src={imagePreviewUrl} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '12px' }} />
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={imagePreviewUrl} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '12px' }} />
+                  </>
                 ) : (
                   <svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ background: '#fff', borderRadius: '12px' }}>
                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2" strokeWidth="2"></rect>

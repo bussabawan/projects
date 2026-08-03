@@ -15,7 +15,7 @@ const renderTestSetTags = (patient: PatientStatInfo) => {
   const testSets = patient.testSets;
   if (!testSets || testSets.length === 0) return null;
   
-  const assignedCategories = Array.from(new Set((patient.assignedSets || []).map(ts => extractCategory(ts)).filter(Boolean)));
+
   const playedCategories = Array.from(new Set((patient.playedSets || []).map(ts => extractCategory(ts)).filter(Boolean)));
   const tags = Array.from(new Set(testSets.map(ts => extractCategory(ts)).filter(Boolean)));
   

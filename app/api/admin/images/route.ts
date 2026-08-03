@@ -32,7 +32,8 @@ export async function POST(req: NextRequest) {
 
     // Insert into database
     const [result] = await db.query(
-      `INSERT INTO exercises_data (photo_title, photo_name, audio_title, audio_name, audio_gen, test_type, last_update) VALUES (?, ?, ?, ?, ?, 1, NOW())`,
+      `INSERT INTO photo_data (photo_name, photo_title, audio_name, audio_title, audio_gen, remove) 
+       VALUES (?, ?, ?, ?, ?, 0)`,
       [
         imageUrl, 
         title, 
