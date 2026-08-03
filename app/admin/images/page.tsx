@@ -4,6 +4,22 @@ import { useState, useEffect } from "react";
 import styles from "./images.module.css";
 import ImageFormModal from "./components/ImageFormModal";
 
+function CardImage({ src, alt }: { src: string; alt: string }) {
+  const [error, setError] = useState(false);
+
+  if (!src || error) {
+    return (
+      <svg width="50%" height="50%" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+        <polyline points="21 15 16 10 5 21"></polyline>
+      </svg>
+    );
+  }
+
+  return <img src={src} alt={alt} onError={() => setError(true)} />;
+}
+
 interface ImageData {
   id: number;
   title: string;
@@ -40,11 +56,15 @@ export default function ManageImagesPage() {
     fetchImages();
   }, []);
 
+  const [editingImage, setEditingImage] = useState<ImageData | null>(null);
+
   const handleAdd = () => {
+    setEditingImage(null);
     setIsModalOpen(true);
   };
 
-  const handleEdit = () => {
+  const handleEdit = (img: ImageData) => {
+    setEditingImage(img);
     setIsModalOpen(true);
   };
 
@@ -66,15 +86,19 @@ export default function ManageImagesPage() {
 
   const handleModalSave = async (data: Record<string, unknown>) => {
     try {
-      const res = await fetch("/api/admin/images", {
-        method: "POST",
+      const isEdit = !!editingImage;
+      const url = isEdit ? `/api/admin/images/${editingImage.id}` : "/api/admin/images";
+      const method = isEdit ? "PUT" : "POST";
+      
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: data.imageName,
           imageUrl: data.imageUrl,
           audioUrl: data.audioUrl,
           audioTitle: data.speechText || "",
-          audioGen: data.useAutoSpeech
+          audioGen: data.useAutoSpeech ? 1 : 0
         })
       });
       const result = await res.json();
@@ -117,6 +141,12 @@ export default function ManageImagesPage() {
       </div>
 
       <div className={styles.controlsRow}>
+        <button className={styles.mobileAddBtn} onClick={handleAdd}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5b5bb2" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
         <div className={styles.searchContainer}>
           <input 
             type="text" 
@@ -141,47 +171,49 @@ export default function ManageImagesPage() {
           filteredImages.map((img) => (
             <div key={img.id} className={styles.card}>
               <div className={styles.imageContainer}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={img.imageUrl} alt={img.title} />
+                <CardImage src={img.imageUrl} alt={img.title} />
               </div>
-              <div className={styles.cardTitle}>{img.title}</div>
-              
-              <div className={styles.cardActions}>
-                <button 
-                  className={styles.actionBtn} 
-                  title="เล่นเสียง (Play sound)"
-                  onClick={() => playAudio(img.audioUrl)}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
-                  </svg>
-                </button>
-              
-              <button className={styles.actionBtn} onClick={() => handleEdit()} title="แก้ไข (Edit)">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                </svg>
-              </button>
-              
-              <button className={`${styles.actionBtn} ${styles.deleteBtn}`} onClick={() => handleDelete(img.id)} title="ลบ (Delete)">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                  <line x1="10" y1="11" x2="10" y2="17"></line>
-                  <line x1="14" y1="11" x2="14" y2="17"></line>
-                </svg>
-              </button>
+              <div className={styles.cardContent}>
+                <div className={styles.cardTitle}>{img.title}</div>
+                
+                <div className={styles.cardActions}>
+                  <button 
+                    className={styles.actionBtn} 
+                    title="เล่นเสียง (Play sound)"
+                    onClick={() => playAudio(img.audioUrl)}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                      <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                      <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                    </svg>
+                  </button>
+                
+                  <button className={styles.actionBtn} onClick={() => handleEdit(img)} title="แก้ไข (Edit)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                  </button>
+                  
+                  <button className={`${styles.actionBtn} ${styles.deleteBtn}`} onClick={() => handleDelete(img.id)} title="ลบ (Delete)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      <line x1="10" y1="11" x2="10" y2="17"></line>
+                      <line x1="14" y1="11" x2="14" y2="17"></line>
+                    </svg>
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
           ))
         )}
       </div>
 
       {isModalOpen && (
         <ImageFormModal 
+          image={editingImage}
           onClose={() => setIsModalOpen(false)}
           onSave={handleModalSave}
         />

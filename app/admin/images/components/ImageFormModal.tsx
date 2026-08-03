@@ -3,17 +3,28 @@
 import { useState } from "react";
 import styles from "./ImageFormModal.module.css";
 
+interface ImageData {
+  id: number;
+  title: string;
+  imageUrl: string;
+  audioUrl?: string;
+  audioTitle?: string;
+  audioGen?: number;
+}
+
 interface ImageFormModalProps {
+  image?: ImageData | null;
   onClose: () => void;
   onSave?: (data: Record<string, unknown>) => void;
 }
 
-export default function ImageFormModal({ onClose, onSave }: ImageFormModalProps) {
-  const [imageName, setImageName] = useState("");
-  const [useAutoSpeech, setUseAutoSpeech] = useState(true);
-  const [speechText, setSpeechText] = useState("");
+export default function ImageFormModal({ image, onClose, onSave }: ImageFormModalProps) {
+  const [imageName, setImageName] = useState(image?.title || "");
+  const [useAutoSpeech, setUseAutoSpeech] = useState(image ? image.audioGen === 1 : true);
+  const [speechText, setSpeechText] = useState(image?.audioTitle || "");
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(image?.imageUrl || null);
+  const [imageError, setImageError] = useState(false);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -40,21 +51,23 @@ export default function ImageFormModal({ onClose, onSave }: ImageFormModalProps)
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      let uploadedImageUrl = null;
-      let uploadedAudioUrl = null;
+      let uploadedImageUrl = image?.imageUrl || null;
+      let uploadedAudioUrl = image?.audioUrl || null;
 
       if (imageFile) {
         uploadedImageUrl = await uploadFile(imageFile);
       }
 
       if (useAutoSpeech && speechText.trim()) {
-        const res = await fetch(`/api/tts?text=${encodeURIComponent(speechText)}`);
-        if (res.ok) {
-          const blob = await res.blob();
-          const ttsFile = new File([blob], `tts-${Date.now()}.mp3`, { type: 'audio/mpeg' });
-          uploadedAudioUrl = await uploadFile(ttsFile);
-        } else {
-          console.error("Failed to generate TTS audio");
+        if (speechText !== image?.audioTitle || !useAutoSpeech === (image?.audioGen === 0)) {
+           const res = await fetch(`/api/tts?text=${encodeURIComponent(speechText)}`);
+           if (res.ok) {
+             const blob = await res.blob();
+             const ttsFile = new File([blob], `tts-${Date.now()}.mp3`, { type: 'audio/mpeg' });
+             uploadedAudioUrl = await uploadFile(ttsFile);
+           } else {
+             console.error("Failed to generate TTS audio");
+           }
         }
       } else if (!useAutoSpeech && audioFile) {
         uploadedAudioUrl = await uploadFile(audioFile);
@@ -83,6 +96,7 @@ export default function ImageFormModal({ onClose, onSave }: ImageFormModalProps)
       const file = e.target.files[0];
       setImageFile(file);
       setImagePreviewUrl(URL.createObjectURL(file));
+      setImageError(false);
     }
   };
 
@@ -116,7 +130,7 @@ export default function ImageFormModal({ onClose, onSave }: ImageFormModalProps)
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
-          เพิ่มข้อมูลรูปภาพ
+          {image ? "แก้ไขข้อมูลรูปภาพ" : "เพิ่มข้อมูลรูปภาพ"}
         </div>
         
         <div className={styles.body}>
@@ -169,13 +183,13 @@ export default function ImageFormModal({ onClose, onSave }: ImageFormModalProps)
                     </div>
                   </div>
                 ) : (
-                  <div className={styles.fileInputContainer}>
-                    <label className={styles.fileInputBtn}>
-                      เลือกไฟล์
-                      <input type="file" accept="audio/*" onChange={handleAudioChange} />
-                    </label>
-                    {audioFile && <span className={styles.fileInputName}>{audioFile.name}</span>}
-                  </div>
+                  <label className={styles.fileInputContainer}>
+                    <input type="file" accept="audio/*" onChange={handleAudioChange} />
+                    <div className={styles.fileInputBtnFake}>เลือกไฟล์</div>
+                    <span className={styles.fileInputName}>
+                      {audioFile ? audioFile.name : ""}
+                    </span>
+                  </label>
                 )}
               </div>
             </div>
@@ -183,10 +197,15 @@ export default function ImageFormModal({ onClose, onSave }: ImageFormModalProps)
             {/* Right Column */}
             <div className={styles.rightCol}>
               <div className={styles.imagePreview}>
-                {imagePreviewUrl ? (
+                {imagePreviewUrl && !imageError ? (
                   <>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={imagePreviewUrl} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '12px' }} />
+                    <img 
+                      src={imagePreviewUrl} 
+                      alt="Preview" 
+                      style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '12px' }} 
+                      onError={() => setImageError(true)}
+                    />
                   </>
                 ) : (
                   <svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ background: '#fff', borderRadius: '12px' }}>

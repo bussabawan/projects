@@ -75,12 +75,12 @@
 .inputField {
   background: #f0f0f0;
   border: none;
-  border-radius: 12px;
+  border-radius: 20px;
   padding: 0.8rem 1rem;
   font-size: 1rem;
   color: #333;
   outline: none;
-  width: 100%;
+  width: 90%;
 }
 
 .toggleRow {
@@ -150,7 +150,7 @@ input:checked + .slider:before {
 .inputWithIcon input {
   background: #f0f0f0;
   border: none;
-  border-radius: 12px;
+  border-radius: 20px;
   padding: 0.8rem 1rem;
   padding-right: 2.5rem;
   font-size: 1rem;
@@ -244,16 +244,34 @@ input:checked + .slider:before {
 
 @media (max-width: 600px) {
   .columns {
-    flex-direction: column-reverse;
-    align-items: center;
+    flex-direction: column;
+    gap: 1.5rem;
   }
   
   .leftCol {
     width: 100%;
   }
   
-  .footer {
+  .rightCol {
+    width: 100%;
+    flex-direction: row;
     justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .imagePreview {
+    width: 100px;
+    height: 100px;
+  }
+
+  .uploadBtn {
+    width: auto;
+    padding: 0.6rem 1.5rem;
+  }
+  
+  .footer {
+    justify-content: flex-end;
   }
 }
 
@@ -261,32 +279,32 @@ input:checked + .slider:before {
   display: flex;
   align-items: center;
   background: #f0f0f0;
-  border-radius: 12px;
-  padding: 0.2rem;
+  border-radius: 20px;
+  padding: 0.4rem 0.5rem;
   width: 100%;
+  box-sizing: border-box;
+  cursor: pointer;
+  gap: 0.8rem;
 }
 
 .fileInputContainer input[type="file"] {
   display: none;
 }
 
-.fileInputBtn {
+.fileInputBtnFake {
   background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
-  color: #666;
-  cursor: pointer;
-  margin-right: 0.5rem;
+  color: #888;
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.95rem;
+  white-space: nowrap;
 }
 
 .fileInputName {
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: #888;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  padding-right: 0.5rem;
 }
 

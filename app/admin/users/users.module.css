@@ -561,18 +561,17 @@
   }
   
   .controlsRow {
-    flex-direction: row;
+    flex-direction: column;
     justify-content: flex-start;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 1rem;
-    flex-wrap: wrap; /* allow wrap if needed */
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
   }
   
   .tabSwitcher {
     margin-bottom: 0;
     width: auto;
-    flex: none; /* don't stretch */
+    flex: none;
   }
   
   .tabBtn {
@@ -582,27 +581,41 @@
   }
   
   .searchContainer {
-    flex: 1;
-    min-width: 120px;
+    width: 100%;
   }
   
   .searchInput {
-    padding: 0.5rem 0.8rem;
-    font-size: 0.85rem;
-    width: 90%;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.8rem 1.2rem;
+    padding-right: 2.5rem;
+    font-size: 1rem;
   }
 
   .mobileAddContainer {
     display: flex;
     justify-content: flex-start;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
   }
   
   .mobileAddBtn {
-    background: #85f096;
-    color: #6a4a98;
-    padding: 0.5rem 2rem;
+    display: flex;
+    background: #76f387;
+    border: none;
     border-radius: 12px;
+    width: 100px;
+    height: 48px;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(118, 243, 135, 0.4);
+    cursor: pointer;
+    padding: 0;
+  }
+  
+  .mobileAddBtn svg {
+    color: #5b5bb2;
+    width: 24px;
+    height: 24px;
   }
 
   .tableHeaderPatient, .tableHeaderStaff {
