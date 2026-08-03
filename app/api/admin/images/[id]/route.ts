@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { ManageImagesModel } from "@/lib/models/manageImages";
 
 export async function DELETE(
   req: NextRequest,
@@ -11,11 +11,12 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: "Missing ID" }, { status: 400 });
     }
 
-    // Soft delete
-    await db.execute(
-      `UPDATE photo_data SET remove = 1 WHERE photo_id = ?`,
-      [id]
-    );
+    const imageId = parseInt(id, 10);
+    if (isNaN(imageId)) {
+      return NextResponse.json({ success: false, error: "Invalid ID" }, { status: 400 });
+    }
+
+    await ManageImagesModel.deleteImage(imageId);
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
@@ -35,6 +36,11 @@ export async function PUT(
       return NextResponse.json({ success: false, error: "Missing ID" }, { status: 400 });
     }
 
+    const imageId = parseInt(id, 10);
+    if (isNaN(imageId)) {
+      return NextResponse.json({ success: false, error: "Invalid ID" }, { status: 400 });
+    }
+
     const data = await req.json();
     const { title, imageUrl, audioUrl, audioTitle, audioGen } = data;
 
@@ -42,34 +48,19 @@ export async function PUT(
       return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
     }
 
-    // Check if title is duplicated by another image
-    const [existingRows]: any = await db.query(
-      `SELECT photo_id as id FROM photo_data WHERE photo_title = ? AND photo_id != ?`,
-      [title, id]
-    );
-
-    if (existingRows.length > 0) {
-      return NextResponse.json({ 
-        success: false, 
-        error: "มีชื่อรูปภาพนี้อยู่ในระบบแล้ว (Image title already exists)" 
-      }, { status: 400 });
+    try {
+      await ManageImagesModel.updateImage(imageId, { title, imageUrl, audioUrl, audioTitle, audioGen });
+      return NextResponse.json({ success: true });
+    } catch (modelError: unknown) {
+      const mErr = modelError as Error;
+      if (mErr.message === "มีชื่อรูปภาพนี้อยู่ในระบบแล้ว (Image title already exists)") {
+        return NextResponse.json({ 
+          success: false, 
+          error: mErr.message 
+        }, { status: 400 });
+      }
+      throw mErr;
     }
-
-    await db.execute(
-      `UPDATE photo_data 
-       SET photo_name = ?, photo_title = ?, audio_name = ?, audio_title = ?, audio_gen = ?, remove = 0 
-       WHERE photo_id = ?`,
-      [
-        imageUrl, 
-        title, 
-        audioUrl || "", 
-        audioTitle || "", 
-        audioGen ? 1 : 0,
-        id
-      ]
-    );
-
-    return NextResponse.json({ success: true });
   } catch (error: unknown) {
     const err = error as Error;
     console.error("PUT image error:", err);
