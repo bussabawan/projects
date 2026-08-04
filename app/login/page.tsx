@@ -29,31 +29,22 @@ function LoginContent() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
+      const res = await signIn('credentials', {
+        redirect: false,
+        username,
+        password,
       });
 
-      const data = await res.json();
-
-      if (res.ok) {
-        // Save user to localStorage
-        if (data.user) {
-          localStorage.setItem('user', JSON.stringify(data.user));
-        }
-
-        // Redirect to overview stats if role is 2
-        if (data.user?.role === 2) {
-          router.push('/admin');
+      if (res?.error) {
+        if (res.error === 'CredentialsSignin') {
+          setError("Username หรือ Password ไม่ถูกต้อง หากเป็นเจ้าหน้าที่กรุณาเข้าสู่ระบบผ่านบัญชี Google");
         } else {
-          // Default fallback
-          router.push('/admin'); 
+          setError("เกิดข้อผิดพลาด: " + res.error);
         }
-      } else {
-        setError(data.message || 'ล็อกอินล้มเหลว (Login failed)');
+      } else if (res?.ok) {
+        // Successful login
+        router.push('/admin');
+        router.refresh(); // Force refresh to update layout session state
       }
     } catch (err) {
       console.error(err);

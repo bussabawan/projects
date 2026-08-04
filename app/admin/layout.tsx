@@ -18,38 +18,17 @@ export default function AdminLayout({
 
   useEffect(() => {
     const fetchUser = async () => {
-      // Check for user in localStorage first
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        try {
-          const user = JSON.parse(storedUser);
-          if (user.role === 2) {
-            setUserName(`คุณ ${user.fullName || user.username}`);
-            return;
-          }
-        } catch {
-        // Handle error silently
-        }
-      }
-      
-      // Fallback to NextAuth session (for Google login)
       try {
         const session = await getSession();
         if (session && session.user) {
           const user = session.user as Record<string, unknown>;
-          if (user.role === 2) {
-            setUserName(`คุณ ${user.fullName || user.name}`);
-            return;
-          }
-          // If role is missing but we have a session, we can still show their name
-          setUserName(`คุณ ${user.fullName || user.name}`);
+          setUserName(`คุณ ${user.fullName || user.name || "Admin"}`);
           return;
         }
       } catch (e) {
         console.error("Failed to get NextAuth session:", e);
       }
       
-      // Default if no login data found
       setUserName("Admin");
     };
 
@@ -57,8 +36,6 @@ export default function AdminLayout({
   }, []);
 
   const handleLogout = async () => {
-    localStorage.removeItem('user');
-    // We can also redirect here, but we will try next-auth signOut first
     try {
       const { signOut } = await import('next-auth/react');
       await signOut({ callbackUrl: '/login' });
