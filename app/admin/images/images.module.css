@@ -208,8 +208,8 @@
   }
   
   .grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.8rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
   }
   
   .card {
@@ -217,6 +217,7 @@
     padding: 0.5rem;
     border-radius: 12px;
     align-items: center;
+    min-width: 0;
   }
 
   .imageContainer {
@@ -230,7 +231,12 @@
   }
 
   .cardContent {
+    display: flex;
+    flex-direction: column;
     align-items: flex-start;
+    flex: 1;
+    min-width: 0;
+    justify-content: center;
   }
 
   .cardTitle {
@@ -240,29 +246,31 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 100%;
+    width: 100%;
   }
 
   .cardActions {
     border-top: none;
     padding-top: 0;
     justify-content: flex-start;
-    gap: 0.4rem;
+    gap: 0.2rem;
+    margin-top: 0.2rem;
+    flex-wrap: wrap;
   }
 
   .actionBtn {
-    padding: 0.1rem;
+    padding: 0.15rem;
   }
 
   .actionBtn svg {
-    width: 14px;
-    height: 14px;
+    width: 15px;
+    height: 15px;
   }
 }
 
 @media (max-width: 480px) {
   .grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
