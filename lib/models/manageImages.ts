@@ -14,14 +14,46 @@ export class ManageImagesModel {
   /**
    * Get all active images
    */
-  static async getImages(): Promise<ImageInfo[]> {
+  static async getImages(
+    page: number = 1,
+    limit: number = 12,
+    search: string = ""
+  ): Promise<{ data: ImageInfo[]; totalPages: number }> {
+    const offset = (page - 1) * limit;
+    let queryParams: any[] = [];
+    let countParams: any[] = [];
+
+    let whereClause = "WHERE remove = 0";
+    if (search) {
+      whereClause += " AND photo_title LIKE ?";
+      queryParams.push(`%${search}%`);
+      countParams.push(`%${search}%`);
+    }
+
+    // Get total count
+    const [countRows] = await db.query<RowDataPacket[]>(
+      `SELECT COUNT(*) as total FROM photo_data ${whereClause}`,
+      countParams
+    );
+    const totalCount = countRows[0].total;
+    const totalPages = Math.ceil(totalCount / limit);
+
+    queryParams.push(limit, offset);
+
+    // Get paginated data
     const [rows] = await db.query<RowDataPacket[]>(
       `SELECT photo_id as id, photo_title as title, photo_name as imageUrl, audio_name as audioUrl, audio_title as audioTitle, audio_gen as audioGen
        FROM photo_data 
-       WHERE remove = 0 
-       ORDER BY photo_id DESC`
+       ${whereClause} 
+       ORDER BY photo_id DESC 
+       LIMIT ? OFFSET ?`,
+      queryParams
     );
-    return rows as ImageInfo[];
+
+    return {
+      data: rows as ImageInfo[],
+      totalPages: totalPages === 0 ? 1 : totalPages
+    };
   }
 
   /**

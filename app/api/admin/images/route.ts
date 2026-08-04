@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ManageImagesModel } from "@/lib/models/manageImages";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const images = await ManageImagesModel.getImages();
-    return NextResponse.json({ success: true, data: images });
+    const url = new URL(req.url);
+    const page = parseInt(url.searchParams.get("page") || "1");
+    const limit = parseInt(url.searchParams.get("limit") || "12");
+    const search = url.searchParams.get("search") || "";
+
+    const { data: images, totalPages } = await ManageImagesModel.getImages(page, limit, search);
+    return NextResponse.json({ success: true, data: images, totalPages });
   } catch (error: unknown) {
     const err = error as Error;
     console.error("GET images error:", err);

@@ -78,7 +78,7 @@
   border-radius: 20px;
   padding: 0.8rem 1rem;
   font-size: 1rem;
-  color: #333;
+  color: #000000;
   outline: none;
   width: 90%;
 }
@@ -154,7 +154,7 @@ input:checked + .slider:before {
   padding: 0.8rem 1rem;
   padding-right: 2.5rem;
   font-size: 1rem;
-  color: #888;
+  color: #000000;
   width: 100%;
   outline: none;
 }
@@ -293,7 +293,7 @@ input:checked + .slider:before {
 
 .fileInputBtnFake {
   background: #fff;
-  color: #888;
+  color: #000000;
   padding: 0.4rem 1rem;
   border-radius: 20px;
   font-size: 0.95rem;

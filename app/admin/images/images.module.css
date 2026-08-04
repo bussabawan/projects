@@ -265,3 +265,16 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+.loadMoreTarget {
+  width: 100%;
+  padding: 20px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loadingMoreText {
+  color: #666;
+  font-size: 14px;
+}

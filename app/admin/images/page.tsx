@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import styles from "./images.module.css";
 import ImageFormModal from "./components/ImageFormModal";
 import DeleteConfirmModal from "../components/DeleteConfirmModal";
@@ -19,7 +19,7 @@ function CardImage({ src, alt }: { src: string; alt: string }) {
     );
   }
 
-  return <img src={src} alt={alt} onError={() => setError(true)} />;
+  return <img src={src} alt={alt} onError={() => setError(true)} loading="lazy" />;
 }
 
 interface ImageData {
@@ -33,30 +33,84 @@ interface ImageData {
 
 export default function ManageImagesPage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [images, setImages] = useState<ImageData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const itemsPerPage = 12;
+  const isLoadMoreRef = useRef(false);
 
-  const fetchImages = async () => {
-    setIsLoading(true);
+  const fetchImages = useCallback(async () => {
+    const isLoadMore = isLoadMoreRef.current;
+    if (isLoadMore) {
+      setLoadingMore(true);
+    } else {
+      setIsLoading(true);
+    }
+    
     try {
-      const res = await fetch("/api/admin/images");
+      const res = await fetch(`/api/admin/images?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}`);
       const json = await res.json();
       if (json.success) {
-        setImages(json.data);
+        if (isLoadMore) {
+          setImages(prev => [...prev, ...json.data]);
+        } else {
+          setImages(json.data);
+        }
+        setTotalPages(json.totalPages || 1);
       }
     } catch (err) {
       console.error("Failed to fetch images", err);
     } finally {
-      setIsLoading(false);
+      if (isLoadMore) {
+        setLoadingMore(false);
+      } else {
+        setIsLoading(false);
+      }
     }
-  };
+  }, [currentPage, itemsPerPage, debouncedSearchQuery]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchImages();
-  }, []);
+    isLoadMoreRef.current = false;
+  }, [fetchImages]);
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Reset to page 1 when the debounced search term changes
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCurrentPage(1);
+  }, [debouncedSearchQuery]);
+
+  // Infinite Scroll Observer
+  const observer = useRef<IntersectionObserver | null>(null);
+  const lastElementRef = useCallback((node: HTMLDivElement | null) => {
+    if (isLoading || loadingMore) return;
+    if (observer.current) observer.current.disconnect();
+    
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && currentPage < totalPages) {
+        isLoadMoreRef.current = true;
+        setCurrentPage(prev => prev + 1);
+      }
+    }, { rootMargin: '200px' });
+    
+    if (node) observer.current.observe(node);
+  }, [isLoading, loadingMore, currentPage, totalPages]);
 
   const [editingImage, setEditingImage] = useState<ImageData | null>(null);
   const [deletingImageId, setDeletingImageId] = useState<number | null>(null);
@@ -82,7 +136,7 @@ export default function ManageImagesPage() {
       const res = await fetch(`/api/admin/images/${deletingImageId}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
-        fetchImages();
+        setImages(prev => prev.filter(img => img.id !== deletingImageId));
       } else {
         alert("ลบข้อมูลไม่สำเร็จ");
       }
@@ -114,7 +168,14 @@ export default function ManageImagesPage() {
       });
       const result = await res.json();
       if (result.success) {
-        fetchImages();
+        setIsModalOpen(false);
+        if (currentPage === 1) {
+          isLoadMoreRef.current = false;
+          fetchImages();
+        } else {
+          isLoadMoreRef.current = false;
+          setCurrentPage(1);
+        }
       } else if (result.isDuplicateDeleted) {
         setDuplicateToRestore({ id: result.duplicateId, data: payload });
       } else {
@@ -136,7 +197,8 @@ export default function ManageImagesPage() {
       });
       const result = await res.json();
       if (result.success) {
-        fetchImages();
+        isLoadMoreRef.current = false;
+        setCurrentPage(1);
       } else {
         alert(result.error || "กู้คืนข้อมูลไม่สำเร็จ");
       }
@@ -159,8 +221,6 @@ export default function ManageImagesPage() {
       alert("ไม่สามารถเล่นเสียงได้");
     });
   };
-
-  const filteredImages = images.filter(img => img.title.toLowerCase().includes(searchQuery.toLowerCase()));
 
   return (
     <div className={styles.container}>
@@ -198,12 +258,12 @@ export default function ManageImagesPage() {
       </div>
 
       <div className={styles.grid}>
-        {isLoading ? (
+        {isLoading && images.length === 0 ? (
           <div>กำลังโหลดข้อมูล...</div>
-        ) : filteredImages.length === 0 ? (
+        ) : images.length === 0 ? (
           <div>ไม่พบรูปภาพ</div>
         ) : (
-          filteredImages.map((img) => (
+          images.map((img) => (
             <div key={img.id} className={styles.card}>
               <div className={styles.imageContainer}>
                 <CardImage src={img.imageUrl} alt={img.title} />
@@ -245,6 +305,13 @@ export default function ManageImagesPage() {
           ))
         )}
       </div>
+
+      {/* Intersection Observer Target */}
+      {!isLoading && currentPage < totalPages && (
+        <div ref={lastElementRef} className={styles.loadMoreTarget}>
+          {loadingMore && <div className={styles.loadingMoreText}>กำลังโหลด...</div>}
+        </div>
+      )}
 
       {isModalOpen && (
         <ImageFormModal 

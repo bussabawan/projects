@@ -185,7 +185,7 @@ export default function ImageFormModal({ image, onClose, onSave }: ImageFormModa
                 ) : (
                   <label className={styles.fileInputContainer}>
                     <input type="file" accept="audio/*" onChange={handleAudioChange} />
-                    <div className={styles.fileInputBtnFake}>เลือกไฟล์</div>
+                    <div className={styles.fileInputBtnFake}>เลือกไฟล์เสียง</div>
                     <span className={styles.fileInputName}>
                       {audioFile ? audioFile.name : ""}
                     </span>
