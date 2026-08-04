@@ -14,8 +14,8 @@ export async function POST(req: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Save to public/uploads
-    const uploadDir = path.join(process.cwd(), "public/uploads");
+    // Save to storage/uploads
+    const uploadDir = path.join(process.cwd(), "storage/uploads");
     await fs.mkdir(uploadDir, { recursive: true });
 
     // Generate unique filename
@@ -40,3 +40,4 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+

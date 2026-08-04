@@ -15,7 +15,7 @@ interface ImageData {
 interface ImageFormModalProps {
   image?: ImageData | null;
   onClose: () => void;
-  onSave?: (data: Record<string, unknown>) => void;
+  onSave?: (data: Record<string, unknown>) => void | Promise<void>;
 }
 
 export default function ImageFormModal({ image, onClose, onSave }: ImageFormModalProps) {
@@ -76,7 +76,7 @@ export default function ImageFormModal({ image, onClose, onSave }: ImageFormModa
       }
 
       if (onSave) {
-        onSave({
+        await onSave({
           imageName,
           useAutoSpeech,
           speechText: useAutoSpeech ? speechText : "",
@@ -84,11 +84,11 @@ export default function ImageFormModal({ image, onClose, onSave }: ImageFormModa
           audioUrl: uploadedAudioUrl
         });
       }
-      onClose();
-      onClose();
-    } catch (error: any) {
-      console.error("Save error", error);
-      if (error.message === "TTS_FAILED") {
+      // onClose will be handled by the parent component after successful save
+    } catch (error: unknown) {
+      const err = error as Error;
+      console.error("Save error", err);
+      if (err.message === "TTS_FAILED") {
         setTtsError("สร้างเสียงไม่สมบูรณ์ กรุณาลองใหม่");
       } else {
         alert("เกิดข้อผิดพลาดในการบันทึก");

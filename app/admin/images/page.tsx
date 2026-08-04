@@ -19,6 +19,7 @@ function CardImage({ src, alt }: { src: string; alt: string }) {
     );
   }
 
+  // eslint-disable-next-line @next/next/no-img-element
   return <img src={src} alt={alt} onError={() => setError(true)} loading="lazy" />;
 }
 
@@ -55,7 +56,9 @@ export default function ManageImagesPage() {
     }
     
     try {
-      const res = await fetch(`/api/admin/images?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}`);
+      const res = await fetch(`/api/admin/images?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}`, {
+        cache: 'no-store'
+      });
       const json = await res.json();
       if (json.success) {
         if (isLoadMore) {
@@ -114,7 +117,7 @@ export default function ManageImagesPage() {
 
   const [editingImage, setEditingImage] = useState<ImageData | null>(null);
   const [deletingImageId, setDeletingImageId] = useState<number | null>(null);
-  const [duplicateToRestore, setDuplicateToRestore] = useState<{ id: number; data: any } | null>(null);
+  const [duplicateToRestore, setDuplicateToRestore] = useState<{ id: number; data: Record<string, unknown> } | null>(null);
 
   const handleAdd = () => {
     setEditingImage(null);
