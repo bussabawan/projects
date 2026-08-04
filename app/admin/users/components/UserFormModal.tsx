@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import styles from "../users.module.css";
+import RestoreConfirmModal from "../../components/RestoreConfirmModal";
 
 interface User {
   user_id: number;
@@ -43,6 +44,7 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchExercise, setSearchExercise] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleCheckboxChange = (exId: number) => {
     setFormData(prev => {
@@ -83,8 +85,14 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
     setError("");
     setLoading(true);
 
+    if (role === 1 && (!formData.exercises_id || formData.exercises_id.length === 0)) {
+      setError("กรุณาเลือกชุดแบบฝึกหัดเริ่มต้นอย่างน้อย 1 ชุด");
+      setLoading(false);
+      return;
+    }
+
     try {
-      const payload: any = {
+      const payload: Record<string, unknown> = {
         user_name: formData.user_name,
         full_name: formData.full_name,
         role: role
@@ -121,8 +129,9 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
       } else {
         setError(result.error || "เกิดข้อผิดพลาดในการบันทึกข้อมูล");
       }
-    } catch (err: any) {
-      setError(err.message || "เกิดข้อผิดพลาดในการเชื่อมต่อ");
+    } catch (err: unknown) {
+      const error = err as Error;
+      setError(error.message || "เกิดข้อผิดพลาดในการเชื่อมต่อ");
     } finally {
       setLoading(false);
     }
@@ -133,10 +142,24 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
     setLoading(true);
     setError("");
     try {
+      const payload: Record<string, unknown> = {
+        user_name: formData.user_name,
+        full_name: formData.full_name,
+        role: role
+      };
+
+      if (formData.password) {
+        payload.password = formData.password;
+      }
+      
+      if (role === 1 && formData.exercises_id) {
+        payload.exercises_id = formData.exercises_id;
+      }
+
       const res = await fetch(`/api/admin/users/${restoreUserId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'restore' })
+        body: JSON.stringify({ action: 'restore', data: payload })
       });
       const result = await res.json();
       if (result.success) {
@@ -145,8 +168,9 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
         setError(result.error || "เกิดข้อผิดพลาดในการกู้คืนข้อมูล");
         setRestoreUserId(null);
       }
-    } catch (err: any) {
-      setError(err.message || "เกิดข้อผิดพลาดในการเชื่อมต่อ");
+    } catch (err: unknown) {
+      const error = err as Error;
+      setError(error.message || "เกิดข้อผิดพลาดในการเชื่อมต่อ");
       setRestoreUserId(null);
     } finally {
       setLoading(false);
@@ -156,28 +180,10 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
   const renderRestoreModal = () => {
     if (!restoreUserId) return null;
     return (
-      <div className={styles.restoreModalOverlay} onClick={() => setRestoreUserId(null)}>
-        <div className={styles.restoreModalContent} onClick={e => e.stopPropagation()}>
-          <div className={styles.restoreModalIcon}>
-            <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M17 2.1l4 4-4 4"/>
-              <path d="M3 12.2v-2a4 4 0 0 1 4-4h14"/>
-              <path d="M7 21.9l-4-4 4-4"/>
-              <path d="M21 11.8v2a4 4 0 0 1-4 4H3"/>
-            </svg>
-          </div>
-          <h2 className={styles.restoreModalTitle}>พบข้อมูลเดิมในระบบ</h2>
-          <p className={styles.restoreModalSubTitle}>ต้องการกู้คืนข้อมูลที่เคยลบหรือไม่</p>
-          <div className={styles.deleteModalActions}>
-            <button className={styles.restoreBtnConfirm} onClick={handleRestore} disabled={loading}>
-              {loading ? 'กำลังกู้คืน...' : 'กู้คืนข้อมูล'}
-            </button>
-            <button className={styles.deleteBtnConfirm} onClick={() => setRestoreUserId(null)} disabled={loading}>
-              ยกเลิก
-            </button>
-          </div>
-        </div>
-      </div>
+      <RestoreConfirmModal 
+        onConfirm={handleRestore}
+        onCancel={() => setRestoreUserId(null)}
+      />
     );
   };
 
@@ -245,7 +251,7 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalContentPatient} onClick={e => e.stopPropagation()}>
+      <div className={styles.modalContentStaff} onClick={e => e.stopPropagation()}>
         <div className={styles.modalHeaderStaff}>
           <h2 className={styles.modalTitleStaff}>
             {isEditing ? 'แก้ไขข้อมูลผู้ป่วย' : 'เพิ่มข้อมูลผู้ป่วย'}
@@ -291,14 +297,47 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
                 <label className={styles.labelStaff}>
                   รหัสผ่าน
                 </label>
-                <input 
-                  type="password" 
-                  name="password"
-                  className={styles.inputStaff}
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder={isEditing ? "(เว้นว่างถ้าไม่เปลี่ยน)" : ""}
-                />
+                <div style={{ position: 'relative' }}>
+                  <input 
+                    type={showPassword ? "text" : "password"} 
+                    name="password"
+                    className={styles.inputStaff}
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder={isEditing ? "(เว้นว่างถ้าไม่เปลี่ยน)" : ""}
+                    style={{ paddingRight: '2.5rem' }}
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{
+                      position: 'absolute',
+                      right: '0.8rem',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      color: '#666',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: 0
+                    }}
+                  >
+                    {showPassword ? (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                      </svg>
+                    ) : (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -307,7 +346,7 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
               <div className={styles.multiSelectContainer}>
                 <input 
                   type="text"
-                  className={styles.multiSelectInput}
+                  className={`${styles.multiSelectInput} ${dropdownOpen ? styles.multiSelectInputOpen : ''}`}
                   placeholder={
                     formData.exercises_id.length > 0
                       ? `เลือกแล้ว ${formData.exercises_id.length} ชุด (สามารถกรอกเพื่อค้นหาได้)`
@@ -363,6 +402,7 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
             </div>
           </form>
         </div>
+        {renderRestoreModal()}
       </div>
     </div>
   );

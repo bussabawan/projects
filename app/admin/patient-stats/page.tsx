@@ -15,14 +15,14 @@ const renderTestSetTags = (patient: PatientStatInfo) => {
   const testSets = patient.testSets;
   if (!testSets || testSets.length === 0) return null;
   
-  const assignedCategories = Array.from(new Set((patient.assignedSets || []).map(ts => extractCategory(ts)).filter(Boolean)));
+
   const playedCategories = Array.from(new Set((patient.playedSets || []).map(ts => extractCategory(ts)).filter(Boolean)));
   const tags = Array.from(new Set(testSets.map(ts => extractCategory(ts)).filter(Boolean)));
   
   return (
     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
       {tags.map((tag, idx) => {
-        const isAssigned = assignedCategories.includes(tag);
+
         const isPlayed = playedCategories.includes(tag);
         
         // If it has been played (has data)
@@ -93,8 +93,9 @@ export default function PatientStatsPage() {
         }
         const data = await response.json();
         setPatients(data);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        const error = err as Error;
+        setError(error.message);
       } finally {
         setLoading(false);
       }
@@ -114,6 +115,7 @@ export default function PatientStatsPage() {
       );
     }
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setFilteredPatients(result);
     setCurrentPage(1);
     setMobileVisibleCount(10);
@@ -127,23 +129,19 @@ export default function PatientStatsPage() {
   };
 
   const getPageNumbers = () => {
-    const pages: (number | string)[] = [];
-    const maxVisiblePages = 5;
-
-    if (totalPages <= maxVisiblePages) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      if (currentPage <= 3) {
-        pages.push(1, 2, 3, '...', totalPages);
-      } else if (currentPage >= totalPages - 2) {
-        pages.push(1, '...', totalPages - 2, totalPages - 1, totalPages);
-      } else {
-        pages.push(1, '...', currentPage, '...', totalPages);
-      }
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
     }
-    return pages;
+
+    if (currentPage <= 4) {
+      return [1, 2, 3, 4, 5, '...', totalPages];
+    }
+
+    if (currentPage >= totalPages - 3) {
+      return [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    }
+
+    return [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
   };
 
   return (

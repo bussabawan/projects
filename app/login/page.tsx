@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import styles from './login.module.css';
 import { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 
 function LoginContent() {
@@ -11,12 +11,14 @@ function LoginContent() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   useEffect(() => {
     const errParam = searchParams.get('error');
     if (errParam === 'AccessDenied') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setError('คุณไม่มีสิทธิ์เข้าใช้งาน หรือบัญชีนี้ไม่ใช่สำหรับเจ้าหน้าที่');
     }
   }, [searchParams]);
@@ -27,22 +29,22 @@ function LoginContent() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
+      const res = await signIn('credentials', {
+        redirect: false,
+        username,
+        password,
       });
 
-      const data = await res.json();
-
-      if (res.ok) {
-        // Handle successful login (e.g., redirect to dashboard)
-        alert('Login successful!');
-        // router.push('/dashboard');
-      } else {
-        setError(data.message || 'ล็อกอินล้มเหลว (Login failed)');
+      if (res?.error) {
+        if (res.error === 'CredentialsSignin') {
+          setError("Username หรือ Password ไม่ถูกต้อง หากเป็นเจ้าหน้าที่กรุณาเข้าสู่ระบบผ่านบัญชี Google");
+        } else {
+          setError("เกิดข้อผิดพลาด: " + res.error);
+        }
+      } else if (res?.ok) {
+        // Successful login
+        router.push('/admin');
+        router.refresh(); // Force refresh to update layout session state
       }
     } catch (err) {
       console.error(err);
@@ -102,7 +104,7 @@ function LoginContent() {
               type="button" 
               className={styles.googleBtn} 
               aria-label="Log in with Google"
-              onClick={() => signIn('google', { callbackUrl: '/patient-stats' })}
+              onClick={() => signIn('google', { callbackUrl: '/admin' })}
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="28px" height="28px">
                 <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>

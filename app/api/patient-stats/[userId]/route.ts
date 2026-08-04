@@ -23,8 +23,9 @@ export async function GET(
     const responseData = await PatientDetailStatsModel.getPatientDetailStats(userId, filters);
     return NextResponse.json(responseData);
     
-  } catch (error: any) {
-    console.error('Error fetching patient statistics for chart:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error('Error fetching patient statistics for chart:', err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

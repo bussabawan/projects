@@ -28,11 +28,11 @@ async function checkSchema() {
     
     console.log(`Database: ${process.env.MYSQL_DATABASE}`);
     
-    for (const tableObj of tables as any[]) {
+    for (const tableObj of tables as Record<string, string>[]) {
       const tableName = tableObj[tableKey];
       console.log(`\nTable: ${tableName}`);
       const [columns] = await db.query(`DESCRIBE ${tableName}`);
-      for (const col of columns as any[]) {
+      for (const col of columns as Record<string, string>[]) {
         console.log(`  - ${col.Field} (${col.Type})`);
       }
     }

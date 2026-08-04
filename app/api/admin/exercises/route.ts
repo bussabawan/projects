@@ -9,10 +9,11 @@ export async function GET() {
       success: true,
       data: exercises
     });
-  } catch (error: any) {
-    console.error('Error in GET /api/admin/exercises:', error);
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error('Error in GET /api/admin/exercises:', err);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal Server Error' },
+      { success: false, error: err.message || 'Internal Server Error' },
       { status: 500 }
     );
   }
