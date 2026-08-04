@@ -211,7 +211,7 @@ input:checked + .slider:before {
 }
 
 .saveBtn {
-  background: #11ff11; /* Bright green from image */
+  background: #76f387; /* Bright green from image */
   color: #111;
   border: none;
   border-radius: 20px;
