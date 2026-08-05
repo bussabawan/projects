@@ -1,5 +1,6 @@
 import { db } from '@/lib/db';
 import { RowDataPacket } from 'mysql2';
+import bcrypt from 'bcryptjs';
 
 export interface User {
   user_id: number;
@@ -31,17 +32,32 @@ export class UserModel {
    * Authenticate user with username and password
    */
   static async authenticate(userName: string, password: string): Promise<User | null> {
-    // Note: Assuming plain text password for now based on varchar(50) in DB.
-    // If passwords are MD5 or hashed, the query/logic should be updated accordingly.
     const [rows] = await db.execute<RowDataPacket[]>(
-      'SELECT user_id, user_name, full_name, role, remove, update_time FROM users_data WHERE user_name = ? AND password = ? AND remove = 0',
-      [userName, password]
+      'SELECT user_id, user_name, full_name, password as stored_password, role, remove, update_time FROM users_data WHERE user_name = ? AND remove = 0',
+      [userName]
     );
     
     if (rows.length === 0) {
       return null;
     }
     
-    return rows[0] as User;
+    const userRow = rows[0];
+
+    // For Google API logins, passwords aren't verified this way.
+    // If somehow a google user tries to login with a normal form, they shouldn't be able to unless they have a real password.
+    if (userRow.stored_password === 'API Login google') {
+       return null; 
+    }
+    
+    // Compare provided password with hashed password
+    const isMatch = await bcrypt.compare(password, userRow.stored_password);
+    
+    if (!isMatch) {
+      return null;
+    }
+    
+    // Remove password from returned object
+    const { stored_password, ...userWithoutPassword } = userRow;
+    return userWithoutPassword as User;
   }
 }

@@ -1,5 +1,6 @@
 import { db } from '@/lib/db';
 import { RowDataPacket, ResultSetHeader } from 'mysql2';
+import bcrypt from 'bcryptjs';
 
 export interface UserInfo {
   user_id: number;
@@ -118,11 +119,15 @@ export class ManageUsersModel {
         throw new Error(`RESTORE_REQUIRED:${removedUser[0].user_id}`);
       }
 
-      const defaultPassword = userData.password || userData.user_name; // Default password to username if not provided
+      let finalPassword = userData.password || userData.user_name; // Default password to username if not provided
+      if (finalPassword !== 'API Login google') {
+        const salt = await bcrypt.genSalt(10);
+        finalPassword = await bcrypt.hash(finalPassword, salt);
+      }
       
       const [userResult] = await connection.execute<ResultSetHeader>(
         'INSERT INTO users_data (user_name, full_name, password, role, remove, update_time) VALUES (?, ?, ?, ?, 0, NOW())',
-        [userData.user_name, userData.full_name, defaultPassword, userData.role]
+        [userData.user_name, userData.full_name, finalPassword, userData.role]
       );
 
       const userId = userResult.insertId;
@@ -181,8 +186,13 @@ export class ManageUsersModel {
         updateValues.push(userData.full_name);
       }
       if (userData.password) {
+        let finalPassword = userData.password;
+        if (finalPassword !== 'API Login google') {
+          const salt = await bcrypt.genSalt(10);
+          finalPassword = await bcrypt.hash(finalPassword, salt);
+        }
         updateFields.push('password = ?');
-        updateValues.push(userData.password);
+        updateValues.push(finalPassword);
       }
       
       if (updateFields.length > 0) {
