@@ -308,3 +308,10 @@ input:checked + .slider:before {
   text-overflow: ellipsis;
 }
 
+.errorText {
+  color: #ef4444;
+  font-size: 0.85rem;
+  margin-top: 0.4rem;
+  padding-left: 0.5rem;
+}
+

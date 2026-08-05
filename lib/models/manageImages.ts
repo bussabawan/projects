@@ -20,8 +20,8 @@ export class ManageImagesModel {
     search: string = ""
   ): Promise<{ data: ImageInfo[]; totalPages: number }> {
     const offset = (page - 1) * limit;
-    let queryParams: any[] = [];
-    let countParams: any[] = [];
+    const queryParams: (string | number)[] = [];
+    const countParams: (string | number)[] = [];
 
     let whereClause = "WHERE remove = 0";
     if (search) {

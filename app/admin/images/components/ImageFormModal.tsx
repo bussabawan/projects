@@ -15,7 +15,7 @@ interface ImageData {
 interface ImageFormModalProps {
   image?: ImageData | null;
   onClose: () => void;
-  onSave?: (data: Record<string, unknown>) => void;
+  onSave?: (data: Record<string, unknown>) => void | Promise<void>;
 }
 
 export default function ImageFormModal({ image, onClose, onSave }: ImageFormModalProps) {
@@ -28,6 +28,7 @@ export default function ImageFormModal({ image, onClose, onSave }: ImageFormModa
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [ttsError, setTtsError] = useState<string | null>(null);
 
   const uploadFile = async (file: File) => {
     const formData = new FormData();
@@ -67,6 +68,7 @@ export default function ImageFormModal({ image, onClose, onSave }: ImageFormModa
              uploadedAudioUrl = await uploadFile(ttsFile);
            } else {
              console.error("Failed to generate TTS audio");
+             throw new Error("TTS_FAILED");
            }
         }
       } else if (!useAutoSpeech && audioFile) {
@@ -74,7 +76,7 @@ export default function ImageFormModal({ image, onClose, onSave }: ImageFormModa
       }
 
       if (onSave) {
-        onSave({
+        await onSave({
           imageName,
           useAutoSpeech,
           speechText: useAutoSpeech ? speechText : "",
@@ -82,10 +84,15 @@ export default function ImageFormModal({ image, onClose, onSave }: ImageFormModa
           audioUrl: uploadedAudioUrl
         });
       }
-      onClose();
-    } catch (error) {
-      console.error("Save error", error);
-      alert("เกิดข้อผิดพลาดในการบันทึก");
+      // onClose will be handled by the parent component after successful save
+    } catch (error: unknown) {
+      const err = error as Error;
+      console.error("Save error", err);
+      if (err.message === "TTS_FAILED") {
+        setTtsError("สร้างเสียงไม่สมบูรณ์ กรุณาลองใหม่");
+      } else {
+        alert("เกิดข้อผิดพลาดในการบันทึก");
+      }
     } finally {
       setIsSaving(false);
     }
@@ -110,19 +117,21 @@ export default function ImageFormModal({ image, onClose, onSave }: ImageFormModa
     if (!speechText.trim() || isPlaying) return;
     
     setIsPlaying(true);
+    setTtsError(null);
     try {
       const audio = new Audio(`/api/tts?text=${encodeURIComponent(speechText)}`);
       
       audio.onended = () => setIsPlaying(false);
       audio.onerror = () => {
         setIsPlaying(false);
-        alert("ไม่สามารถเล่นเสียงได้");
+        setTtsError("ไม่สามารถสร้างหรือเล่นเสียงได้");
       };
       
       await audio.play();
     } catch (e) {
       console.error(e);
       setIsPlaying(false);
+      setTtsError("ไม่สามารถสร้างหรือเล่นเสียงได้");
     }
   };
 
@@ -162,13 +171,17 @@ export default function ImageFormModal({ image, onClose, onSave }: ImageFormModa
                 </div>
                 
                 {useAutoSpeech ? (
-                  <div className={styles.inputWithIcon}>
-                    <input 
-                      type="text" 
-                      placeholder="ข้อความที่ต้องการให้ระบบอ่าน" 
-                      value={speechText}
-                      onChange={(e) => setSpeechText(e.target.value)}
-                    />
+                  <div style={{ width: '100%' }}>
+                    <div className={styles.inputWithIcon}>
+                      <input 
+                        type="text" 
+                        placeholder="ข้อความที่ต้องการให้ระบบอ่าน" 
+                        value={speechText}
+                        onChange={(e) => {
+                          setSpeechText(e.target.value);
+                          setTtsError(null);
+                        }}
+                      />
                     <div 
                       className={styles.iconInside} 
                       onClick={playTTSPreview} 
@@ -182,6 +195,8 @@ export default function ImageFormModal({ image, onClose, onSave }: ImageFormModa
                       </svg>
                     </div>
                   </div>
+                  {ttsError && <div className={styles.errorText}>{ttsError}</div>}
+                </div>
                 ) : (
                   <label className={styles.fileInputContainer}>
                     <input type="file" accept="audio/*" onChange={handleAudioChange} />
