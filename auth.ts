@@ -119,10 +119,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return session;
     },
-    authorized: async ({ auth }) => {
-      // Logged in users are authenticated, otherwise false
-      return !!auth
-    },
   },
   session: {
     strategy: "jwt",
