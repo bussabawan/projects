@@ -14,8 +14,8 @@ export async function POST(req: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Save to public/uploads
-    const uploadDir = path.join(process.cwd(), "public/uploads");
+    // Save to storage/uploads
+    const uploadDir = path.join(process.cwd(), "storage/uploads");
     await fs.mkdir(uploadDir, { recursive: true });
 
     // Generate unique filename
@@ -31,11 +31,13 @@ export async function POST(req: NextRequest) {
       message: "File uploaded successfully. Database connection verified.",
       url: `/uploads/${filename}`,
     });
-  } catch (error: any) {
-    console.error("Upload error:", error);
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error("Upload error:", err);
     return NextResponse.json(
-      { error: "Error uploading file or connecting to database.", details: error.message },
+      { error: "Error uploading file or connecting to database.", details: err.message },
       { status: 500 }
     );
   }
 }
+

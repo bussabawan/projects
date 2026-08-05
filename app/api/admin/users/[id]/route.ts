@@ -35,12 +35,13 @@ export async function PUT(
       success: true,
       message: 'User updated successfully'
     });
-  } catch (error: any) {
-    console.error('Error in PUT /api/admin/users/[id]:', error);
-    const status = error.message === 'Username already exists' ? 409 : 500;
-    const errorMessage = error.message === 'Username already exists' 
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error('Error in PUT /api/admin/users/[id]:', err);
+    const status = err.message === 'Username already exists' ? 409 : 500;
+    const errorMessage = err.message === 'Username already exists' 
       ? 'รหัสผู้ป่วยหรืออีเมลนี้มีอยู่ในระบบแล้ว' 
-      : error.message || 'Internal Server Error';
+      : err.message || 'Internal Server Error';
     return NextResponse.json(
       { success: false, error: errorMessage },
       { status }
@@ -65,10 +66,11 @@ export async function DELETE(
       success: true,
       message: 'User deleted successfully'
     });
-  } catch (error: any) {
-    console.error('Error in DELETE /api/admin/users/[id]:', error);
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error('Error in DELETE /api/admin/users/[id]:', err);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal Server Error' },
+      { success: false, error: err.message || 'Internal Server Error' },
       { status: 500 }
     );
   }
@@ -88,6 +90,20 @@ export async function PATCH(
     const body = await request.json();
     if (body.action === 'restore') {
       await ManageUsersModel.restoreUser(userId);
+      if (body.data) {
+        // Convert string fields if needed
+        if (body.data.role !== undefined) {
+          body.data.role = parseInt(body.data.role, 10);
+        }
+        if (body.data.exercises_id !== undefined && body.data.exercises_id !== null) {
+          if (Array.isArray(body.data.exercises_id)) {
+            body.data.exercises_id = body.data.exercises_id.map((exId: string | number) => typeof exId === 'string' ? parseInt(exId, 10) : exId);
+          } else {
+            body.data.exercises_id = parseInt(body.data.exercises_id, 10);
+          }
+        }
+        await ManageUsersModel.updateUser(userId, body.data);
+      }
       return NextResponse.json({
         success: true,
         message: 'User restored successfully'
@@ -95,10 +111,11 @@ export async function PATCH(
     }
 
     return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 });
-  } catch (error: any) {
-    console.error('Error in PATCH /api/admin/users/[id]:', error);
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error('Error in PATCH /api/admin/users/[id]:', err);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal Server Error' },
+      { success: false, error: err.message || 'Internal Server Error' },
       { status: 500 }
     );
   }

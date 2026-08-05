@@ -8,8 +8,8 @@ export class PatientDetailStatsModel {
   static async getPatientDetailStats(userId: string, filters?: { period?: string, category?: string, exerciseSet?: string, startDate?: string, endDate?: string }) {
     if (!userId) throw new Error('User ID is required');
 
-    const matchingParams: any[] = [userId];
-    const memoryParams: any[] = [userId];
+    const matchingParams: (string | number | boolean | null)[] = [userId];
+    const memoryParams: (string | number | boolean | null)[] = [userId];
     let dateFilter = '';
     
     if (filters?.period) {
@@ -110,7 +110,7 @@ export class PatientDetailStatsModel {
       GROUP BY DATE_FORMAT(login_time, '%Y-%m-%d')
       ORDER BY dateStr ASC
     `;
-    const loginParams: any[] = [userId];
+    const loginParams: (string | number | boolean | null)[] = [userId];
     if (filters?.period === 'custom' && filters.startDate && filters.endDate) {
       loginParams.push(filters.startDate, filters.endDate);
     }

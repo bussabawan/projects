@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import styles from './PatientStatsPopup.module.css';
 import { 
   PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, ComposedChart, Legend,
-  ScatterChart, Scatter, ZAxis
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, Legend
 } from 'recharts';
 
 interface PatientStatsPopupProps {
@@ -15,6 +14,7 @@ interface PatientStatsPopupProps {
 }
 
 const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, patientId, categories = [], exerciseSets = [] }) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -25,6 +25,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
 
   useEffect(() => {
     if (isOpen && patientId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(true);
       let url = `/api/patient-stats/${patientId}?category=${encodeURIComponent(categoryFilter)}&period=${periodFilter}&exerciseSet=${encodeURIComponent(exerciseSetFilter)}`;
       if (periodFilter === 'custom') {
@@ -77,13 +78,13 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
               {!loading && data && data.dailyStats && (
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                   <div style={{ background: '#f3f4f6', padding: '6px 15px', borderRadius: '20px', fontSize: '0.9rem', color: '#374151' }}>
-                    จำนวน Login: <b>{data.dailyStats.reduce((acc: number, cur: any) => acc + (cur.logins || 0), 0)}</b> ครั้ง
+                    จำนวน Login: <b>{data.dailyStats.reduce((acc: number, cur: Record<string, number>) => acc + (cur.logins || 0), 0)}</b> ครั้ง
                   </div>
                   <div style={{ background: '#ede9fe', padding: '6px 15px', borderRadius: '20px', fontSize: '0.9rem', color: '#5b21b6' }}>
-                    ความจำ: <b>{data.dailyStats.reduce((acc: number, cur: any) => acc + (cur.memoryPlays || 0), 0)}</b> ครั้ง
+                    ความจำ: <b>{data.dailyStats.reduce((acc: number, cur: Record<string, number>) => acc + (cur.memoryPlays || 0), 0)}</b> ครั้ง
                   </div>
                   <div style={{ background: '#dbeafe', padding: '6px 15px', borderRadius: '20px', fontSize: '0.9rem', color: '#1e40af' }}>
-                    จับคู่: <b>{data.dailyStats.reduce((acc: number, cur: any) => acc + (cur.matchingPlays || 0), 0)}</b> ครั้ง
+                    จับคู่: <b>{data.dailyStats.reduce((acc: number, cur: Record<string, number>) => acc + (cur.matchingPlays || 0), 0)}</b> ครั้ง
                   </div>
                 </div>
               )}
