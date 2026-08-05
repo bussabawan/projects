@@ -336,4 +336,67 @@ export class ManageUsersModel {
       total: countRows[0].total as number,
     };
   }
+
+  /**
+   * Add a new exercise set (empty)
+   */
+  static async addExercise(name: string): Promise<void> {
+    const [existing] = await db.query<RowDataPacket[]>(
+      'SELECT exercises_id FROM exercises_data WHERE exercises_name = ? AND remove = 0',
+      [name]
+    );
+    if (existing.length > 0) {
+      throw new Error("มีชุดแบบฝึกหัดชื่อนี้อยู่ในระบบแล้ว");
+    }
+
+    await db.execute(
+      'INSERT INTO exercises_data (exercises_name, photo_id, remove) VALUES (?, NULL, 0)',
+      [name]
+    );
+  }
+
+  /**
+   * Get selected photos for an exercise
+   */
+  static async getExerciseImages(name: string): Promise<number[]> {
+    const [rows] = await db.query<RowDataPacket[]>(
+      'SELECT photo_id FROM exercises_data WHERE exercises_name = ? AND remove = 0 AND photo_id IS NOT NULL',
+      [name]
+    );
+    return rows.map(r => r.photo_id as number);
+  }
+
+  /**
+   * Update selected photos for an exercise
+   */
+  static async updateExerciseImages(name: string, newPhotoIds: number[]): Promise<void> {
+    const [existingRows] = await db.query<RowDataPacket[]>(
+      'SELECT exercises_id FROM exercises_data WHERE exercises_name = ?',
+      [name]
+    );
+
+    if (existingRows.length === 0) {
+      throw new Error("ไม่พบชุดแบบฝึกหัดนี้");
+    }
+
+    // Find the primary ID (the minimum exercises_id)
+    const primaryRow = existingRows.reduce((min, row) => row.exercises_id < min.exercises_id ? row : min, existingRows[0]);
+    const primaryId = primaryRow.exercises_id;
+    
+    // Delete all rows EXCEPT primaryId
+    await db.execute('DELETE FROM exercises_data WHERE exercises_name = ? AND exercises_id != ?', [name, primaryId]);
+    
+    if (newPhotoIds.length === 0) {
+      // Set primaryId to have photo_id = NULL
+      await db.execute('UPDATE exercises_data SET photo_id = NULL, remove = 0 WHERE exercises_id = ?', [primaryId]);
+    } else {
+      // Set primaryId to the first photo
+      await db.execute('UPDATE exercises_data SET photo_id = ?, remove = 0 WHERE exercises_id = ?', [newPhotoIds[0], primaryId]);
+      
+      // Insert the rest of the photos
+      for (let i = 1; i < newPhotoIds.length; i++) {
+        await db.execute('INSERT INTO exercises_data (exercises_name, photo_id, remove) VALUES (?, ?, 0)', [name, newPhotoIds[i]]);
+      }
+    }
+  }
 }

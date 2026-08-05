@@ -33,3 +33,24 @@ export async function GET(request: Request) {
     );
   }
 }
+
+export async function POST(request: Request) {
+  try {
+    const { name } = await request.json();
+    
+    if (!name || name.trim() === '') {
+      return NextResponse.json({ success: false, error: 'กรุณากรอกชื่อชุดแบบฝึกหัด' }, { status: 400 });
+    }
+
+    await ManageUsersModel.addExercise(name.trim());
+
+    return NextResponse.json({ success: true });
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error('Error in POST /api/admin/exercises:', err);
+    return NextResponse.json(
+      { success: false, error: err.message || 'Internal Server Error' },
+      { status: 500 }
+    );
+  }
+}

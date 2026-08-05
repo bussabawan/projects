@@ -17,6 +17,20 @@ export default function ManageExercisesPage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Modal state
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newExerciseName, setNewExerciseName] = useState("");
+  const [isAddingExercise, setIsAddingExercise] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
+  
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [imageSearchQuery, setImageSearchQuery] = useState("");
+  const [allImages, setAllImages] = useState<any[]>([]);
+  const [selectedImageIds, setSelectedImageIds] = useState<number[]>([]);
+  const [currentExerciseName, setCurrentExerciseName] = useState<string>("");
+  const [isSavingImages, setIsSavingImages] = useState(false);
+  const [isLoadingImages, setIsLoadingImages] = useState(false);
+
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -57,6 +71,104 @@ export default function ManageExercisesPage() {
     }
   }, [currentPage, itemsPerPage, debouncedSearchQuery]);
 
+  const handleAddExercise = async () => {
+    if (!newExerciseName.trim()) return;
+    setIsAddingExercise(true);
+    setAddError(null);
+    try {
+      const res = await fetch('/api/admin/exercises', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newExerciseName.trim() })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setIsAddModalOpen(false);
+        setNewExerciseName("");
+        window.location.reload();
+      } else {
+        setAddError(data.error || 'เกิดข้อผิดพลาดในการเพิ่มชุดแบบฝึกหัด');
+      }
+    } catch (err) {
+      setAddError('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+    } finally {
+      setIsAddingExercise(false);
+    }
+  };
+
+  const openImageModal = async (exerciseName: string) => {
+    setCurrentExerciseName(exerciseName);
+    setIsImageModalOpen(true);
+    setIsLoadingImages(true);
+    try {
+      const resImgs = await fetch(`/api/admin/images?limit=100&search=${encodeURIComponent(imageSearchQuery)}`);
+      const dataImgs = await resImgs.json();
+      if (dataImgs.success) {
+        setAllImages(dataImgs.data);
+      }
+      
+      const resSelected = await fetch(`/api/admin/exercises/${encodeURIComponent(exerciseName)}/images`);
+      const dataSelected = await resSelected.json();
+      if (dataSelected.success) {
+        setSelectedImageIds(dataSelected.data);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoadingImages(false);
+    }
+  };
+
+  const handleSaveImages = async () => {
+    if (!currentExerciseName) return;
+    setIsSavingImages(true);
+    try {
+      const res = await fetch(`/api/admin/exercises/${encodeURIComponent(currentExerciseName)}/images`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photoIds: selectedImageIds })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setIsImageModalOpen(false);
+        window.location.reload();
+      } else {
+        alert(data.error || 'เกิดข้อผิดพลาดในการบันทึกรูปภาพ');
+      }
+    } catch (err) {
+      alert('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+    } finally {
+      setIsSavingImages(false);
+    }
+  };
+
+  const toggleImageSelection = (id: number) => {
+    setSelectedImageIds(prev => 
+      prev.includes(id) ? prev.filter(imgId => imgId !== id) : [...prev, id]
+    );
+  };
+
+  useEffect(() => {
+    if (isImageModalOpen) {
+      const fetchFilteredImages = async () => {
+        try {
+          const res = await fetch(`/api/admin/images?limit=100&search=${encodeURIComponent(imageSearchQuery)}`);
+          const data = await res.json();
+          if (data.success) {
+            setAllImages(data.data);
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      };
+      
+      const timer = setTimeout(() => {
+        fetchFilteredImages();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [imageSearchQuery, isImageModalOpen]);
+
   useEffect(() => {
     fetchExercises();
     isLoadMoreRef.current = false;
@@ -95,7 +207,10 @@ export default function ManageExercisesPage() {
     <div className={styles.container}>
       <div className={styles.headerContainer}>
         <h1 className={styles.title}>จัดการแบบฝึกหัด</h1>
-        <button className={`${styles.addButton} ${styles.desktopAddBtn}`}>
+        <button className={`${styles.addButton} ${styles.desktopAddBtn}`} onClick={() => {
+          setIsAddModalOpen(true);
+          setAddError(null);
+        }}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
             <line x1="12" y1="5" x2="12" y2="19"></line>
             <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -105,7 +220,10 @@ export default function ManageExercisesPage() {
       </div>
 
       <div className={styles.controlsRow}>
-        <button className={styles.mobileAddBtn}>
+        <button className={styles.mobileAddBtn} onClick={() => {
+          setIsAddModalOpen(true);
+          setAddError(null);
+        }}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7f6e99" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
             <line x1="12" y1="5" x2="12" y2="19"></line>
             <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -163,7 +281,7 @@ export default function ManageExercisesPage() {
                     </div>
                   </div>
                   
-                  <button className={styles.manageImagesBtn}>
+                  <button className={styles.manageImagesBtn} onClick={() => openImageModal(exercise.exercises_name)}>
                     จัดการรูป
                   </button>
                 </div>
@@ -175,6 +293,132 @@ export default function ManageExercisesPage() {
           </>
         )}
       </div>
+
+      {isAddModalOpen && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <div className={styles.modalHeader}>
+              <h2 className={styles.modalTitle}>เพิ่มชุดแบบฝึกหัด</h2>
+            </div>
+            <div className={styles.modalBody}>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>ชื่อชุดแบบฝึกหัด</label>
+                <input
+                  type="text"
+                  className={styles.formInput}
+                  value={newExerciseName}
+                  onChange={(e) => {
+                    setNewExerciseName(e.target.value);
+                    if (addError) setAddError(null);
+                  }}
+                />
+                {addError && <p style={{ color: 'red', fontSize: '0.875rem', marginTop: '0.5rem' }}>{addError}</p>}
+              </div>
+              <div className={styles.modalFooter}>
+                <button
+                  className={styles.btnSave}
+                  onClick={handleAddExercise}
+                  disabled={isAddingExercise}
+                >
+                  {isAddingExercise ? 'กำลังบันทึก...' : 'บันทึก'}
+                </button>
+                <button
+                  className={styles.btnCancel}
+                  onClick={() => {
+                    setIsAddModalOpen(false);
+                    setNewExerciseName("");
+                  }}
+                >
+                  ยกเลิก
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isImageModalOpen && (
+        <div className={styles.modalOverlay}>
+          <div className={`${styles.modalContent} ${styles.largeModal}`}>
+            <div className={styles.modalHeader}>
+              <h2 className={styles.modalTitle}>เลือกรูปภาพสำหรับชุดแบบฝึกหัด</h2>
+            </div>
+            <div className={styles.modalBody}>
+              <div className={styles.imageSearchRow}>
+                <div className={styles.imageSearchContainer}>
+                  <input 
+                    type="text" 
+                    placeholder="ค้นหา" 
+                    className={styles.imageSearchInput}
+                    value={imageSearchQuery}
+                    onChange={(e) => setImageSearchQuery(e.target.value)}
+                  />
+                  <svg className={styles.searchIcon} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#888', pointerEvents: 'none' }}>
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                </div>
+              </div>
+              
+              <div className={styles.imageGrid}>
+                {isLoadingImages ? (
+                  <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '2rem' }}>กำลังโหลดรูปภาพ...</p>
+                ) : allImages.length === 0 ? (
+                  <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '2rem' }}>ไม่พบรูปภาพ</p>
+                ) : (
+                  allImages.map((img) => (
+                    <label key={img.id} className={styles.imageGridItem}>
+                      <input 
+                        type="checkbox" 
+                        className={styles.imageCheckbox} 
+                        checked={selectedImageIds.includes(img.id)}
+                        onChange={() => toggleImageSelection(img.id)}
+                      />
+                      <div className={styles.imageIconPlaceholder}>
+                        {img.imageUrl ? (
+                          <img 
+                            src={img.imageUrl.startsWith('/') ? img.imageUrl : `/uploads/${img.imageUrl}`} 
+                            alt={img.title} 
+                            style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 4 }} 
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.onerror = null;
+                              target.src = "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Ccircle cx='8.5' cy='8.5' r='1.5'%3E%3C/circle%3E%3Cpolyline points='21 15 16 10 5 21'%3E%3C/polyline%3E%3C/svg%3E";
+                            }}
+                          />
+                        ) : (
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                            <polyline points="21 15 16 10 5 21"></polyline>
+                          </svg>
+                        )}
+                      </div>
+                      <span className={styles.imageItemText}>{img.title}</span>
+                    </label>
+                  ))
+                )}
+              </div>
+              
+              <div className={styles.modalFooter}>
+                <button
+                  className={styles.btnSave}
+                  onClick={handleSaveImages}
+                  disabled={isSavingImages}
+                >
+                  {isSavingImages ? 'กำลังบันทึก...' : 'บันทึก'}
+                </button>
+                <button
+                  className={styles.btnCancel}
+                  onClick={() => setIsImageModalOpen(false)}
+                >
+                  ยกเลิก
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
