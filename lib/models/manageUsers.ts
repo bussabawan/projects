@@ -299,4 +299,31 @@ export class ManageUsersModel {
     );
     return rows as ExerciseInfo[];
   }
+
+  /**
+   * Get paginated list of exercises with search
+   */
+  static async getExercisesPaginated(page: number, limit: number, search: string = ''): Promise<{ data: ExerciseInfo[], total: number }> {
+    const offset = (page - 1) * limit;
+    let baseQuery = 'SELECT exercises_id, exercises_name FROM exercises_data WHERE remove = 0';
+    let countQuery = 'SELECT COUNT(exercises_id) as total FROM exercises_data WHERE remove = 0';
+    const queryParams: (string | number)[] = [];
+    
+    if (search) {
+      const searchPattern = `%${search}%`;
+      baseQuery += ' AND exercises_name LIKE ?';
+      countQuery += ' AND exercises_name LIKE ?';
+      queryParams.push(searchPattern);
+    }
+    
+    baseQuery += ' ORDER BY exercises_id DESC LIMIT ? OFFSET ?';
+    
+    const [rows] = await db.query<RowDataPacket[]>(baseQuery, [...queryParams, limit, offset]);
+    const [countRows] = await db.query<RowDataPacket[]>(countQuery, queryParams);
+    
+    return {
+      data: rows as ExerciseInfo[],
+      total: countRows[0].total as number,
+    };
+  }
 }
