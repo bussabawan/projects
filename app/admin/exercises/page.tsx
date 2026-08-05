@@ -15,7 +15,7 @@ const initialExercises = [
 
 export default function ManageExercisesPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [exercises, setExercises] = useState(initialExercises);
+  const [exercises] = useState(initialExercises);
 
   return (
     <div className={styles.container}>
