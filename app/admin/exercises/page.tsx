@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import LoadingSpinner from "@/app/components/LoadingSpinner/LoadingSpinner";
 import styles from "./exercises.module.css";
 
 interface Exercise {
@@ -127,11 +128,11 @@ export default function ManageExercisesPage() {
 
       <div className={styles.grid}>
         {isLoading ? (
-          <p>กำลังโหลด...</p>
+          <LoadingSpinner />
         ) : error ? (
-          <p style={{ color: 'red' }}>{error}</p>
+          <p style={{ color: 'red', gridColumn: '1 / -1', textAlign: 'center' }}>{error}</p>
         ) : exercises.length === 0 ? (
-          <p>ไม่พบข้อมูลแบบฝึกหัด</p>
+          <p style={{ gridColumn: '1 / -1', textAlign: 'center' }}>ไม่พบข้อมูลแบบฝึกหัด</p>
         ) : (
           <>
             {exercises.map((exercise, index) => {
@@ -168,7 +169,9 @@ export default function ManageExercisesPage() {
                 </div>
               );
             })}
-            {loadingMore && <p style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '1rem' }}>กำลังโหลดเพิ่มเติม...</p>}
+            {loadingMore && (
+              <LoadingSpinner text="กำลังโหลดเพิ่มเติม..." size="small" svgSize={32} />
+            )}
           </>
         )}
       </div>

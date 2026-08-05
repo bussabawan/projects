@@ -263,3 +263,19 @@
     white-space: nowrap;
   }
 }
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  grid-column: 1 / -1;
+  min-height: 200px;
+  width: 100%;
+  color: #666;
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}

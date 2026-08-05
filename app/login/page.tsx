@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import styles from './login.module.css';
 import { useState, useEffect, Suspense } from 'react';
+import LoadingSpinner from "@/app/components/LoadingSpinner/LoadingSpinner";
 import { useSearchParams, useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 
@@ -122,7 +123,7 @@ function LoginContent() {
 
 export default function Login() {
   return (
-    <Suspense fallback={<div style={{textAlign: 'center', padding: '50px'}}>กำลังโหลด...</div>}>
+    <Suspense fallback={<LoadingSpinner />}>
       <LoginContent />
     </Suspense>
   );

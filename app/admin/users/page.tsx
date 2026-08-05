@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import LoadingSpinner from "@/app/components/LoadingSpinner/LoadingSpinner";
 import styles from "./users.module.css";
 import UserFormModal from "./components/UserFormModal";
 
@@ -264,7 +265,7 @@ export default function ManageUsersPage() {
         
         <div className={styles.tableBody}>
           {loading && users.length === 0 ? (
-            <div className={styles.loadingState}>กำลังโหลดข้อมูล...</div>
+            <LoadingSpinner text="กำลังโหลดข้อมูล..." />
           ) : users.length === 0 ? (
             <div className={styles.emptyState}>ไม่พบข้อมูล</div>
           ) : (
@@ -390,15 +391,13 @@ export default function ManageUsersPage() {
           )}
         </div>
         
-        {/* Intersection Observer Target */}
+        {/* Desktop observer target */}
         {!loading && currentPage < totalPages && (
-          <div ref={lastElementRef} className={styles.loadMoreTarget}>
-            {loadingMore && <div className={styles.loadingMoreText}>กำลังโหลด...</div>}
+          <div ref={lastElementRef} style={{ padding: '20px', textAlign: 'center', width: '100%', gridColumn: '1/-1' }}>
+            {loadingMore && <LoadingSpinner text="กำลังโหลดเพิ่มเติม..." size="small" svgSize={32} />}
           </div>
         )}
       </div>
-
-
 
       {isModalOpen && (
         <UserFormModal 

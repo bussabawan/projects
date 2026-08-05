@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import LoadingSpinner from "@/app/components/LoadingSpinner/LoadingSpinner";
 import styles from './patientStats.module.css';
 import { PatientStatInfo } from '@/lib/models/patientStats';
 import PatientStatsPopup from './components/PatientStatsPopup';
@@ -166,7 +167,7 @@ export default function PatientStatsPage() {
       </div>
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '2rem' }}>กำลังโหลดข้อมูล...</div>
+        <LoadingSpinner text="กำลังโหลดข้อมูล..." />
       ) : error ? (
         <div style={{ textAlign: 'center', padding: '2rem', color: 'red' }}>เกิดข้อผิดพลาด: {error}</div>
       ) : (
@@ -266,8 +267,8 @@ export default function PatientStatsPage() {
             )}
 
             {mobileVisibleCount < filteredPatients.length && (
-              <div ref={lastElementRef} style={{ padding: '1rem', textAlign: 'center', gridColumn: '1 / -1', color: '#666', fontSize: '0.9rem' }}>
-                กำลังโหลดเพิ่มเติม...
+              <div ref={lastElementRef} style={{ padding: '1rem', width: '100%', gridColumn: '1 / -1' }}>
+                <LoadingSpinner text="กำลังโหลดเพิ่มเติม..." size="small" svgSize={32} />
               </div>
             )}
           </div>
