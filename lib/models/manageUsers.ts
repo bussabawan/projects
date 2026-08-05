@@ -295,7 +295,7 @@ export class ManageUsersModel {
    */
   static async getExercises(): Promise<ExerciseInfo[]> {
     const [rows] = await db.execute<RowDataPacket[]>(
-      'SELECT exercises_id, exercises_name FROM exercises_data WHERE remove = 0 ORDER BY exercises_id ASC'
+      'SELECT MIN(exercises_id) as exercises_id, exercises_name FROM exercises_data WHERE remove = 0 GROUP BY exercises_name ORDER BY MIN(exercises_id) ASC'
     );
     return rows as ExerciseInfo[];
   }
@@ -305,8 +305,8 @@ export class ManageUsersModel {
    */
   static async getExercisesPaginated(page: number, limit: number, search: string = ''): Promise<{ data: ExerciseInfo[], total: number }> {
     const offset = (page - 1) * limit;
-    let baseQuery = 'SELECT exercises_id, exercises_name FROM exercises_data WHERE remove = 0';
-    let countQuery = 'SELECT COUNT(exercises_id) as total FROM exercises_data WHERE remove = 0';
+    let baseQuery = 'SELECT MIN(exercises_id) as exercises_id, exercises_name FROM exercises_data WHERE remove = 0';
+    let countQuery = 'SELECT COUNT(DISTINCT exercises_name) as total FROM exercises_data WHERE remove = 0';
     const queryParams: (string | number)[] = [];
     
     if (search) {
@@ -316,7 +316,7 @@ export class ManageUsersModel {
       queryParams.push(searchPattern);
     }
     
-    baseQuery += ' ORDER BY exercises_id DESC LIMIT ? OFFSET ?';
+    baseQuery += ' GROUP BY exercises_name ORDER BY MIN(exercises_id) DESC LIMIT ? OFFSET ?';
     
     const [rows] = await db.query<RowDataPacket[]>(baseQuery, [...queryParams, limit, offset]);
     const [countRows] = await db.query<RowDataPacket[]>(countQuery, queryParams);
