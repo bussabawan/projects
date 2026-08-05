@@ -20,7 +20,7 @@
 }
 
 .addButton {
-  background: linear-gradient(135deg, #a8ffb2 0%, #76f387 100%);
+  background: #76f387;
   color: #222;
   border: none;
   border-radius: 30px;
