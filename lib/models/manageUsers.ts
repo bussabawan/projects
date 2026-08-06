@@ -399,4 +399,57 @@ export class ManageUsersModel {
       }
     }
   }
+
+  /**
+   * Update exercise name
+   */
+  static async updateExerciseName(oldName: string, newName: string): Promise<void> {
+    const [existing] = await db.query<RowDataPacket[]>(
+      'SELECT exercises_id FROM exercises_data WHERE exercises_name = ? AND remove = 0',
+      [newName]
+    );
+    if (existing.length > 0 && oldName !== newName) {
+      throw new Error("มีชุดแบบฝึกหัดชื่อนี้อยู่ในระบบแล้ว");
+    }
+
+    await db.execute(
+      'UPDATE exercises_data SET exercises_name = ? WHERE exercises_name = ?',
+      [newName, oldName]
+    );
+  }
+
+  /**
+   * Delete exercise (Soft delete)
+   */
+  static async deleteExercise(name: string): Promise<void> {
+    const connection = await db.getConnection();
+    try {
+      await connection.beginTransaction();
+
+      await connection.execute(
+        'UPDATE exercises_data SET remove = 1 WHERE exercises_name = ?',
+        [name]
+      );
+      
+      const [rows] = await connection.query<RowDataPacket[]>(
+        'SELECT exercises_id FROM exercises_data WHERE exercises_name = ?',
+        [name]
+      );
+      if (rows.length > 0) {
+        const ids = rows.map(r => r.exercises_id);
+        const placeholders = ids.map(() => '?').join(',');
+        await connection.execute(
+          `UPDATE patient_data SET remove = 1 WHERE exercises_id IN (${placeholders})`,
+          ids
+        );
+      }
+
+      await connection.commit();
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
 }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import LoadingSpinner from "@/app/components/LoadingSpinner/LoadingSpinner";
+import DeleteConfirmModal from "@/app/admin/components/DeleteConfirmModal";
 import styles from "./exercises.module.css";
 
 interface Exercise {
@@ -22,6 +23,15 @@ export default function ManageExercisesPage() {
   const [newExerciseName, setNewExerciseName] = useState("");
   const [isAddingExercise, setIsAddingExercise] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
+  
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [exerciseToDelete, setExerciseToDelete] = useState<string | null>(null);
+  
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editExerciseOldName, setEditExerciseOldName] = useState("");
+  const [editExerciseNewName, setEditExerciseNewName] = useState("");
+  const [isEditingExercise, setIsEditingExercise] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
   
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [imageSearchQuery, setImageSearchQuery] = useState("");
@@ -93,6 +103,66 @@ export default function ManageExercisesPage() {
       setAddError('เกิดข้อผิดพลาดในการเชื่อมต่อ');
     } finally {
       setIsAddingExercise(false);
+    }
+  };
+
+  const openEditModal = (name: string) => {
+    setEditExerciseOldName(name);
+    setEditExerciseNewName(name);
+    setIsEditModalOpen(true);
+    setEditError(null);
+  };
+
+  const handleEditExercise = async () => {
+    if (!editExerciseNewName.trim() || editExerciseNewName.trim() === editExerciseOldName) {
+      setIsEditModalOpen(false);
+      return;
+    }
+    
+    setIsEditingExercise(true);
+    setEditError(null);
+    try {
+      const res = await fetch(`/api/admin/exercises/${encodeURIComponent(editExerciseOldName)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: editExerciseNewName.trim() })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setIsEditModalOpen(false);
+        window.location.reload();
+      } else {
+        setEditError(data.error || 'เกิดข้อผิดพลาดในการแก้ไขชุดแบบฝึกหัด');
+      }
+    } catch (err) {
+      setEditError('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+    } finally {
+      setIsEditingExercise(false);
+    }
+  };
+
+  const openDeleteModal = (name: string) => {
+    setExerciseToDelete(name);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDeleteExercise = async () => {
+    if (!exerciseToDelete) return;
+    
+    try {
+      const res = await fetch(`/api/admin/exercises/${encodeURIComponent(exerciseToDelete)}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (data.success) {
+        window.location.reload();
+      } else {
+        alert(data.error || 'เกิดข้อผิดพลาดในการลบชุดแบบฝึกหัด');
+        setIsDeleteModalOpen(false);
+      }
+    } catch (err) {
+      alert('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+      setIsDeleteModalOpen(false);
     }
   };
 
@@ -264,13 +334,13 @@ export default function ManageExercisesPage() {
                   <div className={styles.cardHeader}>
                     <h3 className={styles.cardTitle}>{exercise.exercises_name}</h3>
                     <div className={styles.cardActions}>
-                      <button className={styles.iconBtn} title="แก้ไข (Edit)">
+                      <button className={styles.iconBtn} title="แก้ไข (Edit)" onClick={() => openEditModal(exercise.exercises_name)}>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                         </svg>
                       </button>
-                      <button className={`${styles.iconBtn} ${styles.deleteBtn}`} title="ลบ (Delete)">
+                      <button className={`${styles.iconBtn} ${styles.deleteBtn}`} title="ลบ (Delete)" onClick={() => openDeleteModal(exercise.exercises_name)}>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <polyline points="3 6 5 6 21 6"></polyline>
                           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -317,6 +387,7 @@ export default function ManageExercisesPage() {
               <div className={styles.modalFooter}>
                 <button
                   className={styles.btnSave}
+                  style={{ backgroundColor: '#76f387' }}
                   onClick={handleAddExercise}
                   disabled={isAddingExercise}
                 >
@@ -335,6 +406,57 @@ export default function ManageExercisesPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {isEditModalOpen && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <div className={styles.modalHeader}>
+              <h2 className={styles.modalTitle}>แก้ไขชุดแบบฝึกหัด</h2>
+            </div>
+            <div className={styles.modalBody}>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>ชื่อชุดแบบฝึกหัด</label>
+                <input
+                  type="text"
+                  className={styles.formInput}
+                  value={editExerciseNewName}
+                  onChange={(e) => {
+                    setEditExerciseNewName(e.target.value);
+                    if (editError) setEditError(null);
+                  }}
+                />
+                {editError && <p style={{ color: 'red', fontSize: '0.875rem', marginTop: '0.5rem' }}>{editError}</p>}
+              </div>
+              <div className={styles.modalFooter}>
+                <button
+                  className={styles.btnSave}
+                  style={{ backgroundColor: '#76f387' }}
+                  onClick={handleEditExercise}
+                  disabled={isEditingExercise}
+                >
+                  {isEditingExercise ? 'กำลังบันทึก...' : 'บันทึก'}
+                </button>
+                <button
+                  className={styles.btnCancel}
+                  onClick={() => {
+                    setIsEditModalOpen(false);
+                  }}
+                >
+                  ยกเลิก
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isDeleteModalOpen && (
+        <DeleteConfirmModal
+          title="ยืนยันการลบชุดแบบฝึกหัด"
+          onConfirm={confirmDeleteExercise}
+          onCancel={() => setIsDeleteModalOpen(false)}
+        />
       )}
 
       {isImageModalOpen && (
@@ -405,6 +527,7 @@ export default function ManageExercisesPage() {
               <div className={styles.modalFooter}>
                 <button
                   className={styles.btnSave}
+                  style={{ backgroundColor: '#76f387' }}
                   onClick={handleSaveImages}
                   disabled={isSavingImages}
                 >
