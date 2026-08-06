@@ -13,6 +13,7 @@ export const authConfig = {
 
       const isApiAdminRoute = nextUrl.pathname.startsWith('/api/admin');
       const isAdminRoute = nextUrl.pathname.startsWith('/admin');
+      const isUserRoute = nextUrl.pathname.startsWith('/user');
       const isUploadsRoute = nextUrl.pathname.startsWith('/uploads');
 
       // Allow public access to the hospital logo
@@ -21,11 +22,9 @@ export const authConfig = {
       }
 
       // Protect secured routes
-      if (isApiAdminRoute || isAdminRoute || isUploadsRoute) {
+      if (isApiAdminRoute || isAdminRoute || isUserRoute || isUploadsRoute) {
         if (!isAuthenticated) {
           // Return false to redirect to sign-in page for pages
-          // Wait, for API routes NextAuth returns 401 automatically if not authorized?
-          // We can also return a NextResponse explicitly
           if (isApiAdminRoute || isUploadsRoute) {
             return Response.json({ message: "Unauthorized" }, { status: 401 });
           }
