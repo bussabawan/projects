@@ -8,6 +8,15 @@ export const authConfig = {
     error: '/login',
   },
   callbacks: {
+    async session({ session, token }) {
+      if (token && session.user) {
+        const extendedUser = session.user as any;
+        extendedUser.id = token.id as string;
+        extendedUser.role = token.role as number;
+        extendedUser.fullName = token.fullName as string;
+      }
+      return session;
+    },
     authorized({ auth, request: { nextUrl } }) {
       const isAuthenticated = !!auth?.user;
 
@@ -29,6 +38,18 @@ export const authConfig = {
             return Response.json({ message: "Unauthorized" }, { status: 401 });
           }
           return false;
+        }
+
+        // Add Role Based Access Control
+        const userRole = (auth?.user as any)?.role;
+        
+        if ((isApiAdminRoute || isAdminRoute) && userRole === 1) {
+          // If patient (role 1) tries to access admin routes, redirect to /user
+          // For API routes, return 403 Forbidden
+          if (isApiAdminRoute) {
+            return Response.json({ message: "Forbidden" }, { status: 403 });
+          }
+          return Response.redirect(new URL('/user/games', nextUrl));
         }
       }
 

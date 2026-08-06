@@ -65,6 +65,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     })
   ],
   callbacks: {
+    ...authConfig.callbacks,
     async signIn({ user, account }) {
       if (account?.provider === "google") {
         try {
@@ -108,16 +109,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
       }
       return token;
-    },
-    async session({ session, token }) {
-      // Pass JWT payload to session
-      if (token && session.user) {
-        const extendedUser = session.user as unknown as Record<string, string | number | undefined | null>;
-        extendedUser.id = token.id as string;
-        extendedUser.role = token.role as number;
-        extendedUser.fullName = token.fullName as string;
-      }
-      return session;
     },
   },
   session: {
