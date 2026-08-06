@@ -104,7 +104,7 @@ export default function UserLayout({
         <div className={styles.sidebarBottom}>
           <Link href="/user/manual" className={styles.manualBtn}>
             <span className={styles.menuIcon} style={{ display: isCollapsed ? 'flex' : 'none' }}>
-              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
                 <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
                 <line x1="12" y1="17" x2="12.01" y2="17"></line>
@@ -115,7 +115,7 @@ export default function UserLayout({
           
           <div className={styles.userInfo}>
             <div className={styles.avatar}>
-              <svg viewBox="0 0 24 24" width="45" height="45" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+              <svg viewBox="0 0 24 24" width="35" height="35" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle cx="12" cy="7" r="4"></circle>
               </svg>
