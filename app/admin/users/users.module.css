@@ -157,7 +157,6 @@
 }
 .tableBody::-webkit-scrollbar-track {
   background: transparent;
-  border-bottom-right-radius: 19px;
 }
 .tableBody::-webkit-scrollbar-thumb {
   background: #d4aed4;
