@@ -35,11 +35,18 @@ export default function ManageExercisesPage() {
   
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [imageSearchQuery, setImageSearchQuery] = useState("");
+  const [debouncedImageSearchQuery, setDebouncedImageSearchQuery] = useState("");
   const [allImages, setAllImages] = useState<any[]>([]);
   const [selectedImageIds, setSelectedImageIds] = useState<number[]>([]);
   const [currentExerciseName, setCurrentExerciseName] = useState<string>("");
   const [isSavingImages, setIsSavingImages] = useState(false);
   const [isLoadingImages, setIsLoadingImages] = useState(false);
+  const [isLoadingMoreImages, setIsLoadingMoreImages] = useState(false);
+  
+  const [imagePage, setImagePage] = useState(1);
+  const [imageTotalPages, setImageTotalPages] = useState(1);
+  const imageItemsPerPage = 20;
+  const isImageLoadMoreRef = useRef(false);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -168,15 +175,12 @@ export default function ManageExercisesPage() {
 
   const openImageModal = async (exerciseName: string) => {
     setCurrentExerciseName(exerciseName);
+    setImageSearchQuery("");
+    setImagePage(1);
+    isImageLoadMoreRef.current = false;
     setIsImageModalOpen(true);
-    setIsLoadingImages(true);
+    
     try {
-      const resImgs = await fetch(`/api/admin/images?limit=100&search=${encodeURIComponent(imageSearchQuery)}`);
-      const dataImgs = await resImgs.json();
-      if (dataImgs.success) {
-        setAllImages(dataImgs.data);
-      }
-      
       const resSelected = await fetch(`/api/admin/exercises/${encodeURIComponent(exerciseName)}/images`);
       const dataSelected = await resSelected.json();
       if (dataSelected.success) {
@@ -184,8 +188,6 @@ export default function ManageExercisesPage() {
       }
     } catch (err) {
       console.error(err);
-    } finally {
-      setIsLoadingImages(false);
     }
   };
 
@@ -218,26 +220,58 @@ export default function ManageExercisesPage() {
     );
   };
 
+  const fetchFilteredImages = useCallback(async () => {
+    const isLoadMore = isImageLoadMoreRef.current;
+    if (isLoadMore) {
+      setIsLoadingMoreImages(true);
+    } else {
+      setIsLoadingImages(true);
+    }
+
+    try {
+      const res = await fetch(`/api/admin/images?page=${imagePage}&limit=${imageItemsPerPage}&search=${encodeURIComponent(debouncedImageSearchQuery)}`);
+      const data = await res.json();
+      if (data.success) {
+        if (isLoadMore) {
+          setAllImages(prev => {
+            const existingIds = new Set(prev.map(img => img.id));
+            const newImages = data.data.filter((img: any) => !existingIds.has(img.id));
+            return [...prev, ...newImages];
+          });
+        } else {
+          setAllImages(data.data);
+        }
+        setImageTotalPages(data.totalPages || 1);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      if (isLoadMore) {
+        setIsLoadingMoreImages(false);
+      } else {
+        setIsLoadingImages(false);
+      }
+      isImageLoadMoreRef.current = false;
+    }
+  }, [imagePage, imageItemsPerPage, debouncedImageSearchQuery]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedImageSearchQuery(imageSearchQuery);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [imageSearchQuery]);
+
+  useEffect(() => {
+    setImagePage(1);
+    isImageLoadMoreRef.current = false;
+  }, [debouncedImageSearchQuery]);
+
   useEffect(() => {
     if (isImageModalOpen) {
-      const fetchFilteredImages = async () => {
-        try {
-          const res = await fetch(`/api/admin/images?limit=100&search=${encodeURIComponent(imageSearchQuery)}`);
-          const data = await res.json();
-          if (data.success) {
-            setAllImages(data.data);
-          }
-        } catch (err) {
-          console.error(err);
-        }
-      };
-      
-      const timer = setTimeout(() => {
-        fetchFilteredImages();
-      }, 500);
-      return () => clearTimeout(timer);
+      fetchFilteredImages();
     }
-  }, [imageSearchQuery, isImageModalOpen]);
+  }, [fetchFilteredImages, isImageModalOpen]);
 
   useEffect(() => {
     fetchExercises();
@@ -272,6 +306,21 @@ export default function ManageExercisesPage() {
     
     if (node) observer.current.observe(node);
   }, [isLoading, loadingMore, currentPage, totalPages]);
+
+  const imageObserver = useRef<IntersectionObserver | null>(null);
+  const lastImageElementRef = useCallback((node: HTMLLabelElement | null) => {
+    if (isLoadingImages || isLoadingMoreImages) return;
+    if (imageObserver.current) imageObserver.current.disconnect();
+    
+    imageObserver.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && imagePage < imageTotalPages) {
+        isImageLoadMoreRef.current = true;
+        setImagePage(prev => prev + 1);
+      }
+    }, { rootMargin: '200px' });
+    
+    if (node) imageObserver.current.observe(node);
+  }, [isLoadingImages, isLoadingMoreImages, imagePage, imageTotalPages]);
 
   return (
     <div className={styles.container}>
@@ -488,39 +537,53 @@ export default function ManageExercisesPage() {
                 ) : allImages.length === 0 ? (
                   <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '2rem' }}>ไม่พบรูปภาพ</p>
                 ) : (
-                  allImages.map((img) => (
-                    <label key={img.id} className={styles.imageGridItem}>
-                      <input 
-                        type="checkbox" 
-                        className={styles.imageCheckbox} 
-                        checked={selectedImageIds.includes(img.id)}
-                        onChange={() => toggleImageSelection(img.id)}
-                      />
-                      <div className={styles.imageIconPlaceholder}>
-                        {img.imageUrl ? (
-                          <img 
-                            src={img.imageUrl.startsWith('/') ? img.imageUrl : `/uploads/${img.imageUrl}`} 
-                            alt={img.title} 
-                            loading="lazy"
-                            decoding="async"
-                            style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 4 }} 
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.onerror = null;
-                              target.src = "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Ccircle cx='8.5' cy='8.5' r='1.5'%3E%3C/circle%3E%3Cpolyline points='21 15 16 10 5 21'%3E%3C/polyline%3E%3C/svg%3E";
-                            }}
+                  <>
+                    {allImages.map((img, index) => {
+                      const isLastElement = index === allImages.length - 1;
+                      return (
+                        <label 
+                          key={img.id} 
+                          className={styles.imageGridItem}
+                          ref={isLastElement ? lastImageElementRef : null}
+                        >
+                          <input 
+                            type="checkbox" 
+                            className={styles.imageCheckbox} 
+                            checked={selectedImageIds.includes(img.id)}
+                            onChange={() => toggleImageSelection(img.id)}
                           />
-                        ) : (
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                            <polyline points="21 15 16 10 5 21"></polyline>
-                          </svg>
-                        )}
+                          <div className={styles.imageIconPlaceholder}>
+                            {img.imageUrl ? (
+                              <img 
+                                src={img.imageUrl.startsWith('/') ? img.imageUrl : `/uploads/${img.imageUrl}`} 
+                                alt={img.title} 
+                                loading="lazy"
+                                decoding="async"
+                                style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 4 }} 
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.onerror = null;
+                                  target.src = "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Ccircle cx='8.5' cy='8.5' r='1.5'%3E%3C/circle%3E%3Cpolyline points='21 15 16 10 5 21'%3E%3C/polyline%3E%3C/svg%3E";
+                                }}
+                              />
+                            ) : (
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                              </svg>
+                            )}
+                          </div>
+                          <span className={styles.imageItemText}>{img.title}</span>
+                        </label>
+                      );
+                    })}
+                    {isLoadingMoreImages && (
+                      <div style={{ gridColumn: '1/-1', padding: '1rem 0' }}>
+                        <LoadingSpinner text="กำลังโหลดเพิ่มเติม..." size="small" svgSize={32} />
                       </div>
-                      <span className={styles.imageItemText}>{img.title}</span>
-                    </label>
-                  ))
+                    )}
+                  </>
                 )}
               </div>
               
