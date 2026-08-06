@@ -8,7 +8,15 @@ export async function PUT(
   try {
     const resolvedParams = await params;
     const oldName = decodeURIComponent(resolvedParams.name);
-    const { name: newName } = await request.json();
+    const body = await request.json();
+    const action = body.action;
+
+    if (action === 'restore') {
+      await ManageUsersModel.restoreExercise(oldName);
+      return NextResponse.json({ success: true });
+    }
+
+    const newName = body.name;
 
     if (!newName || newName.trim() === '') {
       return NextResponse.json({ success: false, error: 'กรุณากรอกชื่อชุดแบบฝึกหัด' }, { status: 400 });

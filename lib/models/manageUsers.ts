@@ -340,7 +340,7 @@ export class ManageUsersModel {
   /**
    * Add a new exercise set (empty)
    */
-  static async addExercise(name: string): Promise<void> {
+  static async addExercise(name: string): Promise<any> {
     const [existing] = await db.query<RowDataPacket[]>(
       'SELECT exercises_id FROM exercises_data WHERE exercises_name = ? AND remove = 0',
       [name]
@@ -349,10 +349,54 @@ export class ManageUsersModel {
       throw new Error("มีชุดแบบฝึกหัดชื่อนี้อยู่ในระบบแล้ว");
     }
 
+    const [removed] = await db.query<RowDataPacket[]>(
+      'SELECT exercises_name FROM exercises_data WHERE exercises_name = ? AND remove = 1 LIMIT 1',
+      [name]
+    );
+    if (removed.length > 0) {
+      return { isDuplicateDeleted: true, name: name };
+    }
+
     await db.execute(
       'INSERT INTO exercises_data (exercises_name, photo_id, remove) VALUES (?, NULL, 0)',
       [name]
     );
+    return { success: true };
+  }
+
+  /**
+   * Restore exercise
+   */
+  static async restoreExercise(name: string): Promise<void> {
+    const connection = await db.getConnection();
+    try {
+      await connection.beginTransaction();
+
+      await connection.execute(
+        'UPDATE exercises_data SET remove = 0 WHERE exercises_name = ?',
+        [name]
+      );
+      
+      const [rows] = await connection.query<RowDataPacket[]>(
+        'SELECT exercises_id FROM exercises_data WHERE exercises_name = ?',
+        [name]
+      );
+      if (rows.length > 0) {
+        const ids = rows.map(r => r.exercises_id);
+        const placeholders = ids.map(() => '?').join(',');
+        await connection.execute(
+          `UPDATE patient_data SET remove = 0 WHERE exercises_id IN (${placeholders})`,
+          ids
+        );
+      }
+
+      await connection.commit();
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
   }
 
   /**

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import LoadingSpinner from "@/app/components/LoadingSpinner/LoadingSpinner";
 import DeleteConfirmModal from "@/app/admin/components/DeleteConfirmModal";
+import RestoreConfirmModal from "@/app/admin/components/RestoreConfirmModal";
 import styles from "./exercises.module.css";
 
 interface Exercise {
@@ -26,6 +27,9 @@ export default function ManageExercisesPage() {
   
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [exerciseToDelete, setExerciseToDelete] = useState<string | null>(null);
+  
+  const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
+  const [exerciseToRestore, setExerciseToRestore] = useState<string | null>(null);
   
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editExerciseOldName, setEditExerciseOldName] = useState("");
@@ -103,6 +107,11 @@ export default function ManageExercisesPage() {
         setIsAddModalOpen(false);
         setNewExerciseName("");
         window.location.reload();
+      } else if (data.isDuplicateDeleted) {
+        setIsAddModalOpen(false);
+        setNewExerciseName("");
+        setExerciseToRestore(data.name);
+        setIsRestoreModalOpen(true);
       } else {
         setAddError(data.error || 'เกิดข้อผิดพลาดในการเพิ่มชุดแบบฝึกหัด');
       }
@@ -170,6 +179,28 @@ export default function ManageExercisesPage() {
     } catch (err) {
       alert('เกิดข้อผิดพลาดในการเชื่อมต่อ');
       setIsDeleteModalOpen(false);
+    }
+  };
+
+  const confirmRestoreExercise = async () => {
+    if (!exerciseToRestore) return;
+    
+    try {
+      const res = await fetch(`/api/admin/exercises/${encodeURIComponent(exerciseToRestore)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'restore' })
+      });
+      const data = await res.json();
+      if (data.success) {
+        window.location.reload();
+      } else {
+        alert(data.error || 'เกิดข้อผิดพลาดในการกู้คืน');
+        setIsRestoreModalOpen(false);
+      }
+    } catch (err) {
+      alert('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+      setIsRestoreModalOpen(false);
     }
   };
 
@@ -505,6 +536,13 @@ export default function ManageExercisesPage() {
           title="ยืนยันการลบชุดแบบฝึกหัด"
           onConfirm={confirmDeleteExercise}
           onCancel={() => setIsDeleteModalOpen(false)}
+        />
+      )}
+
+      {isRestoreModalOpen && (
+        <RestoreConfirmModal
+          onConfirm={confirmRestoreExercise}
+          onCancel={() => setIsRestoreModalOpen(false)}
         />
       )}
 

@@ -42,7 +42,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'กรุณากรอกชื่อชุดแบบฝึกหัด' }, { status: 400 });
     }
 
-    await ManageUsersModel.addExercise(name.trim());
+    const result = await ManageUsersModel.addExercise(name.trim());
+    
+    if (result && result.isDuplicateDeleted) {
+      return NextResponse.json({ 
+        success: false, 
+        isDuplicateDeleted: true,
+        name: result.name
+      });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
