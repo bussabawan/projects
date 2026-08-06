@@ -379,6 +379,8 @@ export default function ManageExercisesPage() {
                           <img 
                             src={img.imageUrl.startsWith('/') ? img.imageUrl : `/uploads/${img.imageUrl}`} 
                             alt={img.title} 
+                            loading="lazy"
+                            decoding="async"
                             style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 4 }} 
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
