@@ -1,48 +1,81 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { getSession } from "next-auth/react";
-import Link from "next/link";
-import Image from "next/image";
-import styles from "./admin.module.css";
-import { usePathname } from "next/navigation";
-
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [userName, setUserName] = useState("กำลังโหลด...");
-  const pathname = usePathname();
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const session = await getSession();
-        if (session && session.user) {
-          const user = session.user as Record<string, unknown>;
-          setUserName(`คุณ ${user.fullName || user.name || "Admin"}`);
-          return;
+  import { useState, useEffect, useCallback } from "react";
+  import { getSession } from "next-auth/react";
+  import Link from "next/link";
+  import Image from "next/image";
+  import styles from "./admin.module.css";
+  import { usePathname } from "next/navigation";
+  
+  export default function AdminLayout({
+    children,
+  }: {
+    children: React.ReactNode;
+  }) {
+    const [isCollapsed, setIsCollapsed] = useState(false);
+    const [userName, setUserName] = useState("กำลังโหลด...");
+    const pathname = usePathname();
+  
+    useEffect(() => {
+      const fetchUser = async () => {
+        try {
+          const session = await getSession();
+          if (session && session.user) {
+            const user = session.user as Record<string, unknown>;
+            setUserName(`คุณ ${user.fullName || user.name || "Admin"}`);
+            return;
+          }
+        } catch (e) {
+          console.error("Failed to get NextAuth session:", e);
         }
-      } catch (e) {
-        console.error("Failed to get NextAuth session:", e);
+        
+        setUserName("Admin");
+      };
+  
+      fetchUser();
+    }, []);
+  
+    const handleLogout = useCallback(async () => {
+      try {
+        const { signOut } = await import('next-auth/react');
+        await signOut({ callbackUrl: '/login' });
+      } catch {
+        window.location.href = '/login';
       }
-      
-      setUserName("Admin");
-    };
-
-    fetchUser();
-  }, []);
-
-  const handleLogout = async () => {
-    try {
-      const { signOut } = await import('next-auth/react');
-      await signOut({ callbackUrl: '/login' });
-    } catch {
-      window.location.href = '/login';
-    }
-  };
+    }, []);
+  
+    // ตั้งค่า Logout อัตโนมัติเมื่อไม่มีการเคลื่อนไหวเกิน 5 นาที
+    useEffect(() => {
+      let timeoutId: NodeJS.Timeout;
+  
+      const resetTimeout = () => {
+        if (timeoutId) clearTimeout(timeoutId);
+        // 5 นาที = 5 * 60 * 1000 = 300000 มิลลิวินาที
+        timeoutId = setTimeout(() => {
+          console.log("ไม่มีการเคลื่อนไหวเกิน 5 นาที กำลังออกจากระบบ...");
+          handleLogout();
+        }, 300000);
+      };
+  
+      // เหตุการณ์ที่ถือว่ามีการเคลื่อนไหว
+      const events = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
+  
+      // เริ่มนับเวลาครั้งแรก
+      resetTimeout();
+  
+      // ดักจับเหตุการณ์
+      events.forEach(event => {
+        window.addEventListener(event, resetTimeout);
+      });
+  
+      // ทำความสะอาด Event Listeners เมื่อ Component ถูกถอดถอน
+      return () => {
+        if (timeoutId) clearTimeout(timeoutId);
+        events.forEach(event => {
+          window.removeEventListener(event, resetTimeout);
+        });
+      };
+    }, [handleLogout]);
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
