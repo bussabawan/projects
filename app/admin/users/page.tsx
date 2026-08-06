@@ -391,9 +391,9 @@ export default function ManageUsersPage() {
           )}
         </div>
         
-        {/* Desktop observer target */}
+        {/* Mobile observer target */}
         {!loading && currentPage < totalPages && (
-          <div ref={lastElementRef} style={{ padding: '20px', textAlign: 'center', width: '100%', gridColumn: '1/-1' }}>
+          <div ref={lastElementRef} className={styles.loadMoreTarget}>
             {loadingMore && <LoadingSpinner text="กำลังโหลดเพิ่มเติม..." size="small" svgSize={32} />}
           </div>
         )}
