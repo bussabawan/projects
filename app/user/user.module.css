@@ -258,6 +258,10 @@
   display: none;
 }
 
+.mobileHeader {
+  display: none;
+}
+
 /* Main Content */
 .mainContent {
   flex: 1;
@@ -266,6 +270,7 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
 }
 
 .pageTitle {
@@ -350,15 +355,15 @@
 
   .sidebar, .sidebar.collapsed {
     position: fixed;
-    bottom: 1rem;
-    left: 1rem;
-    right: 1rem;
-    width: calc(100% - 2rem) !important;
-    height: 65px;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content !important;
+    height: 55px;
     background-color: white;
-    border-radius: 35px;
+    border-radius: 30px;
     flex-direction: row;
-    padding: 0 1.5rem;
+    padding: 0.3rem;
     align-items: center;
     justify-content: center;
     z-index: 100;
@@ -372,66 +377,74 @@
 
   .menu, .collapsed .menu {
     flex-direction: row;
-    justify-content: space-between;
-    width: 100%;
+    justify-content: center;
+    width: auto;
     padding: 0;
     margin: 0;
+    gap: 0;
   }
 
   .menuItem, .collapsed .menuItem {
-    padding: 0;
+    padding: 0 1.2rem;
     background: transparent;
-    width: 45px;
+    width: auto;
     height: 45px;
-    border-radius: 50%;
-    gap: 0;
+    border-radius: 25px;
+    gap: 0.5rem;
     display: flex;
     justify-content: center;
     align-items: center;
+    color: #111;
   }
 
   .menuItem.active, .collapsed .menuItem.active {
-    background-color: #d8d8d8;
+    background-color: #dcdcdc;
   }
 
   .menuText, .collapsed .menuText {
-    display: none !important;
+    display: block !important;
+    font-size: 0.95rem;
+    font-weight: 500;
   }
 
   .sidebarBottom, .collapsed .sidebarBottom {
-    position: fixed;
-    top: 1.5rem;
-    right: 1.5rem;
-    padding: 0;
-    margin: 0;
-    z-index: 50;
-    width: auto;
+    display: none !important;
   }
 
-  .userInfo {
-    flex-direction: row;
-    gap: 0.8rem;
+  .mobileHeader {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1.5rem 1.5rem 0.5rem 1.5rem;
+    width: 100%;
+    box-sizing: border-box;
   }
-
-  .userName {
-    display: block;
+  
+  .mobileUserPill {
     background-color: #dcdcdc;
-    padding: 0.4rem 1rem;
+    color: #111;
+    padding: 0.4rem 1.2rem;
     border-radius: 20px;
     font-size: 0.9rem;
-    color: #000;
+    margin-right: auto;
+    font-weight: 500;
   }
-
-  .avatar {
-    display: none;
-  }
-
-  .logoutBtn {
-    color: #000;
+  
+  .mobileHomeBtn, .mobileLogoutBtn {
+    color: #111;
+    background: none;
+    border: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
   }
 
   .mainContent {
     padding: 5rem 1.5rem 1.5rem 1.5rem;
+    width: 100%;
   }
 
   .pageTitle {
