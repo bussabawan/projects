@@ -60,4 +60,18 @@ export class UserModel {
     const { stored_password, ...userWithoutPassword } = userRow;
     return userWithoutPassword as User;
   }
+
+  /**
+   * Log a successful login event
+   */
+  static async logLogin(userId: number): Promise<void> {
+    try {
+      await db.execute(
+        'INSERT INTO login_logs (user_id, login_time) VALUES (?, NOW())',
+        [userId]
+      );
+    } catch (error) {
+      console.error('Error logging login:', error);
+    }
+  }
 }

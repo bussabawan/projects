@@ -67,23 +67,21 @@ export default function HistoryPage() {
           return;
         }
 
-        const res = await fetch(`/api/patient-stats/${userId}?period=custom&startDate=${startDate}&endDate=${endDate}`);
+        const res = await fetch(`/api/patient-history/${userId}?startDate=${startDate}&endDate=${endDate}`);
         if (!res.ok) throw new Error('Failed to fetch');
         
         const data = await res.json();
-        const { dailyStats, scatterStats } = data;
+        const { dailyStats } = data;
 
         const transformedData: HistoryRow[] = dailyStats.map((daily: any, index: number) => {
-          const details = scatterStats
-            .filter((s: any) => s.dateStr === daily.dateStr)
-            .map((s: any, idx: number) => ({
-              id: s.id || idx,
-              time: s.timeStr,
-              icon: "user-square",
-              game: s.mode,
-              score: `${s.score} คะแนน`,
-              duration: `${(s.duration / 60).toFixed(2)} นาที`
-            }));
+          const details = daily.details.map((d: any) => ({
+            id: d.id,
+            time: d.timeStr,
+            icon: "user-square",
+            game: d.mode,
+            score: `${d.score} คะแนน`,
+            duration: `${(d.duration / 60).toFixed(2)} นาที`
+          }));
             
           const typesSet = new Set(details.map((d: any) => d.game));
 
@@ -202,11 +200,29 @@ export default function HistoryPage() {
                         <div>{detail.time}</div>
                         <div className={styles.gameInfo}>
                           <div className={styles.gameIcon}>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                              <circle cx="12" cy="10" r="3"></circle>
-                              <path d="M7 21v-2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2"></path>
-                            </svg>
+                            {detail.game === 'จับคู่' ? (
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M14.5 12h-5a2.5 2.5 0 0 1-2.5-2.5v-5"></path>
+                                <path d="M9.5 12h5a2.5 2.5 0 0 1 2.5 2.5v5"></path>
+                                <rect x="5.5" y="4.5" width="4" height="4" rx="1"></rect>
+                                <rect x="14.5" y="15.5" width="4" height="4" rx="1"></rect>
+                                <circle cx="9.5" cy="15.5" r="1.5" fill="currentColor"></circle>
+                                <circle cx="14.5" cy="8.5" r="1.5" fill="currentColor"></circle>
+                              </svg>
+                            ) : detail.game === 'ความจำ' ? (
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"></path>
+                                <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"></path>
+                                <line x1="12" y1="4.5" x2="12" y2="19.5"></line>
+                              </svg>
+                            ) : (
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="12" cy="10" r="3"></circle>
+                                <path d="M7 21v-2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2"></path>
+                              </svg>
+                            )}
                           </div>
                           {detail.game}
                         </div>

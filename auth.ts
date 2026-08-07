@@ -74,6 +74,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           const dbUser = await UserModel.findByUserName(user.email);
           
           if (dbUser && (dbUser.role === 1 || dbUser.role === 2)) {
+            await UserModel.logLogin(dbUser.user_id);
             return true;
           }
           
@@ -83,6 +84,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return false;
         }
       }
+      
+      if (account?.provider === "credentials" && user.id) {
+        await UserModel.logLogin(Number(user.id));
+      }
+      
       return true; // Credentials provider handles its own authorization
     },
     async jwt({ token, user, account }) {
