@@ -593,7 +593,7 @@ export default function ManageExercisesPage() {
                           <div className={styles.imageIconPlaceholder}>
                             {img.imageUrl ? (
                               <img 
-                                src={img.imageUrl.startsWith('/') ? img.imageUrl : `/uploads/${img.imageUrl}`} 
+                                src={img.imageUrl.startsWith('/') ? img.imageUrl : `/api/uploads/${img.imageUrl}`} 
                                 alt={img.title} 
                                 loading="lazy"
                                 decoding="async"

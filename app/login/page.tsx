@@ -59,7 +59,7 @@ function LoginContent() {
     <div className={styles.container}>
       <div className={styles.logoContainer}>
         <Image
-          src="/uploads/vejjarak_logo.png"
+          src="/api/uploads/vejjarak_logo.png"
           alt="Vejjarak Lampang Hospital"
           width={350}
           height={180}

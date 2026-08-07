@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { ManageUsersModel } from '@/lib/models/manageUsers';
+import { ManageExercisesModel } from '@/lib/models/manageExercises';
 
 export async function GET(request: Request) {
   try {
@@ -9,7 +9,7 @@ export async function GET(request: Request) {
     const search = searchParams.get('search') || '';
 
     if (page && limit) {
-      const result = await ManageUsersModel.getExercisesPaginated(Number(page), Number(limit), search);
+      const result = await ManageExercisesModel.getExercisesPaginated(Number(page), Number(limit), search);
       return NextResponse.json({
         success: true,
         data: result.data,
@@ -18,7 +18,7 @@ export async function GET(request: Request) {
     }
 
     // Default behavior for other places (like dropdowns) that fetch all exercises
-    const exercises = await ManageUsersModel.getExercises();
+    const exercises = await ManageExercisesModel.getExercises();
     
     return NextResponse.json({
       success: true,
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'กรุณากรอกชื่อชุดแบบฝึกหัด' }, { status: 400 });
     }
 
-    const result = await ManageUsersModel.addExercise(name.trim());
+    const result = await ManageExercisesModel.addExercise(name.trim());
     
     if (result && result.isDuplicateDeleted) {
       return NextResponse.json({ 

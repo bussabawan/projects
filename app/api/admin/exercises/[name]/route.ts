@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { ManageUsersModel } from '@/lib/models/manageUsers';
+import { ManageExercisesModel } from '@/lib/models/manageExercises';
 
 export async function PUT(
   request: Request,
@@ -12,7 +12,7 @@ export async function PUT(
     const action = body.action;
 
     if (action === 'restore') {
-      await ManageUsersModel.restoreExercise(oldName);
+      await ManageExercisesModel.restoreExercise(oldName);
       return NextResponse.json({ success: true });
     }
 
@@ -22,7 +22,7 @@ export async function PUT(
       return NextResponse.json({ success: false, error: 'กรุณากรอกชื่อชุดแบบฝึกหัด' }, { status: 400 });
     }
 
-    await ManageUsersModel.updateExerciseName(oldName, newName.trim());
+    await ManageExercisesModel.updateExerciseName(oldName, newName.trim());
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
@@ -43,7 +43,7 @@ export async function DELETE(
     const resolvedParams = await params;
     const name = decodeURIComponent(resolvedParams.name);
     
-    await ManageUsersModel.deleteExercise(name);
+    await ManageExercisesModel.deleteExercise(name);
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {

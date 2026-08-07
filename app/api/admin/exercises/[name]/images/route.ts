@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ManageUsersModel } from "@/lib/models/manageUsers";
+import { ManageExercisesModel } from "@/lib/models/manageExercises";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ name: string }> }) {
   try {
     const { name } = await params;
     const decodedName = decodeURIComponent(name);
     
-    const photoIds = await ManageUsersModel.getExerciseImages(decodedName);
+    const photoIds = await ManageExercisesModel.getExerciseImages(decodedName);
     
     return NextResponse.json({ success: true, data: photoIds });
   } catch (error: unknown) {
@@ -27,7 +27,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ name
       return NextResponse.json({ success: false, error: "photoIds must be an array" }, { status: 400 });
     }
 
-    await ManageUsersModel.updateExerciseImages(decodedName, photoIds);
+    await ManageExercisesModel.updateExerciseImages(decodedName, photoIds);
     
     return NextResponse.json({ success: true });
   } catch (error: unknown) {

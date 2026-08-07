@@ -104,7 +104,7 @@
         <div className={styles.logoContainer}>
           <div className={styles.logo}>
             <Image 
-              src="/uploads/vejjarak_logo.png" 
+              src="/api/uploads/vejjarak_logo.png" 
               alt="Vejjarak Lampang Hospital Logo" 
               width={90} 
               height={90} 
