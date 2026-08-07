@@ -31,10 +31,12 @@ export default function HistoryPage() {
     return `${year}-${month}-${day}`;
   };
 
-  const [startDate, setStartDate] = useState<string>(getTodayString());
-  const [endDate, setEndDate] = useState<string>(getTodayString());
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
   const [historyData, setHistoryData] = useState<HistoryRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 10;
 
   const startDateRef = React.useRef<HTMLInputElement>(null);
   const endDateRef = React.useRef<HTMLInputElement>(null);
@@ -92,9 +94,10 @@ export default function HistoryPage() {
             totalTime: `รวม ${daily.totalMinutes} นาที`,
             details
           };
-        }).reverse(); // Show latest first
+        });
 
         setHistoryData(transformedData);
+        setCurrentPage(1);
         if (transformedData.length > 0) {
           setExpandedRow(transformedData[0].id);
         }
@@ -114,6 +117,21 @@ export default function HistoryPage() {
     } else {
       setExpandedRow(id);
     }
+  };
+
+  const totalPages = Math.ceil(historyData.length / rowsPerPage);
+  const currentData = historyData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+
+  const getPageNumbers = () => {
+    const pages = [];
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || Math.abs(currentPage - i) <= 1) {
+        pages.push(i);
+      } else if (pages[pages.length - 1] !== '...') {
+        pages.push('...');
+      }
+    }
+    return pages;
   };
 
   return (
@@ -170,10 +188,10 @@ export default function HistoryPage() {
         <div className={styles.tableBody}>
           {isLoading ? (
             <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>กำลังโหลดข้อมูล...</div>
-          ) : historyData.length === 0 ? (
+          ) : currentData.length === 0 ? (
             <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>ไม่มีข้อมูลในช่วงเวลานี้</div>
           ) : (
-            historyData.map((row) => (
+            currentData.map((row) => (
               <div key={row.id} className={styles.rowGroup}>
                 <div 
                   className={`${styles.mainRow} ${expandedRow === row.id ? styles.expanded : ''}`}
@@ -199,7 +217,7 @@ export default function HistoryPage() {
                       >
                         <div>{detail.time}</div>
                         <div className={styles.gameInfo}>
-                          <div className={styles.gameIcon}>
+                          <div className={`${styles.gameIcon} ${detail.game === 'จับคู่' ? styles.gameIconMatching : detail.game === 'ความจำ' ? styles.gameIconMemory : ''}`}>
                             {detail.game === 'จับคู่' ? (
                               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                                 <circle cx="12" cy="12" r="10"></circle>
@@ -237,26 +255,53 @@ export default function HistoryPage() {
           )}
         </div>
 
-        <div className={styles.pagination}>
-          <button className={styles.pageBtn} disabled>
-            &laquo;
-          </button>
-          <button className={styles.pageBtn} disabled>
-            &lsaquo;
-          </button>
-          <button className={`${styles.pageBtn} ${styles.active}`}>1</button>
-          <button className={styles.pageBtn}>2</button>
-          <button className={styles.pageBtn}>3</button>
-          <button className={styles.pageBtn}>4</button>
-          <button className={`${styles.pageBtn} ${styles.dotsBtn}`} disabled>...</button>
-          <button className={styles.pageBtn}>5</button>
-          <button className={styles.pageBtn}>
-            &rsaquo;
-          </button>
-          <button className={styles.pageBtn}>
-            &raquo;
-          </button>
-        </div>
+        {totalPages > 1 && (
+          <div className={styles.pagination}>
+            <button 
+              className={styles.pageBtn} 
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(1)}
+            >
+              &laquo;
+            </button>
+            <button 
+              className={styles.pageBtn} 
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            >
+              &lsaquo;
+            </button>
+            
+            {getPageNumbers().map((page, index) => (
+              page === '...' ? (
+                <button key={`dots-${index}`} className={`${styles.pageBtn} ${styles.dotsBtn}`} disabled>...</button>
+              ) : (
+                <button 
+                  key={`page-${page}`} 
+                  className={`${styles.pageBtn} ${currentPage === page ? styles.active : ''}`}
+                  onClick={() => setCurrentPage(page as number)}
+                >
+                  {page}
+                </button>
+              )
+            ))}
+
+            <button 
+              className={styles.pageBtn} 
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+            >
+              &rsaquo;
+            </button>
+            <button 
+              className={styles.pageBtn} 
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(totalPages)}
+            >
+              &raquo;
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

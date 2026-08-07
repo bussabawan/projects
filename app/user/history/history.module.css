@@ -161,13 +161,21 @@
 }
 
 .gameIcon {
-  background-color: #111;
-  color: #fff;
   padding: 0.3rem 0.5rem;
   border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.gameIconMatching {
+  background-color: #3b82f6; /* Vibrant Blue */
+  color: #fff;
+}
+
+.gameIconMemory {
+  background-color: #ec4899; /* Vibrant Pink */
+  color: #fff;
 }
 
 .detailScore, .detailDuration {

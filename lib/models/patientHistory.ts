@@ -26,8 +26,8 @@ export class PatientHistoryModel {
         'จับคู่' as mode,
         m.correct_count as score
       FROM matching_exercises_log m
-      JOIN matching_question_time_log t ON m.id_matching = t.id_matching
-      WHERE m.user_id = ? AND m.remove = 0 AND t.remove = 0
+      LEFT JOIN matching_question_time_log t ON m.id_matching = t.id_matching AND t.remove = 0
+      WHERE m.user_id = ? AND m.remove = 0
       ${mDateFilter}
       GROUP BY m.id_matching
       
@@ -40,8 +40,8 @@ export class PatientHistoryModel {
         'ความจำ' as mode,
         m.correct_count as score
       FROM memory_exercises_log m
-      JOIN memory_question_time_log t ON m.id_memory = t.id_memory
-      WHERE m.user_id = ? AND m.remove = 0 AND t.remove = 0
+      LEFT JOIN memory_question_time_log t ON m.id_memory = t.id_memory AND t.remove = 0
+      WHERE m.user_id = ? AND m.remove = 0
       ${mDateFilter}
       GROUP BY m.id_memory
       ORDER BY dateStr DESC, timeStr DESC

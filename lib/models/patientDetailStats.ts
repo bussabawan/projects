@@ -221,8 +221,8 @@ export class PatientDetailStatsModel {
         TIME_TO_SEC(t.time_per_question) as seconds,
         'จับคู่' as mode
       FROM matching_exercises_log m
-      JOIN matching_question_time_log t ON m.id_matching = t.id_matching
-      WHERE m.user_id = ? AND m.remove = 0 AND t.remove = 0
+      LEFT JOIN matching_question_time_log t ON m.id_matching = t.id_matching AND t.remove = 0
+      WHERE m.user_id = ? AND m.remove = 0
       ${mDateFilter}
       ${mMatchingExtra}
       
@@ -233,8 +233,8 @@ export class PatientDetailStatsModel {
         TIME_TO_SEC(t.time_per_question) as seconds,
         'ความจำ' as mode
       FROM memory_exercises_log m
-      JOIN memory_question_time_log t ON m.id_memory = t.id_memory
-      WHERE m.user_id = ? AND m.remove = 0 AND t.remove = 0
+      LEFT JOIN memory_question_time_log t ON m.id_memory = t.id_memory AND t.remove = 0
+      WHERE m.user_id = ? AND m.remove = 0
       ${mDateFilter}
       ${mMemoryExtra}
     `;
@@ -296,8 +296,8 @@ export class PatientDetailStatsModel {
         'จับคู่' as mode,
         m.correct_count as score
       FROM matching_exercises_log m
-      JOIN matching_question_time_log t ON m.id_matching = t.id_matching
-      WHERE m.user_id = ? AND m.remove = 0 AND t.remove = 0
+      LEFT JOIN matching_question_time_log t ON m.id_matching = t.id_matching AND t.remove = 0
+      WHERE m.user_id = ? AND m.remove = 0
       ${mDateFilter}
       ${mMatchingExtra}
       GROUP BY m.id_matching
@@ -312,8 +312,8 @@ export class PatientDetailStatsModel {
         'ความจำ' as mode,
         m.correct_count as score
       FROM memory_exercises_log m
-      JOIN memory_question_time_log t ON m.id_memory = t.id_memory
-      WHERE m.user_id = ? AND m.remove = 0 AND t.remove = 0
+      LEFT JOIN memory_question_time_log t ON m.id_memory = t.id_memory AND t.remove = 0
+      WHERE m.user_id = ? AND m.remove = 0
       ${mDateFilter}
       ${mMemoryExtra}
       GROUP BY m.id_memory
