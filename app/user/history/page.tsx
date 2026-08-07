@@ -44,12 +44,11 @@ export default function HistoryPage() {
   const formatThaiDate = (dateString: string) => {
     if (!dateString) return "";
     const date = new Date(dateString);
-    const thaiDate = date.toLocaleDateString('th-TH', {
+    return date.toLocaleDateString('th-TH', {
       day: 'numeric',
       month: 'short',
       year: 'numeric'
     });
-    return thaiDate.split(' ').join(' / ');
   };
 
   React.useEffect(() => {
@@ -90,7 +89,7 @@ export default function HistoryPage() {
           return {
             id: index + 1,
             dateStr: formatThaiDate(daily.dateStr),
-            plays: `${daily.plays} ครั้ง ${typesSet.size} ประเภทเกม`,
+            plays: `${daily.plays} ครั้ง (${typesSet.size} เกม)`,
             totalTime: `รวม ${daily.totalMinutes} นาที`,
             details
           };
@@ -201,8 +200,8 @@ export default function HistoryPage() {
                   <div>{row.plays}</div>
                   <div>{row.totalTime}</div>
                   <div className={styles.expandIcon}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="6 9 12 15 18 9"></polyline>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                      <polygon points="6,9 18,9 12,16"></polygon>
                     </svg>
                   </div>
                 </div>

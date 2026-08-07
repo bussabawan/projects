@@ -27,6 +27,10 @@
   gap: 0.5rem;
 }
 
+.filterGroup span {
+  min-width: 45px;
+}
+
 .datePickerWrapper {
   position: relative;
   display: inline-block;
@@ -231,7 +235,6 @@
 }
 
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .title {
     font-size: 2rem;
@@ -240,30 +243,57 @@
   .filterSection {
     flex-direction: column;
     align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
   }
   
   .tableHeader {
-    grid-template-columns: 1fr 1fr 40px;
-  }
-  
-  .tableHeader > div:nth-child(2) {
-    display: none;
+    grid-template-columns: 2.2fr 2.8fr 2.2fr 16px;
+    padding: 0.6rem 0.4rem;
+    font-size: 0.8rem;
+    background-color: #c026d3;
+    color: #fff;
   }
   
   .mainRow {
-    grid-template-columns: 1fr 1fr 40px;
+    grid-template-columns: 2.2fr 2.8fr 2.2fr 16px;
+    padding: 0.8rem 0.4rem;
+    font-size: 0.75rem;
+    gap: 0.2rem;
   }
   
-  .mainRow > div:nth-child(2) {
-    display: none;
+  .detailsContainer {
+    padding: 0;
   }
   
   .detailRow {
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
+    grid-template-columns: 1fr 1.5fr 1.2fr 1.2fr;
+    padding: 0.8rem 1rem;
+    font-size: 0.8rem;
+    gap: 0.2rem;
+  }
+  
+  .gameInfo {
+    gap: 0.3rem;
+  }
+  
+  .gameIcon {
+    padding: 0.2rem 0.3rem;
+  }
+  
+  .gameIcon svg {
+    width: 14px;
+    height: 14px;
   }
   
   .detailScore, .detailDuration {
-    text-align: left;
+    text-align: right;
+  }
+  
+  .pageBtn {
+    min-width: 36px;
+    height: 36px;
+    font-size: 0.95rem;
+    padding: 0 0.3rem;
   }
 }
