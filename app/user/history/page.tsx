@@ -36,10 +36,20 @@ export default function HistoryPage() {
   const [historyData, setHistoryData] = useState<HistoryRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 10;
+  const [totalPages, setTotalPages] = useState(1);
+  const [isMobile, setIsMobile] = useState(false);
+  const observer = React.useRef<IntersectionObserver | null>(null);
+  const rowsPerPage = 5;
 
   const startDateRef = React.useRef<HTMLInputElement>(null);
   const endDateRef = React.useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile(); // Check immediately on mount
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const formatThaiDate = (dateString: string) => {
     if (!dateString) return "";
@@ -53,7 +63,9 @@ export default function HistoryPage() {
 
   React.useEffect(() => {
     const fetchData = async () => {
-      setIsLoading(true);
+      if (currentPage === 1 || !isMobile) {
+        setIsLoading(true);
+      }
       try {
         const { getSession } = await import('next-auth/react');
         const session = await getSession();
@@ -68,11 +80,12 @@ export default function HistoryPage() {
           return;
         }
 
-        const res = await fetch(`/api/patient-history/${userId}?startDate=${startDate}&endDate=${endDate}`);
+        const res = await fetch(`/api/patient-history/${userId}?startDate=${startDate}&endDate=${endDate}&page=${currentPage}&limit=${rowsPerPage}`);
         if (!res.ok) throw new Error('Failed to fetch');
         
         const data = await res.json();
-        const { dailyStats } = data;
+        const { dailyStats, totalPages: fetchedTotalPages } = data;
+        setTotalPages(fetchedTotalPages || 1);
 
         const transformedData: HistoryRow[] = dailyStats.map((daily: any, index: number) => {
           const details = daily.details.map((d: any) => ({
@@ -87,7 +100,7 @@ export default function HistoryPage() {
           const typesSet = new Set(details.map((d: any) => d.game));
 
           return {
-            id: index + 1,
+            id: new Date(daily.dateStr).getTime() + index,
             dateStr: formatThaiDate(daily.dateStr),
             plays: `${daily.plays} ครั้ง (${typesSet.size} เกม)`,
             totalTime: `รวม ${daily.totalMinutes} นาที`,
@@ -95,10 +108,16 @@ export default function HistoryPage() {
           };
         });
 
-        setHistoryData(transformedData);
-        setCurrentPage(1);
-        if (transformedData.length > 0) {
-          setExpandedRow(transformedData[0].id);
+        if (isMobile && currentPage > 1) {
+          setHistoryData(prev => {
+            const newIds = new Set(transformedData.map(d => d.id));
+            return [...prev.filter(d => !newIds.has(d.id)), ...transformedData];
+          });
+        } else {
+          setHistoryData(transformedData);
+          if (transformedData.length > 0 && currentPage === 1) {
+            setExpandedRow(transformedData[0].id);
+          }
         }
       } catch (error) {
         console.error('Error fetching history:', error);
@@ -108,7 +127,24 @@ export default function HistoryPage() {
     };
 
     fetchData();
+  }, [startDate, endDate, currentPage, isMobile]);
+
+  React.useEffect(() => {
+    setCurrentPage(1);
   }, [startDate, endDate]);
+
+  const lastElementRef = React.useCallback((node: HTMLDivElement | null) => {
+    if (isLoading || !isMobile) return;
+    if (observer.current) observer.current.disconnect();
+    
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && currentPage < totalPages) {
+        setCurrentPage(prev => prev + 1);
+      }
+    });
+    
+    if (node) observer.current.observe(node);
+  }, [isLoading, isMobile, currentPage, totalPages]);
 
   const toggleRow = (id: number) => {
     if (expandedRow === id) {
@@ -118,8 +154,7 @@ export default function HistoryPage() {
     }
   };
 
-  const totalPages = Math.ceil(historyData.length / rowsPerPage);
-  const currentData = historyData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+  const currentData = historyData;
 
   const getPageNumbers = () => {
     const pages = [];
@@ -190,8 +225,12 @@ export default function HistoryPage() {
           ) : currentData.length === 0 ? (
             <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>ไม่มีข้อมูลในช่วงเวลานี้</div>
           ) : (
-            currentData.map((row) => (
-              <div key={row.id} className={styles.rowGroup}>
+            currentData.map((row, index) => (
+              <div 
+                key={row.id} 
+                className={styles.rowGroup}
+                ref={index === currentData.length - 1 ? lastElementRef : null}
+              >
                 <div 
                   className={`${styles.mainRow} ${expandedRow === row.id ? styles.expanded : ''}`}
                   onClick={() => toggleRow(row.id)}
@@ -254,7 +293,7 @@ export default function HistoryPage() {
           )}
         </div>
 
-        {totalPages > 1 && (
+        {!isMobile && totalPages > 1 && (
           <div className={styles.pagination}>
             <button 
               className={styles.pageBtn} 

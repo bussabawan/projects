@@ -15,8 +15,10 @@ export async function GET(
     const searchParams = request.nextUrl.searchParams;
     const startDate = searchParams.get('startDate') || undefined;
     const endDate = searchParams.get('endDate') || undefined;
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const limit = parseInt(searchParams.get('limit') || '5', 10);
 
-    const responseData = await PatientHistoryModel.getHistory(userId, startDate, endDate);
+    const responseData = await PatientHistoryModel.getHistory(userId, startDate, endDate, page, limit);
     return NextResponse.json(responseData);
     
   } catch (error: unknown) {
