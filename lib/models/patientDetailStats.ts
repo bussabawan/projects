@@ -293,7 +293,8 @@ export class PatientDetailStatsModel {
         TIME_TO_SEC(TIME(m.test_date))/3600 as timeOfDay,
         TIME_FORMAT(TIME(m.test_date), '%H:%i') as timeStr,
         SUM(TIME_TO_SEC(t.time_per_question)) as duration,
-        'จับคู่' as mode
+        'จับคู่' as mode,
+        m.correct_count as score
       FROM matching_exercises_log m
       JOIN matching_question_time_log t ON m.id_matching = t.id_matching
       WHERE m.user_id = ? AND m.remove = 0 AND t.remove = 0
@@ -308,23 +309,27 @@ export class PatientDetailStatsModel {
         TIME_TO_SEC(TIME(m.test_date))/3600 as timeOfDay,
         TIME_FORMAT(TIME(m.test_date), '%H:%i') as timeStr,
         SUM(TIME_TO_SEC(t.time_per_question)) as duration,
-        'ความจำ' as mode
+        'ความจำ' as mode,
+        m.correct_count as score
       FROM memory_exercises_log m
       JOIN memory_question_time_log t ON m.id_memory = t.id_memory
       WHERE m.user_id = ? AND m.remove = 0 AND t.remove = 0
       ${mDateFilter}
       ${mMemoryExtra}
       GROUP BY m.id_memory
+      ORDER BY dateStr DESC, timeStr DESC
     `;
 
     const [scatterRows] = await db.execute<RowDataPacket[]>(scatterQuery, timeParams);
     
-    const scatterStats = scatterRows.map(row => ({
+    const scatterStats = scatterRows.map((row, index) => ({
+      id: index + 1,
       dateStr: row.dateStr,
       timeOfDay: Number(row.timeOfDay || 0),
       timeStr: row.timeStr,
       duration: Number(row.duration || 0),
-      mode: row.mode || 'ไม่ระบุ'
+      mode: row.mode || 'ไม่ระบุ',
+      score: Number(row.score || 0)
     }));
 
     return {
