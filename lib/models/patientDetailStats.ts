@@ -35,15 +35,17 @@ export class PatientDetailStatsModel {
       const catParam = `%หมวด${filters.category}%`;
       matchingExtraFilter += ` AND EXISTS (
         SELECT 1 FROM matching_question_time_log mt
-        JOIN exercises_data ed ON mt.photo_id = ed.photo_id
+        JOIN photo_in_exercises pie ON mt.photo_id = pie.photo_id
+        JOIN exercises_data ed ON pie.exercises_id = ed.exercises_id
         WHERE mt.id_matching = matching_exercises_log.id_matching
-        AND ed.exercises_name LIKE ?
+        AND ed.exercises_name LIKE ? AND pie.remove = 0 AND ed.remove = 0
       )`;
       memoryExtraFilter += ` AND EXISTS (
         SELECT 1 FROM memory_question_time_log mt
-        JOIN exercises_data ed ON mt.photo_id = ed.photo_id
+        JOIN photo_in_exercises pie ON mt.photo_id = pie.photo_id
+        JOIN exercises_data ed ON pie.exercises_id = ed.exercises_id
         WHERE mt.id_memory = memory_exercises_log.id_memory
-        AND ed.exercises_name LIKE ?
+        AND ed.exercises_name LIKE ? AND pie.remove = 0 AND ed.remove = 0
       )`;
       matchingParams.push(catParam);
       memoryParams.push(catParam);
@@ -52,15 +54,17 @@ export class PatientDetailStatsModel {
     if (filters?.exerciseSet && filters.exerciseSet !== 'all') {
       matchingExtraFilter += ` AND EXISTS (
         SELECT 1 FROM matching_question_time_log mt
-        JOIN exercises_data ed ON mt.photo_id = ed.photo_id
+        JOIN photo_in_exercises pie ON mt.photo_id = pie.photo_id
+        JOIN exercises_data ed ON pie.exercises_id = ed.exercises_id
         WHERE mt.id_matching = matching_exercises_log.id_matching
-        AND ed.exercises_name = ?
+        AND ed.exercises_name = ? AND pie.remove = 0 AND ed.remove = 0
       )`;
       memoryExtraFilter += ` AND EXISTS (
         SELECT 1 FROM memory_question_time_log mt
-        JOIN exercises_data ed ON mt.photo_id = ed.photo_id
+        JOIN photo_in_exercises pie ON mt.photo_id = pie.photo_id
+        JOIN exercises_data ed ON pie.exercises_id = ed.exercises_id
         WHERE mt.id_memory = memory_exercises_log.id_memory
-        AND ed.exercises_name = ?
+        AND ed.exercises_name = ? AND pie.remove = 0 AND ed.remove = 0
       )`;
       matchingParams.push(filters.exerciseSet);
       memoryParams.push(filters.exerciseSet);
@@ -221,8 +225,8 @@ export class PatientDetailStatsModel {
         TIME_TO_SEC(t.time_per_question) as seconds,
         'จับคู่' as mode
       FROM matching_exercises_log m
-      JOIN matching_question_time_log t ON m.id_matching = t.id_matching
-      WHERE m.user_id = ? AND m.remove = 0 AND t.remove = 0
+      LEFT JOIN matching_question_time_log t ON m.id_matching = t.id_matching AND t.remove = 0
+      WHERE m.user_id = ? AND m.remove = 0
       ${mDateFilter}
       ${mMatchingExtra}
       
@@ -233,8 +237,8 @@ export class PatientDetailStatsModel {
         TIME_TO_SEC(t.time_per_question) as seconds,
         'ความจำ' as mode
       FROM memory_exercises_log m
-      JOIN memory_question_time_log t ON m.id_memory = t.id_memory
-      WHERE m.user_id = ? AND m.remove = 0 AND t.remove = 0
+      LEFT JOIN memory_question_time_log t ON m.id_memory = t.id_memory AND t.remove = 0
+      WHERE m.user_id = ? AND m.remove = 0
       ${mDateFilter}
       ${mMemoryExtra}
     `;
@@ -293,10 +297,11 @@ export class PatientDetailStatsModel {
         TIME_TO_SEC(TIME(m.test_date))/3600 as timeOfDay,
         TIME_FORMAT(TIME(m.test_date), '%H:%i') as timeStr,
         SUM(TIME_TO_SEC(t.time_per_question)) as duration,
-        'จับคู่' as mode
+        'จับคู่' as mode,
+        m.correct_count as score
       FROM matching_exercises_log m
-      JOIN matching_question_time_log t ON m.id_matching = t.id_matching
-      WHERE m.user_id = ? AND m.remove = 0 AND t.remove = 0
+      LEFT JOIN matching_question_time_log t ON m.id_matching = t.id_matching AND t.remove = 0
+      WHERE m.user_id = ? AND m.remove = 0
       ${mDateFilter}
       ${mMatchingExtra}
       GROUP BY m.id_matching
@@ -308,23 +313,27 @@ export class PatientDetailStatsModel {
         TIME_TO_SEC(TIME(m.test_date))/3600 as timeOfDay,
         TIME_FORMAT(TIME(m.test_date), '%H:%i') as timeStr,
         SUM(TIME_TO_SEC(t.time_per_question)) as duration,
-        'ความจำ' as mode
+        'ความจำ' as mode,
+        m.correct_count as score
       FROM memory_exercises_log m
-      JOIN memory_question_time_log t ON m.id_memory = t.id_memory
-      WHERE m.user_id = ? AND m.remove = 0 AND t.remove = 0
+      LEFT JOIN memory_question_time_log t ON m.id_memory = t.id_memory AND t.remove = 0
+      WHERE m.user_id = ? AND m.remove = 0
       ${mDateFilter}
       ${mMemoryExtra}
       GROUP BY m.id_memory
+      ORDER BY dateStr DESC, timeStr DESC
     `;
 
     const [scatterRows] = await db.execute<RowDataPacket[]>(scatterQuery, timeParams);
     
-    const scatterStats = scatterRows.map(row => ({
+    const scatterStats = scatterRows.map((row, index) => ({
+      id: index + 1,
       dateStr: row.dateStr,
       timeOfDay: Number(row.timeOfDay || 0),
       timeStr: row.timeStr,
       duration: Number(row.duration || 0),
-      mode: row.mode || 'ไม่ระบุ'
+      mode: row.mode || 'ไม่ระบุ',
+      score: Number(row.score || 0)
     }));
 
     return {

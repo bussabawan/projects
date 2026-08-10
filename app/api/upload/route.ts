@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       message: "File uploaded successfully. Database connection verified.",
-      url: `/uploads/${filename}`,
+      url: `/api/uploads/${filename}`,
     });
   } catch (error: unknown) {
     const err = error as Error;

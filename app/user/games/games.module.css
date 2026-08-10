@@ -1,0 +1,107 @@
+.container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  font-size: 3rem;
+  font-weight: 500;
+  color: #111;
+  margin-bottom: 2rem;
+  margin-top: 0;
+}
+
+.cardsGrid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 3rem;
+  max-width: 1000px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.gameCard {
+  background-color: #fff;
+  border-radius: 20px;
+  padding: 3rem 2rem;
+  flex: 1;
+  min-width: 300px;
+  max-width: 400px;
+  height: 450px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+.gameCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.iconContainer {
+  width: 200px;
+  height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  border: 2px dashed #ccc;
+  margin-bottom: 2rem;
+  padding: 10px;
+}
+
+.gameTitle {
+  font-size: 4rem;
+  font-weight: 500;
+  color: #111;
+  text-align: center;
+  line-height: 1;
+}
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .cardsGrid {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.5rem;
+    width: 100%;
+  }
+  
+  .gameCard {
+    width: 100%;
+    max-width: none;
+    height: auto;
+    padding: 1.5rem 1rem;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  
+  .iconContainer {
+    width: 95px;
+    height: 95px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+  
+  .gameTitle {
+    font-size: 2rem;
+    text-align: left;
+    flex: 1;
+    white-space: nowrap;
+  }
+}

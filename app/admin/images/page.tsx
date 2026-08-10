@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import LoadingSpinner from "@/app/components/LoadingSpinner/LoadingSpinner";
 import styles from "./images.module.css";
 import ImageFormModal from "./components/ImageFormModal";
 import DeleteConfirmModal from "../components/DeleteConfirmModal";
@@ -20,7 +21,7 @@ function CardImage({ src, alt }: { src: string; alt: string }) {
   }
 
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src={src} alt={alt} onError={() => setError(true)} loading="lazy" />;
+  return <img src={src.startsWith('/') || src.startsWith('blob:') ? src : `/api/uploads/${src}`} alt={alt} onError={() => setError(true)} loading="lazy" />;
 }
 
 interface ImageData {
@@ -261,8 +262,8 @@ export default function ManageImagesPage() {
       </div>
 
       <div className={styles.grid}>
-        {isLoading && images.length === 0 ? (
-          <div>กำลังโหลดข้อมูล...</div>
+        {isLoading ? (
+          <LoadingSpinner text="กำลังโหลดข้อมูล..." />
         ) : images.length === 0 ? (
           <div>ไม่พบรูปภาพ</div>
         ) : (
@@ -312,7 +313,9 @@ export default function ManageImagesPage() {
       {/* Intersection Observer Target */}
       {!isLoading && currentPage < totalPages && (
         <div ref={lastElementRef} className={styles.loadMoreTarget}>
-          {loadingMore && <div className={styles.loadingMoreText}>กำลังโหลด...</div>}
+          {loadingMore && (
+            <LoadingSpinner text="กำลังโหลดเพิ่มเติม..." size="small" svgSize={32} />
+          )}
         </div>
       )}
 

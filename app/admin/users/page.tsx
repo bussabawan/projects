@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import LoadingSpinner from "@/app/components/LoadingSpinner/LoadingSpinner";
 import styles from "./users.module.css";
 import UserFormModal from "./components/UserFormModal";
 
@@ -264,7 +265,7 @@ export default function ManageUsersPage() {
         
         <div className={styles.tableBody}>
           {loading && users.length === 0 ? (
-            <div className={styles.loadingState}>กำลังโหลดข้อมูล...</div>
+            <LoadingSpinner text="กำลังโหลดข้อมูล..." />
           ) : users.length === 0 ? (
             <div className={styles.emptyState}>ไม่พบข้อมูล</div>
           ) : (
@@ -272,7 +273,7 @@ export default function ManageUsersPage() {
               activeTab === "patient" ? (
                 <div className={styles.tableRowPatient} key={user.user_id}>
                   {/* Desktop cells */}
-                  <div className={`${styles.cell} ${styles.desktopOnly}`}>{user.user_id}</div>
+                  <div className={`${styles.cell} ${styles.desktopOnly}`}>{user.user_name}</div>
                   <div className={`${styles.cell} ${styles.desktopOnly}`}>{user.full_name}</div>
                   <div className={`${styles.cell} ${styles.desktopOnly}`}>
                     {user.exercises_name ? (
@@ -291,7 +292,7 @@ export default function ManageUsersPage() {
                   <div className={`${styles.cell} ${styles.mobileOnly}`}>
                     <div className={styles.mobileCardInfo}>
                       <div className={styles.mobileName}>{user.full_name}</div>
-                      <div className={styles.mobileId}>{user.user_id}</div>
+                      <div className={styles.mobileId}>{user.user_name}</div>
                     </div>
                   </div>
 
@@ -390,15 +391,13 @@ export default function ManageUsersPage() {
           )}
         </div>
         
-        {/* Intersection Observer Target */}
+        {/* Mobile observer target */}
         {!loading && currentPage < totalPages && (
-          <div ref={lastElementRef} className={styles.loadMoreTarget}>
-            {loadingMore && <div className={styles.loadingMoreText}>กำลังโหลด...</div>}
+          <div ref={lastElementRef} className={styles.loadMoreTarget} style={{ padding: '1.5rem 0', textAlign: 'center', gridColumn: '1/-1' }}>
+            {loadingMore && <LoadingSpinner text="กำลังโหลดเพิ่มเติม..." size="small" svgSize={32} />}
           </div>
         )}
       </div>
-
-
 
       {isModalOpen && (
         <UserFormModal 

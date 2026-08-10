@@ -20,7 +20,7 @@
 }
 
 .addButton {
-  background: linear-gradient(135deg, #a8ffb2 0%, #76f387 100%);
+  background: #76f387;
   color: #222;
   border: none;
   border-radius: 30px;
@@ -152,6 +152,20 @@
   overflow-y: auto;
 }
 
+.tableBody::-webkit-scrollbar {
+  width: 8px;
+}
+.tableBody::-webkit-scrollbar-track {
+  background: transparent;
+}
+.tableBody::-webkit-scrollbar-thumb {
+  background: #d4aed4;
+  border-radius: 4px;
+}
+.tableBody::-webkit-scrollbar-thumb:hover {
+  background: #c396c3;
+}
+
 .tableRowPatient {
   display: grid;
   grid-template-columns: 1fr 1.5fr 1fr 1.2fr 80px;
@@ -220,12 +234,16 @@
   justify-content: center;
   gap: 0.5rem;
   margin-top: auto;
+  margin-left: -1.5rem;
+  margin-right: -1.5rem;
   position: sticky;
   bottom: -1.5rem;
   background-color: #fafafa;
-  padding: 1.5rem 0;
+  padding: 1.5rem;
   z-index: 10;
   border-top: 1px solid #eaeaea;
+  border-bottom-left-radius: 19px;
+  border-bottom-right-radius: 19px;
 }
 
 .pageBtn {

@@ -15,7 +15,7 @@ services:
       mysql:
         condition: service_healthy
     volumes:
-      - app-uploads:/usr/src/app/public/uploads
+      - app-uploads:/usr/src/app/storage/uploads
 
   mysql:
     image: mysql:8

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import LoadingSpinner from "@/app/components/LoadingSpinner/LoadingSpinner";
 import styles from './PatientStatsPopup.module.css';
 import { 
   PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer,
@@ -149,7 +150,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
             <h3 className={styles.sectionTitle}>สถิติคะแนน</h3>
             
             {loading ? (
-              <div style={{ textAlign: 'center', padding: '2rem' }}>กำลังโหลดข้อมูลสถิติ...</div>
+              <LoadingSpinner text="กำลังโหลดข้อมูลสถิติ..." />
             ) : data && data.dailyStats ? (
               <div className={styles.statsGrid}>
                 <div className={styles.statItem}>

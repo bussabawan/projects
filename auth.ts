@@ -65,6 +65,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     })
   ],
   callbacks: {
+    ...authConfig.callbacks,
     async signIn({ user, account }) {
       if (account?.provider === "google") {
         try {
@@ -73,6 +74,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           const dbUser = await UserModel.findByUserName(user.email);
           
           if (dbUser && (dbUser.role === 1 || dbUser.role === 2)) {
+            await UserModel.logLogin(dbUser.user_id);
             return true;
           }
           
@@ -82,6 +84,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return false;
         }
       }
+      
+      if (account?.provider === "credentials" && user.id) {
+        await UserModel.logLogin(Number(user.id));
+      }
+      
       return true; // Credentials provider handles its own authorization
     },
     async jwt({ token, user, account }) {
@@ -108,20 +115,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
       }
       return token;
-    },
-    async session({ session, token }) {
-      // Pass JWT payload to session
-      if (token && session.user) {
-        const extendedUser = session.user as unknown as Record<string, string | number | undefined | null>;
-        extendedUser.id = token.id as string;
-        extendedUser.role = token.role as number;
-        extendedUser.fullName = token.fullName as string;
-      }
-      return session;
-    },
-    authorized: async ({ auth }) => {
-      // Logged in users are authenticated, otherwise false
-      return !!auth
     },
   },
   session: {
