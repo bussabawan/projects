@@ -20,7 +20,7 @@ export class PatientStatsModel {
         SELECT 
           u.user_id as id,
           u.full_name as name,
-          u.user_id as patientId,
+          u.user_name as patientId,
           IFNULL(ex.exercises_name, '-') as testSet
         FROM users_data u
         INNER JOIN patient_data p ON u.user_id = p.user_id
@@ -33,16 +33,18 @@ export class PatientStatsModel {
         SELECT DISTINCT m.user_id as id, ed.exercises_name as testSet
         FROM matching_exercises_log m
         JOIN matching_question_time_log mt ON m.id_matching = mt.id_matching
-        JOIN exercises_data ed ON mt.photo_id = ed.photo_id
-        WHERE m.remove = 0 AND mt.remove = 0
+        JOIN photo_in_exercises pie ON mt.photo_id = pie.photo_id
+        JOIN exercises_data ed ON pie.exercises_id = ed.exercises_id
+        WHERE m.remove = 0 AND mt.remove = 0 AND pie.remove = 0 AND ed.remove = 0
       `;
       
       const playedMemoryQuery = `
         SELECT DISTINCT m.user_id as id, ed.exercises_name as testSet
         FROM memory_exercises_log m
         JOIN memory_question_time_log mt ON m.id_memory = mt.id_memory
-        JOIN exercises_data ed ON mt.photo_id = ed.photo_id
-        WHERE m.remove = 0 AND mt.remove = 0
+        JOIN photo_in_exercises pie ON mt.photo_id = pie.photo_id
+        JOIN exercises_data ed ON pie.exercises_id = ed.exercises_id
+        WHERE m.remove = 0 AND mt.remove = 0 AND pie.remove = 0 AND ed.remove = 0
       `;
       
       const [rows] = await db.execute<RowDataPacket[]>(query);

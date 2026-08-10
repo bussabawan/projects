@@ -273,7 +273,7 @@ export default function ManageUsersPage() {
               activeTab === "patient" ? (
                 <div className={styles.tableRowPatient} key={user.user_id}>
                   {/* Desktop cells */}
-                  <div className={`${styles.cell} ${styles.desktopOnly}`}>{user.user_id}</div>
+                  <div className={`${styles.cell} ${styles.desktopOnly}`}>{user.user_name}</div>
                   <div className={`${styles.cell} ${styles.desktopOnly}`}>{user.full_name}</div>
                   <div className={`${styles.cell} ${styles.desktopOnly}`}>
                     {user.exercises_name ? (
@@ -292,7 +292,7 @@ export default function ManageUsersPage() {
                   <div className={`${styles.cell} ${styles.mobileOnly}`}>
                     <div className={styles.mobileCardInfo}>
                       <div className={styles.mobileName}>{user.full_name}</div>
-                      <div className={styles.mobileId}>{user.user_id}</div>
+                      <div className={styles.mobileId}>{user.user_name}</div>
                     </div>
                   </div>
 
@@ -391,9 +391,9 @@ export default function ManageUsersPage() {
           )}
         </div>
         
-        {/* Desktop observer target */}
+        {/* Mobile observer target */}
         {!loading && currentPage < totalPages && (
-          <div ref={lastElementRef} style={{ padding: '1.5rem 0', textAlign: 'center', gridColumn: '1/-1' }}>
+          <div ref={lastElementRef} className={styles.loadMoreTarget} style={{ padding: '1.5rem 0', textAlign: 'center', gridColumn: '1/-1' }}>
             {loadingMore && <LoadingSpinner text="กำลังโหลดเพิ่มเติม..." size="small" svgSize={32} />}
           </div>
         )}
