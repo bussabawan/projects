@@ -12,7 +12,7 @@ export class ManageExercisesModel {
    */
   static async getExercises(): Promise<ExerciseInfo[]> {
     const [rows] = await db.execute<RowDataPacket[]>(
-      'SELECT MIN(exercises_id) as exercises_id, exercises_name FROM exercises_data WHERE remove = 0 GROUP BY exercises_name ORDER BY MIN(exercises_id) ASC'
+      'SELECT exercises_id, exercises_name FROM exercises_data WHERE remove = 0 ORDER BY exercises_id ASC'
     );
     return rows as ExerciseInfo[];
   }
@@ -22,8 +22,8 @@ export class ManageExercisesModel {
    */
   static async getExercisesPaginated(page: number, limit: number, search: string = ''): Promise<{ data: ExerciseInfo[], total: number }> {
     const offset = (page - 1) * limit;
-    let baseQuery = 'SELECT MIN(exercises_id) as exercises_id, exercises_name FROM exercises_data WHERE remove = 0';
-    let countQuery = 'SELECT COUNT(DISTINCT exercises_name) as total FROM exercises_data WHERE remove = 0';
+    let baseQuery = 'SELECT exercises_id, exercises_name FROM exercises_data WHERE remove = 0';
+    let countQuery = 'SELECT COUNT(exercises_id) as total FROM exercises_data WHERE remove = 0';
     const queryParams: (string | number)[] = [];
     
     if (search) {
@@ -33,7 +33,7 @@ export class ManageExercisesModel {
       queryParams.push(searchPattern);
     }
     
-    baseQuery += ' GROUP BY exercises_name ORDER BY MIN(exercises_id) DESC LIMIT ? OFFSET ?';
+    baseQuery += ' ORDER BY exercises_id DESC LIMIT ? OFFSET ?';
     
     const [rows] = await db.query<RowDataPacket[]>(baseQuery, [...queryParams, limit, offset]);
     const [countRows] = await db.query<RowDataPacket[]>(countQuery, queryParams);
@@ -65,7 +65,7 @@ export class ManageExercisesModel {
     }
 
     await db.execute(
-      'INSERT INTO exercises_data (exercises_name, photo_id, remove) VALUES (?, NULL, 0)',
+      'INSERT INTO exercises_data (exercises_name, remove) VALUES (?, 0)',
       [name]
     );
     return { success: true };
@@ -95,6 +95,10 @@ export class ManageExercisesModel {
           `UPDATE patient_data SET remove = 0 WHERE exercises_id IN (${placeholders})`,
           ids
         );
+        await connection.execute(
+          `UPDATE photo_in_exercises SET remove = 0 WHERE exercises_id IN (${placeholders})`,
+          ids
+        );
       }
 
       await connection.commit();
@@ -111,7 +115,10 @@ export class ManageExercisesModel {
    */
   static async getExerciseImages(name: string): Promise<number[]> {
     const [rows] = await db.query<RowDataPacket[]>(
-      'SELECT photo_id FROM exercises_data WHERE exercises_name = ? AND remove = 0 AND photo_id IS NOT NULL',
+      `SELECT pie.photo_id 
+       FROM photo_in_exercises pie
+       JOIN exercises_data ed ON pie.exercises_id = ed.exercises_id
+       WHERE ed.exercises_name = ? AND ed.remove = 0 AND pie.remove = 0`,
       [name]
     );
     return rows.map(r => r.photo_id as number);
@@ -122,7 +129,7 @@ export class ManageExercisesModel {
    */
   static async updateExerciseImages(name: string, newPhotoIds: number[]): Promise<void> {
     const [existingRows] = await db.query<RowDataPacket[]>(
-      'SELECT exercises_id FROM exercises_data WHERE exercises_name = ?',
+      'SELECT exercises_id FROM exercises_data WHERE exercises_name = ? AND remove = 0',
       [name]
     );
 
@@ -130,24 +137,17 @@ export class ManageExercisesModel {
       throw new Error("ไม่พบชุดแบบฝึกหัดนี้");
     }
 
-    // Find the primary ID (the minimum exercises_id)
-    const primaryRow = existingRows.reduce((min, row) => row.exercises_id < min.exercises_id ? row : min, existingRows[0]);
-    const primaryId = primaryRow.exercises_id;
+    const exercisesId = existingRows[0].exercises_id;
     
-    // Delete all rows EXCEPT primaryId
-    await db.execute('DELETE FROM exercises_data WHERE exercises_name = ? AND exercises_id != ?', [name, primaryId]);
+    // Delete existing photos for this exercise in photo_in_exercises
+    await db.execute('DELETE FROM photo_in_exercises WHERE exercises_id = ?', [exercisesId]);
     
-    if (newPhotoIds.length === 0) {
-      // Set primaryId to have photo_id = NULL
-      await db.execute('UPDATE exercises_data SET photo_id = NULL, remove = 0 WHERE exercises_id = ?', [primaryId]);
-    } else {
-      // Set primaryId to the first photo
-      await db.execute('UPDATE exercises_data SET photo_id = ?, remove = 0 WHERE exercises_id = ?', [newPhotoIds[0], primaryId]);
-      
-      // Insert the rest of the photos
-      for (let i = 1; i < newPhotoIds.length; i++) {
-        await db.execute('INSERT INTO exercises_data (exercises_name, photo_id, remove) VALUES (?, ?, 0)', [name, newPhotoIds[i]]);
-      }
+    // Insert new photos
+    for (const photoId of newPhotoIds) {
+      await db.execute(
+        'INSERT INTO photo_in_exercises (exercises_id, photo_id, remove) VALUES (?, ?, 0)',
+        [exercisesId, photoId]
+      );
     }
   }
 
@@ -191,6 +191,10 @@ export class ManageExercisesModel {
         const placeholders = ids.map(() => '?').join(',');
         await connection.execute(
           `UPDATE patient_data SET remove = 1 WHERE exercises_id IN (${placeholders})`,
+          ids
+        );
+        await connection.execute(
+          `UPDATE photo_in_exercises SET remove = 1 WHERE exercises_id IN (${placeholders})`,
           ids
         );
       }

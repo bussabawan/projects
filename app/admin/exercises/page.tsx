@@ -576,8 +576,14 @@ export default function ManageExercisesPage() {
                   <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '2rem' }}>ไม่พบรูปภาพ</p>
                 ) : (
                   <>
-                    {allImages.map((img, index) => {
-                      const isLastElement = index === allImages.length - 1;
+                    {[...allImages].sort((a, b) => {
+                      const aSelected = selectedImageIds.includes(a.id);
+                      const bSelected = selectedImageIds.includes(b.id);
+                      if (aSelected && !bSelected) return -1;
+                      if (!aSelected && bSelected) return 1;
+                      return 0;
+                    }).map((img, index, sortedArr) => {
+                      const isLastElement = index === sortedArr.length - 1;
                       return (
                         <label 
                           key={img.id} 

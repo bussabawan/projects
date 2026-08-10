@@ -117,11 +117,15 @@
   font-weight: 500;
   color: #333;
   margin: 0;
+  word-break: break-word;
+  flex: 1;
+  padding-right: 0.5rem;
 }
 
 .cardActions {
   display: flex;
   gap: 0.5rem;
+  flex-shrink: 0;
 }
 
 .iconBtn {
