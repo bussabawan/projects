@@ -21,7 +21,7 @@ function CardImage({ src, alt }: { src: string; alt: string }) {
   }
 
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src={src} alt={alt} onError={() => setError(true)} loading="lazy" />;
+  return <img src={src.startsWith('/') || src.startsWith('blob:') ? src : `/api/uploads/${src}`} alt={alt} onError={() => setError(true)} loading="lazy" />;
 }
 
 interface ImageData {
