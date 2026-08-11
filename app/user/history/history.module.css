@@ -48,7 +48,7 @@
 }
 
 .datePicker {
-  background-color: #e2e2e2;
+  background-color: #ffffff;
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 20px;
@@ -91,6 +91,12 @@
 .tableBody {
   flex: 1;
   overflow-y: auto;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.tableBody::-webkit-scrollbar {
+  display: none;
 }
 
 .rowGroup {
@@ -113,6 +119,10 @@
 
 .mainRow:hover {
   background-color: #f9f9f9;
+}
+
+.mainRow > div:first-child {
+  white-space: nowrap;
 }
 
 .mainRow.expanded {
@@ -248,18 +258,19 @@
   }
   
   .tableHeader {
-    grid-template-columns: 2.2fr 2.8fr 2.2fr 16px;
-    padding: 0.6rem 0.4rem;
+    grid-template-columns: 2.5fr 2.5fr 2fr 16px;
+    gap: 0.8rem;
+    padding: 0.6rem 0.5rem;
     font-size: 0.8rem;
     background-color: #c026d3;
     color: #fff;
   }
   
   .mainRow {
-    grid-template-columns: 2.2fr 2.8fr 2.2fr 16px;
-    padding: 0.8rem 0.4rem;
+    grid-template-columns: 2.5fr 2.5fr 2fr 16px;
+    padding: 0.8rem 0.5rem;
     font-size: 0.75rem;
-    gap: 0.2rem;
+    gap: 0.8rem;
   }
   
   .detailsContainer {

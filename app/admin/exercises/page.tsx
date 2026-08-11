@@ -57,6 +57,7 @@ export default function ManageExercisesPage() {
   const [totalPages, setTotalPages] = useState(1);
   const itemsPerPage = 12;
   const isLoadMoreRef = useRef(false);
+  const latestSelectedIdsRef = useRef<number[]>([]);
 
   const fetchExercises = useCallback(async () => {
     const isLoadMore = isLoadMoreRef.current;
@@ -209,17 +210,20 @@ export default function ManageExercisesPage() {
     setImageSearchQuery("");
     setImagePage(1);
     isImageLoadMoreRef.current = false;
-    setIsImageModalOpen(true);
     
     try {
       const resSelected = await fetch(`/api/admin/exercises/${encodeURIComponent(exerciseName)}/images`);
       const dataSelected = await resSelected.json();
       if (dataSelected.success) {
         setSelectedImageIds(dataSelected.data);
+        latestSelectedIdsRef.current = dataSelected.data;
       }
     } catch (err) {
       console.error(err);
+      latestSelectedIdsRef.current = [];
     }
+
+    setIsImageModalOpen(true);
   };
 
   const handleSaveImages = async () => {
@@ -246,9 +250,11 @@ export default function ManageExercisesPage() {
   };
 
   const toggleImageSelection = (id: number) => {
-    setSelectedImageIds(prev => 
-      prev.includes(id) ? prev.filter(imgId => imgId !== id) : [...prev, id]
-    );
+    setSelectedImageIds(prev => {
+      const newIds = prev.includes(id) ? prev.filter(imgId => imgId !== id) : [...prev, id];
+      latestSelectedIdsRef.current = newIds;
+      return newIds;
+    });
   };
 
   const fetchFilteredImages = useCallback(async () => {
@@ -260,7 +266,8 @@ export default function ManageExercisesPage() {
     }
 
     try {
-      const res = await fetch(`/api/admin/images?page=${imagePage}&limit=${imageItemsPerPage}&search=${encodeURIComponent(debouncedImageSearchQuery)}`);
+      const prioritizeIds = latestSelectedIdsRef.current.join(',');
+      const res = await fetch(`/api/admin/images?page=${imagePage}&limit=${imageItemsPerPage}&search=${encodeURIComponent(debouncedImageSearchQuery)}&prioritizeIds=${prioritizeIds}`);
       const data = await res.json();
       if (data.success) {
         if (isLoadMore) {
