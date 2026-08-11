@@ -8,20 +8,19 @@ import PatientStatsPopup from './components/PatientStatsPopup';
 
 const extractCategory = (testSet?: string) => {
   if (!testSet) return '';
-  const match = testSet.match(/หมวด(.*?)(?:\s+เลเวล|$)/);
-  return match ? match[1].trim() : testSet;
+  return testSet.replace(/^(?:แบบฝึกหัด\s*)?(?:หมวด\s*)?/, '').replace(/\s+เลเวล\s*/, 'เลเวล');
 };
 
 const renderTestSetTags = (patient: PatientStatInfo) => {
-  const assignedSets = patient.assignedSets;
-  if (!assignedSets || assignedSets.length === 0) return null;
+  const allSets = patient.testSets;
+  if (!allSets || allSets.length === 0) return null;
   
-  // Deduplicate by the exact assigned string to accurately check play history
-  const uniqueAssignedSets = Array.from(new Set(assignedSets.filter(Boolean)));
+  // Deduplicate by the exact string to accurately check play history
+  const uniqueSets = Array.from(new Set(allSets.filter(Boolean)));
   
   return (
     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-      {uniqueAssignedSets.map((setStr, idx) => {
+      {uniqueSets.map((setStr, idx) => {
         const tag = extractCategory(setStr) || setStr;
         const isPlayed = (patient.playedSets || []).includes(setStr);
         

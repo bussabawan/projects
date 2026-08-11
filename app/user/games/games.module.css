@@ -67,7 +67,7 @@
   line-height: 1;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (max-width: 950px) and (max-height: 500px) {
   .title {
     font-size: 2rem;
     margin-bottom: 1.5rem;
@@ -104,5 +104,27 @@
     text-align: left;
     flex: 1;
     white-space: nowrap;
+  }
+}
+
+@media (max-width: 950px) and (max-height: 500px) {
+  .cardsGrid {
+    flex-direction: row;
+  }
+  
+  .gameCard {
+    flex: 1 1 calc(50% - 0.75rem);
+    width: auto;
+    padding: 1rem;
+    gap: 1rem;
+  }
+  
+  .iconContainer {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .gameTitle {
+    font-size: 1.6rem;
   }
 }
