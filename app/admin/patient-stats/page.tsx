@@ -13,20 +13,18 @@ const extractCategory = (testSet?: string) => {
 };
 
 const renderTestSetTags = (patient: PatientStatInfo) => {
-  const testSets = patient.testSets;
-  if (!testSets || testSets.length === 0) return null;
+  const assignedSets = patient.assignedSets;
+  if (!assignedSets || assignedSets.length === 0) return null;
   
-
-  const playedCategories = Array.from(new Set((patient.playedSets || []).map(ts => extractCategory(ts)).filter(Boolean)));
-  const tags = Array.from(new Set(testSets.map(ts => extractCategory(ts)).filter(Boolean)));
+  // Deduplicate by the exact assigned string to accurately check play history
+  const uniqueAssignedSets = Array.from(new Set(assignedSets.filter(Boolean)));
   
   return (
     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-      {tags.map((tag, idx) => {
-
-        const isPlayed = playedCategories.includes(tag);
+      {uniqueAssignedSets.map((setStr, idx) => {
+        const tag = extractCategory(setStr) || setStr;
+        const isPlayed = (patient.playedSets || []).includes(setStr);
         
-        // If it has been played (has data)
         let tagClass = styles.testSetTag;
         if (isPlayed) {
           tagClass = `${styles.testSetTag} ${styles.playedTag}`;
