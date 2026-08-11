@@ -82,6 +82,7 @@
   
   .gameCard {
     width: 100%;
+    min-width: 0;
     max-width: none;
     height: auto;
     padding: 1.5rem 1rem;

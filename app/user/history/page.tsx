@@ -35,11 +35,12 @@ export default function HistoryPage() {
   const [endDate, setEndDate] = useState<string>('');
   const [historyData, setHistoryData] = useState<HistoryRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isMobile, setIsMobile] = useState(false);
   const observer = React.useRef<IntersectionObserver | null>(null);
-  const rowsPerPage = 5;
+  const rowsPerPage = 7;
 
   const startDateRef = React.useRef<HTMLInputElement>(null);
   const endDateRef = React.useRef<HTMLInputElement>(null);
@@ -65,18 +66,22 @@ export default function HistoryPage() {
     const fetchData = async () => {
       if (currentPage === 1 || !isMobile) {
         setIsLoading(true);
+      } else {
+        setIsFetchingMore(true);
       }
       try {
         const { getSession } = await import('next-auth/react');
         const session = await getSession();
         if (!session?.user) {
           setIsLoading(false);
+          setIsFetchingMore(false);
           return;
         }
 
         const userId = (session.user as any).id;
         if (!userId) {
           setIsLoading(false);
+          setIsFetchingMore(false);
           return;
         }
 
@@ -123,6 +128,7 @@ export default function HistoryPage() {
         console.error('Error fetching history:', error);
       } finally {
         setIsLoading(false);
+        setIsFetchingMore(false);
       }
     };
 
@@ -134,7 +140,7 @@ export default function HistoryPage() {
   }, [startDate, endDate]);
 
   const lastElementRef = React.useCallback((node: HTMLDivElement | null) => {
-    if (isLoading || !isMobile) return;
+    if (isLoading || isFetchingMore || !isMobile) return;
     if (observer.current) observer.current.disconnect();
     
     observer.current = new IntersectionObserver(entries => {
@@ -144,7 +150,7 @@ export default function HistoryPage() {
     });
     
     if (node) observer.current.observe(node);
-  }, [isLoading, isMobile, currentPage, totalPages]);
+  }, [isLoading, isFetchingMore, isMobile, currentPage, totalPages]);
 
   const toggleRow = (id: number) => {
     if (expandedRow === id) {
@@ -290,6 +296,12 @@ export default function HistoryPage() {
                 )}
               </div>
             ))
+          )}
+          
+          {isFetchingMore && (
+            <div style={{ padding: '1.5rem', textAlign: 'center', color: '#666', fontSize: '0.9rem' }}>
+              กำลังโหลดเพิ่มเติม...
+            </div>
           )}
         </div>
 
