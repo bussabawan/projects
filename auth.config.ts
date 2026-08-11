@@ -51,6 +51,11 @@ export const authConfig = {
           }
           return Response.redirect(new URL('/user/games', nextUrl));
         }
+
+        if (isUserRoute && userRole !== 1) {
+          // If staff (role !== 1) tries to access patient routes, redirect to /admin
+          return Response.redirect(new URL('/admin', nextUrl));
+        }
       }
 
       return true;

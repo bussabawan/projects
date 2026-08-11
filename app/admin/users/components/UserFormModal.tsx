@@ -57,9 +57,17 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
     });
   };
 
-  const filteredExercises = exercises.filter(ex => 
-    ex.exercises_name.toLowerCase().includes(searchExercise.toLowerCase())
-  );
+  const filteredExercises = exercises
+    .filter(ex => 
+      ex.exercises_name.toLowerCase().includes(searchExercise.toLowerCase())
+    )
+    .sort((a, b) => {
+      const aSelected = formData.exercises_id.includes(a.exercises_id);
+      const bSelected = formData.exercises_id.includes(b.exercises_id);
+      if (aSelected && !bSelected) return -1;
+      if (!aSelected && bSelected) return 1;
+      return 0;
+    });
 
   useEffect(() => {
     if (role === 1) {

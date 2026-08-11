@@ -17,7 +17,8 @@ export class ManageImagesModel {
   static async getImages(
     page: number = 1,
     limit: number = 12,
-    search: string = ""
+    search: string = "",
+    prioritizeIds: number[] = []
   ): Promise<{ data: ImageInfo[]; totalPages: number }> {
     const offset = (page - 1) * limit;
     const queryParams: (string | number)[] = [];
@@ -38,16 +39,29 @@ export class ManageImagesModel {
     const totalCount = countRows[0].total;
     const totalPages = Math.ceil(totalCount / limit);
 
-    queryParams.push(limit, offset);
+    let orderClause = "ORDER BY photo_id DESC";
+    if (prioritizeIds.length > 0) {
+      const idsStr = prioritizeIds.map(() => '?').join(',');
+      orderClause = `ORDER BY CASE WHEN photo_id IN (${idsStr}) THEN 0 ELSE 1 END ASC, photo_id DESC`;
+    }
+
+    const finalParams: (string | number)[] = [];
+    if (search) {
+      finalParams.push(`%${search}%`);
+    }
+    if (prioritizeIds.length > 0) {
+      finalParams.push(...prioritizeIds);
+    }
+    finalParams.push(limit, offset);
 
     // Get paginated data
     const [rows] = await db.query<RowDataPacket[]>(
       `SELECT photo_id as id, photo_title as title, photo_name as imageUrl, audio_name as audioUrl, audio_title as audioTitle, audio_gen as audioGen
        FROM photo_data 
        ${whereClause} 
-       ORDER BY photo_id DESC 
+       ${orderClause} 
        LIMIT ? OFFSET ?`,
-      queryParams
+      finalParams
     );
 
     return {

@@ -7,8 +7,10 @@ export async function GET(req: NextRequest) {
     const page = parseInt(url.searchParams.get("page") || "1");
     const limit = parseInt(url.searchParams.get("limit") || "12");
     const search = url.searchParams.get("search") || "";
+    const prioritizeIdsStr = url.searchParams.get("prioritizeIds") || "";
+    const prioritizeIds = prioritizeIdsStr ? prioritizeIdsStr.split(',').map(Number).filter(n => !isNaN(n)) : [];
 
-    const { data: images, totalPages } = await ManageImagesModel.getImages(page, limit, search);
+    const { data: images, totalPages } = await ManageImagesModel.getImages(page, limit, search, prioritizeIds);
     return NextResponse.json({ success: true, data: images, totalPages });
   } catch (error: unknown) {
     const err = error as Error;
