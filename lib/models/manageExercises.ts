@@ -47,7 +47,7 @@ export class ManageExercisesModel {
   /**
    * Add a new exercise set (empty)
    */
-  static async addExercise(name: string): Promise<any> {
+  static async addExercise(name: string): Promise<{ success?: boolean; isDuplicateDeleted?: boolean; name?: string }> {
     const [existing] = await db.query<RowDataPacket[]>(
       'SELECT exercises_id FROM exercises_data WHERE exercises_name = ? AND remove = 0',
       [name]

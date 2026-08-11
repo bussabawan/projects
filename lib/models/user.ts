@@ -58,6 +58,7 @@ export class UserModel {
     
     // Remove password from returned object
     const { stored_password, ...userWithoutPassword } = userRow;
+    void stored_password; // bypass unused-var warning
     return userWithoutPassword as User;
   }
 

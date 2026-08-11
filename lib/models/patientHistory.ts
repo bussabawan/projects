@@ -93,7 +93,7 @@ export class PatientHistoryModel {
       dateStr: string;
       plays: number;
       totalSeconds: number;
-      details: any[];
+      details: { id: number, timeStr: string, duration: number, mode: string, score: number }[];
     }>();
     
     // Initialize map with all requested dates in order to maintain sorting

@@ -23,13 +23,7 @@ interface HistoryRow {
 export default function HistoryPage() {
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
   
-  const getTodayString = () => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
+
 
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
@@ -74,7 +68,7 @@ export default function HistoryPage() {
           return;
         }
 
-        const userId = (session.user as any).id;
+        const userId = (session.user as { id?: string | number }).id;
         if (!userId) {
           setIsLoading(false);
           return;
@@ -87,8 +81,8 @@ export default function HistoryPage() {
         const { dailyStats, totalPages: fetchedTotalPages } = data;
         setTotalPages(fetchedTotalPages || 1);
 
-        const transformedData: HistoryRow[] = dailyStats.map((daily: any, index: number) => {
-          const details = daily.details.map((d: any) => ({
+        const transformedData: HistoryRow[] = dailyStats.map((daily: { dateStr: string, plays: number, totalMinutes: number, details: { id: number, timeStr: string, mode: string, score: number, duration: number }[] }, index: number) => {
+          const details = daily.details.map((d) => ({
             id: d.id,
             time: d.timeStr,
             icon: "user-square",
@@ -97,7 +91,7 @@ export default function HistoryPage() {
             duration: `${(d.duration / 60).toFixed(2)} นาที`
           }));
             
-          const typesSet = new Set(details.map((d: any) => d.game));
+          const typesSet = new Set(details.map((d) => d.game));
 
           return {
             id: new Date(daily.dateStr).getTime() + index,
@@ -129,9 +123,7 @@ export default function HistoryPage() {
     fetchData();
   }, [startDate, endDate, currentPage, isMobile]);
 
-  React.useEffect(() => {
-    setCurrentPage(1);
-  }, [startDate, endDate]);
+
 
   const lastElementRef = React.useCallback((node: HTMLDivElement | null) => {
     if (isLoading || !isMobile) return;
@@ -181,7 +173,7 @@ export default function HistoryPage() {
               ref={startDateRef}
               className={styles.nativeDatePicker}
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={(e) => { setStartDate(e.target.value); setCurrentPage(1); }}
             />
             <button className={styles.datePicker} onClick={() => startDateRef.current?.showPicker()}>
               {startDate ? formatThaiDate(startDate) : "เลือกวันที่"}
@@ -199,7 +191,7 @@ export default function HistoryPage() {
               ref={endDateRef}
               className={styles.nativeDatePicker}
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
+              onChange={(e) => { setEndDate(e.target.value); setCurrentPage(1); }}
             />
             <button className={styles.datePicker} onClick={() => endDateRef.current?.showPicker()}>
               {endDate ? formatThaiDate(endDate) : "เลือกวันที่"}

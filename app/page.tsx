@@ -5,7 +5,7 @@ export default async function Home() {
   const session = await auth();
   
   if (session && session.user) {
-    const role = (session.user as any).role;
+    const role = (session.user as { role?: number }).role;
     if (role === 1) {
       redirect('/user/games');
     } else {

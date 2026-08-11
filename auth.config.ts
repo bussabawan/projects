@@ -10,7 +10,7 @@ export const authConfig = {
   callbacks: {
     async session({ session, token }) {
       if (token && session.user) {
-        const extendedUser = session.user as any;
+        const extendedUser = session.user as { id?: string; role?: number; fullName?: string };
         extendedUser.id = token.id as string;
         extendedUser.role = token.role as number;
         extendedUser.fullName = token.fullName as string;
@@ -41,7 +41,7 @@ export const authConfig = {
         }
 
         // Add Role Based Access Control
-        const userRole = (auth?.user as any)?.role;
+        const userRole = (auth?.user as { role?: number })?.role;
         
         if ((isApiAdminRoute || isAdminRoute) && userRole === 1) {
           // If patient (role 1) tries to access admin routes, redirect to /user

@@ -40,7 +40,7 @@ export default function ManageExercisesPage() {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [imageSearchQuery, setImageSearchQuery] = useState("");
   const [debouncedImageSearchQuery, setDebouncedImageSearchQuery] = useState("");
-  const [allImages, setAllImages] = useState<any[]>([]);
+  const [allImages, setAllImages] = useState<{ id: number, title: string, imageUrl?: string }[]>([]);
   const [selectedImageIds, setSelectedImageIds] = useState<number[]>([]);
   const [currentExerciseName, setCurrentExerciseName] = useState<string>("");
   const [isSavingImages, setIsSavingImages] = useState(false);
@@ -266,7 +266,7 @@ export default function ManageExercisesPage() {
         if (isLoadMore) {
           setAllImages(prev => {
             const existingIds = new Set(prev.map(img => img.id));
-            const newImages = data.data.filter((img: any) => !existingIds.has(img.id));
+            const newImages = data.data.filter((img: { id: number, title: string, imageUrl?: string }) => !existingIds.has(img.id));
             return [...prev, ...newImages];
           });
         } else {
@@ -289,22 +289,21 @@ export default function ManageExercisesPage() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedImageSearchQuery(imageSearchQuery);
+      setImagePage(1);
+      isImageLoadMoreRef.current = false;
     }, 500);
     return () => clearTimeout(timer);
   }, [imageSearchQuery]);
 
   useEffect(() => {
-    setImagePage(1);
-    isImageLoadMoreRef.current = false;
-  }, [debouncedImageSearchQuery]);
-
-  useEffect(() => {
     if (isImageModalOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchFilteredImages();
     }
   }, [fetchFilteredImages, isImageModalOpen]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchExercises();
     isLoadMoreRef.current = false;
   }, [fetchExercises]);
@@ -313,14 +312,10 @@ export default function ManageExercisesPage() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
+      setCurrentPage(1);
     }, 500);
     return () => clearTimeout(timer);
   }, [searchQuery]);
-
-  // Reset to page 1 when the debounced search term changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [debouncedSearchQuery]);
 
   // Infinite Scroll Observer
   const observer = useRef<IntersectionObserver | null>(null);
@@ -598,6 +593,7 @@ export default function ManageExercisesPage() {
                           />
                           <div className={styles.imageIconPlaceholder}>
                             {img.imageUrl ? (
+                              // eslint-disable-next-line @next/next/no-img-element
                               <img 
                                 src={img.imageUrl.startsWith('/') ? img.imageUrl : `/api/uploads/${img.imageUrl}`} 
                                 alt={img.title} 
