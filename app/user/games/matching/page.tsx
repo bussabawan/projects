@@ -63,7 +63,11 @@ export default function MatchingCategoryPage() {
 
       <div className={styles.categoriesGrid}>
         {loading ? (
-          <div style={{ padding: '2rem', fontSize: '1.2rem', color: '#666' }}>กำลังโหลดข้อมูลแบบฝึกหัด...</div>
+          <>
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className={styles.skeletonCard}></div>
+            ))}
+          </>
         ) : filteredExercises.length > 0 ? (
           filteredExercises.map((ex) => (
             <Link key={ex.exercises_id} href={`/user/games/matching/${ex.exercises_id}?type=${activeTab}`} className={styles.categoryBtn}>
