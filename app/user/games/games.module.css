@@ -15,7 +15,6 @@
 
 .cardsGrid {
   display: flex;
-  flex-wrap: wrap;
   justify-content: center;
   gap: 3rem;
   max-width: 1000px;
@@ -28,7 +27,7 @@
   border-radius: 20px;
   padding: 3rem 2rem;
   flex: 1;
-  min-width: 300px;
+  min-width: 0;
   max-width: 400px;
   height: 450px;
   display: flex;

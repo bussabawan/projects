@@ -107,7 +107,11 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   text-align: center;
   text-decoration: none;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  word-break: break-word;
 }
 
 .categoryBtn:hover {
@@ -117,7 +121,7 @@
 
 @media (max-width: 1200px) and (min-width: 769px) {
   .categoriesGrid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.5rem;
   }
   .categoryBtn {
@@ -175,7 +179,7 @@
     width: 100%;
   }
   .categoriesGrid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1rem;
   }
   .categoryBtn {
