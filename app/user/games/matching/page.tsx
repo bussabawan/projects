@@ -1,12 +1,18 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import styles from './matching.module.css';
 import { getUserAssignedExercises } from './actions';
 
-export default function MatchingCategoryPage() {
-  const [activeTab, setActiveTab] = useState<'image' | 'word'>('image');
+function MatchingCategoryContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  
+  const initialTab = (searchParams.get('type') as 'image' | 'word') || 'image';
+  const [activeTab, setActiveTab] = useState<'image' | 'word'>(initialTab);
   const [searchQuery, setSearchQuery] = useState('');
   const [exercises, setExercises] = useState<{exercises_id: number, exercises_name: string}[]>([]);
   const [loading, setLoading] = useState(true);
@@ -19,6 +25,11 @@ export default function MatchingCategoryPage() {
     };
     fetchExercises();
   }, []);
+
+  const handleTabChange = (tab: 'image' | 'word') => {
+    setActiveTab(tab);
+    router.replace(`${pathname}?type=${tab}`, { scroll: false });
+  };
 
   const filteredExercises = exercises.filter(ex => 
     ex.exercises_name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -33,13 +44,13 @@ export default function MatchingCategoryPage() {
           <div className={styles.toggleContainer}>
             <button 
               className={`${styles.toggleBtn} ${activeTab === 'image' ? styles.active : ''}`}
-              onClick={() => setActiveTab('image')}
+              onClick={() => handleTabChange('image')}
             >
               ภาพกับภาพ
             </button>
             <button 
               className={`${styles.toggleBtn} ${activeTab === 'word' ? styles.active : ''}`}
-              onClick={() => setActiveTab('word')}
+              onClick={() => handleTabChange('word')}
             >
               คำกับภาพ
             </button>
@@ -81,5 +92,13 @@ export default function MatchingCategoryPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function MatchingCategoryPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>}>
+      <MatchingCategoryContent />
+    </Suspense>
   );
 }

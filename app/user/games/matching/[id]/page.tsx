@@ -37,6 +37,8 @@ export default function MatchingSettingsPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   
+  const type = searchParams.get('type') || 'image';
+
   const [questions, setQuestions] = useState(30);
   const [answers, setAnswers] = useState(2);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -44,7 +46,11 @@ export default function MatchingSettingsPage() {
 
   useEffect(() => {
     // Initialize audio
-    audioRef.current = new Audio('/api/uploads/matching_instruction.mp3');
+    const audioSrc = type === 'image' 
+      ? '/api/uploads/matching_instruction.mp3' 
+      : '/api/uploads/word_image_matching_instruction.mp3';
+      
+    audioRef.current = new Audio(audioSrc);
     audioRef.current.onended = () => setIsPlaying(false);
     
     // Attempt to play on mount
@@ -66,7 +72,7 @@ export default function MatchingSettingsPage() {
         audioRef.current = null;
       }
     };
-  }, []);
+  }, [type]);
 
   const toggleAudio = () => {
     if (audioRef.current) {
@@ -87,7 +93,7 @@ export default function MatchingSettingsPage() {
   };
 
   const handleBack = () => {
-    router.back();
+    router.push(`/user/games/matching?type=${type}`);
   };
 
   const updateValue = (setter: React.Dispatch<React.SetStateAction<number>>, current: number, delta: number, min: number, max: number) => {
@@ -97,12 +103,10 @@ export default function MatchingSettingsPage() {
     }
   };
 
-  const type = searchParams.get('type') || 'image';
-
   const title = type === 'image' ? 'จับคู่ภาพกับภาพ' : 'จับคู่คำกับภาพ';
   const subtitle = type === 'image' 
     ? 'เลือกชิ้นส่วนภาพเหมือนในตัวเลือกให้ถูกต้อง' 
-    : 'เลือกคำที่ตรงกับภาพให้ถูกต้อง';
+    : 'เลือกชิ้นส่วนภาพในตัวเลือกให้ตรงกับคำให้ถูกต้อง';
 
   return (
     <div className={styles.container}>
@@ -123,8 +127,21 @@ export default function MatchingSettingsPage() {
         {/* Graphics Section */}
         <div className={styles.graphicsContainer}>
           <div className={styles.mainBox}>
-            <PictureIcon />
-            <div className={styles.questionMark}>?</div>
+            {type === 'image' ? (
+              <>
+                <PictureIcon />
+                <div className={styles.questionMark}>?</div>
+              </>
+            ) : (
+              <>
+                <div style={{ position: 'absolute', top: '10px', left: '10px' }}>
+                  <VolumeIcon isMuted={false} />
+                </div>
+                <div style={{ fontSize: '2rem', fontWeight: 'normal', color: '#000', display: 'flex', alignItems: 'flex-end', gap: '2px' }}>
+                  Text<span style={{ fontSize: '2.5rem', marginBottom: '-5px' }}>?</span>
+                </div>
+              </>
+            )}
           </div>
           
           <div className={styles.optionsBoxContainer}>
