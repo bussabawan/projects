@@ -265,7 +265,7 @@
 /* Main Content */
 .mainContent {
   flex: 1;
-  padding: 4rem;
+  padding: 1rem;
   transition: padding 0.3s ease;
   overflow-y: auto;
   display: flex;
@@ -338,7 +338,7 @@
     font-size: 5.5rem;
   }
   .mainContent {
-    padding: 5rem 6rem;
+    padding: 1rem 1rem;
   }
 }
 
