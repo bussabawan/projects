@@ -80,11 +80,13 @@ export default function MemoryCategoryPage() {
 
       <div className={styles.categoriesGrid}>
         {isLoading ? (
-          <div style={{ fontSize: '1.5rem', color: '#666', textAlign: 'center', width: '100%', padding: '2rem' }}>กำลังโหลดข้อมูล...</div>
+          Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className={styles.skeletonCard}></div>
+          ))
         ) : filteredExercises.length > 0 ? (
-          filteredExercises.map(ex => (
-            <Link key={ex.exercises_id} href={`/user/games/memory/${ex.exercises_id}?mode=${activeTab}`} className={styles.categoryCard}>
-              {ex.exercises_name}
+          filteredExercises.map((ex, index) => (
+            <Link key={`${ex.exercises_id}-${index}`} href={`/user/games/memory/${ex.exercises_id}?mode=${activeTab}`} className={styles.categoryCard}>
+              <span className={styles.cardText}>{ex.exercises_name}</span>
             </Link>
           ))
         ) : (
