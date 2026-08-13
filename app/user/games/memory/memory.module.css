@@ -21,9 +21,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 2rem;
+  gap: 1rem;
   margin-bottom: 3rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .tabsContainer {
@@ -33,11 +33,12 @@
   padding: 5px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
   box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .tabButton {
-  padding: 0.8rem 2.5rem;
-  font-size: 1.2rem;
+  padding: 0.6rem 1.5rem;
+  font-size: 1.1rem;
   font-weight: 500;
   border: none;
   background: transparent;
@@ -45,6 +46,7 @@
   border-radius: 25px;
   transition: background-color 0.2s, color 0.2s;
   color: #333;
+  white-space: nowrap;
 }
 
 .activeTab {
@@ -57,9 +59,11 @@
   align-items: center;
   background-color: #fff;
   border-radius: 30px;
-  padding: 0.5rem 1.5rem;
+  padding: 0.5rem 1rem;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  width: 350px;
+  width: 100%;
+  max-width: 350px;
+  flex: 1;
 }
 
 .searchInput {
@@ -84,19 +88,20 @@
 
 .categoriesGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 2.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1.5rem;
   width: 100%;
 }
 
 .categoryCard {
   background-color: #fff;
   border-radius: 20px;
-  padding: 3rem 2rem;
+  padding: 1.2rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 1.8rem;
+  text-align: center;
+  font-size: 1.2rem;
   font-weight: 500;
   color: #111;
   text-decoration: none;
@@ -104,6 +109,7 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   width: 100%;
   box-sizing: border-box;
+  aspect-ratio: 1 / 1;
 }
 
 .categoryCard:hover {
@@ -113,29 +119,50 @@
 
 @media (max-width: 768px) {
   .title {
-    font-size: 2.5rem;
+    font-size: 2.2rem;
+    margin-bottom: 1.5rem;
   }
 
   .controlsRow {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1.5rem;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    flex-wrap: nowrap;
   }
   
   .tabsContainer {
-    width: 100%;
-    justify-content: space-between;
+    width: auto;
+    flex: 1.2;
+    padding: 2px;
   }
 
   .tabButton {
+    padding: 0.2rem 0.1rem;
+    font-size: 0.8rem;
     flex: 1;
     text-align: center;
-    padding: 0.8rem 1rem;
+    white-space: nowrap;
   }
 
   .searchContainer {
+    width: auto;
+    flex: 0.8;
+    padding: 0.1rem 0.5rem;
+  }
+
+  .searchInput {
+    font-size: 0.85rem;
     width: 100%;
-    box-sizing: border-box;
+  }
+
+  .searchButton {
+    padding: 0.2rem;
+  }
+  
+  .searchButton svg {
+    width: 16px;
+    height: 16px;
   }
 
   .categoriesGrid {
@@ -145,8 +172,9 @@
 
   .categoryCard {
     width: 100%;
-    padding: 1.5rem 1rem;
-    font-size: 1.2rem;
+    padding: 1rem;
+    font-size: 1.1rem;
     border-radius: 15px;
+    aspect-ratio: 1 / 1;
   }
 }
