@@ -15,10 +15,11 @@ interface User {
   exercises_name?: string | null;
 }
 
+import { useDebounce } from '@/app/hooks/useDebounce';
+
 export default function ManageUsersPage() {
   const [activeTab, setActiveTab] = useState<"patient" | "staff">("patient");
   const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -75,13 +76,7 @@ export default function ManageUsersPage() {
     isLoadMoreRef.current = false;
   }, [fetchUsers]);
 
-  // Debounce search query
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   // Reset to page 1 when the debounced search term changes or tab changes
   useEffect(() => {

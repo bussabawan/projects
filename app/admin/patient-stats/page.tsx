@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import LoadingSpinner from "@/app/components/LoadingSpinner/LoadingSpinner";
 import styles from './patientStats.module.css';
 import { PatientStatInfo } from '@/lib/models/patientStats';
+import { useDebounce } from '@/app/hooks/useDebounce';
 import PatientStatsPopup from './components/PatientStatsPopup';
 
 const extractCategory = (testSet?: string) => {
@@ -103,11 +104,13 @@ export default function PatientStatsPage() {
     fetchStats();
   }, []);
 
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+
   useEffect(() => {
     let result = patients;
 
-    if (searchQuery.trim() !== '') {
-      const lowerQuery = searchQuery.toLowerCase();
+    if (debouncedSearchQuery.trim() !== '') {
+      const lowerQuery = debouncedSearchQuery.toLowerCase();
       result = result.filter(patient => 
         (patient.name && patient.name.toLowerCase().includes(lowerQuery)) || 
         (patient.patientId && patient.patientId.toLowerCase().includes(lowerQuery))
@@ -118,7 +121,7 @@ export default function PatientStatsPage() {
     setFilteredPatients(result);
     setCurrentPage(1);
     setMobileVisibleCount(10);
-  }, [searchQuery, patients]);
+  }, [debouncedSearchQuery, patients]);
 
   const totalPages = Math.ceil(filteredPatients.length / itemsPerPage);
   const currentPatients = filteredPatients.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
