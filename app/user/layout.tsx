@@ -44,8 +44,11 @@ export default function UserLayout({
     setIsCollapsed(!isCollapsed);
   };
 
+  const isGameInnerPage = pathname.startsWith("/user/games/") && pathname.split("/").length > 3;
+
   return (
-    <div className={styles.layoutContainer}>
+    <div className={`${styles.layoutContainer} ${isGameInnerPage ? styles.noBottomPadding : ''}`}>
+      {!isGameInnerPage && (
       <aside className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ""}`}>
         <button className={styles.toggleBtn} onClick={toggleSidebar} aria-label="Toggle Sidebar">
           <svg
@@ -131,7 +134,9 @@ export default function UserLayout({
           </div>
         </div>
       </aside>
+      )}
 
+      {!isGameInnerPage && (
       <div className={styles.mobileHeader}>
         <div className={styles.mobileUserPill}>{userName}</div>
         <Link href="/user/games" className={styles.mobileHomeBtn} aria-label="Home">
@@ -148,15 +153,18 @@ export default function UserLayout({
           </svg>
         </button>
       </div>
+      )}
 
-      <main className={styles.mainContent}>
+      <main className={isGameInnerPage ? styles.fullMainContent : styles.mainContent}>
         {children}
       </main>
 
       {/* Mobile Manual Button */}
+      {!isGameInnerPage && (
       <Link href="/user/manual" className={styles.mobileManualBtn} aria-label="Manual">
         ?
       </Link>
+      )}
     </div>
   );
 }
