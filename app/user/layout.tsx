@@ -91,7 +91,7 @@ export default function UserLayout({
             </span>
             <span className={styles.menuText}>ประเภทเกม</span>
           </Link>
-          <Link href="/user/history" className={`${styles.menuItem} ${pathname === '/user/history' ? styles.active : ''}`}>
+          <Link href="/user/history" className={`${styles.menuItem} ${pathname.startsWith('/user/history') ? styles.active : ''}`}>
             <span className={styles.menuIcon}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
