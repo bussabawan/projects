@@ -75,4 +75,18 @@ export class UserModel {
       console.error('Error logging login:', error);
     }
   }
+
+  /**
+   * Get exercises assigned to a user
+   */
+  static async getAssignedExercises(userId: string): Promise<{ exercises_id: number, exercises_name: string }[]> {
+    const [rows] = await db.query<RowDataPacket[]>(`
+      SELECT DISTINCT ex.exercises_id, ex.exercises_name 
+      FROM patient_data p
+      JOIN exercises_data ex ON p.exercises_id = ex.exercises_id
+      WHERE p.user_id = ? AND p.remove = 0 AND ex.remove = 0
+      ORDER BY ex.exercises_id ASC
+    `, [userId]);
+    return rows as { exercises_id: number, exercises_name: string }[];
+  }
 }

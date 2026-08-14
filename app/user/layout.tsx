@@ -71,6 +71,7 @@ export default function UserLayout({
               alt="Vejjarak Lampang Hospital Logo" 
               width={90} 
               height={90} 
+              priority
             />
           </div>
           <div className={styles.hospitalName}>โรงพยาบาลเวชชารักษ์ ลำปาง</div>

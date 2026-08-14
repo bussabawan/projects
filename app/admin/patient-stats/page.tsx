@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import LoadingSpinner from "@/app/components/LoadingSpinner/LoadingSpinner";
 import styles from './patientStats.module.css';
 import { PatientStatInfo } from '@/lib/models/patientStats';
+import { useDebounce } from '@/app/hooks/useDebounce';
 import PatientStatsPopup from './components/PatientStatsPopup';
 
 const extractCategory = (testSet?: string) => {
@@ -102,6 +103,8 @@ export default function PatientStatsPage() {
 
     fetchStats();
   }, []);
+
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   useEffect(() => {
     const timer = setTimeout(() => {

@@ -1,0 +1,226 @@
+.container {
+  width: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 2rem;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2.5rem;
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 3.5rem;
+  font-weight: 500;
+  color: #111;
+  margin: 0;
+}
+
+.controlsRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 1.5rem;
+  flex-wrap: nowrap;
+}
+
+.toggleContainer {
+  display: flex;
+  background-color: #fff;
+  border-radius: 40px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  padding: 2px;
+}
+
+.toggleBtn {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  background: transparent;
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #333;
+  border-radius: 40px;
+  white-space: nowrap;
+}
+
+.toggleBtn.active {
+  background-color: #dfc2df;
+  color: #111;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.searchContainer {
+  position: relative;
+  width: 320px;
+  max-width: 100%;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  padding-right: 3.5rem;
+  border-radius: 40px;
+  border: none;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  font-size: 1.1rem;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.searchIcon {
+  position: absolute;
+  right: 1.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #555;
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+}
+
+.categoriesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+  width: 100%;
+  margin-top: 2rem;
+   padding-bottom: 1rem;
+}
+
+.categoryBtn {
+  background-color: #fff;
+  border: none;
+  border-radius: 25px;
+  padding: 2.5rem;
+  font-size: 1.8rem;
+  font-weight: 500;
+  color: #111;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-align: center;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  word-break: break-word;
+}
+
+.categoryBtn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+}
+
+@media (max-width: 1200px) and (min-width: 769px) {
+  .categoriesGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+  .categoryBtn {
+    padding: 1.5rem;
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .header {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .controlsRow {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    width: 100%;
+    gap: 1rem;
+  }
+  .searchContainer {
+    flex: 1;
+  }
+  .toggleContainer {
+    flex: 1;
+    justify-content: center;
+  }
+  .toggleBtn {
+    flex: 1;
+    padding: 0.5rem 0.5rem;
+    font-size: 0.9rem;
+  }
+  .searchInput {
+    padding: 0.5rem 1rem;
+    padding-right: 2.5rem;
+    font-size: 0.9rem;
+  }
+  .searchIcon {
+    right: 0.8rem;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 2rem;
+  }
+  .controlsRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  .searchContainer, .toggleContainer {
+    width: 100%;
+  }
+  .categoriesGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .categoryBtn {
+    padding: 1rem 0.5rem;
+    font-size: 1.1rem;
+    border-radius: 15px;
+  }
+}
+
+.skeletonCard {
+  background-color: #f0f0f0;
+  border-radius: 25px;
+  min-height: 120px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+}
+
+.skeletonCard::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0.2) 20%,
+    rgba(255, 255, 255, 0.5) 60%,
+    rgba(255, 255, 255, 0)
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+

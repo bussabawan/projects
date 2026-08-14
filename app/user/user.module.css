@@ -1,6 +1,6 @@
 .layoutContainer {
   display: flex;
-  height: 100vh;
+  height: 100dvh; /* Changed from 100vh to fix cutoff behind browser toolbars */
   width: 100vw;
   overflow: hidden;
   background-color: #eaeaea;
@@ -273,6 +273,13 @@
   box-sizing: border-box;
 }
 
+.mainContent::after {
+  content: "";
+  display: block;
+  min-height: 4rem;
+  flex-shrink: 0;
+}
+
 .pageTitle {
   font-size: 3.5rem;
   font-weight: 500;
@@ -452,7 +459,8 @@
     padding: 1.5rem 1.5rem 0 1.5rem;
     width: 100%;
     flex: 1;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
     display: flex;
     flex-direction: column;
     -ms-overflow-style: none; /* IE and Edge */
