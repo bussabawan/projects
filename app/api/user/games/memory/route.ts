@@ -1,20 +1,19 @@
-'use server';
-
+import { NextRequest, NextResponse } from 'next/server';
 import { ManageExercisesModel } from '@/lib/models/manageExercises';
 import { auth } from '@/auth';
 
-export async function getExercisesData() {
+export async function GET(req: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return { success: false, error: 'Unauthorized' };
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     const userId = parseInt(session.user.id, 10);
     const exercises = await ManageExercisesModel.getExercisesByPatientId(userId);
-    return { success: true, data: exercises };
+    return NextResponse.json({ success: true, data: exercises });
   } catch (error) {
     console.error('Error fetching exercises:', error);
-    return { success: false, error: 'Failed to fetch exercises' };
+    return NextResponse.json({ success: false, error: 'Failed to fetch exercises' }, { status: 500 });
   }
 }

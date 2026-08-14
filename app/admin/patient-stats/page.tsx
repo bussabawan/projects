@@ -41,6 +41,7 @@ export default function PatientStatsPage() {
   const [patients, setPatients] = useState<PatientStatInfo[]>([]);
   const [filteredPatients, setFilteredPatients] = useState<PatientStatInfo[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [mobileVisibleCount, setMobileVisibleCount] = useState(20);
@@ -103,10 +104,17 @@ export default function PatientStatsPage() {
   }, []);
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  useEffect(() => {
     let result = patients;
 
-    if (searchQuery.trim() !== '') {
-      const lowerQuery = searchQuery.toLowerCase();
+    if (debouncedSearchQuery.trim() !== '') {
+      const lowerQuery = debouncedSearchQuery.toLowerCase();
       result = result.filter(patient => 
         (patient.name && patient.name.toLowerCase().includes(lowerQuery)) || 
         (patient.patientId && patient.patientId.toLowerCase().includes(lowerQuery))
@@ -117,7 +125,7 @@ export default function PatientStatsPage() {
     setFilteredPatients(result);
     setCurrentPage(1);
     setMobileVisibleCount(10);
-  }, [searchQuery, patients]);
+  }, [debouncedSearchQuery, patients]);
 
   const totalPages = Math.ceil(filteredPatients.length / itemsPerPage);
   const currentPatients = filteredPatients.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
