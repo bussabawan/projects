@@ -110,16 +110,18 @@ export default function MatchingSettingsPage() {
 
   return (
     <div className={styles.container}>
-      <button 
-        className={styles.audioToggleBtn} 
-        onClick={toggleAudio}
-        aria-label={isPlaying ? "Mute instruction" : "Play instruction"}
-        title={isPlaying ? "ปิดเสียงคำแนะนำ" : "เปิดเสียงคำแนะนำ"}
-      >
-        <VolumeIcon isMuted={!isPlaying} />
-      </button>
       <div className={styles.header}>
-        <h1 className={styles.title}>{title}</h1>
+        <h1 className={styles.title}>
+          {title}
+          <button 
+            className={styles.audioToggleBtn} 
+            onClick={toggleAudio}
+            aria-label={isPlaying ? "Mute instruction" : "Play instruction"}
+            title={isPlaying ? "ปิดเสียงคำแนะนำ" : "เปิดเสียงคำแนะนำ"}
+          >
+            <VolumeIcon isMuted={!isPlaying} />
+          </button>
+        </h1>
         <p className={styles.subtitle}>{subtitle}</p>
       </div>
 
@@ -209,12 +211,12 @@ export default function MatchingSettingsPage() {
               </button>
             </div>
           </div>
-
-          <div className={styles.buttonGroup}>
-            <button className={styles.startBtn} onClick={handleStart}>เริ่มเกม</button>
-            <button className={styles.backBtn} onClick={handleBack}>ย้อนกลับ</button>
-          </div>
         </div>
+      </div>
+
+      <div className={styles.buttonGroup}>
+        <button className={styles.backBtn} onClick={handleBack}>ย้อนกลับ</button>
+        <button className={styles.startBtn} onClick={handleStart}>เริ่มเกม</button>
       </div>
     </div>
   );
