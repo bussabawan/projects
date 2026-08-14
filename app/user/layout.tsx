@@ -44,7 +44,7 @@ export default function UserLayout({
     setIsCollapsed(!isCollapsed);
   };
 
-  const isGameInnerPage = pathname.startsWith("/user/games/") && pathname.split("/").length > 3;
+  const isGameInnerPage = pathname.startsWith("/user/games/") && pathname.split("/").length > 4;
 
   return (
     <div className={`${styles.layoutContainer} ${isGameInnerPage ? styles.noBottomPadding : ''}`}>

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import styles from './matchingSettings.module.css';
+import { getExerciseImageCount } from '../actions';
 
 // Generic picture icon SVG
 const PictureIcon = () => (
@@ -40,9 +41,19 @@ export default function MatchingSettingsPage() {
   const type = searchParams.get('type') || 'image';
 
   const [questions, setQuestions] = useState(30);
+  const [maxQuestions, setMaxQuestions] = useState(30);
   const [answers, setAnswers] = useState(2);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    if (params.id) {
+      getExerciseImageCount(Number(params.id)).then(count => {
+        setMaxQuestions(count);
+        setQuestions(prev => Math.min(prev, count));
+      });
+    }
+  }, [params.id]);
 
   useEffect(() => {
     // Initialize audio
@@ -165,7 +176,8 @@ export default function MatchingSettingsPage() {
             <div className={styles.controlGroup}>
               <button 
                 className={styles.controlBtn} 
-                onClick={() => updateValue(setQuestions, questions, -1, 1, 30)}
+                onClick={() => updateValue(setQuestions, questions, -1, 1, maxQuestions)}
+                disabled={questions <= 1}
                 aria-label="Decrease questions"
               >
                 -
@@ -178,7 +190,8 @@ export default function MatchingSettingsPage() {
               />
               <button 
                 className={styles.controlBtn} 
-                onClick={() => updateValue(setQuestions, questions, 1, 1, 30)}
+                onClick={() => updateValue(setQuestions, questions, 1, 1, maxQuestions)}
+                disabled={questions >= maxQuestions}
                 aria-label="Increase questions"
               >
                 +
@@ -192,6 +205,7 @@ export default function MatchingSettingsPage() {
               <button 
                 className={styles.controlBtn} 
                 onClick={() => updateValue(setAnswers, answers, -1, 2, 6)}
+                disabled={answers <= 2}
                 aria-label="Decrease answers"
               >
                 -
@@ -205,6 +219,7 @@ export default function MatchingSettingsPage() {
               <button 
                 className={styles.controlBtn} 
                 onClick={() => updateValue(setAnswers, answers, 1, 2, 6)}
+                disabled={answers >= 6}
                 aria-label="Increase answers"
               >
                 +
