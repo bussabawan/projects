@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import LoadingSpinner from "@/app/components/LoadingSpinner/LoadingSpinner";
 import DeleteConfirmModal from "@/app/admin/components/DeleteConfirmModal";
 import RestoreConfirmModal from "@/app/admin/components/RestoreConfirmModal";
+import AlertModal from "@/app/admin/components/AlertModal";
 import styles from "./exercises.module.css";
 
 interface Exercise {
@@ -20,6 +21,7 @@ export default function ManageExercisesPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Modal state
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newExerciseName, setNewExerciseName] = useState("");
   const [isAddingExercise, setIsAddingExercise] = useState(false);
@@ -174,11 +176,11 @@ export default function ManageExercisesPage() {
       if (data.success) {
         window.location.reload();
       } else {
-        alert(data.error || 'เกิดข้อผิดพลาดในการลบชุดแบบฝึกหัด');
+        setAlertMessage(data.error || 'เกิดข้อผิดพลาดในการลบชุดแบบฝึกหัด');
         setIsDeleteModalOpen(false);
       }
     } catch (err) {
-      alert('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+      setAlertMessage('เกิดข้อผิดพลาดในการเชื่อมต่อ');
       setIsDeleteModalOpen(false);
     }
   };
@@ -196,11 +198,11 @@ export default function ManageExercisesPage() {
       if (data.success) {
         window.location.reload();
       } else {
-        alert(data.error || 'เกิดข้อผิดพลาดในการกู้คืน');
+        setAlertMessage(data.error || 'เกิดข้อผิดพลาดในการกู้คืน');
         setIsRestoreModalOpen(false);
       }
     } catch (err) {
-      alert('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+      setAlertMessage('เกิดข้อผิดพลาดในการเชื่อมต่อ');
       setIsRestoreModalOpen(false);
     }
   };
@@ -240,10 +242,10 @@ export default function ManageExercisesPage() {
         setIsImageModalOpen(false);
         window.location.reload();
       } else {
-        alert(data.error || 'เกิดข้อผิดพลาดในการบันทึกรูปภาพ');
+        setAlertMessage(data.error || 'เกิดข้อผิดพลาดในการบันทึกรูปภาพ');
       }
     } catch (err) {
-      alert('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+      setAlertMessage('เกิดข้อผิดพลาดในการเชื่อมต่อ');
     } finally {
       setIsSavingImages(false);
     }
@@ -251,6 +253,10 @@ export default function ManageExercisesPage() {
 
   const toggleImageSelection = (id: number) => {
     setSelectedImageIds(prev => {
+      if (!prev.includes(id) && prev.length >= 30) {
+        setAlertMessage("คุณสามารถเลือกรูปภาพได้สูงสุด 30 รูปเท่านั้น (สอดคล้องกับจำนวนคำถามสูงสุดในเกม)");
+        return prev;
+      }
       const newIds = prev.includes(id) ? prev.filter(imgId => imgId !== id) : [...prev, id];
       latestSelectedIdsRef.current = newIds;
       return newIds;
@@ -653,6 +659,13 @@ export default function ManageExercisesPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {alertMessage && (
+        <AlertModal 
+          title={alertMessage} 
+          onConfirm={() => setAlertMessage(null)} 
+        />
       )}
     </div>
   );
