@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from './matching.module.css';
-import { getUserAssignedExercises } from './actions';
+
 
 import { useDebounce } from '@/app/hooks/useDebounce';
 
@@ -16,9 +16,19 @@ export default function MatchingCategoryClient() {
 
   useEffect(() => {
     const fetchExercises = async () => {
-      const data = await getUserAssignedExercises();
-      setExercises(data);
-      setLoading(false);
+      try {
+        const res = await fetch('/api/user/exercises');
+        const json = await res.json();
+        if (json.success) {
+          setExercises(json.data);
+        } else {
+          console.error(json.error);
+        }
+      } catch (error) {
+        console.error('Failed to fetch exercises:', error);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchExercises();
   }, []);

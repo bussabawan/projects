@@ -38,6 +38,8 @@ export default function ManageUsersPage() {
   const [deleteUserId, setDeleteUserId] = useState<number | null>(null);
   const [deleteUserRole, setDeleteUserRole] = useState<number>(1);
 
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+
   const fetchUsers = useCallback(async () => {
     const isLoadMore = isLoadMoreRef.current;
     if (isLoadMore) {
@@ -75,8 +77,6 @@ export default function ManageUsersPage() {
     fetchUsers();
     isLoadMoreRef.current = false;
   }, [fetchUsers]);
-
-  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   // Reset to page 1 when the debounced search term changes or tab changes
   useEffect(() => {
