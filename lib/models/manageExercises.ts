@@ -28,8 +28,8 @@ export class ManageExercisesModel {
     
     if (search) {
       const searchPattern = `%${search}%`;
-      baseQuery += ' AND exercises_name LIKE ?';
-      countQuery += ' AND exercises_name LIKE ?';
+      baseQuery += ' AND LOWER(exercises_name) COLLATE utf8mb4_bin LIKE LOWER(?) COLLATE utf8mb4_bin';
+      countQuery += ' AND LOWER(exercises_name) COLLATE utf8mb4_bin LIKE LOWER(?) COLLATE utf8mb4_bin';
       queryParams.push(searchPattern);
     }
     
