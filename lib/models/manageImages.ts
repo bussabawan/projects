@@ -111,15 +111,20 @@ export class ManageImagesModel {
    * Update an existing image
    * @throws Error if new title already exists for another image
    */
-  static async updateImage(id: number, data: { title: string, imageUrl: string, audioUrl?: string, audioTitle?: string, audioGen?: number }): Promise<void> {
+  static async updateImage(id: number, data: { title: string, imageUrl: string, audioUrl?: string, audioTitle?: string, audioGen?: number }): Promise<void | { isDuplicateDeleted: boolean, duplicateId: number }> {
     // Check if title is duplicated by another image
     const [existingRows] = await db.query<RowDataPacket[]>(
-      `SELECT photo_id as id FROM photo_data WHERE photo_title = ? AND photo_id != ?`,
+      `SELECT photo_id as id, remove FROM photo_data WHERE photo_title = ? AND photo_id != ?`,
       [data.title, id]
     );
 
     if (existingRows.length > 0) {
-      throw new Error("มีชื่อรูปภาพนี้อยู่ในระบบแล้ว (Image title already exists)");
+      const existing = existingRows[0];
+      if (existing.remove === 1) {
+        return { isDuplicateDeleted: true, duplicateId: existing.id };
+      } else {
+        throw new Error("มีชื่อรูปภาพนี้อยู่ในระบบแล้ว (Image title already exists)");
+      }
     }
 
     await db.execute(
