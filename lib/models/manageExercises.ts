@@ -125,6 +125,20 @@ export class ManageExercisesModel {
   }
 
   /**
+   * Get image count for an exercise
+   */
+  static async getExerciseImageCount(exerciseId: number): Promise<number> {
+    const [rows] = await db.query<RowDataPacket[]>(
+      `SELECT COUNT(pie.photo_id) as count 
+       FROM photo_in_exercises pie
+       JOIN exercises_data ed ON pie.exercises_id = ed.exercises_id
+       WHERE ed.exercises_id = ? AND ed.remove = 0 AND pie.remove = 0`,
+      [exerciseId]
+    );
+    return rows[0].count as number;
+  }
+
+  /**
    * Update selected photos for an exercise
    */
   static async updateExerciseImages(name: string, newPhotoIds: number[]): Promise<void> {
