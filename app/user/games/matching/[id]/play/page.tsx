@@ -59,6 +59,7 @@ export default function MatchingGamePage() {
   // Game state
   const [isFinished, setIsFinished] = useState(false);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
+  const [showExitPopup, setShowExitPopup] = useState(false);
   
   const [isMuted, setIsMuted] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -145,7 +146,15 @@ export default function MatchingGamePage() {
   };
 
   const handleEndGame = () => {
+    setShowExitPopup(true);
+  };
+
+  const confirmEndGame = () => {
     router.push(`/user/games/matching/${exerciseId}?type=${type}`);
+  };
+
+  const cancelEndGame = () => {
+    setShowExitPopup(false);
   };
 
   const toggleMute = () => {
@@ -271,6 +280,26 @@ export default function MatchingGamePage() {
           {questions[currentIndex + 1].choices.map((choice, idx) => (
             <img key={`preload-${choice.id}-${idx}`} src={choice.imageUrl} alt={`preload choice ${idx}`} />
           ))}
+        </div>
+      )}
+
+      {/* Exit Confirmation Popup */}
+      {showExitPopup && (
+        <div className={styles.popupOverlay}>
+          <div className={styles.popupContainer}>
+            <div className={styles.popupIcon}>
+              <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+            </div>
+            <div className={styles.popupText}>ต้องการออกจากเกมหรือไม่</div>
+            <div className={styles.popupButtons}>
+              <button className={styles.popupBtnConfirm} onClick={confirmEndGame}>ตกลง</button>
+              <button className={styles.popupBtnCancel} onClick={cancelEndGame}>ยกเลิก</button>
+            </div>
+          </div>
         </div>
       )}
     </div>
