@@ -210,7 +210,7 @@ export default function MatchingGamePage() {
           เวลา : {formatTime(elapsedSeconds)}
         </div>
         <div className={styles.headerRight}>
-          <button className={styles.audioBtn} onClick={toggleMute} aria-label="Toggle Audio">
+          <button className={styles.audioBtnDesktop} onClick={toggleMute} aria-label="Toggle Audio">
             <VolumeIcon isMuted={isMuted} />
           </button>
           <button className={styles.endGameBtn} onClick={handleEndGame}>
@@ -219,8 +219,13 @@ export default function MatchingGamePage() {
         </div>
       </div>
 
-      <div className={styles.progressText}>
-        ข้อ {currentIndex + 1} จาก {questions.length}
+      <div className={styles.progressContainer}>
+        <div className={styles.progressText}>
+          ข้อ {currentIndex + 1} จาก {questions.length}
+        </div>
+        <button className={styles.audioBtnMobile} onClick={toggleMute} aria-label="Toggle Audio">
+          <VolumeIcon isMuted={isMuted} />
+        </button>
       </div>
 
       <div className={styles.gameArea}>
