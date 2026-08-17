@@ -99,7 +99,7 @@ export default function MatchingSettingsPage() {
 
   const handleStart = () => {
     // Logic to start the game
-    // router.push(`/user/games/matching/${params.id}/play?type=${searchParams.get('type')}&q=${questions}&a=${answers}`);
+    router.push(`/user/games/matching/${params.id}/play?type=${type}&q=${questions}&a=${answers}`);
     console.log("Starting game with:", { questions, answers });
   };
 

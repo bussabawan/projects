@@ -3,6 +3,7 @@
 import { auth } from "@/auth";
 import { UserModel } from '@/lib/models/user';
 import { ManageExercisesModel } from '@/lib/models/manageExercises';
+import { GameMatchingModel } from '@/lib/models/gameMatching';
 
 export async function getUserAssignedExercises() {
   try {
@@ -24,5 +25,59 @@ export async function getExerciseImageCount(exerciseId: number): Promise<number>
   } catch (error) {
     console.error("Failed to fetch exercise image count:", error);
     return 30; // Default fallback
+  }
+}
+
+export async function getGameData(exerciseId: number, numQuestions: number, numAnswers: number) {
+  try {
+    // 1. Get all target images for the exercise
+    const allTargetImages = await GameMatchingModel.getExerciseImages(exerciseId);
+    if (!allTargetImages || allTargetImages.length === 0) {
+      throw new Error("No images found for this exercise");
+    }
+
+    // Shuffle and pick numQuestions target images
+    const shuffledTargets = allTargetImages.sort(() => 0.5 - Math.random());
+    const selectedTargets = shuffledTargets.slice(0, numQuestions);
+
+    // Helper to format image URL
+    const formatImageUrl = (url: string) => {
+      if (!url) return '/placeholder-image.png'; // Use a local placeholder if possible or just broken image
+      if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
+      if (url.startsWith('/api/uploads/')) return url;
+      
+      // Extract just the filename to prevent directory traversal errors in the API route
+      const filename = url.split('/').pop();
+      return `/api/uploads/${filename}`;
+    };
+
+    const questions = [];
+
+    // 2. For each target image, pick distractor images
+    for (const target of selectedTargets) {
+      // Get distractors (excluding the target itself)
+      const distractors = await GameMatchingModel.getRandomImages(numAnswers - 1, [target.id]);
+      
+      // Combine target and distractors
+      const rawChoices = [target, ...distractors];
+      
+      const choices = rawChoices.map(c => ({
+        ...c,
+        imageUrl: formatImageUrl(c.imageUrl)
+      }));
+
+      // Shuffle choices
+      const shuffledChoices = choices.sort(() => 0.5 - Math.random());
+
+      questions.push({
+        target: { ...target, imageUrl: formatImageUrl(target.imageUrl) },
+        choices: shuffledChoices,
+      });
+    }
+
+    return { success: true, data: questions };
+  } catch (error) {
+    console.error("Failed to fetch game data:", error);
+    return { success: false, error: "Failed to load game data" };
   }
 }

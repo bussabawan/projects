@@ -1,0 +1,169 @@
+.container {
+  min-height: calc(100vh - 120px);
+  padding: 2rem 4rem;
+  background-color: #f0f0f0; /* Match setting page if possible, or just gray */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.timer {
+  font-size: 1.5rem;
+  font-weight: 500;
+  background-color: #e0e0e0;
+  padding: 0.5rem 1.5rem;
+  border-radius: 8px;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.audioBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+
+.audioBtn:hover {
+  transform: scale(1.1);
+}
+
+.endGameBtn {
+  background-color: #ff0000;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 0.8rem 2.5rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.endGameBtn:hover {
+  background-color: #cc0000;
+}
+
+.progressText {
+  font-size: 2.5rem;
+  font-weight: 500;
+  margin-bottom: 3rem;
+  color: #111;
+}
+
+.gameArea {
+  display: flex;
+  gap: 4rem;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+}
+
+.targetContainer {
+  flex: 1;
+  max-width: 500px;
+  background-color: #e0e0e0;
+  border-radius: 16px;
+  border: 1px solid #aaa;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  min-height: 400px;
+  position: relative;
+}
+
+.targetImage {
+  width: 100%;
+  height: auto;
+  max-height: 500px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.choicesContainer {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  max-width: 600px;
+}
+
+.choiceBox {
+  background-color: #e0e0e0;
+  border-radius: 16px;
+  border: 1px solid #aaa;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  min-height: 200px;
+  position: relative;
+}
+
+.choiceBox:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.choiceImage {
+  width: 100%;
+  height: auto;
+  max-height: 250px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 50vh;
+  font-size: 1.5rem;
+  color: #666;
+}
+
+.resultOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255,255,255,0.8);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  border-radius: 20px;
+}
+
+.resultText {
+  font-size: 4rem;
+  font-weight: bold;
+  color: #4CAF50; /* Green for correct, change for wrong if needed */
+  margin-bottom: 2rem;
+}
+
+.wrongText {
+  color: #f44336;
+}
