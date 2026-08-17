@@ -1,0 +1,64 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #fdfdfd;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 450px;
+  padding: 4rem 2rem 3rem 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.icon {
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: #111;
+  margin-bottom: 2rem;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.buttonRow {
+  display: flex;
+  justify-content: center;
+}
+
+.confirmBtn {
+  background: #f0e6ff; /* light purple */
+  color: #111;
+  border: 1px solid #9c7ee6;
+  border-radius: 20px;
+  padding: 0.5rem 3rem;
+  font-size: 1.2rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.confirmBtn:hover {
+  background: #e6d9ff;
+}

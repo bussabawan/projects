@@ -43,8 +43,8 @@ export class ManageExercisesModel {
     
     if (search) {
       const searchPattern = `%${search}%`;
-      baseQuery += ' AND exercises_name LIKE ?';
-      countQuery += ' AND exercises_name LIKE ?';
+      baseQuery += ' AND LOWER(exercises_name) COLLATE utf8mb4_bin LIKE LOWER(?) COLLATE utf8mb4_bin';
+      countQuery += ' AND LOWER(exercises_name) COLLATE utf8mb4_bin LIKE LOWER(?) COLLATE utf8mb4_bin';
       queryParams.push(searchPattern);
     }
     
@@ -137,6 +137,20 @@ export class ManageExercisesModel {
       [name]
     );
     return rows.map(r => r.photo_id as number);
+  }
+
+  /**
+   * Get image count for an exercise
+   */
+  static async getExerciseImageCount(exerciseId: number): Promise<number> {
+    const [rows] = await db.query<RowDataPacket[]>(
+      `SELECT COUNT(pie.photo_id) as count 
+       FROM photo_in_exercises pie
+       JOIN exercises_data ed ON pie.exercises_id = ed.exercises_id
+       WHERE ed.exercises_id = ? AND ed.remove = 0 AND pie.remove = 0`,
+      [exerciseId]
+    );
+    return rows[0].count as number;
   }
 
   /**

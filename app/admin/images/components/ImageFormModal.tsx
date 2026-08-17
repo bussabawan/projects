@@ -29,6 +29,7 @@ export default function ImageFormModal({ image, onClose, onSave }: ImageFormModa
   const [isSaving, setIsSaving] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [ttsError, setTtsError] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const uploadFile = async (file: File) => {
     const formData = new FormData();
@@ -50,11 +51,29 @@ export default function ImageFormModal({ image, onClose, onSave }: ImageFormModa
   };
 
   const handleSave = async () => {
+    let uploadedImageUrl = image?.imageUrl || null;
+    let uploadedAudioUrl = image?.audioUrl || null;
+
+    if (!imageFile && !uploadedImageUrl) {
+      setValidationError("กรุณาเลือกรูปภาพก่อนบันทึก");
+      return;
+    }
+
+    if (useAutoSpeech) {
+      if (!speechText.trim()) {
+        setValidationError("กรุณากรอกข้อความเสียงก่อนบันทึก");
+        return;
+      }
+    } else {
+      if (!audioFile && !uploadedAudioUrl) {
+        setValidationError("กรุณาเลือกไฟล์เสียงก่อนบันทึก");
+        return;
+      }
+    }
+
+    setValidationError(null);
     setIsSaving(true);
     try {
-      let uploadedImageUrl = image?.imageUrl || null;
-      let uploadedAudioUrl = image?.audioUrl || null;
-
       if (imageFile) {
         uploadedImageUrl = await uploadFile(imageFile);
       }
@@ -206,6 +225,7 @@ export default function ImageFormModal({ image, onClose, onSave }: ImageFormModa
                     </span>
                   </label>
                 )}
+                {validationError && <div className={styles.errorText} style={{marginTop: '0.5rem'}}>{validationError}</div>}
               </div>
             </div>
 

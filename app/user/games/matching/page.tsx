@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from 'next/dynamic';
-import React from 'react';
+import React, { Suspense } from 'react';
 import styles from './matching.module.css';
 
 const MatchingCategoryClient = dynamic(() => import('./MatchingCategoryClient'), {
@@ -21,5 +21,9 @@ const MatchingCategoryClient = dynamic(() => import('./MatchingCategoryClient'),
 });
 
 export default function MatchingCategoryPage() {
-  return <MatchingCategoryClient />;
+  return (
+    <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>}>
+      <MatchingCategoryClient />
+    </Suspense>
+  );
 }

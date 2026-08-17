@@ -26,7 +26,7 @@ export class ManageImagesModel {
 
     let whereClause = "WHERE remove = 0";
     if (search) {
-      whereClause += " AND photo_title LIKE ?";
+      whereClause += " AND LOWER(photo_title) COLLATE utf8mb4_bin LIKE LOWER(?) COLLATE utf8mb4_bin";
       queryParams.push(`%${search}%`);
       countParams.push(`%${search}%`);
     }

@@ -280,6 +280,16 @@
   flex-shrink: 0;
 }
 
+.fullMainContent {
+  flex: 1;
+  padding: 0; /* Or minimal padding */
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  background-color: #eaeaea;
+}
+
 .pageTitle {
   font-size: 3.5rem;
   font-weight: 500;
@@ -360,6 +370,10 @@
     box-sizing: border-box;
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
+  }
+  
+  .noBottomPadding {
+    padding-bottom: 0 !important;
   }
   
   .layoutContainer::-webkit-scrollbar {
@@ -466,8 +480,22 @@
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
   }
+
+  .fullMainContent {
+    padding: 0;
+    width: 100%;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    background-color: transparent;
+  }
   
-  .mainContent::-webkit-scrollbar {
+  .mainContent::-webkit-scrollbar,
+  .fullMainContent::-webkit-scrollbar {
     display: none;
   }
 
