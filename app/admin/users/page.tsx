@@ -200,7 +200,7 @@ export default function ManageUsersPage() {
       </div>
 
       <div className={styles.controlsRow}>
-        <div className={styles.tabSwitcher}>
+        <div className={`${styles.tabSwitcher} ${activeTab === 'patient' ? styles.tabPatient : styles.tabStaff}`}>
           <button 
             className={`${styles.tabBtn} ${activeTab === "patient" ? styles.active : ""}`}
             onClick={() => handleTabChange("patient")}

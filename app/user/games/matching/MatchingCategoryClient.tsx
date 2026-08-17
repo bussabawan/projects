@@ -43,7 +43,7 @@ export default function MatchingCategoryClient() {
         <h1 className={styles.title}>จับคู่</h1>
         
         <div className={styles.controlsRow}>
-          <div className={styles.toggleContainer}>
+          <div className={`${styles.toggleContainer} ${activeTab === 'word' ? styles.toggleWord : styles.toggleImage}`}>
             <button 
               className={`${styles.toggleBtn} ${activeTab === 'image' ? styles.active : ''}`}
               onClick={() => setActiveTab('image')}

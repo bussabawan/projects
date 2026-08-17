@@ -54,7 +54,7 @@ export default function MemoryCategoryClient() {
       <h1 className={styles.title}>ความจำ</h1>
       
       <div className={styles.controlsRow}>
-        <div className={styles.tabsContainer}>
+        <div className={`${styles.tabsContainer} ${activeTab === 'word' ? styles.tabWord : styles.tabImage}`}>
           <button 
             className={`${styles.tabButton} ${activeTab === 'picture' ? styles.activeTab : ''}`}
             onClick={() => setActiveTab('picture')}
