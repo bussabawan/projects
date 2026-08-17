@@ -29,6 +29,7 @@ interface Choice {
   id: number;
   title: string;
   imageUrl: string;
+  audioUrl?: string;
 }
 
 interface Question {
@@ -59,8 +60,32 @@ export default function MatchingGamePage() {
   const [isFinished, setIsFinished] = useState(false);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
   
-  // Audio state
   const [isMuted, setIsMuted] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    // Cleanup on unmount
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
+  const playAudio = (url?: string) => {
+    if (!url || isMuted) return;
+    
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = "";
+    }
+    
+    const audio = new Audio(url);
+    audioRef.current = audio;
+    audio.play().catch(e => console.error('Audio play failed:', e));
+  };
 
   // Timer effect
   useEffect(() => {
@@ -95,8 +120,10 @@ export default function MatchingGamePage() {
     fetchGameData();
   }, [exerciseId, numQuestions, numAnswers]);
 
-  const handleChoiceClick = (choiceId: number) => {
+  const handleChoiceClick = (choiceId: number, audioUrl?: string) => {
     if (feedback !== null || isFinished) return; // Prevent clicking while showing feedback
+
+    playAudio(audioUrl);
 
     const currentQ = questions[currentIndex];
     if (choiceId === currentQ.target.id) {
@@ -123,6 +150,9 @@ export default function MatchingGamePage() {
 
   const toggleMute = () => {
     setIsMuted(!isMuted);
+    if (!isMuted && audioRef.current) {
+      audioRef.current.pause();
+    }
   };
 
   // Format timer MM.SS
@@ -194,7 +224,11 @@ export default function MatchingGamePage() {
       </div>
 
       <div className={styles.gameArea}>
-        <div className={styles.targetContainer}>
+        <div 
+          className={styles.targetContainer} 
+          onClick={() => playAudio(currentQ.target.audioUrl)}
+          style={{ cursor: currentQ.target.audioUrl && !isMuted ? 'pointer' : 'default' }}
+        >
           <img 
             src={currentQ.target.imageUrl} 
             alt="Target" 
@@ -210,7 +244,7 @@ export default function MatchingGamePage() {
             <div 
               key={`${choice.id}-${idx}`} 
               className={styles.choiceBox}
-              onClick={() => handleChoiceClick(choice.id)}
+              onClick={() => handleChoiceClick(choice.id, choice.audioUrl)}
             >
               <img 
                 src={choice.imageUrl} 

@@ -40,9 +40,9 @@ export async function getGameData(exerciseId: number, numQuestions: number, numA
     const shuffledTargets = allTargetImages.sort(() => 0.5 - Math.random());
     const selectedTargets = shuffledTargets.slice(0, numQuestions);
 
-    // Helper to format image URL
-    const formatImageUrl = (url: string) => {
-      if (!url) return '/placeholder-image.png'; // Use a local placeholder if possible or just broken image
+    // Helper to format media URL
+    const formatMediaUrl = (url: string | undefined | null) => {
+      if (!url) return ''; 
       if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
       if (url.startsWith('/api/uploads/')) return url;
       
@@ -63,14 +63,19 @@ export async function getGameData(exerciseId: number, numQuestions: number, numA
       
       const choices = rawChoices.map(c => ({
         ...c,
-        imageUrl: formatImageUrl(c.imageUrl)
+        imageUrl: formatMediaUrl(c.imageUrl) || '/placeholder-image.png',
+        audioUrl: formatMediaUrl(c.audioUrl)
       }));
 
       // Shuffle choices
       const shuffledChoices = choices.sort(() => 0.5 - Math.random());
 
       questions.push({
-        target: { ...target, imageUrl: formatImageUrl(target.imageUrl) },
+        target: { 
+          ...target, 
+          imageUrl: formatMediaUrl(target.imageUrl) || '/placeholder-image.png',
+          audioUrl: formatMediaUrl(target.audioUrl)
+        },
         choices: shuffledChoices,
       });
     }
