@@ -33,7 +33,7 @@ export async function getGameData(exerciseId: number, numQuestions: number, numA
     // 1. Get all target images for the exercise
     const allTargetImages = await GameMatchingModel.getExerciseImages(exerciseId);
     if (!allTargetImages || allTargetImages.length === 0) {
-      return { success: false, error: "ไม่พบข้อมูลรูปภาพสำหรับแบบฝึกหัดนี้ โปรดเพิ่มรูปภาพในระบบจัดการ" };
+      return { success: false, error: "ไม่พบข้อมูลรูปภาพสำหรับแบบฝึกหัดนี้ โปรดติดต่อเจ้าหน้าที่" };
     }
 
     // Shuffle and pick numQuestions target images
