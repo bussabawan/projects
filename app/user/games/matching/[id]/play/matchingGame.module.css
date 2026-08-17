@@ -1,5 +1,5 @@
 .container {
-  min-height: calc(100vh - 120px);
+  min-height: 100vh;
   padding: 2rem 4rem;
   background-color: #f0f0f0; /* Match setting page if possible, or just gray */
   position: relative;
