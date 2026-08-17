@@ -4,24 +4,24 @@ import React, { useEffect, useState } from 'react';
 import LoadingSpinner from "@/app/components/LoadingSpinner/LoadingSpinner";
 import styles from './patientStats.module.css';
 import { PatientStatInfo } from '@/lib/models/patientStats';
+import { useDebounce } from '@/app/hooks/useDebounce';
 import PatientStatsPopup from './components/PatientStatsPopup';
 
 const extractCategory = (testSet?: string) => {
   if (!testSet) return '';
-  const match = testSet.match(/หมวด(.*?)(?:\s+เลเวล|$)/);
-  return match ? match[1].trim() : testSet;
+  return testSet.replace(/^(?:แบบฝึกหัด\s*)?(?:หมวด\s*)?/, '').replace(/\s+เลเวล\s*/, 'เลเวล');
 };
 
 const renderTestSetTags = (patient: PatientStatInfo) => {
-  const assignedSets = patient.assignedSets;
-  if (!assignedSets || assignedSets.length === 0) return null;
+  const allSets = patient.testSets;
+  if (!allSets || allSets.length === 0) return null;
   
-  // Deduplicate by the exact assigned string to accurately check play history
-  const uniqueAssignedSets = Array.from(new Set(assignedSets.filter(Boolean)));
+  // Deduplicate by the exact string to accurately check play history
+  const uniqueSets = Array.from(new Set(allSets.filter(Boolean)));
   
   return (
     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-      {uniqueAssignedSets.map((setStr, idx) => {
+      {uniqueSets.map((setStr, idx) => {
         const tag = extractCategory(setStr) || setStr;
         const isPlayed = (patient.playedSets || []).includes(setStr);
         
@@ -42,6 +42,7 @@ export default function PatientStatsPage() {
   const [patients, setPatients] = useState<PatientStatInfo[]>([]);
   const [filteredPatients, setFilteredPatients] = useState<PatientStatInfo[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [mobileVisibleCount, setMobileVisibleCount] = useState(20);
@@ -103,11 +104,20 @@ export default function PatientStatsPage() {
     fetchStats();
   }, []);
 
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   useEffect(() => {
     let result = patients;
 
-    if (searchQuery.trim() !== '') {
-      const lowerQuery = searchQuery.toLowerCase();
+    if (debouncedSearchQuery.trim() !== '') {
+      const lowerQuery = debouncedSearchQuery.toLowerCase();
       result = result.filter(patient => 
         (patient.name && patient.name.toLowerCase().includes(lowerQuery)) || 
         (patient.patientId && patient.patientId.toLowerCase().includes(lowerQuery))
@@ -118,7 +128,7 @@ export default function PatientStatsPage() {
     setFilteredPatients(result);
     setCurrentPage(1);
     setMobileVisibleCount(10);
-  }, [searchQuery, patients]);
+  }, [debouncedSearchQuery, patients]);
 
   const totalPages = Math.ceil(filteredPatients.length / itemsPerPage);
   const currentPatients = filteredPatients.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);

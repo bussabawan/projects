@@ -6,6 +6,7 @@ import DeleteConfirmModal from "@/app/admin/components/DeleteConfirmModal";
 import RestoreConfirmModal from "@/app/admin/components/RestoreConfirmModal";
 import AlertModal from "@/app/admin/components/AlertModal";
 import styles from "./exercises.module.css";
+import { useDebounce } from '@/app/hooks/useDebounce';
 
 interface Exercise {
   exercises_id: number;
@@ -14,7 +15,7 @@ interface Exercise {
 
 export default function ManageExercisesPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -41,7 +42,7 @@ export default function ManageExercisesPage() {
   
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [imageSearchQuery, setImageSearchQuery] = useState("");
-  const [debouncedImageSearchQuery, setDebouncedImageSearchQuery] = useState("");
+  const debouncedImageSearchQuery = useDebounce(imageSearchQuery, 500);
   const [allImages, setAllImages] = useState<{ id: number, title: string, imageUrl?: string }[]>([]);
   const [selectedImageIds, setSelectedImageIds] = useState<number[]>([]);
   const [currentExerciseName, setCurrentExerciseName] = useState<string>("");
@@ -300,13 +301,9 @@ export default function ManageExercisesPage() {
   }, [imagePage, imageItemsPerPage, debouncedImageSearchQuery]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedImageSearchQuery(imageSearchQuery);
-      setImagePage(1);
-      isImageLoadMoreRef.current = false;
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [imageSearchQuery]);
+    setImagePage(1);
+    isImageLoadMoreRef.current = false;
+  }, [debouncedImageSearchQuery]);
 
   useEffect(() => {
     if (isImageModalOpen) {
@@ -321,14 +318,10 @@ export default function ManageExercisesPage() {
     isLoadMoreRef.current = false;
   }, [fetchExercises]);
 
-  // Debounce search query
+  // Reset page when debounced search query changes
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-      setCurrentPage(1);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
+    setCurrentPage(1);
+  }, [debouncedSearchQuery]);
 
   // Infinite Scroll Observer
   const observer = useRef<IntersectionObserver | null>(null);

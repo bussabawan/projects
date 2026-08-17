@@ -32,20 +32,20 @@ export class PatientDetailStatsModel {
     let memoryExtraFilter = '';
     
     if (filters?.category && filters.category !== 'all') {
-      const catParam = `%หมวด${filters.category}%`;
+      const catParam = `%${filters.category.replace(/\s+/g, '')}%`;
       matchingExtraFilter += ` AND EXISTS (
         SELECT 1 FROM matching_question_time_log mt
         JOIN photo_in_exercises pie ON mt.photo_id = pie.photo_id
         JOIN exercises_data ed ON pie.exercises_id = ed.exercises_id
         WHERE mt.id_matching = matching_exercises_log.id_matching
-        AND ed.exercises_name LIKE ? AND pie.remove = 0 AND ed.remove = 0
+        AND REPLACE(ed.exercises_name, ' ', '') LIKE ? AND pie.remove = 0 AND ed.remove = 0
       )`;
       memoryExtraFilter += ` AND EXISTS (
         SELECT 1 FROM memory_question_time_log mt
         JOIN photo_in_exercises pie ON mt.photo_id = pie.photo_id
         JOIN exercises_data ed ON pie.exercises_id = ed.exercises_id
         WHERE mt.id_memory = memory_exercises_log.id_memory
-        AND ed.exercises_name LIKE ? AND pie.remove = 0 AND ed.remove = 0
+        AND REPLACE(ed.exercises_name, ' ', '') LIKE ? AND pie.remove = 0 AND ed.remove = 0
       )`;
       matchingParams.push(catParam);
       memoryParams.push(catParam);

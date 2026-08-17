@@ -6,6 +6,7 @@ import styles from "./images.module.css";
 import ImageFormModal from "./components/ImageFormModal";
 import DeleteConfirmModal from "../components/DeleteConfirmModal";
 import RestoreConfirmModal from "../components/RestoreConfirmModal";
+import { useDebounce } from '@/app/hooks/useDebounce';
 
 function CardImage({ src, alt }: { src: string; alt: string }) {
   const [error, setError] = useState(false);
@@ -35,7 +36,7 @@ interface ImageData {
 
 export default function ManageImagesPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [images, setImages] = useState<ImageData[]>([]);
@@ -86,13 +87,7 @@ export default function ManageImagesPage() {
     isLoadMoreRef.current = false;
   }, [fetchImages]);
 
-  // Debounce search query
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
+  // Debounce search query handled by hook
 
   // Reset to page 1 when the debounced search term changes
   useEffect(() => {

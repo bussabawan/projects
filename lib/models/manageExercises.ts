@@ -18,6 +18,21 @@ export class ManageExercisesModel {
   }
 
   /**
+   * Get exercises assigned to a specific patient
+   */
+  static async getExercisesByPatientId(userId: number): Promise<ExerciseInfo[]> {
+    const [rows] = await db.execute<RowDataPacket[]>(
+      `SELECT ed.exercises_id, ed.exercises_name 
+       FROM exercises_data ed
+       JOIN patient_data pd ON ed.exercises_id = pd.exercises_id
+       WHERE pd.user_id = ? AND pd.remove = 0 AND ed.remove = 0
+       ORDER BY ed.exercises_id ASC`,
+      [userId]
+    );
+    return rows as ExerciseInfo[];
+  }
+
+  /**
    * Get paginated list of exercises with search
    */
   static async getExercisesPaginated(page: number, limit: number, search: string = ''): Promise<{ data: ExerciseInfo[], total: number }> {
