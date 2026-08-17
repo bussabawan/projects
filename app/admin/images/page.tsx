@@ -216,6 +216,8 @@ export default function ManageImagesPage() {
       });
       const result = await res.json();
       if (result.success) {
+        setIsModalOpen(false);
+        setEditingImage(null);
         isLoadMoreRef.current = false;
         if (currentPage === 1) {
           fetchImages();
