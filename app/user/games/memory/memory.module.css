@@ -11,7 +11,7 @@
 }
 
 .title {
-  font-size: 4rem;
+  font-size: 3.5rem;
   font-weight: 500;
   color: #111;
   margin-bottom: 2rem;
@@ -23,28 +23,28 @@
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
+  gap: 1.5rem;
   margin-bottom: 2rem;
 }
 
 .tabsContainer {
   display: flex;
   background-color: #fff;
-  border-radius: 30px;
-  padding: 5px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border-radius: 40px;
+  padding: 2px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
   box-sizing: border-box;
   flex-shrink: 0;
 }
 
 .tabButton {
-  padding: 0.6rem 1.5rem;
+  padding: 0.8rem 1.5rem;
   font-size: 1.1rem;
   font-weight: 500;
   border: none;
   background: transparent;
   cursor: pointer;
-  border-radius: 25px;
+  border-radius: 40px;
   transition: background-color 0.2s, color 0.2s;
   color: #333;
   white-space: nowrap;
@@ -53,17 +53,18 @@
 .activeTab {
   background-color: #d8b4e2;
   color: #111;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .searchContainer {
   display: flex;
   align-items: center;
   background-color: #fff;
-  border-radius: 30px;
-  padding: 0.5rem 1rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border-radius: 40px;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
   width: 100%;
-  max-width: 350px;
+  max-width: 320px;
   flex: 1;
   box-sizing: border-box;
 }
@@ -73,7 +74,7 @@
   outline: none;
   flex: 1;
   font-size: 1.1rem;
-  padding: 0.5rem 0;
+  padding: 0;
   background: transparent;
 }
 
@@ -91,32 +92,34 @@
 .categoriesGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
+  gap: 2rem;
   width: 100%;
+  margin-top: 2rem;
+  padding-bottom: 1rem;
 }
 
 .categoryCard {
   background-color: #fff;
-  border-radius: 12px;
-  padding: 1.2rem;
+  border-radius: 25px;
+  padding: 2.5rem;
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
-  font-size: 1.1rem;
+  font-size: 1.8rem;
   font-weight: 500;
   color: #111;
   text-decoration: none;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   width: 100%;
   box-sizing: border-box;
-  min-height: 100px;
+  flex-direction: column;
 }
 
 .categoryCard:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
 }
 
 .cardText {
@@ -125,6 +128,17 @@
   white-space: normal;
   max-width: 100%;
   display: block;
+}
+
+@media (max-width: 1200px) and (min-width: 769px) {
+  .categoriesGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+  .categoryCard {
+    padding: 1.5rem;
+    font-size: 1.5rem;
+  }
 }
 
 @media (max-width: 768px) {
@@ -194,10 +208,11 @@
 
 .skeletonCard {
   background-color: #e0e0e0;
-  border-radius: 12px;
+  border-radius: 25px;
   width: 100%;
-  min-height: 100px;
+  min-height: 120px;
   animation: pulse 1.5s infinite ease-in-out;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
 }
 
 @keyframes pulse {
