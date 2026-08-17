@@ -42,7 +42,6 @@ export default function PatientStatsPage() {
   const [patients, setPatients] = useState<PatientStatInfo[]>([]);
   const [filteredPatients, setFilteredPatients] = useState<PatientStatInfo[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [mobileVisibleCount, setMobileVisibleCount] = useState(20);
@@ -105,13 +104,6 @@ export default function PatientStatsPage() {
   }, []);
 
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
 
   useEffect(() => {
     let result = patients;
