@@ -181,7 +181,7 @@ export default function MatchingGamePage() {
         <div className={styles.loading}>
           {error || 'ไม่พบข้อมูลคำถาม'}
           <br />
-          <button className={styles.endGameBtn} onClick={handleEndGame} style={{marginTop: '20px'}}>กลับ</button>
+          <button className={styles.endGameBtn} onClick={confirmEndGame} style={{marginTop: '20px'}}>กลับ</button>
         </div>
       </div>
     );
@@ -193,7 +193,7 @@ export default function MatchingGamePage() {
         <div className={styles.loading} style={{flexDirection: 'column', gap: '20px'}}>
           <h1>จบเกม!</h1>
           <p>เวลาที่ใช้: {formatTime(elapsedSeconds)}</p>
-          <button className={styles.endGameBtn} onClick={handleEndGame}>กลับไปหน้าตั้งค่า</button>
+          <button className={styles.endGameBtn} onClick={confirmEndGame}>กลับไปหน้าตั้งค่า</button>
         </div>
       </div>
     );
