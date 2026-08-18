@@ -31,4 +31,54 @@ export class GameMatchingModel {
     const [rows] = await db.query<RowDataPacket[]>(query, params);
     return rows as ImageInfo[];
   }
+
+  static async saveGameLog(
+    userId: number, 
+    logData: {
+      totalQuestions: number;
+      totalAnswers: number;
+      clickCount: number;
+      correctCount: number;
+      incorrectCount: number;
+    }, 
+    timeLogs: {
+      photoId: number;
+      timePerQuestion: string;
+    }[]
+  ): Promise<boolean> {
+    const connection = await db.getConnection();
+    try {
+      await connection.beginTransaction();
+
+      // Fix ResultSetHeader type error by importing it or using any temporarily
+      const [result] = await connection.query(
+        `INSERT INTO matching_exercises_log 
+         (user_id, total_questions, total_answers, click_count, correct_count, incorrect_count, test_date, remove) 
+         VALUES (?, ?, ?, ?, ?, ?, CURDATE(), 0)`,
+        [userId, logData.totalQuestions, logData.totalAnswers, logData.clickCount, logData.correctCount, logData.incorrectCount]
+      ) as any;
+
+      const matchingId = result.insertId;
+
+      if (timeLogs && timeLogs.length > 0) {
+        for (const timeLog of timeLogs) {
+          await connection.query(
+            `INSERT INTO matching_question_time_log 
+             (id_matching, photo_id, time_per_question, remove) 
+             VALUES (?, ?, ?, 0)`,
+            [matchingId, timeLog.photoId, timeLog.timePerQuestion]
+          );
+        }
+      }
+
+      await connection.commit();
+      return true;
+    } catch (error) {
+      await connection.rollback();
+      console.error("Failed to save matching game log:", error);
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
 }

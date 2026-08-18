@@ -86,3 +86,30 @@ export async function getGameData(exerciseId: number, numQuestions: number, numA
     return { success: false, error: "Failed to load game data" };
   }
 }
+
+export async function saveMatchingGameResult(
+  logData: {
+    totalQuestions: number;
+    totalAnswers: number;
+    clickCount: number;
+    correctCount: number;
+    incorrectCount: number;
+  }, 
+  timeLogs: {
+    photoId: number;
+    timePerQuestion: string;
+  }[]
+) {
+  try {
+    const session = await auth();
+    if (!session || !session.user || !session.user.id) {
+      return { success: false, error: "Unauthorized" };
+    }
+    
+    await GameMatchingModel.saveGameLog(session.user.id, logData, timeLogs);
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to save game result:", error);
+    return { success: false, error: "Failed to save game result" };
+  }
+}

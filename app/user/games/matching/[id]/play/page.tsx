@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import styles from './matchingGame.module.css';
-import { getGameData } from '@/app/actions/matchingActions';
+import { getGameData, saveMatchingGameResult } from '@/app/actions/matchingActions';
 
 // Volume Icon SVG
 const VolumeIcon = ({ isMuted }: { isMuted: boolean }) => (
@@ -61,6 +61,13 @@ export default function MatchingGamePage() {
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
   const [showExitPopup, setShowExitPopup] = useState(false);
   
+  // Log state
+  const [clickCount, setClickCount] = useState(0);
+  const [correctCount, setCorrectCount] = useState(0);
+  const [incorrectCount, setIncorrectCount] = useState(0);
+  const [timeLogs, setTimeLogs] = useState<{photoId: number, timePerQuestion: string}[]>([]);
+  const [currentQuestionStartTime, setCurrentQuestionStartTime] = useState<number>(0);
+  
   const [isMuted, setIsMuted] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -93,7 +100,9 @@ export default function MatchingGamePage() {
     if (loading || isFinished || feedback !== null) return;
     
     if (startTime === 0) {
-      setStartTime(Date.now());
+      const now = Date.now();
+      setStartTime(now);
+      setCurrentQuestionStartTime(now);
     }
 
     const interval = setInterval(() => {
@@ -121,29 +130,83 @@ export default function MatchingGamePage() {
     fetchGameData();
   }, [exerciseId, numQuestions, numAnswers]);
 
+  // Autoplay audio when question changes or game starts
+  useEffect(() => {
+    if (questions.length > 0 && !isMuted && !isFinished) {
+      const currentQ = questions[currentIndex];
+      if (currentQ?.target?.audioUrl) {
+        const timer = setTimeout(() => {
+          if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.src = "";
+          }
+          const audio = new Audio(currentQ.target.audioUrl);
+          audioRef.current = audio;
+          audio.play().catch(e => console.warn('Audio autoplay blocked by browser:', e));
+        }, 500); // Small delay allows UI to render first and helps with browser autoplay policies
+        
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [currentIndex, questions, isMuted, isFinished]);
+
+  const formatHHMMSS = (totalSeconds: number) => {
+    const hrs = Math.floor(totalSeconds / 3600);
+    const mins = Math.floor((totalSeconds % 3600) / 60);
+    const secs = totalSeconds % 60;
+    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
   const handleChoiceClick = (choiceId: number, audioUrl?: string) => {
     if (feedback !== null || isFinished) return; // Prevent clicking while showing feedback
 
     playAudio(audioUrl);
+    setClickCount(prev => prev + 1);
 
     const currentQ = questions[currentIndex];
+    
     if (choiceId === currentQ.target.id) {
       setFeedback('correct');
+      setCorrectCount(prev => prev + 1);
+      
+      const questionTimeSecs = Math.floor((Date.now() - currentQuestionStartTime) / 1000);
+      const timePerQuestion = formatHHMMSS(questionTimeSecs);
+      setTimeLogs(prev => [...prev, { photoId: currentQ.target.id, timePerQuestion }]);
+      
       setTimeout(() => {
         setFeedback(null);
         if (currentIndex < questions.length - 1) {
           setCurrentIndex(prev => prev + 1);
+          setCurrentQuestionStartTime(Date.now());
         } else {
           setIsFinished(true);
         }
       }, 1000);
     } else {
       setFeedback('wrong');
+      setIncorrectCount(prev => prev + 1);
       setTimeout(() => {
         setFeedback(null);
       }, 1000);
     }
   };
+
+  // Save data when finished
+  useEffect(() => {
+    if (isFinished) {
+      const saveData = async () => {
+        const logData = {
+          totalQuestions: questions.length,
+          totalAnswers: currentIndex + 1,
+          clickCount,
+          correctCount,
+          incorrectCount
+        };
+        await saveMatchingGameResult(logData, timeLogs);
+      };
+      saveData();
+    }
+  }, [isFinished, questions.length, currentIndex, clickCount, correctCount, incorrectCount, timeLogs]);
 
   const handleEndGame = () => {
     setShowExitPopup(true);
