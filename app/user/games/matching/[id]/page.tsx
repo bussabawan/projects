@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import styles from './matchingSettings.module.css';
-import { getExerciseImageCount } from '../actions';
+import { getExerciseImageCount } from '@/app/actions/matchingActions';
 
 // Generic picture icon SVG
 const PictureIcon = () => (

@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import styles from './matchingGame.module.css';
-import { getGameData } from '../../actions';
+import { getGameData } from '@/app/actions/matchingActions';
 
 // Volume Icon SVG
 const VolumeIcon = ({ isMuted }: { isMuted: boolean }) => (
