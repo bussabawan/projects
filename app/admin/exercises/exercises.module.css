@@ -409,7 +409,8 @@
 
 .imageSearchRow {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 1rem;
   flex-shrink: 0;
 }

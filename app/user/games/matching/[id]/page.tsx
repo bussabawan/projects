@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import styles from './matchingSettings.module.css';
-import { getExerciseImageCount } from '../actions';
+import { getExerciseImageCount } from '@/app/actions/matchingActions';
 
 // Generic picture icon SVG
 const PictureIcon = () => (
@@ -99,7 +99,7 @@ export default function MatchingSettingsPage() {
 
   const handleStart = () => {
     // Logic to start the game
-    // router.push(`/user/games/matching/${params.id}/play?type=${searchParams.get('type')}&q=${questions}&a=${answers}`);
+    router.push(`/user/games/matching/${params.id}/play?type=${type}&q=${questions}&a=${answers}`);
     console.log("Starting game with:", { questions, answers });
   };
 

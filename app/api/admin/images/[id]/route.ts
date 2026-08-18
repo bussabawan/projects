@@ -49,7 +49,17 @@ export async function PUT(
     }
 
     try {
-      await ManageImagesModel.updateImage(imageId, { title, imageUrl, audioUrl, audioTitle, audioGen });
+      const result = await ManageImagesModel.updateImage(imageId, { title, imageUrl, audioUrl, audioTitle, audioGen });
+      
+      if (typeof result === 'object' && result.isDuplicateDeleted) {
+        return NextResponse.json({ 
+          success: false, 
+          isDuplicateDeleted: true,
+          duplicateId: result.duplicateId,
+          message: "มีชื่อรูปภาพนี้อยู่ในระบบแตะถูกลบไปแล้ว ต้องการกู้คืนหรือไม่"
+        });
+      }
+
       return NextResponse.json({ success: true });
     } catch (modelError: unknown) {
       const mErr = modelError as Error;

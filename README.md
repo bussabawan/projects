@@ -56,6 +56,7 @@
 ```text
 ot-project-2026/
 ├── app/                  # (View & Controller) โฟลเดอร์หลักของแอป
+│   ├── actions/          # (Controller) สำหรับเก็บไฟล์ Server Actions ("use server")
 │   ├── api/              # (Controller) สำหรับสร้าง API Endpoint รับส่งข้อมูล
 │   │   └── upload/
 │   │       └── route.ts  # API สำหรับจัดการการอัปโหลดไฟล์
@@ -80,10 +81,11 @@ ot-project-2026/
 - การตกแต่งหน้าจอ สามารถสร้างไฟล์ `.module.css` เพื่อกำหนดสไตล์เฉพาะหน้านั้นๆ ได้
 
 ## ⚙️ 2. Controller (จัดการลอจิกและ API)
-**เก็บที่ไหน:** โฟลเดอร์ `app/api/` (ไฟล์ชื่อ `route.ts`)
+**เก็บที่ไหน:** โฟลเดอร์ `app/api/` (สำหรับ API) และ `app/actions/` (สำหรับ Server Actions)
 **วิธีแก้ไข/เพิ่มเติม:**
-- หากต้องการสร้าง API ใหม่ (เช่น จัดการข้อมูล User) ให้สร้างโฟลเดอร์ `app/api/users/route.ts` 
-- ในไฟล์ `route.ts` คุณสามารถประกาศฟังก์ชัน `GET`, `POST`, `PUT`, `DELETE` เพื่อรองรับ HTTP Methods ต่างๆ 
+- **Server Actions:** หากมีไฟล์ที่มีลักษณะเป็น `"use server";` (เช่น การดึงข้อมูลลอจิกเกมส์ หรือฟังก์ชันการทำงานอื่นๆ) ให้นำมาเก็บไว้ในโฟลเดอร์ `app/actions/` (เช่น `app/actions/matchingActions.ts`) เพื่อให้เป็นระเบียบและเรียกใช้จาก View ได้ง่าย
+- **API Endpoints:** หากต้องการสร้าง API ใหม่ (เช่น จัดการข้อมูล User ที่สื่อสารผ่าน HTTP) ให้สร้างโฟลเดอร์ `app/api/users/route.ts` 
+- ในไฟล์ `route.ts` คุณสามารถประกาศฟังก์ชัน `GET`, `POST`, `PUT`, `DELETE` เพื่อรองรับ HTTP Methods ต่างๆ
 
 ## 🗄️ 3. Model & ฐานข้อมูล (การเชื่อมต่อและ CRUD)
 **เก็บที่ไหน:** โฟลเดอร์ `lib/` (เช่น `lib/db.ts`)

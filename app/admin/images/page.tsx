@@ -11,6 +11,10 @@ import { useDebounce } from '@/app/hooks/useDebounce';
 function CardImage({ src, alt }: { src: string; alt: string }) {
   const [error, setError] = useState(false);
 
+  useEffect(() => {
+    setError(false);
+  }, [src]);
+
   if (!src || error) {
     return (
       <svg width="50%" height="50%" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -168,12 +172,28 @@ export default function ManageImagesPage() {
       const result = await res.json();
       if (result.success) {
         setIsModalOpen(false);
-        if (currentPage === 1) {
-          isLoadMoreRef.current = false;
-          fetchImages();
+        if (isEdit) {
+          // Update the specific image locally to prevent scroll jump and data reset
+          setImages(prev => prev.map(img => 
+            img.id === editingImage.id 
+              ? { 
+                  ...img, 
+                  title: payload.title as string,
+                  imageUrl: payload.imageUrl as string,
+                  audioUrl: payload.audioUrl as string | undefined,
+                  audioTitle: payload.audioTitle as string | undefined,
+                  audioGen: payload.audioGen as number
+                } 
+              : img
+          ));
         } else {
-          isLoadMoreRef.current = false;
-          setCurrentPage(1);
+          if (currentPage === 1) {
+            isLoadMoreRef.current = false;
+            fetchImages();
+          } else {
+            isLoadMoreRef.current = false;
+            setCurrentPage(1);
+          }
         }
       } else if (result.isDuplicateDeleted) {
         setDuplicateToRestore({ id: result.duplicateId, data: payload });
@@ -196,8 +216,14 @@ export default function ManageImagesPage() {
       });
       const result = await res.json();
       if (result.success) {
+        setIsModalOpen(false);
+        setEditingImage(null);
         isLoadMoreRef.current = false;
-        setCurrentPage(1);
+        if (currentPage === 1) {
+          fetchImages();
+        } else {
+          setCurrentPage(1);
+        }
       } else {
         alert(result.error || "กู้คืนข้อมูลไม่สำเร็จ");
       }

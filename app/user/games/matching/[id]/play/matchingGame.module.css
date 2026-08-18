@@ -1,0 +1,365 @@
+.container {
+  height: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 2rem 4rem;
+  background-color: #f0f0f0; /* Match setting page if possible, or just gray */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.timer {
+  font-size: 1.5rem;
+  font-weight: 500;
+  background-color: #e0e0e0;
+  padding: 0.5rem 1.5rem;
+  border-radius: 8px;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.audioBtnDesktop {
+  background-color: #ffffff;
+  border: 2px solid #e0e0e0;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  cursor: pointer;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.audioBtnDesktop:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+}
+
+.audioBtnMobile {
+  display: none;
+  background-color: #ffffff;
+  border: 2px solid #e0e0e0;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  color: #333;
+  transition: all 0.2s ease;
+  padding: 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.endGameBtn {
+  background-color: #F38776;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 0.8rem 2.5rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.endGameBtn:hover {
+  background-color: #e27564;
+}
+
+.progressText {
+  font-size: 2.5rem;
+  font-weight: 500;
+  margin-bottom: 3rem;
+  color: #111;
+}
+
+.gameArea {
+  display: flex;
+  gap: 12rem;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+  margin-bottom: 10vh;
+}
+
+.targetContainer {
+  flex: 1;
+  max-width: 350px;
+  background-color: #e0e0e0;
+  border-radius: 16px;
+  border: 1px solid #aaa;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  aspect-ratio: 1 / 1;
+  position: relative;
+}
+
+.targetImage {
+  width: 100%;
+  height: auto;
+  max-height: 500px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.choicesContainer {
+  flex: 1.7;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  max-width: 600px;
+}
+
+.choiceBox {
+  background-color: #e0e0e0;
+  border-radius: 16px;
+  border: 1px solid #aaa;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  aspect-ratio: 1 / 1;
+  position: relative;
+}
+
+.choiceBox:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.choiceImage {
+  width: 100%;
+  height: auto;
+  max-height: 250px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 50vh;
+  font-size: 1.5rem;
+  color: #666;
+}
+
+.resultOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255,255,255,0.8);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  border-radius: 20px;
+}
+
+.resultText {
+  font-size: 4rem;
+  font-weight: bold;
+  color: #4CAF50; /* Green for correct, change for wrong if needed */
+  margin-bottom: 2rem;
+}
+
+.wrongText {
+  color: #f44336;
+}
+
+/* Exit Confirmation Popup */
+.popupOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.popupContainer {
+  background-color: #f9f9f9;
+  padding: 2.5rem;
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  width: 90%;
+  max-width: 400px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.popupIcon {
+  color: #111;
+  margin-bottom: 1rem;
+}
+
+.popupText {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #111;
+  margin-bottom: 2rem;
+}
+
+.popupButtons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.popupBtnConfirm {
+  background-color: transparent;
+  color: #111;
+  border: 1px solid #7c5cff; /* Purple border */
+  border-radius: 50px;
+  padding: 0.6rem 2rem;
+  font-size: 1.2rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.popupBtnConfirm:hover {
+  background-color: rgba(124, 92, 255, 0.1);
+}
+
+.popupBtnCancel {
+  background-color: #F38776;
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 0.6rem 2rem;
+  font-size: 1.2rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.popupBtnCancel:hover {
+  background-color: #e57867;
+}
+
+/* Mobile and Landscape Responsiveness */
+@media (max-width: 768px), (max-width: 950px) and (max-height: 500px) {
+  .container {
+    padding: 1.5rem;
+    margin: 0;
+    min-height: 100dvh;
+    height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  
+  .container::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+
+  .header {
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .timer {
+    font-size: 1.1rem;
+    padding: 0.5rem 1rem;
+    background-color: #ffffff;
+  }
+
+  .endGameBtn {
+    padding: 0.5rem 1.2rem;
+    font-size: 1rem;
+  }
+
+  .audioBtnDesktop {
+    display: none;
+  }
+
+  .audioBtnMobile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .progressContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+  }
+
+  .progressText {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .gameArea {
+    flex-direction: column;
+    gap: 1rem;
+    justify-content: flex-start;
+    margin-bottom: 0;
+  }
+
+  .targetContainer {
+    width: 80%;
+    max-width: 260px;
+    padding: 1rem;
+    flex: none;
+  }
+
+  .choicesContainer {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 400px;
+    flex: none;
+  }
+
+  .choiceBox {
+    padding: 0.5rem;
+  }
+}
+
+/* Specific Landscape Adjustments */
+@media (max-width: 950px) and (max-height: 500px) {
+  .targetContainer {
+    max-width: 300px;
+  }
+
+  .choicesContainer {
+    max-width: 500px;
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}

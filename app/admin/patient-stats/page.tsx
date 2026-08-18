@@ -9,6 +9,16 @@ import PatientStatsPopup from './components/PatientStatsPopup';
 
 const extractCategory = (testSet?: string) => {
   if (!testSet) return '';
+  let cat = testSet.replace(/^(?:แบบฝึกหัด\s*)?(?:หมวด\s*)?/, '');
+  cat = cat.replace(/\s*เลเวล\s*\d*/g, '').trim();
+  if (cat.includes('สิ่งของ')) {
+    cat = 'สิ่งของ';
+  }
+  return cat;
+};
+
+const formatTagDisplay = (testSet?: string) => {
+  if (!testSet) return '';
   return testSet.replace(/^(?:แบบฝึกหัด\s*)?(?:หมวด\s*)?/, '').replace(/\s+เลเวล\s*/, 'เลเวล');
 };
 
@@ -22,7 +32,7 @@ const renderTestSetTags = (patient: PatientStatInfo) => {
   return (
     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
       {uniqueSets.map((setStr, idx) => {
-        const tag = extractCategory(setStr) || setStr;
+        const tag = formatTagDisplay(setStr) || setStr;
         const isPlayed = (patient.playedSets || []).includes(setStr);
         
         let tagClass = styles.testSetTag;
@@ -42,7 +52,6 @@ export default function PatientStatsPage() {
   const [patients, setPatients] = useState<PatientStatInfo[]>([]);
   const [filteredPatients, setFilteredPatients] = useState<PatientStatInfo[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [mobileVisibleCount, setMobileVisibleCount] = useState(20);
@@ -105,13 +114,6 @@ export default function PatientStatsPage() {
   }, []);
 
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
 
   useEffect(() => {
     let result = patients;
