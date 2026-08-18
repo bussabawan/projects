@@ -31,28 +31,37 @@
 }
 
 .audioBtnDesktop {
-  background: none;
-  border: none;
+  background-color: #ffffff;
+  border: 2px solid #e0e0e0;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
   cursor: pointer;
   color: #333;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.2s;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 
 .audioBtnDesktop:hover {
-  transform: scale(1.1);
+  transform: scale(1.05);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.12);
 }
 
 .audioBtnMobile {
   display: none;
-  background: none;
-  border: none;
+  background-color: #ffffff;
+  border: 2px solid #e0e0e0;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
   cursor: pointer;
   color: #333;
-  transition: transform 0.2s;
+  transition: all 0.2s ease;
   padding: 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 
 .endGameBtn {
@@ -301,7 +310,7 @@
   .audioBtnMobile {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
   }
 
   .progressContainer {
