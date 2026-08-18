@@ -80,7 +80,7 @@
 
 .gameArea {
   display: flex;
-  gap: 4rem;
+  gap: 12rem;
   align-items: center;
   justify-content: center;
   flex-grow: 1;
@@ -111,7 +111,7 @@
 }
 
 .choicesContainer {
-  flex: 1;
+  flex: 1.7;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 2rem;
