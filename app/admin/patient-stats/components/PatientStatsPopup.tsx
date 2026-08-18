@@ -14,6 +14,16 @@ interface PatientStatsPopupProps {
   exerciseSets?: string[];
 }
 
+const extractCategory = (testSet?: string) => {
+  if (!testSet) return '';
+  let cat = testSet.replace(/^(?:แบบฝึกหัด\s*)?(?:หมวด\s*)?/, '');
+  cat = cat.replace(/\s*เลเวล\s*\d*/g, '').trim();
+  if (cat.includes('สิ่งของ')) {
+    cat = 'สิ่งของ';
+  }
+  return cat;
+};
+
 const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, patientId, categories = [], exerciseSets = [] }) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [data, setData] = useState<any>(null);
@@ -23,6 +33,12 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
   const [exerciseSetFilter, setExerciseSetFilter] = useState('all');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+
+  const baseExerciseSets = (data?.availableExerciseSets || exerciseSets) as string[];
+  const dynamicCategories = Array.from(new Set<string>(baseExerciseSets.map(extractCategory)));
+  const dynamicExerciseSets = categoryFilter !== 'all' 
+    ? baseExerciseSets.filter(set => extractCategory(set) === categoryFilter)
+    : baseExerciseSets;
 
   useEffect(() => {
     if (isOpen && patientId) {
@@ -90,12 +106,16 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                 </div>
               )}
             </div>
-            <div className={styles.filtersWrapper} style={{ marginBottom: 0 }}>
+            <div className={styles.filtersWrapper} style={{ marginBottom: 0, marginLeft: 'auto' }}>
               <div className={styles.filters}>
                 <select 
                 className={styles.filterSelect}
                 value={periodFilter}
-                onChange={(e) => setPeriodFilter(e.target.value)}
+                onChange={(e) => {
+                  setPeriodFilter(e.target.value);
+                  setCategoryFilter('all');
+                  setExerciseSetFilter('all');
+                }}
               >
                 <option value="all">ทุกช่วงเวลา</option>
                 <option value="today">วันนี้</option>
@@ -106,22 +126,25 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
               </select>
               <select 
                 className={styles.filterSelect}
-                value={exerciseSetFilter}
-                onChange={(e) => setExerciseSetFilter(e.target.value)}
+                value={categoryFilter}
+                onChange={(e) => {
+                  setCategoryFilter(e.target.value);
+                  setExerciseSetFilter('all');
+                }}
               >
-                <option value="all">ทุกชุดแบบฝึกหัด</option>
-                {exerciseSets.map(set => (
-                  <option key={set} value={set}>{set}</option>
+                <option value="all">ทุกหมวดหมู่</option>
+                {dynamicCategories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
                 ))}
               </select>
               <select 
                 className={styles.filterSelect}
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
+                value={exerciseSetFilter}
+                onChange={(e) => setExerciseSetFilter(e.target.value)}
               >
-                <option value="all">ทุกหมวดหมู่</option>
-                {categories.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
+                <option value="all">ทุกชุดแบบฝึกหัด</option>
+                {dynamicExerciseSets.map(set => (
+                  <option key={set} value={set}>{set}</option>
                 ))}
               </select>
             </div>

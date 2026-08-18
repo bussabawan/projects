@@ -555,6 +555,9 @@ export default function ManageExercisesPage() {
             </div>
             <div className={styles.modalBody}>
               <div className={styles.imageSearchRow}>
+                <div style={{ background: '#f3f4f6', padding: '6px 15px', borderRadius: '20px', fontSize: '0.9rem', color: '#374151', whiteSpace: 'nowrap' }}>
+                  จำนวนรูปที่เลือก: <b>{selectedImageIds.length}</b> รูป
+                </div>
                 <div className={styles.imageSearchContainer}>
                   <input 
                     type="text" 

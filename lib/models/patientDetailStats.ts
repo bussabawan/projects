@@ -70,6 +70,27 @@ export class PatientDetailStatsModel {
       memoryParams.push(filters.exerciseSet);
     }
 
+    // Get available exercise sets for the given period (ignoring category/exercise filters)
+    const availableFiltersQuery = `
+      SELECT DISTINCT ed.exercises_name
+      FROM matching_exercises_log m
+      JOIN matching_question_time_log mt ON m.id_matching = mt.id_matching
+      JOIN photo_in_exercises pie ON mt.photo_id = pie.photo_id
+      JOIN exercises_data ed ON pie.exercises_id = ed.exercises_id
+      WHERE m.user_id = ? AND m.remove = 0 AND mt.remove = 0 AND pie.remove = 0 AND ed.remove = 0
+      ${dateFilter}
+      UNION
+      SELECT DISTINCT ed.exercises_name
+      FROM memory_exercises_log m
+      JOIN memory_question_time_log mt ON m.id_memory = mt.id_memory
+      JOIN photo_in_exercises pie ON mt.photo_id = pie.photo_id
+      JOIN exercises_data ed ON pie.exercises_id = ed.exercises_id
+      WHERE m.user_id = ? AND m.remove = 0 AND mt.remove = 0 AND pie.remove = 0 AND ed.remove = 0
+      ${dateFilter.replace(/test_date/g, 'm.test_date')}
+    `;
+    const [availableFiltersRows] = await db.execute<RowDataPacket[]>(availableFiltersQuery, [...matchingParams.slice(0, dateFilter ? 3 : 1), ...memoryParams.slice(0, dateFilter ? 3 : 1)]);
+    const availableExerciseSets = availableFiltersRows.map(r => r.exercises_name);
+
     // 1. Fetch Score Stats from Matching and Memory logs
     const matchingQuery = `
       SELECT 
@@ -345,7 +366,8 @@ export class PatientDetailStatsModel {
         }
       },
       dailyStats: fullDailyStats,
-      scatterStats
+      scatterStats,
+      availableExerciseSets
     };
   }
 }

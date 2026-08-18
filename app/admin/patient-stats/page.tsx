@@ -9,6 +9,16 @@ import PatientStatsPopup from './components/PatientStatsPopup';
 
 const extractCategory = (testSet?: string) => {
   if (!testSet) return '';
+  let cat = testSet.replace(/^(?:แบบฝึกหัด\s*)?(?:หมวด\s*)?/, '');
+  cat = cat.replace(/\s*เลเวล\s*\d*/g, '').trim();
+  if (cat.includes('สิ่งของ')) {
+    cat = 'สิ่งของ';
+  }
+  return cat;
+};
+
+const formatTagDisplay = (testSet?: string) => {
+  if (!testSet) return '';
   return testSet.replace(/^(?:แบบฝึกหัด\s*)?(?:หมวด\s*)?/, '').replace(/\s+เลเวล\s*/, 'เลเวล');
 };
 
@@ -22,7 +32,7 @@ const renderTestSetTags = (patient: PatientStatInfo) => {
   return (
     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
       {uniqueSets.map((setStr, idx) => {
-        const tag = extractCategory(setStr) || setStr;
+        const tag = formatTagDisplay(setStr) || setStr;
         const isPlayed = (patient.playedSets || []).includes(setStr);
         
         let tagClass = styles.testSetTag;

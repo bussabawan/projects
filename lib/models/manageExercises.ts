@@ -133,7 +133,8 @@ export class ManageExercisesModel {
       `SELECT pie.photo_id 
        FROM photo_in_exercises pie
        JOIN exercises_data ed ON pie.exercises_id = ed.exercises_id
-       WHERE ed.exercises_name = ? AND ed.remove = 0 AND pie.remove = 0`,
+       JOIN photo_data pd ON pie.photo_id = pd.photo_id
+       WHERE ed.exercises_name = ? AND ed.remove = 0 AND pie.remove = 0 AND pd.remove = 0`,
       [name]
     );
     return rows.map(r => r.photo_id as number);
@@ -147,7 +148,8 @@ export class ManageExercisesModel {
       `SELECT COUNT(pie.photo_id) as count 
        FROM photo_in_exercises pie
        JOIN exercises_data ed ON pie.exercises_id = ed.exercises_id
-       WHERE ed.exercises_id = ? AND ed.remove = 0 AND pie.remove = 0`,
+       JOIN photo_data pd ON pie.photo_id = pd.photo_id
+       WHERE ed.exercises_id = ? AND ed.remove = 0 AND pie.remove = 0 AND pd.remove = 0`,
       [exerciseId]
     );
     return rows[0].count as number;
