@@ -41,9 +41,7 @@ export default function MemoryCategoryClient() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-  };
+
 
   const filteredExercises = exercises.filter(ex => 
     ex.exercises_name.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
@@ -69,7 +67,7 @@ export default function MemoryCategoryClient() {
           </button>
         </div>
         
-        <form className={styles.searchContainer} onSubmit={handleSearch}>
+        <div className={styles.searchContainer}>
           <input 
             type="text" 
             placeholder="ค้นหา" 
@@ -77,13 +75,11 @@ export default function MemoryCategoryClient() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <button type="submit" className={styles.searchButton} aria-label="Search">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-          </button>
-        </form>
+          <svg xmlns="http://www.w3.org/2000/svg" className={styles.searchIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </div>
       </div>
 
       <div className={styles.categoriesGrid}>
