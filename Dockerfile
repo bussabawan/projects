@@ -9,6 +9,10 @@ COPY package.json package-lock.json ./
 # Install dependencies
 RUN npm ci
 
+# Development image
+FROM deps AS dev
+COPY . .
+
 # Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /usr/src/app

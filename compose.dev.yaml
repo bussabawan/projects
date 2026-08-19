@@ -2,13 +2,12 @@ services:
   server:
     build:
       context: .
-      target: base
+      target: dev
     working_dir: /usr/src/app
-    command: sh -c "npm install && npm run dev"
+    command: npm run dev
     environment:
       NODE_ENV: development
       HOSTNAME: "0.0.0.0"
-      WATCHPACK_POLLING: "true"
       PORT: ${PORT:-3000}
       MYSQL_HOST: mysql
       MYSQL_USER: ${MYSQL_USER}
@@ -19,10 +18,16 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
-      - /usr/src/app/.next
+    develop:
+      watch:
+        - action: sync
+          path: ./
+          target: /usr/src/app
+          ignore:
+            - node_modules/
+            - .next/
+        - action: rebuild
+          path: package.json
 
   mysql:
     image: mysql:8
