@@ -11,7 +11,12 @@ export class GameMatchingModel {
        WHERE pie.exercises_id = ? AND pie.remove = 0 AND pd.remove = 0`,
       [exerciseId]
     );
-    return rows as ImageInfo[];
+    const formattedRows = rows.map((row) => ({
+      ...row,
+      imageUrl: row.imageUrl ? `/api/files/${row.id}?type=image` : "",
+      audioUrl: row.audioUrl ? `/api/files/${row.id}?type=audio` : "",
+    }));
+    return formattedRows as ImageInfo[];
   }
 
   static async getRandomImages(limit: number, excludeIds: number[]): Promise<ImageInfo[]> {
@@ -29,7 +34,12 @@ export class GameMatchingModel {
     params.push(limit);
 
     const [rows] = await db.query<RowDataPacket[]>(query, params);
-    return rows as ImageInfo[];
+    const formattedRows = rows.map((row) => ({
+      ...row,
+      imageUrl: row.imageUrl ? `/api/files/${row.id}?type=image` : "",
+      audioUrl: row.audioUrl ? `/api/files/${row.id}?type=audio` : "",
+    }));
+    return formattedRows as ImageInfo[];
   }
 
   static async saveGameLog(
