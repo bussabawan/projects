@@ -7,47 +7,45 @@
 คุณสามารถเลือกรันโปรเจกต์ได้ 2 แบบ ตามวัตถุประสงค์การใช้งานครับ:
 
 ### แบบที่ 1: โหมดนักพัฒนา (Development) - สำหรับเขียนโค้ดและแก้ไข
-ในโหมดนี้เราจะรันฐานข้อมูลด้วย Docker และรันตัวเว็บด้วยคำสั่ง `npm run dev` ในเครื่องของเราเพื่อให้มันอัปเดตโค้ดแบบ Real-time (Hot Reload)
+ในโหมดนี้เราจะใช้ Docker Compose Watch เพื่อรันทั้งฐานข้อมูลและเว็บเซิร์ฟเวอร์ใน Docker ทั้งหมด พร้อมระบบ Hot Reload เมื่อมีการแก้ไขไฟล์โค้ด (ไม่ต้องติดตั้ง Node.js หรือรัน `npm run dev` ในเครื่องตัวเอง) ข้อมูลฐานข้อมูลในโหมดนี้จะถูกแยกออกจากโหมด Production
 
-1. **ติดตั้ง Dependencies:**
-   ```bash
-   npm install
-   ```
-2. **ตั้งค่าไฟล์ .env:**
-   สร้างหรือแก้ไขไฟล์ `.env` โดยกำหนด Host เป็น `localhost` เพื่อให้เครื่องเราเชื่อมกับ Docker ได้:
+1. **ตั้งค่าไฟล์ .env:**
+   สร้างไฟล์ `.env` (โดยอ้างอิงจาก `.env.example`) และกำหนดค่าตัวแปร:
    ```env
    PORT=3000
    MYSQL_ROOT_PASSWORD=password
    MYSQL_DATABASE=ot_project_db
    MYSQL_USER=admin
    MYSQL_PASSWORD=password
-   MYSQL_HOST=localhost
+   MYSQL_HOST=mysql
    MYSQL_PORT=3306
+   AUTH_SECRET="your-secret-here"
+   GOOGLE_CLIENT_ID="your-google-client-id"
+   GOOGLE_CLIENT_SECRET="your-google-client-secret"
+   AUTH_URL="http://localhost:3000"
    ```
-3. **รันเฉพาะ Database และ phpMyAdmin ใน Docker:**
+2. **รันโหมดนักพัฒนา:**
+   รันสคริปต์ที่เตรียมไว้ให้เพื่อเริ่มต้นระบบ (หรือรัน `docker compose -f compose.dev.yaml watch` เอง):
    ```bash
-   docker compose up -d mysql phpmyadmin
+   .\run_dev_mode.bat
    ```
-4. **รันเว็บเซิร์ฟเวอร์สำหรับการพัฒนา:**
-   ```bash
-   npm run dev
-   ```
-   *เข้าใช้งานเว็บไซต์: http://localhost:3000*
-   *จัดการฐานข้อมูล: http://localhost:8081*
+   *(สคริปต์นี้จะรันไฟล์ `compose.dev.yaml` สร้าง Container และเปิดโหมด watch เพื่อ Sync โค้ดจากเครื่องคุณเข้าไปใน Container แบบ Real-time)*
+3. **เริ่มต้นทำงาน:**
+   * เว็บไซต์ (ระบบ Hot Reload จะทำงานอัตโนมัติ): http://localhost:3000
+   * จัดการฐานข้อมูลผ่าน phpMyAdmin: http://localhost:8081
 
 ---
 
-### แบบที่ 2: โหมดใช้งานจริง (Production / Docker All-in-one)
-หากต้องการรันเพื่อดูผลลัพธ์อย่างเดียว (ไม่เขียนโค้ด) คุณสามารถรันทุกอย่าง (รวมถึง Next.js) ผ่าน Docker ได้เลย:
+### แบบที่ 2: โหมดใช้งานจริง (Production)
+โหมดนี้ใช้เมื่อนำระบบขึ้นเซิร์ฟเวอร์จริง โดยโปรเจกต์จะถูก Build เพื่อประสิทธิภาพสูงสุด (ไม่มี Hot Reload) การตั้งค่าทั้งหมดจะอยู่ใน `compose.yaml` แยกขาดจากโหมดการพัฒนาอย่างชัดเจน
 
-1. แก้ไขไฟล์ `.env` (ไม่จำเป็นต้องเปลี่ยน `MYSQL_HOST` เพราะ Docker จะจัดการให้)
-2. รันคำสั่งเดียวจบ:
+1. จัดเตรียมไฟล์ `.env` (ต้องตั้งรหัสผ่าน, AUTH_SECRET และ Key ต่างๆ เป็นความลับ)
+2. รันคำสั่งสำหรับใช้งานจริง:
    ```bash
-   docker compose up -d
+   docker compose -f compose.yaml up -d --build
    ```
    *(รอให้ระบบ Build และทำงานสักครู่)*
-3. เข้าใช้งานเว็บไซต์ได้เลยที่ http://localhost:3000 และจัดการฐานข้อมูลที่ http://localhost:8081
-**(หมายเหตุ: หากรันด้วยวิธีนี้ คุณจะใช้คำสั่ง `npm run dev` ซ้ำไม่ได้ เพราะ Port 3000 จะถูกใช้งานโดย Docker ไปแล้ว และจะเกิด Error: `EADDRINUSE`)**
+3. เข้าใช้งานเว็บไซต์ได้ที่ http://localhost:3000 และจัดการฐานข้อมูลที่ http://localhost:8081
 
 ---
 
@@ -67,8 +65,10 @@ ot-project-2026/
 │   └── db.ts             # โค้ดเชื่อมต่อฐานข้อมูล MySQL
 ├── storage/              # โฟลเดอร์เก็บไฟล์ที่ระบบสร้างขึ้น (ไม่สามารถเข้าถึงผ่าน URL ตรงๆ ได้เพื่อความปลอดภัย)
 │   └── uploads/          # โฟลเดอร์เก็บไฟล์ภาพและเสียงที่ผู้ใช้อัปโหลด
-├── .env                  # ไฟล์ตั้งค่าตัวแปรระบบ (รหัสผ่านฐานข้อมูล, พอร์ต)
-├── compose.yaml          # ไฟล์ตั้งค่า Docker (Database, Server)
+├── .env                  # ไฟล์ตั้งค่าตัวแปรระบบ (รหัสผ่านฐานข้อมูล, พอร์ต, คีย์ล็อคอิน)
+├── compose.yaml          # ไฟล์ตั้งค่า Docker (สำหรับ Production)
+├── compose.dev.yaml      # ไฟล์ตั้งค่า Docker (สำหรับ Development / Hot Reload)
+├── run_dev_mode.bat      # สคริปต์คำสั่งสำหรับรันโหมดพัฒนา
 └── Dockerfile            # ไฟล์สำหรับ Build โปรเจกต์ขึ้น Docker
 ```
 
