@@ -119,7 +119,7 @@ export default function ManageExercisesPage() {
       } else {
         setAddError(data.error || 'เกิดข้อผิดพลาดในการเพิ่มชุดแบบฝึกหัด');
       }
-    } catch (err) {
+    } catch {
       setAddError('เกิดข้อผิดพลาดในการเชื่อมต่อ');
     } finally {
       setIsAddingExercise(false);
@@ -154,7 +154,7 @@ export default function ManageExercisesPage() {
       } else {
         setEditError(data.error || 'เกิดข้อผิดพลาดในการแก้ไขชุดแบบฝึกหัด');
       }
-    } catch (err) {
+    } catch {
       setEditError('เกิดข้อผิดพลาดในการเชื่อมต่อ');
     } finally {
       setIsEditingExercise(false);
@@ -180,7 +180,7 @@ export default function ManageExercisesPage() {
         setAlertMessage(data.error || 'เกิดข้อผิดพลาดในการลบชุดแบบฝึกหัด');
         setIsDeleteModalOpen(false);
       }
-    } catch (err) {
+    } catch {
       setAlertMessage('เกิดข้อผิดพลาดในการเชื่อมต่อ');
       setIsDeleteModalOpen(false);
     }
@@ -202,7 +202,7 @@ export default function ManageExercisesPage() {
         setAlertMessage(data.error || 'เกิดข้อผิดพลาดในการกู้คืน');
         setIsRestoreModalOpen(false);
       }
-    } catch (err) {
+    } catch {
       setAlertMessage('เกิดข้อผิดพลาดในการเชื่อมต่อ');
       setIsRestoreModalOpen(false);
     }
@@ -245,7 +245,7 @@ export default function ManageExercisesPage() {
       } else {
         setAlertMessage(data.error || 'เกิดข้อผิดพลาดในการบันทึกรูปภาพ');
       }
-    } catch (err) {
+    } catch {
       setAlertMessage('เกิดข้อผิดพลาดในการเชื่อมต่อ');
     } finally {
       setIsSavingImages(false);
@@ -301,7 +301,6 @@ export default function ManageExercisesPage() {
   }, [imagePage, imageItemsPerPage, debouncedImageSearchQuery]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setImagePage(1);
     isImageLoadMoreRef.current = false;
   }, [debouncedImageSearchQuery]);

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
-import Image from 'next/image';
+
 import styles from './matchingGame.module.css';
 import { getGameData, saveMatchingGameResult } from '@/app/actions/matchingActions';
 
