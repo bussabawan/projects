@@ -33,8 +33,8 @@ RUN mkdir .next
 RUN chown nextjs:nodejs .next
 
 # Ensure upload directory exists and has correct permissions
-RUN mkdir -p public/uploads
-RUN chown -R nextjs:nodejs public/uploads
+RUN mkdir -p uploads
+RUN chown -R nextjs:nodejs uploads
 
 USER nextjs
 
