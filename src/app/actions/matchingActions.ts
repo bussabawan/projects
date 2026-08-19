@@ -44,7 +44,7 @@ export async function getGameData(exerciseId: number, numQuestions: number, numA
     const formatMediaUrl = (url: string | undefined | null) => {
       if (!url) return ''; 
       if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
-      if (url.startsWith('/api/uploads/')) return url;
+      if (url.startsWith('/api/uploads/') || url.startsWith('/api/files/')) return url;
       
       // Extract just the filename to prevent directory traversal errors in the API route
       const filename = url.split('/').pop();
