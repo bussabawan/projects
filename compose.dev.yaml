@@ -20,6 +20,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+    volumes:
+      - ./uploads:/usr/src/app/uploads
     develop:
       watch:
         - action: sync
