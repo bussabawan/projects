@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'Vejjarak Hospital',
+  title: 'Vejjarak Lampang Hospital',
   description: 'OT Project',
 }
 

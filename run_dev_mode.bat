@@ -1,2 +1,2 @@
-docker compose up -d mysql phpmyadmin
-npm run dev
+docker compose -f compose.dev.yaml up -d --build
+docker compose -f compose.dev.yaml watch

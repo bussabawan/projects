@@ -69,7 +69,7 @@ function LoginContent() {
       </div>
 
       <div className={styles.card}>
-        <h1 className={styles.title}>Log in</h1>
+        <h1 className={styles.title}>เข้าสู่ระบบ</h1>
         
         <form className={styles.form} onSubmit={handleLogin}>
           {error && <div style={{ color: 'red', textAlign: 'center' }}>{error}</div>}

@@ -9,6 +9,10 @@ COPY package.json package-lock.json ./
 # Install dependencies
 RUN npm ci
 
+# Development image
+FROM deps AS dev
+COPY . .
+
 # Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /usr/src/app
@@ -33,8 +37,8 @@ RUN mkdir .next
 RUN chown nextjs:nodejs .next
 
 # Ensure upload directory exists and has correct permissions
-RUN mkdir -p public/uploads
-RUN chown -R nextjs:nodejs public/uploads
+RUN mkdir -p uploads
+RUN chown -R nextjs:nodejs uploads
 
 USER nextjs
 
