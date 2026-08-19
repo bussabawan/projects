@@ -1,0 +1,16 @@
+services:
+  server:
+    build:
+      context: .
+      target: base
+    working_dir: /usr/src/app
+    command: sh -c "npm install && npm run dev"
+    environment:
+      NODE_ENV: development
+      HOSTNAME: "0.0.0.0"
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - .:/usr/src/app
+      # Use anonymous volumes to prevent host directories from overwriting container directories
+      - /usr/src/app/node_modules
+      - /usr/src/app/.next
