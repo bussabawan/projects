@@ -106,7 +106,7 @@ export async function saveMatchingGameResult(
       return { success: false, error: "Unauthorized" };
     }
     
-    await GameMatchingModel.saveGameLog(session.user.id, logData, timeLogs);
+    await GameMatchingModel.saveGameLog(Number(session.user.id), logData, timeLogs);
     return { success: true };
   } catch (error) {
     console.error("Failed to save game result:", error);

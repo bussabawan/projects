@@ -10,15 +10,18 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ file
     return new NextResponse("Invalid filename", { status: 400 });
   }
 
-  const filePath = path.join(process.cwd(), "storage/uploads", filename);
+  // Determine content type and folder based on extension
+  const ext = filename.split('.').pop()?.toLowerCase();
+  const isAudio = ['mp3', 'wav', 'ogg'].includes(ext || '');
+  const folder = isAudio ? 'audio' : 'images';
+
+  const filePath = path.join(process.cwd(), "uploads", folder, filename);
   
   try {
     const buffer = await fs.readFile(filePath);
     
     // Determine content type
     let contentType = "application/octet-stream";
-    const ext = filename.split('.').pop()?.toLowerCase();
-    
     if (ext === 'png') contentType = 'image/png';
     else if (ext === 'jpg' || ext === 'jpeg') contentType = 'image/jpeg';
     else if (ext === 'webp') contentType = 'image/webp';

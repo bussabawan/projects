@@ -14,8 +14,13 @@ export async function POST(req: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Save to storage/uploads
-    const uploadDir = path.join(process.cwd(), "storage/uploads");
+    // Determine content type and folder based on extension
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    const isAudio = ['mp3', 'wav', 'ogg'].includes(ext || '');
+    const folder = isAudio ? 'audio' : 'images';
+    
+    // Save to uploads/[folder]
+    const uploadDir = path.join(process.cwd(), "uploads", folder);
     await fs.mkdir(uploadDir, { recursive: true });
 
     // Generate unique filename

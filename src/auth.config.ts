@@ -25,10 +25,7 @@ export const authConfig = {
       const isUserRoute = nextUrl.pathname.startsWith('/user');
       const isUploadsRoute = nextUrl.pathname.startsWith('/api/uploads');
 
-      // Allow public access to the hospital logo
-      if (isUploadsRoute && nextUrl.pathname === '/api/uploads/vejjarak_logo.png') {
-        return true;
-      }
+
 
       // Protect secured routes
       if (isApiAdminRoute || isAdminRoute || isUserRoute || isUploadsRoute) {

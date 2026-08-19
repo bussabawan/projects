@@ -101,6 +101,7 @@ export default function MatchingGamePage() {
     
     if (startTime === 0) {
       const now = Date.now();
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStartTime(now);
       setCurrentQuestionStartTime(now);
     }
@@ -169,6 +170,7 @@ export default function MatchingGamePage() {
       setFeedback('correct');
       setCorrectCount(prev => prev + 1);
       
+      // eslint-disable-next-line react-hooks/purity
       const questionTimeSecs = Math.floor((Date.now() - currentQuestionStartTime) / 1000);
       const timePerQuestion = formatHHMMSS(questionTimeSecs);
       setTimeLogs(prev => [...prev, { photoId: currentQ.target.id, timePerQuestion }]);

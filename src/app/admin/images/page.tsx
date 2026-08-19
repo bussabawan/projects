@@ -12,6 +12,7 @@ function CardImage({ src, alt }: { src: string; alt: string }) {
   const [error, setError] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setError(false);
   }, [src]);
 

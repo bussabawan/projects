@@ -1,5 +1,5 @@
 import { db } from '@/lib/db';
-import { RowDataPacket } from 'mysql2';
+import { RowDataPacket, ResultSetHeader } from 'mysql2';
 import { ImageInfo } from './manageImages';
 
 export class GameMatchingModel {
@@ -17,7 +17,7 @@ export class GameMatchingModel {
   static async getRandomImages(limit: number, excludeIds: number[]): Promise<ImageInfo[]> {
     let query = `SELECT photo_id as id, photo_title as title, photo_name as imageUrl, audio_name as audioUrl, audio_title as audioTitle, audio_gen as audioGen
                  FROM photo_data WHERE remove = 0`;
-    const params: any[] = [];
+    const params: (string | number)[] = [];
     
     if (excludeIds.length > 0) {
       const placeholders = excludeIds.map(() => '?').join(',');
@@ -50,13 +50,12 @@ export class GameMatchingModel {
     try {
       await connection.beginTransaction();
 
-      // Fix ResultSetHeader type error by importing it or using any temporarily
-      const [result] = await connection.query(
+      const [result] = await connection.query<ResultSetHeader>(
         `INSERT INTO matching_exercises_log 
          (user_id, total_questions, total_answers, click_count, correct_count, incorrect_count, test_date, remove) 
          VALUES (?, ?, ?, ?, ?, ?, CURDATE(), 0)`,
         [userId, logData.totalQuestions, logData.totalAnswers, logData.clickCount, logData.correctCount, logData.incorrectCount]
-      ) as any;
+      );
 
       const matchingId = result.insertId;
 

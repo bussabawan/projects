@@ -301,6 +301,7 @@ export default function ManageExercisesPage() {
   }, [imagePage, imageItemsPerPage, debouncedImageSearchQuery]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setImagePage(1);
     isImageLoadMoreRef.current = false;
   }, [debouncedImageSearchQuery]);
@@ -320,6 +321,7 @@ export default function ManageExercisesPage() {
 
   // Reset page when debounced search query changes
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentPage(1);
   }, [debouncedSearchQuery]);
 
