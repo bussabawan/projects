@@ -93,7 +93,7 @@ export default function MatchingGamePage() {
     
     const audio = new Audio(url);
     audioRef.current = audio;
-    audio.play().catch(e => console.error('Audio play failed:', e));
+    audio.play().catch(() => {});
   };
 
   // Timer effect
@@ -144,7 +144,7 @@ export default function MatchingGamePage() {
           }
           const audio = new Audio(currentQ.target.audioUrl);
           audioRef.current = audio;
-          audio.play().catch(e => console.warn('Audio autoplay blocked by browser:', e));
+          audio.play().catch(() => {});
         }, 500); // Small delay allows UI to render first and helps with browser autoplay policies
         
         return () => clearTimeout(timer);
