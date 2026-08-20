@@ -356,7 +356,7 @@
 
   .gameArea {
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.5rem;
     justify-content: flex-start;
     margin-bottom: 0;
   }
@@ -378,6 +378,12 @@
 
   .choiceBox {
     padding: 0.5rem;
+  }
+
+  .wordText {
+    font-size: clamp(3.5rem, 10vw, 3rem);
+    width: 100%;
+    word-break: break-word;
   }
 }
 
