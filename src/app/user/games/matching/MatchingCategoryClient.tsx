@@ -15,6 +15,18 @@ export default function MatchingCategoryClient() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const savedMode = sessionStorage.getItem('matchingActiveTab');
+    if (savedMode === 'word') {
+      setActiveTab('word');
+    }
+  }, []);
+
+  const handleTabChange = (mode: 'image' | 'word') => {
+    setActiveTab(mode);
+    sessionStorage.setItem('matchingActiveTab', mode);
+  };
+
+  useEffect(() => {
     const fetchExercises = async () => {
       try {
         const res = await fetch('/api/user/exercises');
@@ -46,13 +58,13 @@ export default function MatchingCategoryClient() {
           <div className={`${styles.toggleContainer} ${activeTab === 'word' ? styles.toggleWord : styles.toggleImage}`}>
             <button 
               className={`${styles.toggleBtn} ${activeTab === 'image' ? styles.active : ''}`}
-              onClick={() => setActiveTab('image')}
+              onClick={() => handleTabChange('image')}
             >
               ภาพกับภาพ
             </button>
             <button 
               className={`${styles.toggleBtn} ${activeTab === 'word' ? styles.active : ''}`}
-              onClick={() => setActiveTab('word')}
+              onClick={() => handleTabChange('word')}
             >
               คำกับภาพ
             </button>

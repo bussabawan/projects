@@ -63,7 +63,7 @@ export class GameMatchingModel {
       const [result] = await connection.query<ResultSetHeader>(
         `INSERT INTO matching_exercises_log 
          (user_id, total_questions, total_answers, click_count, correct_count, incorrect_count, test_date, remove) 
-         VALUES (?, ?, ?, ?, ?, ?, CURDATE(), 0)`,
+         VALUES (?, ?, ?, ?, ?, ?, NOW(), 0)`,
         [userId, logData.totalQuestions, logData.totalAnswers, logData.clickCount, logData.correctCount, logData.incorrectCount]
       );
 

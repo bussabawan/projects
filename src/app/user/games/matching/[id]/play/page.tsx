@@ -93,7 +93,7 @@ export default function MatchingGamePage() {
     
     const audio = new Audio(url);
     audioRef.current = audio;
-    audio.play().catch(e => console.error('Audio play failed:', e));
+    audio.play().catch(() => {});
   };
 
   // Timer effect
@@ -144,7 +144,7 @@ export default function MatchingGamePage() {
           }
           const audio = new Audio(currentQ.target.audioUrl);
           audioRef.current = audio;
-          audio.play().catch(e => console.warn('Audio autoplay blocked by browser:', e));
+          audio.play().catch(() => {});
         }, 500); // Small delay allows UI to render first and helps with browser autoplay policies
         
         return () => clearTimeout(timer);
@@ -301,14 +301,20 @@ export default function MatchingGamePage() {
           onClick={() => playAudio(currentQ.target.audioUrl)}
           style={{ cursor: currentQ.target.audioUrl && !isMuted ? 'pointer' : 'default' }}
         >
-          <img 
-            src={currentQ.target.imageUrl} 
-            alt="Target" 
-            className={styles.targetImage} 
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400?text=Image+Not+Found';
-            }}
-          />
+          {type === 'word' ? (
+            <div className={styles.wordTarget}>
+              <span className={styles.wordText}>{currentQ.target.title}</span>
+            </div>
+          ) : (
+            <img 
+              src={currentQ.target.imageUrl} 
+              alt="Target" 
+              className={styles.targetImage} 
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400?text=Image+Not+Found';
+              }}
+            />
+          )}
         </div>
 
         <div className={styles.choicesContainer} style={{ gridTemplateColumns: numAnswers > 4 ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)' }}>

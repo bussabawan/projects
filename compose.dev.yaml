@@ -8,6 +8,7 @@ services:
     env_file:
       - .env
     environment:
+      TZ: "Asia/Bangkok"
       NODE_ENV: development
       HOSTNAME: "0.0.0.0"
       PORT: ${PORT:-3000}
@@ -37,6 +38,7 @@ services:
     image: mysql:8
     restart: always
     environment:
+      TZ: "Asia/Bangkok"
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
