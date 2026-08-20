@@ -49,8 +49,8 @@ next-env.d.ts
 
 /uploads/audio/*
 !/uploads/audio/.gitkeep
-!/uploads/audio/1787126482588-291944130-tts-1787126482561.mp3
+/uploads/audio/1787126482588-291944130-tts-1787126482561.mp3
 
 /uploads/images/*
 !/uploads/images/.gitkeep
-!/uploads/images/1787126481506-55842190-images.png
+/uploads/images/1787126481506-55842190-images.png
