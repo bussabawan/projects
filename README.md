@@ -55,29 +55,34 @@
 
 ```text
 ot-project-2026/
-├── app/                  # (View & Controller) โฟลเดอร์หลักของแอป
-│   ├── actions/          # (Controller) สำหรับเก็บไฟล์ Server Actions ("use server")
-│   ├── api/              # (Controller) สำหรับสร้าง API Endpoint รับส่งข้อมูล
-│   │   └── upload/
-│   │       └── route.ts  # API สำหรับจัดการการอัปโหลดไฟล์
-│   ├── globals.css       # ไฟล์ CSS หลัก
-│   ├── page.module.css   # ไฟล์ CSS เฉพาะหน้าเว็บ (CSS Module)
-│   └── page.tsx          # (View) หน้าจอ UI หลัก
-├── lib/                  # (Model) สำหรับเก็บโค้ดที่เกี่ยวกับฐานข้อมูลหรือลอจิกส่วนกลาง
-│   └── db.ts             # โค้ดเชื่อมต่อฐานข้อมูล MySQL
-├── storage/              # โฟลเดอร์เก็บไฟล์ที่ระบบสร้างขึ้น (ไม่สามารถเข้าถึงผ่าน URL ตรงๆ ได้เพื่อความปลอดภัย)
-│   └── uploads/          # โฟลเดอร์เก็บไฟล์ภาพและเสียงที่ผู้ใช้อัปโหลด
-├── .env                  # ไฟล์ตั้งค่าตัวแปรระบบ (รหัสผ่านฐานข้อมูล, พอร์ต)
-├── compose.yaml          # ไฟล์ตั้งค่า Docker (Database, Server)
-└── Dockerfile            # ไฟล์สำหรับ Build โปรเจกต์ขึ้น Docker
+├── src/
+│   ├── app/                  # (View & Controller) โฟลเดอร์หลักของแอป
+│   │   ├── actions/          # (Controller) สำหรับเก็บไฟล์ Server Actions ("use server")
+│   │   ├── api/              # (Controller) สำหรับสร้าง API Endpoint รับส่งข้อมูล
+│   │   │   └── upload/
+│   │   │       └── route.ts  # API สำหรับจัดการการอัปโหลดไฟล์
+│   │   ├── admin/            # (View & Controller) ส่วนของผู้ดูแลระบบ
+│   │   ├── user/             # (View & Controller) ส่วนของผู้ใช้งานทั่วไป (ผู้ป่วย)
+│   │   ├── components/       # (View) React Components ที่ใช้ร่วมกัน
+│   │   └── page.tsx          # (View) หน้าจอ UI หลัก
+│   ├── lib/                  # (Model) สำหรับเก็บโค้ดที่เกี่ยวกับฐานข้อมูลหรือลอจิกส่วนกลาง
+│   │   ├── db.ts             # โค้ดเชื่อมต่อฐานข้อมูล MySQL
+│   │   └── models/           # (Model) โค้ดจัดการข้อมูลแต่ละส่วน (เช่น user.ts, patientStats.ts)
+│   ├── auth.ts               # โค้ดจัดการการเข้าสู่ระบบ (Auth.js)
+│   └── proxy.ts              # (Middleware) สำหรับจัดการ Request ก่อนเข้าถึงแอป
+├── uploads/                  # โฟลเดอร์เก็บไฟล์ภาพและเสียงที่ผู้ใช้อัปโหลด
+├── .env                      # ไฟล์ตั้งค่าตัวแปรระบบ (รหัสผ่านฐานข้อมูล, พอร์ต)
+├── compose.dev.yaml          # ไฟล์ตั้งค่า Docker สำหรับ Development
+├── compose.yaml              # ไฟล์ตั้งค่า Docker สำหรับ Production
+└── Dockerfile                # ไฟล์สำหรับ Build โปรเจกต์ขึ้น Docker
 ```
 
 ---
 
 ## 🖥️ 1. View (หน้าจอแสดงผล)
-**เก็บที่ไหน:** โฟลเดอร์ `app/` (ไฟล์ชื่อ `page.tsx` หรือ `layout.tsx`)
+**เก็บที่ไหน:** โฟลเดอร์ `src/app/` (ไฟล์ชื่อ `page.tsx` หรือ `layout.tsx`)
 **วิธีแก้ไข/เพิ่มเติม:**
-- หากต้องการสร้างหน้าใหม่ เช่น หน้า Dashboard ให้สร้างโฟลเดอร์ย่อยใน `app/` เช่น `app/dashboard/page.tsx` (จะเข้าถึงผ่าน URL: `/dashboard`)
+- หากต้องการสร้างหน้าใหม่ เช่น หน้า Dashboard ให้สร้างโฟลเดอร์ย่อยใน `src/app/` เช่น `src/app/dashboard/page.tsx` (จะเข้าถึงผ่าน URL: `/dashboard`)
 - การตกแต่งหน้าจอ สามารถสร้างไฟล์ `.module.css` เพื่อกำหนดสไตล์เฉพาะหน้านั้นๆ ได้
 
 ## ⚙️ 2. Controller (จัดการลอจิกและ API)
