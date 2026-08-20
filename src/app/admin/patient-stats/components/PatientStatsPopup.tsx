@@ -10,7 +10,6 @@ interface PatientStatsPopupProps {
   isOpen: boolean;
   onClose: () => void;
   patientId?: string; // Optional, might be used to fetch specific stats later
-  categories?: string[];
   exerciseSets?: string[];
 }
 
@@ -24,7 +23,7 @@ const extractCategory = (testSet?: string) => {
   return cat;
 };
 
-const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, patientId, categories = [], exerciseSets = [] }) => {
+const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, patientId, exerciseSets = [] }) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(false);

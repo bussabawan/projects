@@ -677,7 +677,7 @@
   
   .tableBody {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.6rem;
     padding: 0;
     background: transparent;
@@ -694,6 +694,8 @@
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    height: 100%;
+    box-sizing: border-box;
   }
   
   .desktopOnly {
@@ -749,7 +751,7 @@
 
 @media (max-width: 600px) {
   .tableBody {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

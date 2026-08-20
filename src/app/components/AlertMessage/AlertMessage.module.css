@@ -1,0 +1,36 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  /* background-color: rgba(0, 0, 0, 0.2); Uncomment if you want a dark overlay */
+}
+
+.alertBox {
+  padding: 40px 60px;
+  border-radius: 24px;
+  border: 1px solid #000;
+  text-align: center;
+  min-width: 350px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.text {
+  margin: 15px 0;
+  font-size: 28px;
+  font-weight: 400;
+  color: #000;
+}
+
+.success {
+  background-color: #8DFF66;
+}
+
+.error {
+  background-color: #FFC1C1;
+}

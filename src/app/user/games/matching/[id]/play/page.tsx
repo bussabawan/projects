@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
-import Image from 'next/image';
+
 import styles from './matchingGame.module.css';
 import { getGameData, saveMatchingGameResult } from '@/app/actions/matchingActions';
+import AlertMessage from '@/app/components/AlertMessage/AlertMessage';
 
 // Volume Icon SVG
 const VolumeIcon = ({ isMuted }: { isMuted: boolean }) => (
@@ -268,16 +269,8 @@ export default function MatchingGamePage() {
 
   return (
     <div className={styles.container}>
-      {feedback === 'correct' && (
-        <div className={styles.resultOverlay}>
-          <div className={styles.resultText}>ถูกต้อง!</div>
-        </div>
-      )}
-      {feedback === 'wrong' && (
-        <div className={styles.resultOverlay}>
-          <div className={`${styles.resultText} ${styles.wrongText}`}>ลองใหม่นะ</div>
-        </div>
-      )}
+      <AlertMessage type="success" show={feedback === 'correct'} />
+      <AlertMessage type="error" show={feedback === 'wrong'} />
 
       <div className={styles.header}>
         <div className={styles.timer}>

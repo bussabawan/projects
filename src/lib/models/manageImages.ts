@@ -64,8 +64,14 @@ export class ManageImagesModel {
       finalParams
     );
 
+    const formattedRows = rows.map((row) => ({
+      ...row,
+      imageUrl: row.imageUrl ? `/api/files/${row.id}?type=image` : "",
+      audioUrl: row.audioUrl ? `/api/files/${row.id}?type=audio` : "",
+    }));
+
     return {
-      data: rows as ImageInfo[],
+      data: formattedRows as ImageInfo[],
       totalPages: totalPages === 0 ? 1 : totalPages
     };
   }
@@ -129,12 +135,18 @@ export class ManageImagesModel {
 
     await db.execute(
       `UPDATE photo_data 
-       SET photo_name = ?, photo_title = ?, audio_name = ?, audio_title = ?, audio_gen = ?, remove = 0 
+       SET 
+         photo_name = IF(? LIKE '/api/files/%', photo_name, ?), 
+         photo_title = ?, 
+         audio_name = IF(? LIKE '/api/files/%', audio_name, ?), 
+         audio_title = ?, 
+         audio_gen = ?, 
+         remove = 0 
        WHERE photo_id = ?`,
       [
-        data.imageUrl, 
+        data.imageUrl, data.imageUrl,
         data.title, 
-        data.audioUrl || "", 
+        data.audioUrl || "", data.audioUrl || "",
         data.audioTitle || "", 
         data.audioGen ? 1 : 0,
         id
