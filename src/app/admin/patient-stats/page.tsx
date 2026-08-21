@@ -289,7 +289,6 @@ export default function PatientStatsPage() {
         isOpen={isPopupOpen} 
         onClose={closePopup} 
         patientId={selectedPatientId} 
-        categories={uniqueCategories}
         exerciseSets={uniqueExerciseSets}
       />
     </div>
