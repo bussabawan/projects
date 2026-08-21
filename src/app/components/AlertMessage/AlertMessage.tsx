@@ -17,9 +17,12 @@ export default function AlertMessage({
   
   if (!show) return null;
 
+  const icon = type === 'success' ? '✅' : '❌';
+
   return (
     <div className={styles.overlay}>
       <div className={`${styles.alertBox} ${styles[type]}`}>
+        <div className={styles.iconContainer}>{icon}</div>
         <p className={styles.text}>{line1}</p>
         {line2 && <p className={styles.text}>{line2}</p>}
       </div>
