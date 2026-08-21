@@ -126,17 +126,18 @@ export default function MemorySettingsPage() {
 
   return (
     <div className={styles.container}>
-      <button 
-        className={styles.audioToggleBtn} 
-        onClick={toggleAudio}
-        aria-label={isPlaying ? "Mute instruction" : "Play instruction"}
-        title={isPlaying ? "ปิดเสียงคำแนะนำ" : "เปิดเสียงคำแนะนำ"}
-      >
-        <VolumeIcon isMuted={!isPlaying} />
-      </button>
-
       <div className={styles.header}>
-        <h1 className={styles.title}>จำภาพเหมือน</h1>
+        <h1 className={styles.title}>
+          จำภาพเหมือน
+          <button 
+            className={styles.audioToggleBtn} 
+            onClick={toggleAudio}
+            aria-label={isPlaying ? "Mute instruction" : "Play instruction"}
+            title={isPlaying ? "ปิดเสียงคำแนะนำ" : "เปิดเสียงคำแนะนำ"}
+          >
+            <VolumeIcon isMuted={!isPlaying} />
+          </button>
+        </h1>
         <p className={styles.subtitle}>เลือกชิ้นส่วนภาพเหมือนในตัวเลือกให้ถูกต้อง</p>
       </div>
 

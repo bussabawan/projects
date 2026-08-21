@@ -249,12 +249,12 @@
   .header {
     text-align: left;
     margin-top: 0;
-    margin-bottom: 1.5rem;
+    margin-bottom: -1.5rem;
   }
 
   .title {
     font-size: 2rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
     display: flex;
     align-items: center;
     justify-content: flex-start;
@@ -274,7 +274,7 @@
   /* Settings Row (Order 1 on mobile) */
   .settingsContainer {
     order: 1;
-    align-items: flex-start;
+    align-items: center;
     width: 100%;
   }
 
