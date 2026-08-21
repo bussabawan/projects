@@ -249,7 +249,7 @@ export default function HistoryPage() {
                       <div 
                         key={detail.id} 
                         className={styles.detailRow}
-                        style={{ backgroundColor: index % 2 === 0 ? '#e2e2e2' : '#c4c4c4' }}
+                        style={{ backgroundColor: index % 2 === 0 ? '#f5f9fc' : '#e8f1f8' }}
                       >
                         <div>{detail.time}</div>
                         <div className={styles.gameInfo}>

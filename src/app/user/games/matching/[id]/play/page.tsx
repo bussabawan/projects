@@ -184,13 +184,13 @@ export default function MatchingGamePage() {
         } else {
           setIsFinished(true);
         }
-      }, 1000);
+      }, 1500);
     } else {
       setFeedback('wrong');
       setIncorrectCount(prev => prev + 1);
       setTimeout(() => {
         setFeedback(null);
-      }, 1000);
+      }, 1500);
     }
   };
 
