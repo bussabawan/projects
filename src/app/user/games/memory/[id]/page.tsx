@@ -85,8 +85,10 @@ export default function MemorySettingsPage() {
   }, [params.id]);
 
   useEffect(() => {
-    // Initialize audio with instruction voice file
-    const audioSrc = '/api/uploads/memory_instruction.mp3';
+    // Initialize audio with instruction voice file based on mode
+    const audioSrc = mode === 'word' 
+      ? '/api/uploads/word_image_memory_instruction.mp3' 
+      : '/api/uploads/memory_instruction.mp3';
       
     audioRef.current = new Audio(audioSrc);
     audioRef.current.onended = () => setIsPlaying(false);
@@ -110,7 +112,7 @@ export default function MemorySettingsPage() {
         audioRef.current = null;
       }
     };
-  }, []);
+  }, [mode]);
 
   const toggleAudio = () => {
     if (audioRef.current) {
