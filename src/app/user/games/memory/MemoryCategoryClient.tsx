@@ -18,6 +18,18 @@ export default function MemoryCategoryClient() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const savedTab = sessionStorage.getItem('memoryActiveTab');
+    if (savedTab === 'picture' || savedTab === 'word') {
+      setActiveTab(savedTab as 'picture' | 'word');
+    }
+  }, []);
+
+  const handleTabChange = (tab: 'picture' | 'word') => {
+    setActiveTab(tab);
+    sessionStorage.setItem('memoryActiveTab', tab);
+  };
+
+  useEffect(() => {
     const fetchExercises = async () => {
       try {
         const res = await fetch('/api/user/games/memory');
@@ -55,13 +67,13 @@ export default function MemoryCategoryClient() {
         <div className={`${styles.tabsContainer} ${activeTab === 'word' ? styles.tabWord : styles.tabImage}`}>
           <button 
             className={`${styles.tabButton} ${activeTab === 'picture' ? styles.activeTab : ''}`}
-            onClick={() => setActiveTab('picture')}
+            onClick={() => handleTabChange('picture')}
           >
             ภาพกับภาพ
           </button>
           <button 
             className={`${styles.tabButton} ${activeTab === 'word' ? styles.activeTab : ''}`}
-            onClick={() => setActiveTab('word')}
+            onClick={() => handleTabChange('word')}
           >
             คำกับภาพ
           </button>

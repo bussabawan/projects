@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import styles from './memorySettings.module.css';
 import { getExerciseImageCount } from '@/app/actions/matchingActions';
 
@@ -28,6 +28,20 @@ const StackedPictureIcon = () => (
   </svg>
 );
 
+const WordToImageIcon = () => (
+  <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+    <div style={{ position: 'absolute', top: '15px', left: '15px' }}>
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+      </svg>
+    </div>
+    <div style={{ fontSize: '4.5rem', fontWeight: 500, color: '#000' }}>Text</div>
+    <div style={{ position: 'absolute', bottom: '5px', right: '25px', fontSize: '3.5rem', color: '#000' }}>?</div>
+  </div>
+);
+
 // Volume Icon SVG
 const VolumeIcon = ({ isMuted }: { isMuted: boolean }) => (
   <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -50,6 +64,8 @@ const VolumeIcon = ({ isMuted }: { isMuted: boolean }) => (
 export default function MemorySettingsPage() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
+  const mode = searchParams.get('mode') || 'picture';
 
   const [questions, setQuestions] = useState(30);
   const [maxQuestions, setMaxQuestions] = useState(30);
@@ -110,7 +126,7 @@ export default function MemorySettingsPage() {
 
   const handleStart = () => {
     // Logic to start the game with the selected settings
-    router.push(`/user/games/memory/${params.id}/play?q=${questions}&a=${answers}&t=${showTime}`);
+    router.push(`/user/games/memory/${params.id}/play?mode=${mode}&q=${questions}&a=${answers}&t=${showTime}`);
   };
 
   const handleBack = () => {
@@ -128,7 +144,7 @@ export default function MemorySettingsPage() {
     <div className={styles.container}>
       <div className={styles.header}>
         <h1 className={styles.title}>
-          จำภาพเหมือน
+          {mode === 'word' ? 'จำคำแล้วเลือกภาพ' : 'จำภาพเหมือน'}
           <button 
             className={styles.audioToggleBtn} 
             onClick={toggleAudio}
@@ -138,14 +154,18 @@ export default function MemorySettingsPage() {
             <VolumeIcon isMuted={!isPlaying} />
           </button>
         </h1>
-        <p className={styles.subtitle}>เลือกชิ้นส่วนภาพเหมือนในตัวเลือกให้ถูกต้อง</p>
+        <p className={styles.subtitle}>
+          {mode === 'word' 
+            ? 'เลือกชิ้นส่วนภาพในตัวเลือกให้ตรงกับคำให้ถูกต้อง' 
+            : 'เลือกชิ้นส่วนภาพเหมือนในตัวเลือกให้ถูกต้อง'}
+        </p>
       </div>
 
       <div className={styles.contentRow}>
         {/* Graphics Section */}
         <div className={styles.graphicsContainer}>
           <div className={styles.mainBox}>
-            <StackedPictureIcon />
+            {mode === 'word' ? <WordToImageIcon /> : <StackedPictureIcon />}
           </div>
         </div>
 
