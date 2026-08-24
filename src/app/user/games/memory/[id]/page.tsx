@@ -228,7 +228,7 @@ export default function MemorySettingsPage() {
           </div>
 
           <div className={styles.settingRow}>
-            <span className={styles.settingLabel}>เวลาที่แสดงคำตอบ</span>
+            <span className={styles.settingLabel}>เวลาที่แสดงคำถาม</span>
             <div className={styles.controlGroup}>
               <button 
                 className={styles.controlBtn} 
