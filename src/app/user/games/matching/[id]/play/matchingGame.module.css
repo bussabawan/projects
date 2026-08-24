@@ -99,24 +99,25 @@
 .targetContainer {
   flex: 1;
   max-width: 350px;
-  background-color: #e0e0e0;
+  background-color: #ffffff;
   border-radius: 16px;
   border: 1px solid #aaa;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: 0;
   aspect-ratio: 1 / 1;
   position: relative;
 }
 
 .targetImage {
   width: 100%;
-  height: auto;
+  height: 100%;
   max-height: 500px;
   object-fit: contain;
-  border-radius: 4px;
+  border-radius: 16px;
+  background-color: #ffffff;
 }
 
 .wordTarget {
@@ -157,14 +158,14 @@
 }
 
 .choiceBox {
-  background-color: #e0e0e0;
+  background-color: #ffffff;
   border-radius: 16px;
   border: 1px solid #aaa;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  padding: 0;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
   aspect-ratio: 1 / 1;
@@ -178,10 +179,11 @@
 
 .choiceImage {
   width: 100%;
-  height: auto;
+  height: 100%;
   max-height: 250px;
   object-fit: contain;
-  border-radius: 4px;
+  border-radius: 16px;
+  background-color: #ffffff;
 }
 
 .loading {
@@ -364,7 +366,7 @@
   .targetContainer {
     width: 80%;
     max-width: 260px;
-    padding: 1rem;
+    padding: 0;
     flex: none;
   }
 
@@ -377,7 +379,7 @@
   }
 
   .choiceBox {
-    padding: 0.5rem;
+    padding: 0;
   }
 
   .wordText {

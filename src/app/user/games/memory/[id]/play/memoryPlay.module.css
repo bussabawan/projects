@@ -1,0 +1,279 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  background-color: #e5e5e5;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #e5e5e5;
+}
+
+.progressInfo {
+  font-size: 2rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.timerContainer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #d1d5db;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 1.5rem;
+  flex: 1;
+  justify-content: center;
+}
+
+.controlsContainer {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.audioBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+}
+
+.endGameBtn {
+  background-color: #F38776;
+  color: white;
+  border: none;
+  padding: 10px 30px;
+  border-radius: 10px;
+  font-size: 1.25rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.endGameBtn:hover {
+  background-color: #E27665;
+}
+
+/* Question Phase Styles */
+.questionContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.targetCard {
+  width: 60%;
+  max-width: 600px;
+  aspect-ratio: 4/3;
+  background-color: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #737373;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.targetCard img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 20px;
+  background-color: #ffffff;
+}
+
+.countdownText {
+  position: absolute;
+  bottom: 40px;
+  right: 40px;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #333;
+}
+
+/* Options Phase Styles */
+.optionsContent {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.optionsGrid {
+  display: grid;
+  gap: 30px;
+  max-width: 900px;
+  width: 100%;
+  justify-content: center;
+}
+
+/* Grid layout for different number of options */
+.grid2 { grid-template-columns: repeat(2, 1fr); }
+.grid3 { grid-template-columns: repeat(3, 1fr); }
+.grid4 { grid-template-columns: repeat(2, 1fr); }
+.grid5 { grid-template-columns: repeat(3, 1fr); }
+.grid6 { grid-template-columns: repeat(3, 1fr); }
+
+.optionCard {
+  width: 100%;
+  aspect-ratio: 4/3;
+  background-color: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #737373;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.optionCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+}
+
+.optionCard.selected {
+  border: 4px solid #4ade80;
+}
+
+.optionCard.wrong {
+  border: 4px solid #ef4444;
+}
+
+.optionCard img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 20px;
+  background-color: #ffffff;
+}
+
+.loadingContainer, .errorContainer, .summaryContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  gap: 20px;
+  font-size: 1.5rem;
+  background-color: #f9fafb;
+}
+
+.summaryScore {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #10b981;
+}
+
+.homeBtn {
+  background-color: #3b82f6;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+
+  .header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: 
+      "timer . endBtn"
+      "progress progress progress"
+      "audio audio audio";
+    gap: 10px;
+    padding: 10px 0;
+  }
+
+  .timerContainer {
+    grid-area: timer;
+    background-color: white;
+    color: black;
+    font-size: 1rem;
+    padding: 5px 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .controlsContainer {
+    display: contents; 
+  }
+
+  .endGameBtn {
+    grid-area: endBtn;
+    background-color: #F38776;
+    padding: 8px 20px;
+    font-size: 1.1rem;
+  }
+  
+  .endGameBtn:hover {
+    background-color: #E27665;
+  }
+
+  .progressInfo {
+    grid-area: progress;
+    font-size: 1.25rem;
+    margin-top: 5px;
+  }
+
+  .audioBtn {
+    grid-area: audio;
+    justify-self: start;
+    padding: 0;
+  }
+
+  .targetCard {
+    width: 95%;
+  }
+
+  .optionsGrid {
+    gap: 15px;
+  }
+  
+  .optionCard {
+    aspect-ratio: 1/1;
+  }
+
+  .grid2, .grid3, .grid4, .grid5, .grid6 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .countdownText {
+    bottom: 20px;
+    right: 15px;
+    font-size: 1rem;
+  }
+}

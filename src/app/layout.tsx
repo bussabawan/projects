@@ -1,3 +1,5 @@
+import './globals.css';
+
 export const metadata = {
   title: 'Vejjarak Lampang Hospital',
   description: 'OT Project',
