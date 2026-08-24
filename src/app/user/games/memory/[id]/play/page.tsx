@@ -106,25 +106,6 @@ export default function MemoryGamePlayPage() {
     };
   }, [gameState, currentQuestionIndex]);
 
-  // Play audio when entering question state
-  useEffect(() => {
-    if (gameState === 'question' && questions[currentQuestionIndex]) {
-      const currentQ = questions[currentQuestionIndex];
-      playAudio(currentQ.target.audioUrl);
-    }
-  }, [gameState, currentQuestionIndex, questions]);
-
-  const formatTime = (time: number) => {
-    return time.toFixed(2);
-  };
-
-  const formatTimeForDB = (totalSeconds: number) => {
-    const hrs = Math.floor(totalSeconds / 3600);
-    const mins = Math.floor((totalSeconds % 3600) / 60);
-    const secs = Math.floor(totalSeconds % 60);
-    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
   const playAudio = (url?: string): Promise<void> => {
     return new Promise((resolve) => {
       if (!url || isMuted) {
@@ -148,6 +129,27 @@ export default function MemoryGamePlayPage() {
       });
     });
   };
+
+  // Play audio when entering question state
+  useEffect(() => {
+    if (gameState === 'question' && questions[currentQuestionIndex]) {
+      const currentQ = questions[currentQuestionIndex];
+      playAudio(currentQ.target.audioUrl);
+    }
+  }, [gameState, currentQuestionIndex, questions]);
+
+  const formatTime = (time: number) => {
+    return time.toFixed(2);
+  };
+
+  const formatTimeForDB = (totalSeconds: number) => {
+    const hrs = Math.floor(totalSeconds / 3600);
+    const mins = Math.floor((totalSeconds % 3600) / 60);
+    const secs = Math.floor(totalSeconds % 60);
+    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+
 
   const handleOptionClick = async (selectedChoice: ImageInfo) => {
     if (gameState !== 'options' || isTransitioning) return;
