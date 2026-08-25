@@ -5,6 +5,7 @@ import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import styles from './memoryPlay.module.css';
 import { getMemoryGameData, saveMemoryGameResult } from '@/app/actions/memoryActions';
+import AlertMessage from '@/app/components/AlertMessage/AlertMessage';
 
 type ImageInfo = {
   id: number;
@@ -39,6 +40,8 @@ export default function MemoryGamePlayPage() {
   const [timeLogs, setTimeLogs] = useState<{photoId: number, timePerQuestion: string}[]>([]);
   const [wrongGuesses, setWrongGuesses] = useState<number[]>([]);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
+  const [showExitPopup, setShowExitPopup] = useState(false);
   
   // Timers
   const [countdown, setCountdown] = useState(showTimeSetting);
@@ -159,6 +162,8 @@ export default function MemoryGamePlayPage() {
     // If already guessed wrong, replay the sound and count as another mistake
     if (wrongGuesses.includes(selectedChoice.id)) {
       setIncorrectCount(prev => prev + 1);
+      setFeedback('wrong');
+      setTimeout(() => setFeedback(null), 1500);
       playAudio(selectedChoice.audioUrl);
       return;
     }
@@ -168,6 +173,7 @@ export default function MemoryGamePlayPage() {
     
     if (isCorrect) {
       setIsTransitioning(true);
+      setFeedback('correct');
       if (stopwatchRef.current) {
         clearInterval(stopwatchRef.current);
       }
@@ -185,6 +191,7 @@ export default function MemoryGamePlayPage() {
 
       // Move to next question or end game
       setWrongGuesses([]);
+      setFeedback(null);
       setIsTransitioning(false);
       if (currentQuestionIndex < questions.length - 1) {
         setCurrentQuestionIndex(prev => prev + 1);
@@ -195,6 +202,8 @@ export default function MemoryGamePlayPage() {
     } else {
       setIncorrectCount(prev => prev + 1);
       setWrongGuesses(prev => [...prev, selectedChoice.id]);
+      setFeedback('wrong');
+      setTimeout(() => setFeedback(null), 1500);
       playAudio(selectedChoice.audioUrl);
     }
   };
@@ -224,7 +233,15 @@ export default function MemoryGamePlayPage() {
   }, [gameState]);
 
   const handleEndGame = () => {
-    router.push(`/user/games/memory`);
+    setShowExitPopup(true);
+  };
+
+  const confirmEndGame = () => {
+    router.push(`/user/games/memory/${params.id}?mode=${mode}`);
+  };
+
+  const cancelEndGame = () => {
+    setShowExitPopup(false);
   };
 
   const toggleMute = () => {
@@ -242,7 +259,7 @@ export default function MemoryGamePlayPage() {
     return (
       <div className={styles.errorContainer}>
         <h2>เกิดข้อผิดพลาดในการโหลดข้อมูล</h2>
-        <button className={styles.homeBtn} onClick={handleEndGame}>กลับหน้าหลัก</button>
+        <button className={styles.homeBtn} onClick={confirmEndGame}>กลับไปหน้าตั้งค่า</button>
       </div>
     );
   }
@@ -255,7 +272,7 @@ export default function MemoryGamePlayPage() {
           ตอบถูก: {correctCount} / {questions.length}
         </div>
         <p>เวลาเฉลี่ย: {(timeLogs.reduce((acc, curr) => acc + parseFloat(curr.timePerQuestion), 0) / questions.length).toFixed(2)} วินาที</p>
-        <button className={styles.homeBtn} onClick={handleEndGame}>กลับหน้าหลัก</button>
+        <button className={styles.homeBtn} onClick={confirmEndGame}>กลับไปหน้าตั้งค่า</button>
       </div>
     );
   }
@@ -331,6 +348,28 @@ export default function MemoryGamePlayPage() {
                 <img src={choice.imageUrl} alt={`Option ${index + 1}`} loading="lazy" />
               </div>
             ))}
+          </div>
+        </div>
+      )}
+      <AlertMessage type="success" show={feedback === 'correct'} />
+      <AlertMessage type="error" show={feedback === 'wrong'} />
+
+      {/* Exit Confirmation Popup */}
+      {showExitPopup && (
+        <div className={styles.popupOverlay}>
+          <div className={styles.popupContainer}>
+            <div className={styles.popupIcon}>
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+            </div>
+            <div className={styles.popupText}>ต้องการออกจากเกมหรือไม่</div>
+            <div className={styles.popupButtons}>
+              <button className={styles.popupBtnConfirm} onClick={confirmEndGame}>ตกลง</button>
+              <button className={styles.popupBtnCancel} onClick={cancelEndGame}>ยกเลิก</button>
+            </div>
           </div>
         </div>
       )}
