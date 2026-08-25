@@ -61,6 +61,8 @@ export default function MatchingGamePage() {
   const [isFinished, setIsFinished] = useState(false);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
   const [showExitPopup, setShowExitPopup] = useState(false);
+  const [wrongChoiceId, setWrongChoiceId] = useState<number | null>(null);
+  const [correctChoiceId, setCorrectChoiceId] = useState<number | null>(null);
   
   // Log state
   const [clickCount, setClickCount] = useState(0);
@@ -169,6 +171,7 @@ export default function MatchingGamePage() {
     
     if (choiceId === currentQ.target.id) {
       setFeedback('correct');
+      setCorrectChoiceId(choiceId);
       setCorrectCount(prev => prev + 1);
       
       // eslint-disable-next-line react-hooks/purity
@@ -178,6 +181,7 @@ export default function MatchingGamePage() {
       
       setTimeout(() => {
         setFeedback(null);
+        setCorrectChoiceId(null);
         if (currentIndex < questions.length - 1) {
           setCurrentIndex(prev => prev + 1);
           setCurrentQuestionStartTime(Date.now());
@@ -187,9 +191,11 @@ export default function MatchingGamePage() {
       }, 1500);
     } else {
       setFeedback('wrong');
+      setWrongChoiceId(choiceId);
       setIncorrectCount(prev => prev + 1);
       setTimeout(() => {
         setFeedback(null);
+        setWrongChoiceId(null);
       }, 1500);
     }
   };
@@ -321,7 +327,7 @@ export default function MatchingGamePage() {
           {currentQ.choices.map((choice, idx) => (
             <div 
               key={`${choice.id}-${idx}`} 
-              className={styles.choiceBox}
+              className={`${styles.choiceBox} ${wrongChoiceId === choice.id ? styles.wrongChoice : ''} ${correctChoiceId === choice.id ? styles.correctChoice : ''}`}
               onClick={() => handleChoiceClick(choice.id, choice.audioUrl)}
             >
               <img 
@@ -348,24 +354,14 @@ export default function MatchingGamePage() {
       )}
 
       {/* Exit Confirmation Popup */}
-      {showExitPopup && (
-        <div className={styles.popupOverlay}>
-          <div className={styles.popupContainer}>
-            <div className={styles.popupIcon}>
-              <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="16" x2="12" y2="12"></line>
-                <line x1="12" y1="8" x2="12.01" y2="8"></line>
-              </svg>
-            </div>
-            <div className={styles.popupText}>ต้องการออกจากเกมหรือไม่</div>
-            <div className={styles.popupButtons}>
-              <button className={styles.popupBtnConfirm} onClick={confirmEndGame}>ตกลง</button>
-              <button className={styles.popupBtnCancel} onClick={cancelEndGame}>ยกเลิก</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <AlertMessage 
+        type="confirm" 
+        show={showExitPopup} 
+        onConfirm={confirmEndGame} 
+        onCancel={cancelEndGame} 
+        line1="ต้องการออกจากเกมหรือไม่" 
+        line2="" 
+      />
     </div>
   );
 }

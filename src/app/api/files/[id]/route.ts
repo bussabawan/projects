@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { RowDataPacket } from "mysql2";
+import { ManageImagesModel } from "@/lib/models/manageImages";
 import { promises as fs } from "fs";
 import path from "path";
 
@@ -11,16 +10,12 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const type = url.searchParams.get("type") || "image"; // 'image' or 'audio'
 
   try {
-    const [rows] = await db.query<RowDataPacket[]>(
-      `SELECT photo_name, audio_name FROM photo_data WHERE photo_id = ? AND remove = 0`,
-      [id]
-    );
+    const row = await ManageImagesModel.getFileDataById(Number(id));
 
-    if (rows.length === 0) {
+    if (!row) {
       return new NextResponse("File not found in database", { status: 404 });
     }
 
-    const row = rows[0];
     let filename = "";
     let folder = "";
 
