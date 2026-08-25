@@ -72,26 +72,26 @@
 /* Confirm Popup Styles */
 .popupContainer {
   background-color: white;
-  padding: 40px;
-  border-radius: 20px;
+  padding: 40px 30px;
+  border-radius: 32px;
   text-align: center;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
   width: 90%;
-  max-width: 400px;
-  border: 2px solid #ccc;
+  max-width: 420px;
+  border: none;
   animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 .popupIcon {
-  color: #ff9800;
-  margin-bottom: 20px;
+  color: #1a1a1a;
+  margin-bottom: 25px;
 }
 
 .popupText {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 500;
-  margin-bottom: 30px;
-  color: #333;
+  margin-bottom: 40px;
+  color: #1a1a1a;
 }
 
 .popupButtons {
@@ -101,33 +101,37 @@
 }
 
 .popupBtnConfirm {
-  padding: 12px 30px;
-  font-size: 18px;
-  background-color: #f44336;
-  color: white;
-  border: none;
-  border-radius: 10px;
+  flex: 1;
+  padding: 12px 20px;
+  font-size: 20px;
+  background-color: white;
+  color: #1a1a1a;
+  border: 1px solid #7b61ff;
+  border-radius: 40px;
   cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.2s;
+  font-weight: 500;
+  transition: all 0.2s;
+  max-width: 150px;
 }
 
 .popupBtnConfirm:hover {
-  background-color: #d32f2f;
+  background-color: #f5f3ff;
 }
 
 .popupBtnCancel {
-  padding: 12px 30px;
-  font-size: 18px;
-  background-color: #e0e0e0;
-  color: #333;
+  flex: 1;
+  padding: 12px 20px;
+  font-size: 20px;
+  background-color: #f28b82;
+  color: white;
   border: none;
-  border-radius: 10px;
+  border-radius: 40px;
   cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.2s;
+  font-weight: 500;
+  transition: all 0.2s;
+  max-width: 150px;
 }
 
 .popupBtnCancel:hover {
-  background-color: #bdbdbd;
+  background-color: #e07a72;
 }
