@@ -221,6 +221,14 @@
   color: #f44336;
 }
 
+.wrongChoice {
+  border: 4px solid #f44336 !important;
+}
+
+.correctChoice {
+  border: 4px solid #4ade80 !important;
+}
+
 /* Exit Confirmation Popup */
 .popupOverlay {
   position: fixed;

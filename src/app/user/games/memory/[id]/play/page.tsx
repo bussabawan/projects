@@ -42,10 +42,12 @@ export default function MemoryGamePlayPage() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
   const [showExitPopup, setShowExitPopup] = useState(false);
+  const [correctChoiceId, setCorrectChoiceId] = useState<number | null>(null);
   
   // Timers
   const [countdown, setCountdown] = useState(showTimeSetting);
   const [stopwatch, setStopwatch] = useState(0);
+  const [totalElapsedSeconds, setTotalElapsedSeconds] = useState(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const stopwatchRef = useRef<NodeJS.Timeout | null>(null);
   
@@ -95,18 +97,24 @@ export default function MemoryGamePlayPage() {
     };
   }, [gameState, currentQuestionIndex, showTimeSetting]);
 
-  // Handle Options Phase Stopwatch
+  // Handle Options Phase Stopwatch and Total Timer
   useEffect(() => {
     if (gameState === 'options') {
       setStopwatch(0);
+      const startTime = Date.now();
+      const lastTotal = totalElapsedSeconds;
+
       stopwatchRef.current = setInterval(() => {
-        setStopwatch((prev) => prev + 0.01);
-      }, 10);
+        const elapsedMs = Date.now() - startTime;
+        setStopwatch(elapsedMs / 1000);
+        setTotalElapsedSeconds(lastTotal + Math.floor(elapsedMs / 1000));
+      }, 100);
     }
     
     return () => {
       if (stopwatchRef.current) clearInterval(stopwatchRef.current);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState, currentQuestionIndex]);
 
   const playAudio = (url?: string): Promise<void> => {
@@ -141,6 +149,13 @@ export default function MemoryGamePlayPage() {
     }
   }, [gameState, currentQuestionIndex, questions]);
 
+  // Format timer MM.SS for display like matching game
+  const formatTimeMMSS = (totalSeconds: number) => {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}.${seconds.toString().padStart(2, '0')}`;
+  };
+
   const formatTime = (time: number) => {
     return time.toFixed(2);
   };
@@ -159,11 +174,13 @@ export default function MemoryGamePlayPage() {
     
     setClickCount(prev => prev + 1);
     
-    // If already guessed wrong, replay the sound and count as another mistake
     if (wrongGuesses.includes(selectedChoice.id)) {
       setIncorrectCount(prev => prev + 1);
       setFeedback('wrong');
-      setTimeout(() => setFeedback(null), 1500);
+      setTimeout(() => {
+        setFeedback(null);
+        setWrongGuesses(prev => prev.filter(id => id !== selectedChoice.id));
+      }, 1500);
       playAudio(selectedChoice.audioUrl);
       return;
     }
@@ -174,6 +191,7 @@ export default function MemoryGamePlayPage() {
     if (isCorrect) {
       setIsTransitioning(true);
       setFeedback('correct');
+      setCorrectChoiceId(selectedChoice.id);
       if (stopwatchRef.current) {
         clearInterval(stopwatchRef.current);
       }
@@ -186,12 +204,15 @@ export default function MemoryGamePlayPage() {
         timePerQuestion: formatTimeForDB(stopwatch)
       }]);
 
-      // Play the audio of the selected choice and wait for it to finish
-      await playAudio(selectedChoice.audioUrl);
+      // Play the audio and ensure at least 1.5s delay for feedback
+      const audioPromise = playAudio(selectedChoice.audioUrl);
+      const delayPromise = new Promise(resolve => setTimeout(resolve, 1500));
+      await Promise.all([audioPromise, delayPromise]);
 
       // Move to next question or end game
       setWrongGuesses([]);
       setFeedback(null);
+      setCorrectChoiceId(null);
       setIsTransitioning(false);
       if (currentQuestionIndex < questions.length - 1) {
         setCurrentQuestionIndex(prev => prev + 1);
@@ -203,7 +224,10 @@ export default function MemoryGamePlayPage() {
       setIncorrectCount(prev => prev + 1);
       setWrongGuesses(prev => [...prev, selectedChoice.id]);
       setFeedback('wrong');
-      setTimeout(() => setFeedback(null), 1500);
+      setTimeout(() => {
+        setFeedback(null);
+        setWrongGuesses(prev => prev.filter(id => id !== selectedChoice.id));
+      }, 1500);
       playAudio(selectedChoice.audioUrl);
     }
   };
@@ -294,7 +318,7 @@ export default function MemoryGamePlayPage() {
         </div>
         
         <div className={styles.timerContainer}>
-          เวลา : {gameState === 'options' ? formatTime(stopwatch) : formatTime(0)}
+          เวลา : {formatTimeMMSS(totalElapsedSeconds)}
         </div>
         
         <div className={styles.controlsContainer}>
@@ -342,7 +366,7 @@ export default function MemoryGamePlayPage() {
             {currentQ.choices.map((choice, index) => (
               <div 
                 key={index} 
-                className={`${styles.optionCard} ${wrongGuesses.includes(choice.id) ? styles.wrong : ''}`}
+                className={`${styles.optionCard} ${wrongGuesses.includes(choice.id) ? styles.wrong : ''} ${correctChoiceId === choice.id ? styles.selected : ''}`}
                 onClick={() => handleOptionClick(choice)}
               >
                 <img src={choice.imageUrl} alt={`Option ${index + 1}`} loading="lazy" />

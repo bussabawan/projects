@@ -58,7 +58,7 @@ export default function MatchingSettingsPage() {
   useEffect(() => {
     // Initialize audio
     const audioSrc = type === 'image' 
-      ? '/api/uploads/matching_instruction.mp3' 
+      ? '/api/uploads/image_image_matching_instruction.mp3' 
       : '/api/uploads/word_image_matching_instruction.mp3';
       
     audioRef.current = new Audio(audioSrc);

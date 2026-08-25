@@ -61,6 +61,8 @@ export default function MatchingGamePage() {
   const [isFinished, setIsFinished] = useState(false);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
   const [showExitPopup, setShowExitPopup] = useState(false);
+  const [wrongChoiceId, setWrongChoiceId] = useState<number | null>(null);
+  const [correctChoiceId, setCorrectChoiceId] = useState<number | null>(null);
   
   // Log state
   const [clickCount, setClickCount] = useState(0);
@@ -169,6 +171,7 @@ export default function MatchingGamePage() {
     
     if (choiceId === currentQ.target.id) {
       setFeedback('correct');
+      setCorrectChoiceId(choiceId);
       setCorrectCount(prev => prev + 1);
       
       // eslint-disable-next-line react-hooks/purity
@@ -178,6 +181,7 @@ export default function MatchingGamePage() {
       
       setTimeout(() => {
         setFeedback(null);
+        setCorrectChoiceId(null);
         if (currentIndex < questions.length - 1) {
           setCurrentIndex(prev => prev + 1);
           setCurrentQuestionStartTime(Date.now());
@@ -187,9 +191,11 @@ export default function MatchingGamePage() {
       }, 1500);
     } else {
       setFeedback('wrong');
+      setWrongChoiceId(choiceId);
       setIncorrectCount(prev => prev + 1);
       setTimeout(() => {
         setFeedback(null);
+        setWrongChoiceId(null);
       }, 1500);
     }
   };
@@ -321,7 +327,7 @@ export default function MatchingGamePage() {
           {currentQ.choices.map((choice, idx) => (
             <div 
               key={`${choice.id}-${idx}`} 
-              className={styles.choiceBox}
+              className={`${styles.choiceBox} ${wrongChoiceId === choice.id ? styles.wrongChoice : ''} ${correctChoiceId === choice.id ? styles.correctChoice : ''}`}
               onClick={() => handleChoiceClick(choice.id, choice.audioUrl)}
             >
               <img 
