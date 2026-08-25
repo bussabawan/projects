@@ -375,28 +375,29 @@ export default function MemoryGamePlayPage() {
           </div>
         </div>
       )}
+
+      {/* Preload Next Question Images */}
+      {currentQuestionIndex < questions.length - 1 && (
+        <div style={{ display: 'none' }}>
+          <img src={questions[currentQuestionIndex + 1].target.imageUrl} alt="preload target" />
+          {questions[currentQuestionIndex + 1].choices.map((choice, idx) => (
+            <img key={`preload-${choice.id}-${idx}`} src={choice.imageUrl} alt={`preload choice ${idx}`} />
+          ))}
+        </div>
+      )}
+
       <AlertMessage type="success" show={feedback === 'correct'} />
       <AlertMessage type="error" show={feedback === 'wrong'} />
 
       {/* Exit Confirmation Popup */}
-      {showExitPopup && (
-        <div className={styles.popupOverlay}>
-          <div className={styles.popupContainer}>
-            <div className={styles.popupIcon}>
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="16" x2="12" y2="12"></line>
-                <line x1="12" y1="8" x2="12.01" y2="8"></line>
-              </svg>
-            </div>
-            <div className={styles.popupText}>ต้องการออกจากเกมหรือไม่</div>
-            <div className={styles.popupButtons}>
-              <button className={styles.popupBtnConfirm} onClick={confirmEndGame}>ตกลง</button>
-              <button className={styles.popupBtnCancel} onClick={cancelEndGame}>ยกเลิก</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <AlertMessage 
+        type="confirm" 
+        show={showExitPopup} 
+        onConfirm={confirmEndGame} 
+        onCancel={cancelEndGame} 
+        line1="ต้องการออกจากเกมหรือไม่" 
+        line2="" 
+      />
     </div>
   );
 }

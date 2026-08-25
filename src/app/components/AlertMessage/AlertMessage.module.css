@@ -68,3 +68,66 @@
     font-size: 22px;
   }
 }
+
+/* Confirm Popup Styles */
+.popupContainer {
+  background-color: white;
+  padding: 40px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 400px;
+  border: 2px solid #ccc;
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.popupIcon {
+  color: #ff9800;
+  margin-bottom: 20px;
+}
+
+.popupText {
+  font-size: 24px;
+  font-weight: 500;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+.popupButtons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.popupBtnConfirm {
+  padding: 12px 30px;
+  font-size: 18px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.popupBtnConfirm:hover {
+  background-color: #d32f2f;
+}
+
+.popupBtnCancel {
+  padding: 12px 30px;
+  font-size: 18px;
+  background-color: #e0e0e0;
+  color: #333;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.popupBtnCancel:hover {
+  background-color: #bdbdbd;
+}

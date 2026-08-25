@@ -163,4 +163,19 @@ export class ManageImagesModel {
       [id]
     );
   }
+
+  /**
+   * Get file data (image/audio) by id for API file serving
+   */
+  static async getFileDataById(id: number): Promise<{ photo_name: string, audio_name: string } | null> {
+    const [rows] = await db.query<RowDataPacket[]>(
+      `SELECT photo_name, audio_name FROM photo_data WHERE photo_id = ? AND remove = 0`,
+      [id]
+    );
+    if (rows.length === 0) return null;
+    return {
+      photo_name: rows[0].photo_name,
+      audio_name: rows[0].audio_name
+    };
+  }
 }
