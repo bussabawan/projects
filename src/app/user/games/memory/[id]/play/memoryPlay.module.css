@@ -2,10 +2,19 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 100vh;
+  min-height: 100dvh;
+  height: 100dvh;
   background-color: #e5e5e5;
   padding: 20px;
   box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 .header {
@@ -46,13 +55,29 @@
 }
 
 .audioBtn {
-  background: none;
-  border: none;
+  background-color: #ffffff;
+  border: 2px solid #e0e0e0;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
   cursor: pointer;
+  color: #333;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 5px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  padding: 0;
+}
+
+.audioBtn svg {
+  width: 24px;
+  height: 24px;
+}
+
+.audioBtn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.12);
 }
 
 .endGameBtn {
@@ -294,7 +319,6 @@
 @media (max-width: 768px) and (orientation: portrait) {
   .container {
     padding: 10px;
-    background-color: transparent;
   }
 
   .header {
@@ -343,7 +367,14 @@
   .audioBtn {
     grid-area: audio;
     justify-self: start;
+    width: 40px;
+    height: 40px;
     padding: 0;
+  }
+
+  .audioBtn svg {
+    width: 20px;
+    height: 20px;
   }
 
   .targetCard {
@@ -378,7 +409,6 @@
 @media (max-width: 950px) and (max-height: 500px) and (orientation: landscape) {
   .container {
     padding: 10px;
-    background-color: transparent;
   }
 
   .header {
@@ -427,7 +457,14 @@
   .audioBtn {
     grid-area: audio;
     justify-self: start;
+    width: 40px;
+    height: 40px;
     padding: 0;
+  }
+
+  .audioBtn svg {
+    width: 20px;
+    height: 20px;
   }
 
   .targetCard {

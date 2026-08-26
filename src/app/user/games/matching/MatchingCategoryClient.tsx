@@ -100,7 +100,7 @@ export default function MatchingCategoryClient() {
             </Link>
           ))
         ) : (
-          <div style={{ padding: '2rem', fontSize: '1.2rem', color: '#666' }}>
+          <div style={{ padding: '2rem', fontSize: '1.2rem', color: '#666', gridColumn: '1 / -1', textAlign: 'center' }}>
             {searchQuery ? 'ไม่พบแบบฝึกหัดที่ค้นหา' : 'ไม่มีแบบฝึกหัดที่ได้รับมอบหมาย'}
           </div>
         )}

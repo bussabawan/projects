@@ -106,7 +106,9 @@ export default function MemoryCategoryClient() {
             </Link>
           ))
         ) : (
-          <div style={{ fontSize: '1.5rem', color: '#666', textAlign: 'center', width: '100%', padding: '2rem' }}>ไม่พบแบบฝึกหัด</div>
+          <div style={{ padding: '2rem', fontSize: '1.2rem', color: '#666', gridColumn: '1 / -1', textAlign: 'center' }}>
+            {searchQuery ? 'ไม่พบแบบฝึกหัดที่ค้นหา' : 'ไม่มีแบบฝึกหัดที่ได้รับมอบหมาย'}
+          </div>
         )}
       </div>
     </div>
