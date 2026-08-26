@@ -113,3 +113,14 @@ export async function saveMatchingGameResult(
     return { success: false, error: "Failed to save game result" };
   }
 }
+
+export async function getUserMatchingGameHistory(limit: number = 7) {
+  try {
+    const session = await auth();
+    if (!session || !session.user || !session.user.id) return [];
+    return await GameMatchingModel.getUserGameHistory(Number(session.user.id), limit);
+  } catch (e) {
+    console.error(e);
+    return [];
+  }
+}

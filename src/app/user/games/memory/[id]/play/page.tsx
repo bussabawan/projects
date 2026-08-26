@@ -251,10 +251,13 @@ export default function MemoryGamePlayPage() {
           },
           timeLogs
         );
+        
+        const timeStr = formatTimeMMSS(totalElapsedSeconds);
+        router.push(`/user/games/summary?gameType=memory&tq=${questions.length}&c=${clickCount}&co=${correctCount}&time=${timeStr}&returnUrl=/user/games/memory/${params.id}?mode=${mode}`);
       };
       saveLog();
     }
-  }, [gameState]);
+  }, [gameState, questions.length, numAnswersSetting, showTimeSetting, clickCount, correctCount, incorrectCount, timeLogs, totalElapsedSeconds, router, params.id, mode]);
 
   const handleEndGame = () => {
     setShowExitPopup(true);
@@ -290,14 +293,7 @@ export default function MemoryGamePlayPage() {
 
   if (gameState === 'summary') {
     return (
-      <div className={styles.summaryContainer}>
-        <h2>สรุปผลการเล่น</h2>
-        <div className={styles.summaryScore}>
-          ตอบถูก: {correctCount} / {questions.length}
-        </div>
-        <p>เวลาเฉลี่ย: {(timeLogs.reduce((acc, curr) => acc + parseFloat(curr.timePerQuestion), 0) / questions.length).toFixed(2)} วินาที</p>
-        <button className={styles.homeBtn} onClick={confirmEndGame}>กลับไปหน้าตั้งค่า</button>
-      </div>
+      <div className={styles.loadingContainer}>กำลังบันทึกข้อมูล...</div>
     );
   }
 

@@ -212,10 +212,13 @@ export default function MatchingGamePage() {
           incorrectCount
         };
         await saveMatchingGameResult(logData, timeLogs);
+        
+        const timeStr = formatTime(elapsedSeconds);
+        router.push(`/user/games/summary?tq=${questions.length}&c=${clickCount}&co=${correctCount}&time=${timeStr}&returnUrl=/user/games/matching/${exerciseId}?type=${type}`);
       };
       saveData();
     }
-  }, [isFinished, questions.length, currentIndex, clickCount, correctCount, incorrectCount, timeLogs]);
+  }, [isFinished, questions.length, currentIndex, clickCount, correctCount, incorrectCount, timeLogs, elapsedSeconds, router, exerciseId, type]);
 
   const handleEndGame = () => {
     setShowExitPopup(true);
@@ -260,15 +263,7 @@ export default function MatchingGamePage() {
   }
 
   if (isFinished) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.loading} style={{flexDirection: 'column', gap: '20px'}}>
-          <h1>จบเกม!</h1>
-          <p>เวลาที่ใช้: {formatTime(elapsedSeconds)}</p>
-          <button className={styles.endGameBtn} onClick={confirmEndGame}>กลับไปหน้าตั้งค่า</button>
-        </div>
-      </div>
-    );
+    return <div className={styles.container}><div className={styles.loading}>กำลังบันทึกข้อมูล...</div></div>;
   }
 
   const currentQ = questions[currentIndex];
