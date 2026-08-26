@@ -352,7 +352,11 @@ export default function MemoryGamePlayPage() {
             onClick={() => playAudio(currentQ.target.audioUrl)}
             style={{ cursor: 'pointer' }}
           >
-            <img src={currentQ.target.imageUrl} alt="Target" loading="lazy" />
+            {mode === 'word' ? (
+              <h1 className={styles.targetWord}>{currentQ.target.title}</h1>
+            ) : (
+              <img src={currentQ.target.imageUrl} alt="Target" loading="lazy" />
+            )}
           </div>
           <div className={styles.countdownText}>
             กำลังจะหายใน {countdown}

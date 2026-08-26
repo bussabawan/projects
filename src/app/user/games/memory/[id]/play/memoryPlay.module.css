@@ -104,13 +104,23 @@
   background-color: #ffffff;
 }
 
+.targetWord {
+  font-size: 5rem;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+  width: 100%;
+  padding: 10px;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
 .countdownText {
-  position: absolute;
-  bottom: 40px;
-  right: 40px;
+  margin-top: 20px;
   font-size: 1.25rem;
   font-weight: 500;
   color: #333;
+  align-self: flex-end;
 }
 
 /* Options Phase Styles */
@@ -280,10 +290,11 @@
   background-color: #e57867;
 }
 
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
+/* Mobile Portrait Responsiveness */
+@media (max-width: 768px) and (orientation: portrait) {
   .container {
     padding: 10px;
+    background-color: transparent;
   }
 
   .header {
@@ -295,6 +306,7 @@
       "audio audio audio";
     gap: 10px;
     padding: 10px 0;
+    background-color: transparent;
   }
 
   .timerContainer {
@@ -338,6 +350,10 @@
     width: 95%;
   }
 
+  .targetWord {
+    font-size: 2.5rem;
+  }
+
   .optionsGrid {
     gap: 15px;
   }
@@ -350,9 +366,101 @@
     grid-template-columns: repeat(2, 1fr);
   }
 
+
   .countdownText {
-    bottom: 20px;
-    right: 15px;
+    margin-top: 15px;
     font-size: 1rem;
+    align-self: flex-end;
+  }
+}
+
+/* Mobile Landscape Responsiveness */
+@media (max-width: 950px) and (max-height: 500px) and (orientation: landscape) {
+  .container {
+    padding: 10px;
+    background-color: transparent;
+  }
+
+  .header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: 
+      "timer . endBtn"
+      "progress progress progress"
+      "audio audio audio";
+    gap: 10px;
+    padding: 10px 0;
+    background-color: transparent;
+  }
+
+  .timerContainer {
+    grid-area: timer;
+    background-color: white;
+    color: black;
+    font-size: 1rem;
+    padding: 5px 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .controlsContainer {
+    display: contents; 
+  }
+
+  .endGameBtn {
+    grid-area: endBtn;
+    background-color: #F38776;
+    padding: 8px 20px;
+    font-size: 1.1rem;
+  }
+  
+  .endGameBtn:hover {
+    background-color: #E27665;
+  }
+
+  .progressInfo {
+    grid-area: progress;
+    font-size: 1.25rem;
+    margin-top: 5px;
+  }
+
+  .audioBtn {
+    grid-area: audio;
+    justify-self: start;
+    padding: 0;
+  }
+
+  .targetCard {
+    height: 85vh;
+    max-width: 95%;
+    width: auto;
+  }
+
+  .targetWord {
+    font-size: 2.5rem;
+  }
+
+  .optionsGrid {
+    gap: 15px;
+  }
+  
+  .optionCard {
+    aspect-ratio: 1/1;
+  }
+
+  .grid2, .grid4 {
+    grid-template-columns: repeat(2, min(85vw, 85vh));
+    justify-content: center;
+  }
+
+  .grid3, .grid5, .grid6 {
+    grid-template-columns: repeat(3, 1fr);
+    justify-content: center;
+  }
+
+  .countdownText {
+    margin-top: 15px;
+    font-size: 1rem;
+    align-self: flex-end;
   }
 }
