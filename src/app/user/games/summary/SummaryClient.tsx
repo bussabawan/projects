@@ -6,7 +6,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recha
 import styles from './summary.module.css';
 
 interface SummaryClientProps {
-  historyData: any[];
+  historyData: { name: string; date: string; score: number }[];
 }
 
 export default function SummaryClient({ historyData }: SummaryClientProps) {
@@ -15,6 +15,7 @@ export default function SummaryClient({ historyData }: SummaryClientProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 

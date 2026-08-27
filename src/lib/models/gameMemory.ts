@@ -2,6 +2,14 @@ import { db } from '@/lib/db';
 import { RowDataPacket, ResultSetHeader } from 'mysql2';
 import { ImageInfo } from './manageImages';
 
+export interface MemoryGameHistory {
+  id: number;
+  totalQuestions: number;
+  clickCount: number;
+  correctCount: number;
+  testDate: Date;
+}
+
 export class GameMemoryModel {
   static async getExerciseImages(exerciseId: number): Promise<ImageInfo[]> {
     const [rows] = await db.query<RowDataPacket[]>(
@@ -92,7 +100,7 @@ export class GameMemoryModel {
     }
   }
 
-  static async getUserGameHistory(userId: number, limit: number = 7): Promise<any[]> {
+  static async getUserGameHistory(userId: number, limit: number = 7): Promise<MemoryGameHistory[]> {
     const [rows] = await db.query<RowDataPacket[]>(
       `SELECT id_memory as id, total_questions as totalQuestions, click_count as clickCount, correct_count as correctCount, test_date as testDate
        FROM memory_exercises_log 

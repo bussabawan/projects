@@ -74,6 +74,13 @@ export default function MatchingGamePage() {
   const [isMuted, setIsMuted] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Format timer MM.SS
+  const formatTime = (totalSeconds: number) => {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}.${seconds.toString().padStart(2, '0')}`;
+  };
+
   useEffect(() => {
     // Cleanup on unmount
     return () => {
@@ -237,13 +244,6 @@ export default function MatchingGamePage() {
     if (!isMuted && audioRef.current) {
       audioRef.current.pause();
     }
-  };
-
-  // Format timer MM.SS
-  const formatTime = (totalSeconds: number) => {
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    return `${minutes}.${seconds.toString().padStart(2, '0')}`;
   };
 
   if (loading) {

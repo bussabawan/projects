@@ -2,6 +2,14 @@ import { db } from '@/lib/db';
 import { RowDataPacket, ResultSetHeader } from 'mysql2';
 import { ImageInfo } from './manageImages';
 
+export interface MatchingGameHistory {
+  id: number;
+  totalQuestions: number;
+  clickCount: number;
+  correctCount: number;
+  testDate: Date;
+}
+
 export class GameMatchingModel {
   static async getExerciseImages(exerciseId: number): Promise<ImageInfo[]> {
     const [rows] = await db.query<RowDataPacket[]>(
@@ -91,7 +99,7 @@ export class GameMatchingModel {
     }
   }
 
-  static async getUserGameHistory(userId: number, limit: number = 7): Promise<any[]> {
+  static async getUserGameHistory(userId: number, limit: number = 7): Promise<MatchingGameHistory[]> {
     const [rows] = await db.query<RowDataPacket[]>(
       `SELECT id_matching as id, total_questions as totalQuestions, click_count as clickCount, correct_count as correctCount, test_date as testDate
        FROM matching_exercises_log 

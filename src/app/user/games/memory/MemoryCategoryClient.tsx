@@ -20,6 +20,7 @@ export default function MemoryCategoryClient() {
   useEffect(() => {
     const savedTab = sessionStorage.getItem('memoryActiveTab');
     if (savedTab === 'picture' || savedTab === 'word') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveTab(savedTab as 'picture' | 'word');
     }
   }, []);
