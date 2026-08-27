@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import styles from './memory.module.css';
 
 
@@ -11,6 +12,7 @@ interface Exercise {
 }
 
 export default function MemoryCategoryClient() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<'picture' | 'word'>('picture');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
@@ -61,7 +63,12 @@ export default function MemoryCategoryClient() {
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>ความจำ</h1>
+      <div className={styles.titleRow}>
+        <h1 className={styles.title}>ความจำ</h1>
+        <button className={styles.backBtn} onClick={() => router.push('/user/games')}>
+          ย้อนกลับ
+        </button>
+      </div>
       
       <div className={styles.controlsRow}>
         <div className={`${styles.tabsContainer} ${activeTab === 'word' ? styles.tabWord : styles.tabImage}`}>

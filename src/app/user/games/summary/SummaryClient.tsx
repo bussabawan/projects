@@ -80,7 +80,7 @@ export default function SummaryClient({ historyData }: SummaryClientProps) {
             <div className={styles.statItem}>
               <span className={styles.statTitle}>จำนวนข้อ</span>
               <span className={styles.statValue}>{totalQuestions}</span>
-              <span className={styles.statUnit}></span>
+              <span className={styles.statUnit}>ข้อ</span>
             </div>
             <div className={styles.statItem}>
               <span className={styles.statTitle}>ระยะเวลาที่ใช้</span>

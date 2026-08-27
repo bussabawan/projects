@@ -2,12 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import styles from './matching.module.css';
 
 
 import { useDebounce } from '@/app/hooks/useDebounce';
 
 export default function MatchingCategoryClient() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<'image' | 'word'>('image');
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
@@ -52,7 +54,12 @@ export default function MatchingCategoryClient() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.title}>จับคู่</h1>
+        <div className={styles.titleRow}>
+          <h1 className={styles.title}>จับคู่</h1>
+          <button className={styles.backBtn} onClick={() => router.push('/user/games')}>
+            ย้อนกลับ
+          </button>
+        </div>
         
         <div className={styles.controlsRow}>
           <div className={`${styles.toggleContainer} ${activeTab === 'word' ? styles.toggleWord : styles.toggleImage}`}>

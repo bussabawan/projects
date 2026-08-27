@@ -21,6 +21,29 @@
   margin: 0;
 }
 
+.titleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.backBtn {
+  background-color: #F38776;
+  color: white;
+  border: none;
+  padding: 10px 30px;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 6px #0000001a;
+  transition: transform 0.2s;
+}
+
+.backBtn:hover {
+  transform: translateY(-2px);
+}
+
 .controlsRow {
   display: flex;
   justify-content: space-between;
