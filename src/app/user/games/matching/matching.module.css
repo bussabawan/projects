@@ -14,18 +14,18 @@
   margin-bottom: 2rem;
 }
 
-.title {
-  font-size: 3.5rem;
-  font-weight: 500;
-  color: #111;
-  margin: 0;
-}
-
 .titleRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
+}
+
+.title {
+  font-size: 3.5rem;
+  font-weight: 500;
+  color: #111;
+  margin: 0;
 }
 
 .backBtn {
@@ -38,6 +38,9 @@
   cursor: pointer;
   box-shadow: 0 4px 6px #0000001a;
   transition: transform 0.2s;
+  text-decoration: none;
+  display: inline-block;
+  font-family: inherit;
 }
 
 .backBtn:hover {
@@ -236,6 +239,9 @@
     padding: 1rem 0.5rem;
     font-size: 1.1rem;
     border-radius: 15px;
+  }
+  .backBtn {
+    display: none;
   }
 }
 

@@ -7,19 +7,19 @@
   box-sizing: border-box;
 }
 
+.titleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
 .title {
   font-size: 3.5rem;
   font-weight: 500;
   color: #111;
   margin-bottom: 2rem;
   margin-top: 0;
-}
-
-.titleRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
 }
 
 .backBtn {
@@ -32,6 +32,9 @@
   cursor: pointer;
   box-shadow: 0 4px 6px #0000001a;
   transition: transform 0.2s;
+  text-decoration: none;
+  display: inline-block;
+  font-family: inherit;
 }
 
 .backBtn:hover {
@@ -242,6 +245,10 @@
   
   .skeletonCard {
     min-height: 90px;
+  }
+
+  .backBtn {
+    display: none;
   }
 }
 
