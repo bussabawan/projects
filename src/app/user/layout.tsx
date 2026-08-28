@@ -14,6 +14,8 @@ export default function UserLayout({
 }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [userName, setUserName] = useState("User");
+  const [sessionDay, setSessionDay] = useState<number>(0);
+  const [lastActivity, setLastActivity] = useState<number>(0);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -39,6 +41,61 @@ export default function UserLayout({
     await signOut({ redirect: false });
     router.push("/login");
   };
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    setSessionDay(new Date().getDate());
+    setLastActivity(Date.now());
+
+    let throttleTimer: NodeJS.Timeout | null = null;
+    const handleActivity = () => {
+      if (!throttleTimer) {
+        throttleTimer = setTimeout(() => {
+          setLastActivity(Date.now());
+          throttleTimer = null;
+        }, 1000);
+      }
+    };
+
+    window.addEventListener('mousemove', handleActivity);
+    window.addEventListener('keydown', handleActivity);
+    window.addEventListener('touchstart', handleActivity);
+    window.addEventListener('click', handleActivity);
+    window.addEventListener('scroll', handleActivity);
+
+    return () => {
+      window.removeEventListener('mousemove', handleActivity);
+      window.removeEventListener('keydown', handleActivity);
+      window.removeEventListener('touchstart', handleActivity);
+      window.removeEventListener('click', handleActivity);
+      window.removeEventListener('scroll', handleActivity);
+      if (throttleTimer) clearTimeout(throttleTimer);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || sessionDay === 0) return;
+
+    const interval = setInterval(() => {
+      const now = new Date();
+      const currentDay = now.getDate();
+      
+      // If we've crossed midnight since the session started
+      if (currentDay !== sessionDay) {
+        const idleTime = now.getTime() - lastActivity;
+        const thirtyMins = 30 * 60 * 1000;
+        
+        // If inactive for 30 mins
+        if (idleTime >= thirtyMins) {
+           handleLogout();
+        }
+      }
+    }, 60000); // Check every minute
+
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionDay, lastActivity]);
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);

@@ -1,21 +1,51 @@
 .container {
   width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
   padding: 1rem 1rem 2rem 1rem;
   box-sizing: border-box;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2.5rem;
+  margin-bottom: 2rem;
+}
+
+.titleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 
 .title {
   font-size: 3.5rem;
   font-weight: 500;
   color: #111;
-  margin-bottom: 2rem;
-  margin-top: 0;
+  margin: 0;
+}
+
+.backBtn {
+  background-color: #F38776;
+  color: white;
+  border: none;
+  padding: 10px 30px;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 6px #0000001a;
+  transition: transform 0.2s;
+  text-decoration: none;
+  display: inline-block;
+  font-family: inherit;
+}
+
+.backBtn:hover {
+  transform: translateY(-2px);
 }
 
 .controlsRow {
@@ -25,7 +55,6 @@
   align-items: center;
   width: 100%;
   gap: 1.5rem;
-  margin-bottom: 2rem;
   flex-wrap: nowrap;
 }
 
@@ -165,17 +194,52 @@
   }
 }
 
+@media (max-width: 900px) {
+  .header {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .controlsRow {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    width: 100%;
+    gap: 1rem;
+    margin-bottom: 0;
+  }
+  .searchContainer {
+    flex: 1;
+  }
+  .tabsContainer {
+    flex: 1;
+    justify-content: center;
+  }
+  .tabButton {
+    flex: 1;
+    padding: 0.5rem 0.5rem;
+    font-size: 0.9rem;
+  }
+  .searchInput {
+    padding: 0.5rem 1rem;
+    padding-right: 2.5rem;
+    font-size: 0.9rem;
+  }
+  .searchIcon {
+    right: 0.8rem;
+    width: 18px;
+    height: 18px;
+  }
+}
+
 @media (max-width: 768px) {
   .title {
     font-size: 2.2rem;
-    margin-bottom: 1.5rem;
   }
 
   .controlsRow {
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
-    margin-bottom: 1.5rem;
   }
   
   .tabsContainer {
@@ -222,6 +286,10 @@
   
   .skeletonCard {
     min-height: 90px;
+  }
+
+  .backBtn {
+    display: none;
   }
 }
 

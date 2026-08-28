@@ -205,8 +205,8 @@
   background-color: white;
   border: 2px solid #ccc;
   border-radius: 50%;
-  width: 50px;
-  height: 50px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -217,33 +217,35 @@
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
+.audioToggleBtn svg {
+  width: 24px;
+  height: 24px;
+}
+
 .audioToggleBtn:hover {
   background-color: #f0f0f0;
   transform: scale(1.05);
 }
 
-/* Mobile Responsive */
-@media (max-width: 768px) {
+/* Mobile Portrait Responsive */
+@media (max-width: 768px) and (orientation: portrait) {
   .container {
     padding: 2rem 1.5rem;
-    background-color: transparent;
     flex: 1;
     justify-content: space-between;
+    background-color: #EFEFEF;
   }
   
   .audioToggleBtn {
     position: static;
-    background: transparent;
-    border: none;
-    box-shadow: none;
+    width: 40px;
+    height: 40px;
     padding: 0;
-    width: auto;
-    height: auto;
   }
   
   .audioToggleBtn svg {
-    width: 40px;
-    height: 40px;
+    width: 20px;
+    height: 20px;
   }
 
   .header {
@@ -254,7 +256,7 @@
 
   .title {
     font-size: 2rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     display: flex;
     align-items: center;
     justify-content: flex-start;
@@ -262,8 +264,9 @@
   }
 
   .subtitle {
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     line-height: 1.4;
+    margin-bottom: 1.5rem;
   }
 
   .contentRow {
@@ -291,33 +294,33 @@
   }
 
   .settingRow {
-    width: 220px;
-    margin-bottom: 0.8rem;
-    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 1.2rem;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
   }
 
   .settingLabel {
-    font-size: 0.9rem;
+    font-size: 1.1rem;
   }
 
   .controlGroup {
-    border-radius: 20px;
-    padding: 0.1rem;
+    border-radius: 25px;
+    padding: 0.2rem;
     background-color: #f0f0f0;
-    border: none;
   }
 
   .controlBtn {
-    width: 20px;
-    height: 20px;
-    font-size: 1rem;
-    border: none;
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
     background: white;
   }
 
   .controlValue {
-    width: 30px;
-    font-size: 0.9rem;
+    width: 50px;
+    font-size: 1.5rem;
   }
 
   /* Graphics Row (Order 2 on mobile) */
@@ -366,5 +369,147 @@
     padding: 0.8rem;
     border-radius: 15px;
     white-space: nowrap;
+  }
+}
+
+/* Mobile Landscape Responsiveness */
+@media (max-width: 950px) and (max-height: 500px) and (orientation: landscape) {
+  .container {
+    padding: 10px 20px;
+    height: 100dvh;
+    overflow-y: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    justify-content: flex-start;
+    background-color: #EFEFEF;
+  }
+  
+  .container::-webkit-scrollbar {
+    display: none;
+  }
+
+  .header {
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .contentRow {
+    flex-direction: row;
+    gap: 2rem;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+
+  .settingsContainer {
+    align-items: center;
+  }
+
+  .settingsTitle {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .settingsControlsRow {
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 0.8rem;
+    width: 100%;
+  }
+
+  .settingRow {
+    width: 250px;
+    margin-bottom: 0.5rem;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0;
+  }
+
+  .settingLabel {
+    font-size: 1.1rem;
+  }
+
+  .controlGroup {
+    border-radius: 25px;
+    padding: 0.2rem;
+    background-color: #f0f0f0;
+  }
+
+  .controlBtn {
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+    background: white;
+  }
+
+  .controlValue {
+    width: 50px;
+    font-size: 1.5rem;
+  }
+
+  .graphicsContainer {
+    margin-top: 0;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+  }
+
+  .mainBox {
+    width: 120px;
+    height: 120px;
+    border-radius: 15px;
+    background-color: #d9d9d9;
+  }
+
+  .optionsBoxContainer {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .optionBox {
+    width: 90px;
+    height: 90px;
+    border-radius: 15px;
+  }
+
+  .buttonGroup {
+    margin-top: 1rem;
+    gap: 1rem;
+    justify-content: center;
+    flex-direction: row;
+  }
+
+  .backBtn, .startBtn {
+    width: 150px;
+    padding: 0.6rem;
+    font-size: 1.2rem;
+  }
+
+  .audioToggleBtn {
+    position: static;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+  }
+  
+  .audioToggleBtn svg {
+    width: 20px;
+    height: 20px;
   }
 }

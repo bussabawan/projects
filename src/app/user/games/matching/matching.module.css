@@ -14,11 +14,37 @@
   margin-bottom: 2rem;
 }
 
+.titleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
 .title {
   font-size: 3.5rem;
   font-weight: 500;
   color: #111;
   margin: 0;
+}
+
+.backBtn {
+  background-color: #F38776;
+  color: white;
+  border: none;
+  padding: 10px 30px;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 6px #0000001a;
+  transition: transform 0.2s;
+  text-decoration: none;
+  display: inline-block;
+  font-family: inherit;
+}
+
+.backBtn:hover {
+  transform: translateY(-2px);
 }
 
 .controlsRow {
@@ -213,6 +239,9 @@
     padding: 1rem 0.5rem;
     font-size: 1.1rem;
     border-radius: 15px;
+  }
+  .backBtn {
+    display: none;
   }
 }
 

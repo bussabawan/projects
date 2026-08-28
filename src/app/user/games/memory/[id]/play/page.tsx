@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
-import Image from 'next/image';
 import styles from './memoryPlay.module.css';
 import { getMemoryGameData, saveMemoryGameResult } from '@/app/actions/memoryActions';
 import AlertMessage from '@/app/components/AlertMessage/AlertMessage';
@@ -55,12 +54,6 @@ export default function MemoryGamePlayPage() {
   const [isMuted, setIsMuted] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  useEffect(() => {
-    if (params.id) {
-      loadGameData(Number(params.id));
-    }
-  }, [params.id]);
-
   const loadGameData = async (exerciseId: number) => {
     try {
       const result = await getMemoryGameData(exerciseId, numQuestionsSetting, numAnswersSetting);
@@ -76,9 +69,18 @@ export default function MemoryGamePlayPage() {
     }
   };
 
+  useEffect(() => {
+    if (params.id) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      loadGameData(Number(params.id));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.id]);
+
   // Handle Question Phase Timer
   useEffect(() => {
     if (gameState === 'question') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCountdown(showTimeSetting);
       timerRef.current = setInterval(() => {
         setCountdown((prev) => {
@@ -100,6 +102,7 @@ export default function MemoryGamePlayPage() {
   // Handle Options Phase Stopwatch and Total Timer
   useEffect(() => {
     if (gameState === 'options') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStopwatch(0);
       const startTime = Date.now();
       const lastTotal = totalElapsedSeconds;
@@ -149,15 +152,10 @@ export default function MemoryGamePlayPage() {
     }
   }, [gameState, currentQuestionIndex, questions]);
 
-  // Format timer MM.SS for display like matching game
   const formatTimeMMSS = (totalSeconds: number) => {
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
     return `${minutes}.${seconds.toString().padStart(2, '0')}`;
-  };
-
-  const formatTime = (time: number) => {
-    return time.toFixed(2);
   };
 
   const formatTimeForDB = (totalSeconds: number) => {
@@ -251,10 +249,13 @@ export default function MemoryGamePlayPage() {
           },
           timeLogs
         );
+        
+        const timeStr = formatTimeMMSS(totalElapsedSeconds);
+        router.push(`/user/games/summary?gameType=memory&tq=${questions.length}&c=${clickCount}&co=${correctCount}&time=${timeStr}&returnUrl=/user/games/memory/${params.id}?mode=${mode}`);
       };
       saveLog();
     }
-  }, [gameState]);
+  }, [gameState, questions.length, numAnswersSetting, showTimeSetting, clickCount, correctCount, incorrectCount, timeLogs, totalElapsedSeconds, router, params.id, mode]);
 
   const handleEndGame = () => {
     setShowExitPopup(true);
@@ -290,14 +291,7 @@ export default function MemoryGamePlayPage() {
 
   if (gameState === 'summary') {
     return (
-      <div className={styles.summaryContainer}>
-        <h2>สรุปผลการเล่น</h2>
-        <div className={styles.summaryScore}>
-          ตอบถูก: {correctCount} / {questions.length}
-        </div>
-        <p>เวลาเฉลี่ย: {(timeLogs.reduce((acc, curr) => acc + parseFloat(curr.timePerQuestion), 0) / questions.length).toFixed(2)} วินาที</p>
-        <button className={styles.homeBtn} onClick={confirmEndGame}>กลับไปหน้าตั้งค่า</button>
-      </div>
+      <div className={styles.loadingContainer}>กำลังบันทึกข้อมูล...</div>
     );
   }
 
@@ -352,7 +346,11 @@ export default function MemoryGamePlayPage() {
             onClick={() => playAudio(currentQ.target.audioUrl)}
             style={{ cursor: 'pointer' }}
           >
-            <img src={currentQ.target.imageUrl} alt="Target" loading="lazy" />
+            {mode === 'word' ? (
+              <h1 className={styles.targetWord}>{currentQ.target.title}</h1>
+            ) : (
+              <img src={currentQ.target.imageUrl} alt="Target" loading="lazy" />
+            )}
           </div>
           <div className={styles.countdownText}>
             กำลังจะหายใน {countdown}

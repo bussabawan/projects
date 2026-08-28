@@ -10,6 +10,8 @@ import { signIn } from 'next-auth/react';
 function LoginContent() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [usernameEmpty, setUsernameEmpty] = useState(false);
+  const [passwordEmpty, setPasswordEmpty] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -27,6 +29,19 @@ function LoginContent() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    let hasError = false;
+    if (!username) {
+      setUsernameEmpty(true);
+      hasError = true;
+    }
+    if (!password) {
+      setPasswordEmpty(true);
+      hasError = true;
+    }
+    
+    if (hasError) return;
+
     setLoading(true);
 
     try {
@@ -71,17 +86,20 @@ function LoginContent() {
       <div className={styles.card}>
         <h1 className={styles.title}>เข้าสู่ระบบ</h1>
         
-        <form className={styles.form} onSubmit={handleLogin}>
+        <form className={styles.form} onSubmit={handleLogin} noValidate>
           {error && <div style={{ color: 'red', textAlign: 'center' }}>{error}</div>}
           <div className={styles.inputGroup}>
             <label htmlFor="username" className={styles.label}>Username</label>
             <input 
               type="text" 
               id="username" 
-              className={styles.input}
+              className={`${styles.input} ${usernameEmpty ? styles.inputError : ''}`}
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
+              onChange={(e) => {
+                setUsername(e.target.value);
+                setUsernameEmpty(false);
+              }}
+              placeholder={usernameEmpty ? 'โปรดกรอกช่องนี้' : ''}
             />
           </div>
           
@@ -90,10 +108,13 @@ function LoginContent() {
             <input 
               type="password" 
               id="password" 
-              className={styles.input}
+              className={`${styles.input} ${passwordEmpty ? styles.inputError : ''}`}
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setPasswordEmpty(false);
+              }}
+              placeholder={passwordEmpty ? 'โปรดกรอกฟิลด์นี้' : ''}
             />
           </div>
 

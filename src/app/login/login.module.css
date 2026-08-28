@@ -79,6 +79,15 @@
   border-color: #bf66bf;
 }
 
+.inputError {
+  border: 1px solid #ef4444 !important;
+  background-color: #fee2e2 !important;
+}
+
+.inputError::placeholder {
+  color: #ef4444;
+}
+
 .actions {
   display: flex;
   align-items: center;

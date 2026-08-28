@@ -301,13 +301,13 @@ export default function ManageExercisesPage() {
   }, [imagePage, imageItemsPerPage, debouncedImageSearchQuery]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setImagePage(1);
     isImageLoadMoreRef.current = false;
   }, [debouncedImageSearchQuery]);
 
   useEffect(() => {
     if (isImageModalOpen) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchFilteredImages();
     }
   }, [fetchFilteredImages, isImageModalOpen]);

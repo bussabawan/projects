@@ -88,3 +88,14 @@ export async function saveMemoryGameResult(
     return { success: false, error: "Failed to save game result" };
   }
 }
+
+export async function getUserMemoryGameHistory(limit: number = 7) {
+  try {
+    const session = await auth();
+    if (!session || !session.user || !session.user.id) return [];
+    return await GameMemoryModel.getUserGameHistory(Number(session.user.id), limit);
+  } catch (e) {
+    console.error(e);
+    return [];
+  }
+}

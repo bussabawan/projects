@@ -17,6 +17,7 @@ export default function MatchingCategoryClient() {
   useEffect(() => {
     const savedMode = sessionStorage.getItem('matchingActiveTab');
     if (savedMode === 'word') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveTab('word');
     }
   }, []);
@@ -52,8 +53,12 @@ export default function MatchingCategoryClient() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.title}>จับคู่</h1>
-        
+        <div className={styles.titleRow}>
+          <h1 className={styles.title}>จับคู่</h1>
+          <Link href="/user/games" className={styles.backBtn}>
+            ย้อนกลับ
+          </Link>
+        </div>
         <div className={styles.controlsRow}>
           <div className={`${styles.toggleContainer} ${activeTab === 'word' ? styles.toggleWord : styles.toggleImage}`}>
             <button 
@@ -100,7 +105,7 @@ export default function MatchingCategoryClient() {
             </Link>
           ))
         ) : (
-          <div style={{ padding: '2rem', fontSize: '1.2rem', color: '#666' }}>
+          <div style={{ padding: '2rem', fontSize: '1.2rem', color: '#666', gridColumn: '1 / -1', textAlign: 'center' }}>
             {searchQuery ? 'ไม่พบแบบฝึกหัดที่ค้นหา' : 'ไม่มีแบบฝึกหัดที่ได้รับมอบหมาย'}
           </div>
         )}

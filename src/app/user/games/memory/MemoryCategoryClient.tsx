@@ -20,6 +20,7 @@ export default function MemoryCategoryClient() {
   useEffect(() => {
     const savedTab = sessionStorage.getItem('memoryActiveTab');
     if (savedTab === 'picture' || savedTab === 'word') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveTab(savedTab as 'picture' | 'word');
     }
   }, []);
@@ -61,36 +62,43 @@ export default function MemoryCategoryClient() {
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>ความจำ</h1>
-      
-      <div className={styles.controlsRow}>
-        <div className={`${styles.tabsContainer} ${activeTab === 'word' ? styles.tabWord : styles.tabImage}`}>
-          <button 
-            className={`${styles.tabButton} ${activeTab === 'picture' ? styles.activeTab : ''}`}
-            onClick={() => handleTabChange('picture')}
-          >
-            ภาพกับภาพ
-          </button>
-          <button 
-            className={`${styles.tabButton} ${activeTab === 'word' ? styles.activeTab : ''}`}
-            onClick={() => handleTabChange('word')}
-          >
-            คำกับภาพ
-          </button>
+      <div className={styles.header}>
+        <div className={styles.titleRow}>
+          <h1 className={styles.title}>ความจำ</h1>
+          <Link href="/user/games" className={styles.backBtn}>
+            ย้อนกลับ
+          </Link>
         </div>
         
-        <div className={styles.searchContainer}>
-          <input 
-            type="text" 
-            placeholder="ค้นหา" 
-            className={styles.searchInput}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <svg xmlns="http://www.w3.org/2000/svg" className={styles.searchIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
+        <div className={styles.controlsRow}>
+          <div className={`${styles.tabsContainer} ${activeTab === 'word' ? styles.tabWord : styles.tabImage}`}>
+            <button 
+              className={`${styles.tabButton} ${activeTab === 'picture' ? styles.activeTab : ''}`}
+              onClick={() => handleTabChange('picture')}
+            >
+              ภาพกับภาพ
+            </button>
+            <button 
+              className={`${styles.tabButton} ${activeTab === 'word' ? styles.activeTab : ''}`}
+              onClick={() => handleTabChange('word')}
+            >
+              คำกับภาพ
+            </button>
+          </div>
+          
+          <div className={styles.searchContainer}>
+            <input 
+              type="text" 
+              placeholder="ค้นหา" 
+              className={styles.searchInput}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <svg xmlns="http://www.w3.org/2000/svg" className={styles.searchIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </div>
         </div>
       </div>
 
@@ -106,7 +114,9 @@ export default function MemoryCategoryClient() {
             </Link>
           ))
         ) : (
-          <div style={{ fontSize: '1.5rem', color: '#666', textAlign: 'center', width: '100%', padding: '2rem' }}>ไม่พบแบบฝึกหัด</div>
+          <div style={{ padding: '2rem', fontSize: '1.2rem', color: '#666', gridColumn: '1 / -1', textAlign: 'center' }}>
+            {searchQuery ? 'ไม่พบแบบฝึกหัดที่ค้นหา' : 'ไม่มีแบบฝึกหัดที่ได้รับมอบหมาย'}
+          </div>
         )}
       </div>
     </div>
