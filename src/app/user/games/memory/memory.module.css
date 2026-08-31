@@ -345,3 +345,14 @@
     }
 }
 
+/* Mobile Portrait (max-width: 480px) Overrides */
+@media (max-width: 480px) {
+    .controlsRow {
+      flex-direction: column !important;
+      align-items: stretch !important;
+    }
+    .searchContainer, .tabsContainer {
+      width: 100% !important;
+    }
+}
+
