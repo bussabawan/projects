@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import LoadingSpinner from "@/app/components/LoadingSpinner/LoadingSpinner";
+import Skeleton from "@/app/components/Skeleton/Skeleton";
 import styles from './patientStats.module.css';
 import { PatientStatInfo } from '@/lib/models/patientStats';
 import { useDebounce } from '@/app/hooks/useDebounce';
@@ -177,7 +178,9 @@ export default function PatientStatsPage() {
       </div>
 
       {loading ? (
-        <LoadingSpinner text="กำลังโหลดข้อมูล..." />
+        <div style={{ padding: '2rem 0', width: '100%' }}>
+          <Skeleton type="table" count={5} />
+        </div>
       ) : error ? (
         <div style={{ textAlign: 'center', padding: '2rem', color: 'red' }}>เกิดข้อผิดพลาด: {error}</div>
       ) : (

@@ -6,6 +6,7 @@
   import Image from "next/image";
   import styles from "./admin.module.css";
   import { usePathname } from "next/navigation";
+  import LoadingSpinner from "@/app/components/LoadingSpinner/LoadingSpinner";
   
   export default function AdminLayout({
     children,
@@ -13,8 +14,19 @@
     children: React.ReactNode;
   }) {
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const [isPageLoading, setIsPageLoading] = useState(false);
     const [userName, setUserName] = useState("กำลังโหลด...");
     const pathname = usePathname();
+
+    useEffect(() => {
+      setIsPageLoading(false);
+    }, [pathname]);
+
+    const handleLinkClick = (href: string) => {
+      if (pathname !== href) {
+        setIsPageLoading(true);
+      }
+    };
   
     useEffect(() => {
       const fetchUser = async () => {
@@ -115,31 +127,31 @@
         </div>
 
         <nav className={styles.menu}>
-          <Link href="/admin" className={`${styles.menuItem} ${pathname === '/admin' ? styles.active : ''}`}>
+          <Link href="/admin" onClick={() => handleLinkClick('/admin')} className={`${styles.menuItem} ${pathname === '/admin' ? styles.active : ''}`}>
             <span className={styles.menuIcon}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
             </span>
             <span className={styles.menuText}>ภาพรวมสถิติ</span>
           </Link>
-          <Link href="/admin/patient-stats" className={`${styles.menuItem} ${pathname === '/admin/patient-stats' ? styles.active : ''}`}>
+          <Link href="/admin/patient-stats" onClick={() => handleLinkClick('/admin/patient-stats')} className={`${styles.menuItem} ${pathname === '/admin/patient-stats' ? styles.active : ''}`}>
             <span className={styles.menuIcon}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
             </span>
             <span className={styles.menuText}>สถิติผู้ป่วยรายบุคคล</span>
           </Link>
-          <Link href="/admin/users" className={`${styles.menuItem} ${pathname === '/admin/users' ? styles.active : ''}`}>
+          <Link href="/admin/users" onClick={() => handleLinkClick('/admin/users')} className={`${styles.menuItem} ${pathname === '/admin/users' ? styles.active : ''}`}>
             <span className={styles.menuIcon}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
             </span>
             <span className={styles.menuText}>จัดการผู้ใช้</span>
           </Link>
-          <Link href="/admin/images" className={`${styles.menuItem} ${pathname === '/admin/images' ? styles.active : ''}`}>
+          <Link href="/admin/images" onClick={() => handleLinkClick('/admin/images')} className={`${styles.menuItem} ${pathname === '/admin/images' ? styles.active : ''}`}>
             <span className={styles.menuIcon}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
             </span>
             <span className={styles.menuText}>จัดการรูปภาพ</span>
           </Link>
-          <Link href="/admin/exercises" className={`${styles.menuItem} ${pathname === '/admin/exercises' ? styles.active : ''}`}>
+          <Link href="/admin/exercises" onClick={() => handleLinkClick('/admin/exercises')} className={`${styles.menuItem} ${pathname === '/admin/exercises' ? styles.active : ''}`}>
             <span className={styles.menuIcon}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
             </span>
@@ -148,7 +160,7 @@
         </nav>
 
         <div className={styles.sidebarBottom}>
-          <Link href="/admin/manual" className={styles.manualBtn}>
+          <Link href="/admin/manual" onClick={() => handleLinkClick('/admin/manual')} className={styles.manualBtn}>
             <span className={styles.menuIcon} style={{ display: isCollapsed ? 'flex' : 'none' }}>
               <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
             </span>
@@ -175,10 +187,16 @@
       </aside>
 
       <main className={styles.mainContent}>
-        {children}
+        {isPageLoading ? (
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%' }}>
+            <LoadingSpinner text="กำลังโหลดหน้าจอ..." />
+          </div>
+        ) : (
+          children
+        )}
       </main>
       
-      <Link href="/admin/manual" className={styles.mobileManualBtn} aria-label="คู่มือ">
+      <Link href="/admin/manual" onClick={() => handleLinkClick('/admin/manual')} className={styles.mobileManualBtn} aria-label="คู่มือ">
         ?
       </Link>
     </div>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import LoadingSpinner from "@/app/components/LoadingSpinner/LoadingSpinner";
+import Skeleton from "@/app/components/Skeleton/Skeleton";
 import styles from "./users.module.css";
 import UserFormModal from "./components/UserFormModal";
 
@@ -260,7 +261,9 @@ export default function ManageUsersPage() {
         
         <div className={styles.tableBody}>
           {loading && users.length === 0 ? (
-            <LoadingSpinner text="กำลังโหลดข้อมูล..." />
+            <div style={{ padding: '2rem 0', width: '100%' }}>
+              <Skeleton type="table" count={5} />
+            </div>
           ) : users.length === 0 ? (
             <div className={styles.emptyState}>ไม่พบข้อมูล</div>
           ) : (

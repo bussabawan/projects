@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import LoadingSpinner from "@/app/components/LoadingSpinner/LoadingSpinner";
+import Skeleton from "@/app/components/Skeleton/Skeleton";
 import styles from "./images.module.css";
 import ImageFormModal from "./components/ImageFormModal";
 import DeleteConfirmModal from "../components/DeleteConfirmModal";
@@ -285,7 +286,9 @@ export default function ManageImagesPage() {
 
       <div className={styles.grid}>
         {isLoading ? (
-          <LoadingSpinner text="กำลังโหลดข้อมูล..." />
+          <div style={{ padding: '2rem 0', gridColumn: '1 / -1', width: '100%' }}>
+            <Skeleton type="card" count={8} />
+          </div>
         ) : images.length === 0 ? (
           <div>ไม่พบรูปภาพ</div>
         ) : (
