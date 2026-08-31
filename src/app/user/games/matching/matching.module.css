@@ -1,3 +1,6 @@
+/* ==========================================================================
+   Base Styles & Components
+   ========================================================================== */
 .container {
   width: 100%;
   min-height: 100%;
@@ -172,79 +175,6 @@
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
 }
 
-@media (max-width: 1200px) and (min-width: 769px) {
-  .categoriesGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.5rem;
-  }
-  .categoryBtn {
-    padding: 1.5rem;
-    font-size: 1.5rem;
-  }
-}
-
-@media (max-width: 900px) {
-  .header {
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-  .controlsRow {
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: center;
-    width: 100%;
-    gap: 1rem;
-  }
-  .searchContainer {
-    flex: 1;
-  }
-  .toggleContainer {
-    flex: 1;
-    justify-content: center;
-  }
-  .toggleBtn {
-    flex: 1;
-    padding: 0.5rem 0.5rem;
-    font-size: 0.9rem;
-  }
-  .searchInput {
-    padding: 0.5rem 1rem;
-    padding-right: 2.5rem;
-    font-size: 0.9rem;
-  }
-  .searchIcon {
-    right: 0.8rem;
-    width: 18px;
-    height: 18px;
-  }
-}
-
-@media (max-width: 768px) {
-  .title {
-    font-size: 2rem;
-  }
-  .controlsRow {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1rem;
-  }
-  .searchContainer, .toggleContainer {
-    width: 100%;
-  }
-  .categoriesGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
-  }
-  .categoryBtn {
-    padding: 1rem 0.5rem;
-    font-size: 1.1rem;
-    border-radius: 15px;
-  }
-  .backBtn {
-    display: none;
-  }
-}
-
 .skeletonCard {
   background-color: #f0f0f0;
   border-radius: 25px;
@@ -276,5 +206,106 @@
   100% {
     transform: translateX(100%);
   }
+}
+
+/* ==========================================================================
+   Responsive Design (Media Queries)
+   ========================================================================== */
+
+/* 1. Large Desktop (min-width: 1440px) */
+@media (min-width: 1440px) {
+
+}
+
+/* 2. Normal Desktop
+   (Uses Base Styles above, targeting 1025px - 1439px) */
+
+/* 3. Small Desktop / Tablet Landscape (max-width: 1024px) */
+@media (max-width: 1024px) {
+
+}
+
+/* 4. Tablet Portrait / Mobile Landscape (max-width: 768px) */
+@media (max-width: 768px) {
+  
+    .title {
+      font-size: 2rem;
+    }
+    .controlsRow {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1rem;
+    }
+    .searchContainer, .toggleContainer {
+      width: 100%;
+    }
+    .categoriesGrid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+    .categoryBtn {
+      padding: 1rem 0.5rem;
+      font-size: 1.1rem;
+      border-radius: 15px;
+    }
+    .backBtn {
+      display: none;
+    }
+}
+
+/* 5. Mobile Portrait (max-width: 480px) */
+@media (max-width: 480px) {
+
+}
+
+/* Custom Breakpoint */
+@media (max-width: 1200px) and (min-width: 769px) {
+  
+    .categoriesGrid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.5rem;
+    }
+    .categoryBtn {
+      padding: 1.5rem;
+      font-size: 1.5rem;
+    }
+}
+
+/* Custom Breakpoint */
+@media (max-width: 900px) {
+  
+    .header {
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .controlsRow {
+      flex-direction: row;
+      flex-wrap: nowrap;
+      align-items: center;
+      width: 100%;
+      gap: 1rem;
+    }
+    .searchContainer {
+      flex: 1;
+    }
+    .toggleContainer {
+      flex: 1;
+      justify-content: center;
+    }
+    .toggleBtn {
+      flex: 1;
+      padding: 0.5rem 0.5rem;
+      font-size: 0.9rem;
+    }
+    .searchInput {
+      padding: 0.5rem 1rem;
+      padding-right: 2.5rem;
+      font-size: 0.9rem;
+    }
+    .searchIcon {
+      right: 0.8rem;
+      width: 18px;
+      height: 18px;
+    }
 }
 

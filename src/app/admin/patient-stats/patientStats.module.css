@@ -1,3 +1,6 @@
+/* ==========================================================================
+   Base Styles & Components
+   ========================================================================== */
 .container {
   display: flex;
   flex-direction: column;
@@ -226,104 +229,130 @@
 }
 
 /* Mobile Responsive */
-@media (max-width: 768px), (max-width: 950px) and (max-height: 500px) {
-  .headerArea {
-    flex-direction: column;
-    align-items: flex-start;
-    margin-bottom: 1.5rem;
-  }
 
-  .title {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-    margin-top: 1rem;
-  }
+/* ==========================================================================
+   Responsive Design (Media Queries)
+   ========================================================================== */
 
-  .controlsContainer {
-    width: 100%;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
+/* 1. Large Desktop (min-width: 1440px) */
+@media (min-width: 1440px) {
 
-  .categorySelect {
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .searchContainer {
-    display: block;
-    width: 100%;
-    margin-bottom: 1.5rem;
-    align-self: flex-start;
-  }
-
-  .searchInput {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 0.8rem 1.2rem;
-    padding-right: 2.5rem;
-    font-size: 1rem;
-  }
-
-  .tableContainer {
-    display: none; /* Hide table on mobile */
-  }
-
-  .mobileGrid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    width: 100%;
-    padding-bottom: 2rem;
-  }
-
-  .patientCard {
-    background: white;
-    border-radius: 16px;
-    padding: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-  }
-
-  .cardInfo {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-    flex: 1;
-    min-width: 0;
-    margin-right: 0.5rem;
-  }
-
-  .patientName {
-    font-size: 1rem;
-    color: #111;
-    font-weight: 500;
-    overflow-wrap: anywhere;
-    word-break: break-word;
-  }
-
-  .patientId {
-    font-size: 0.9rem;
-    color: #333;
-    overflow-wrap: anywhere;
-    word-break: break-word;
-  }
-
-  .cardPlayBtn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #000;
-    padding: 0;
-    flex-shrink: 0;
-  }
-
-  .cardPlayBtn svg {
-    fill: currentColor;
-    width: 28px;
-    height: 28px;
-  }
 }
+
+/* 2. Normal Desktop
+   (Uses Base Styles above, targeting 1025px - 1439px) */
+
+/* 3. Small Desktop / Tablet Landscape (max-width: 1024px) */
+@media (max-width: 1024px) {
+
+}
+
+/* 4. Tablet Portrait / Mobile Landscape (max-width: 768px) */
+@media (max-width: 768px), (max-width: 950px) and (max-height: 500px) {
+  
+    .headerArea {
+      flex-direction: column;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+    }
+  
+    .title {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      margin-top: 1rem;
+    }
+  
+    .controlsContainer {
+      width: 100%;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+  
+    .categorySelect {
+      width: 100%;
+      box-sizing: border-box;
+    }
+  
+    .searchContainer {
+      display: block;
+      width: 100%;
+      margin-bottom: 1.5rem;
+      align-self: flex-start;
+    }
+  
+    .searchInput {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0.8rem 1.2rem;
+      padding-right: 2.5rem;
+      font-size: 1rem;
+    }
+  
+    .tableContainer {
+      display: none; /* Hide table on mobile */
+    }
+  
+    .mobileGrid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      width: 100%;
+      padding-bottom: 2rem;
+    }
+  
+    .patientCard {
+      background: white;
+      border-radius: 16px;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+  
+    .cardInfo {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      flex: 1;
+      min-width: 0;
+      margin-right: 0.5rem;
+    }
+  
+    .patientName {
+      font-size: 1rem;
+      color: #111;
+      font-weight: 500;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+  
+    .patientId {
+      font-size: 0.9rem;
+      color: #333;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+  
+    .cardPlayBtn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #000;
+      padding: 0;
+      flex-shrink: 0;
+    }
+  
+    .cardPlayBtn svg {
+      fill: currentColor;
+      width: 28px;
+      height: 28px;
+    }
+}
+
+/* 5. Mobile Portrait (max-width: 480px) */
+@media (max-width: 480px) {
+
+}
+

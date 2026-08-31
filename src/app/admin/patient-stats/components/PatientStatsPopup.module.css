@@ -1,3 +1,6 @@
+/* ==========================================================================
+   Base Styles & Components
+   ========================================================================== */
 .overlay {
   position: fixed;
   top: 0;
@@ -158,66 +161,95 @@
   color: #333;
 }
 
-@media (max-width: 992px) {
-  .statsGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+/* ==========================================================================
+   Responsive Design (Media Queries)
+   ========================================================================== */
+
+/* 1. Large Desktop (min-width: 1440px) */
+@media (min-width: 1440px) {
+
 }
 
+/* 2. Normal Desktop
+   (Uses Base Styles above, targeting 1025px - 1439px) */
+
+/* 3. Small Desktop / Tablet Landscape (max-width: 1024px) */
+@media (max-width: 1024px) {
+
+}
+
+/* 4. Tablet Portrait / Mobile Landscape (max-width: 768px) */
 @media (max-width: 768px) {
-  .popup {
-    width: 95%;
-  }
   
-  .header {
-    padding: 30px 20px 20px;
-    border-radius: 20px 20px 0 0;
-  }
+    .popup {
+      width: 95%;
+    }
+    
+    .header {
+      padding: 30px 20px 20px;
+      border-radius: 20px 20px 0 0;
+    }
+    
+    .title {
+      font-size: 1.8rem;
+    }
+    
+    .content {
+      padding: 15px 15px 30px;
+    }
   
-  .title {
-    font-size: 1.8rem;
-  }
+    .filters {
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    
+    .filterSelect {
+      font-size: 0.75rem;
+      padding: 4px 5px;
+      flex: 1;
+      min-width: 80px;
+    }
   
-  .content {
-    padding: 15px 15px 30px;
-  }
-
-  .filters {
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 5px;
-  }
+    .customDateWrapper {
+      justify-content: space-between;
+    }
   
-  .filterSelect {
-    font-size: 0.75rem;
-    padding: 4px 5px;
-    flex: 1;
-    min-width: 80px;
-  }
-
-  .customDateWrapper {
-    justify-content: space-between;
-  }
-
-  .dateInput {
-    flex: 1;
-    max-width: none;
-    font-size: 0.8rem;
-  }
-
-  .statIcon {
-    width: 100%;
-    height: 300px;
-  }
+    .dateInput {
+      flex: 1;
+      max-width: none;
+      font-size: 0.8rem;
+    }
   
-  .statLabel {
-    font-size: 0.9rem;
-  }
+    .statIcon {
+      width: 100%;
+      height: 300px;
+    }
+    
+    .statLabel {
+      font-size: 0.9rem;
+    }
 }
 
+/* 5. Mobile Portrait (max-width: 480px) */
+@media (max-width: 480px) {
+
+}
+
+/* Custom Breakpoint */
+@media (max-width: 992px) {
+  
+    .statsGrid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* Custom Breakpoint */
 @media (max-width: 576px) {
-  .statsGrid {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
+  
+    .statsGrid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
 }
+

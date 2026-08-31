@@ -1,3 +1,6 @@
+/* ==========================================================================
+   Base Styles & Components
+   ========================================================================== */
 .container {
   display: flex;
   flex-direction: column;
@@ -128,35 +131,60 @@
   transform: scale(1.05);
 }
 
-@media (max-width: 480px) {
-  .container {
-    padding: 1.5rem 1rem;
-    min-height: 100dvh;
-  }
+/* ==========================================================================
+   Responsive Design (Media Queries)
+   ========================================================================== */
 
-  .logoContainer {
-    margin-bottom: 1.5rem;
-  }
+/* 1. Large Desktop (min-width: 1440px) */
+@media (min-width: 1440px) {
 
-  .logo {
-    max-width: 200px;
-  }
-  
-  .card {
-    padding: 2.5rem 1.5rem 3.5rem 1.5rem;
-    border-radius: 35px;
-  }
-  
-  .title {
-    font-size: 2.8rem;
-    margin-bottom: 1rem;
-  }
-
-  .form {
-    gap: 1rem;
-  }
-
-  .actions {
-    margin-top: 1rem;
-  }
 }
+
+/* 2. Normal Desktop
+   (Uses Base Styles above, targeting 1025px - 1439px) */
+
+/* 3. Small Desktop / Tablet Landscape (max-width: 1024px) */
+@media (max-width: 1024px) {
+
+}
+
+/* 4. Tablet Portrait / Mobile Landscape (max-width: 768px) */
+@media (max-width: 768px) {
+
+}
+
+/* 5. Mobile Portrait (max-width: 480px) */
+@media (max-width: 480px) {
+  
+    .container {
+      padding: 1.5rem 1rem;
+      min-height: 100dvh;
+    }
+  
+    .logoContainer {
+      margin-bottom: 1.5rem;
+    }
+  
+    .logo {
+      max-width: 200px;
+    }
+    
+    .card {
+      padding: 2.5rem 1.5rem 3.5rem 1.5rem;
+      border-radius: 35px;
+    }
+    
+    .title {
+      font-size: 2.8rem;
+      margin-bottom: 1rem;
+    }
+  
+    .form {
+      gap: 1rem;
+    }
+  
+    .actions {
+      margin-top: 1rem;
+    }
+}
+
