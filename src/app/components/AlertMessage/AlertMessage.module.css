@@ -1,3 +1,6 @@
+/* ==========================================================================
+   1. Base Styles & Animations (Shared)
+   ========================================================================== */
 .overlay {
   position: fixed;
   top: 0;
@@ -10,19 +13,7 @@
   z-index: 1000;
   padding: 20px;
   box-sizing: border-box;
-  /* background-color: rgba(0, 0, 0, 0.2); Uncomment if you want a dark overlay */
-}
-
-.alertBox {
-  padding: 40px 60px;
-  border-radius: 24px;
-  border: 1px solid #000;
-  text-align: center;
-  min-width: 350px;
-  max-width: 100%;
-  box-sizing: border-box;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  /* background-color: rgba(0, 0, 0, 0.4); Uncomment for a dark overlay */
 }
 
 @keyframes popIn {
@@ -36,16 +27,19 @@
   }
 }
 
-.iconContainer {
-  font-size: 48px;
-  margin-bottom: 15px;
-}
-
-.text {
-  margin: 15px 0;
-  font-size: 28px;
-  font-weight: 400;
-  color: #000;
+/* ==========================================================================
+   2. Alert (Success/Error) Popup Styles
+   ========================================================================== */
+.alertBox {
+  padding: 40px 60px;
+  border-radius: 24px;
+  border: 1px solid #000;
+  text-align: center;
+  min-width: 350px;
+  max-width: 100%;
+  box-sizing: border-box;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 .success {
@@ -56,20 +50,29 @@
   background-color: #FFC1C1;
 }
 
-@media (max-width: 600px) {
-  .alertBox {
-    min-width: 0;
-    width: 100%;
-    max-width: 350px;
-    padding: 30px 20px;
-  }
-
-  .text {
-    font-size: 22px;
-  }
+.iconContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 15px;
 }
 
-/* Confirm Popup Styles */
+.iconContainer svg {
+  width: 80px;
+  height: 80px;
+  transition: all 0.3s ease;
+}
+
+.text {
+  margin: 15px 0;
+  font-size: 28px;
+  font-weight: 400;
+  color: #000;
+}
+
+/* ==========================================================================
+   3. Confirm Popup Styles
+   ========================================================================== */
 .popupContainer {
   background-color: white;
   padding: 40px 30px;
@@ -85,6 +88,14 @@
 .popupIcon {
   color: #1a1a1a;
   margin-bottom: 25px;
+  display: flex;
+  justify-content: center;
+}
+
+.popupIcon svg {
+  width: 100px;
+  height: 100px;
+  transition: all 0.3s ease;
 }
 
 .popupText {
@@ -100,18 +111,21 @@
   gap: 20px;
 }
 
-.popupBtnConfirm {
+.popupBtnConfirm, .popupBtnCancel {
   flex: 1;
   padding: 12px 20px;
   font-size: 20px;
-  background-color: white;
-  color: #1a1a1a;
-  border: 1px solid #7b61ff;
   border-radius: 40px;
   cursor: pointer;
   font-weight: 500;
   transition: all 0.2s;
   max-width: 150px;
+}
+
+.popupBtnConfirm {
+  background-color: white;
+  color: #1a1a1a;
+  border: 1px solid #7b61ff;
 }
 
 .popupBtnConfirm:hover {
@@ -119,19 +133,137 @@
 }
 
 .popupBtnCancel {
-  flex: 1;
-  padding: 12px 20px;
-  font-size: 20px;
   background-color: #f28b82;
   color: white;
   border: none;
-  border-radius: 40px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s;
-  max-width: 150px;
 }
 
 .popupBtnCancel:hover {
   background-color: #e07a72;
+}
+
+/* ==========================================================================
+   4. Responsive Design (Media Queries)
+   ========================================================================== */
+
+/* 4.1 Large Desktop (min-width: 1440px) */
+@media (min-width: 1440px) {
+  .alertBox {
+    padding: 50px 80px;
+    min-width: 400px;
+  }
+  
+  .text {
+    font-size: 32px;
+  }
+
+  .popupContainer {
+    max-width: 500px;
+    padding: 50px 40px;
+  }
+
+  .popupText {
+    font-size: 30px;
+  }
+}
+
+/* 4.2 Normal Desktop 
+   (Uses Base Styles above, targeting 1025px - 1439px)
+*/
+
+/* 4.3 Small Desktop / Tablet Landscape (max-width: 1024px) */
+@media (max-width: 1024px) {
+  .alertBox {
+    padding: 35px 50px;
+    min-width: 320px;
+  }
+  
+  .text {
+    font-size: 26px;
+  }
+
+  .popupText {
+    font-size: 24px;
+  }
+}
+
+/* 4.4 Tablet Portrait / Mobile Landscape (max-width: 768px) */
+@media (max-width: 768px) {
+  .alertBox {
+    padding: 30px 40px;
+  }
+  
+  .iconContainer svg {
+    width: 70px;
+    height: 70px;
+  }
+
+  .text {
+    font-size: 24px;
+  }
+
+  .popupContainer {
+    padding: 35px 25px;
+  }
+
+  .popupIcon svg {
+    width: 80px;
+    height: 80px;
+  }
+
+  .popupText {
+    font-size: 22px;
+    margin-bottom: 30px;
+  }
+
+  .popupBtnConfirm, .popupBtnCancel {
+    font-size: 18px;
+    padding: 10px 15px;
+  }
+}
+
+/* 4.5 Mobile Portrait (max-width: 480px) */
+@media (max-width: 480px) {
+  .alertBox {
+    padding: 25px 20px;
+    min-width: 280px;
+    width: 100%;
+    border-radius: 20px;
+  }
+
+  .iconContainer svg {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .text {
+    font-size: 20px;
+    margin: 10px 0;
+  }
+
+  .popupContainer {
+    padding: 30px 20px;
+    border-radius: 24px;
+  }
+
+  .popupIcon svg {
+    width: 70px;
+    height: 70px;
+    margin-bottom: 15px;
+  }
+
+  .popupText {
+    font-size: 20px;
+    margin-bottom: 25px;
+  }
+
+  .popupButtons {
+    gap: 12px;
+  }
+
+  .popupBtnConfirm, .popupBtnCancel {
+    font-size: 16px;
+    padding: 10px 12px;
+    max-width: 100%;
+  }
 }

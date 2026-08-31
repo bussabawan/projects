@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import LoadingSpinner from "@/app/components/LoadingSpinner/LoadingSpinner";
+import Skeleton from "@/app/components/Skeleton/Skeleton";
 import DeleteConfirmModal from "@/app/admin/components/DeleteConfirmModal";
 import RestoreConfirmModal from "@/app/admin/components/RestoreConfirmModal";
 import AlertModal from "@/app/admin/components/AlertModal";
@@ -398,7 +399,9 @@ export default function ManageExercisesPage() {
 
       <div className={styles.grid}>
         {isLoading ? (
-          <LoadingSpinner />
+          <div style={{ padding: '2rem 0', gridColumn: '1 / -1', width: '100%' }}>
+            <Skeleton type="card" count={8} />
+          </div>
         ) : error ? (
           <p style={{ color: 'red', gridColumn: '1 / -1', textAlign: 'center' }}>{error}</p>
         ) : exercises.length === 0 ? (

@@ -1,3 +1,6 @@
+/* ==========================================================================
+   Base Styles & Components
+   ========================================================================== */
 .overlay {
   position: fixed;
   top: 0;
@@ -62,3 +65,31 @@
 .confirmBtn:hover {
   background: #e6d9ff;
 }
+
+/* ==========================================================================
+   Responsive Design (Media Queries)
+   ========================================================================== */
+
+/* 1. Large Desktop (min-width: 1440px) */
+@media (min-width: 1440px) {
+
+}
+
+/* 2. Normal Desktop
+   (Uses Base Styles above, targeting 1025px - 1439px) */
+
+/* 3. Small Desktop / Tablet Landscape (max-width: 1024px) */
+@media (max-width: 1024px) {
+
+}
+
+/* 4. Tablet Portrait / Mobile Landscape (max-width: 768px) */
+@media (max-width: 768px) {
+
+}
+
+/* 5. Mobile Portrait (max-width: 480px) */
+@media (max-width: 480px) {
+
+}
+

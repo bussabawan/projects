@@ -1,3 +1,6 @@
+/* ==========================================================================
+   Base Styles & Components
+   ========================================================================== */
 .container {
   width: 100%;
   display: flex;
@@ -183,116 +186,6 @@
   display: block;
 }
 
-@media (max-width: 1200px) and (min-width: 769px) {
-  .categoriesGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.5rem;
-  }
-  .categoryCard {
-    padding: 1.5rem;
-    font-size: 1.5rem;
-  }
-}
-
-@media (max-width: 900px) {
-  .header {
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-  .controlsRow {
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: center;
-    width: 100%;
-    gap: 1rem;
-    margin-bottom: 0;
-  }
-  .searchContainer {
-    flex: 1;
-  }
-  .tabsContainer {
-    flex: 1;
-    justify-content: center;
-  }
-  .tabButton {
-    flex: 1;
-    padding: 0.5rem 0.5rem;
-    font-size: 0.9rem;
-  }
-  .searchInput {
-    padding: 0.5rem 1rem;
-    padding-right: 2.5rem;
-    font-size: 0.9rem;
-  }
-  .searchIcon {
-    right: 0.8rem;
-    width: 18px;
-    height: 18px;
-  }
-}
-
-@media (max-width: 768px) {
-  .title {
-    font-size: 2.2rem;
-  }
-
-  .controlsRow {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1rem;
-  }
-  
-  .tabsContainer {
-    width: 100%;
-    padding: 2px;
-  }
-
-  .tabButton {
-    padding: 0.5rem 0.1rem;
-    font-size: 0.9rem;
-    flex: 1;
-    text-align: center;
-    white-space: nowrap;
-  }
-
-  .searchContainer {
-    width: 100%;
-  }
-
-  .searchInput {
-    padding: 0.5rem 1rem;
-    padding-right: 2.5rem;
-    font-size: 0.9rem;
-  }
-
-  .searchIcon {
-    right: 0.8rem;
-    width: 18px;
-    height: 18px;
-  }
-
-  .categoriesGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-  }
-
-  .categoryCard {
-    width: 100%;
-    padding: 1rem;
-    font-size: 1.1rem;
-    border-radius: 12px;
-    min-height: 90px;
-  }
-  
-  .skeletonCard {
-    min-height: 90px;
-  }
-
-  .backBtn {
-    display: none;
-  }
-}
-
 .skeletonCard {
   background-color: #e0e0e0;
   border-radius: 25px;
@@ -313,3 +206,153 @@
     background-color: #eee;
   }
 }
+
+/* ==========================================================================
+   Responsive Design (Media Queries)
+   ========================================================================== */
+
+/* 1. Large Desktop (min-width: 1440px) */
+@media (min-width: 1440px) {
+
+}
+
+/* 2. Normal Desktop
+   (Uses Base Styles above, targeting 1025px - 1439px) */
+
+/* 3. Small Desktop / Tablet Landscape (max-width: 1024px) */
+@media (max-width: 1024px) {
+
+}
+
+/* 4. Tablet Portrait / Mobile Landscape (max-width: 768px) */
+@media (max-width: 768px) {
+  
+    .title {
+      font-size: 2.2rem;
+    }
+  
+    .controlsRow {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1rem;
+    }
+    
+    .tabsContainer {
+      width: 100%;
+      padding: 2px;
+    }
+  
+    .tabButton {
+      padding: 0.5rem 0.1rem;
+      font-size: 0.9rem;
+      flex: 1;
+      text-align: center;
+      white-space: nowrap;
+    }
+  
+    .searchContainer {
+      width: 100%;
+    }
+  
+    .searchInput {
+      padding: 0.5rem 1rem;
+      padding-right: 2.5rem;
+      font-size: 0.9rem;
+    }
+  
+    .searchIcon {
+      right: 0.8rem;
+      width: 18px;
+      height: 18px;
+    }
+  
+    .categoriesGrid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+  
+    .categoryCard {
+      width: 100%;
+      padding: 1rem;
+      font-size: 1.1rem;
+      border-radius: 12px;
+      min-height: 90px;
+    }
+    
+    .skeletonCard {
+      min-height: 90px;
+    }
+  
+    .backBtn {
+      display: none;
+    }
+}
+
+/* 5. Mobile Portrait (max-width: 480px) */
+@media (max-width: 480px) {
+
+}
+
+/* Custom Breakpoint */
+@media (max-width: 1200px) and (min-width: 769px) {
+  
+    .categoriesGrid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.5rem;
+    }
+    .categoryCard {
+      padding: 1.5rem;
+      font-size: 1.5rem;
+    }
+}
+
+/* Custom Breakpoint */
+@media (max-width: 900px) {
+  
+    .header {
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .controlsRow {
+      flex-direction: row;
+      flex-wrap: nowrap;
+      align-items: center;
+      width: 100%;
+      gap: 1rem;
+      margin-bottom: 0;
+    }
+    .searchContainer {
+      flex: 1;
+    }
+    .tabsContainer {
+      flex: 1;
+      justify-content: center;
+    }
+    .tabButton {
+      flex: 1;
+      padding: 0.5rem 0.5rem;
+      font-size: 0.9rem;
+    }
+    .searchInput {
+      padding: 0.5rem 1rem;
+      padding-right: 2.5rem;
+      font-size: 0.9rem;
+    }
+    .searchIcon {
+      right: 0.8rem;
+      width: 18px;
+      height: 18px;
+    }
+}
+
+/* Mobile Portrait (max-width: 480px) Overrides */
+@media (max-width: 480px) {
+    .controlsRow {
+      flex-direction: column !important;
+      align-items: stretch !important;
+    }
+    .searchContainer, .tabsContainer {
+      width: 100% !important;
+    }
+}
+

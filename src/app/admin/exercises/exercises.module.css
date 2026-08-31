@@ -1,3 +1,6 @@
+/* ==========================================================================
+   Base Styles & Components
+   ========================================================================== */
 .container {
   height: 100%;
   display: flex;
@@ -173,115 +176,6 @@
 .manageImagesBtn:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 15px rgba(170, 76, 192, 0.4);
-}
-
-@media (max-width: 768px), (max-width: 950px) and (max-height: 500px) {
-  .headerContainer {
-    display: block;
-    position: relative;
-    margin-bottom: 2rem;
-  }
-  
-  .controlsRow {
-    flex-direction: column-reverse;
-    align-items: flex-start;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
-  
-  .mobileAddBtn {
-    display: flex;
-    background: #76f387;
-    border: none;
-    border-radius: 15px;
-    width: 70px;
-    height: 60px;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 4px 10px rgba(118, 243, 135, 0.4);
-    cursor: pointer;
-    flex-shrink: 0;
-    padding: 0;
-  }
-  
-  .title {
-    font-size: 2.2rem;
-    margin-bottom: 1rem;
-  }
-  
-  .searchContainer {
-    width: 100%;
-    max-width: 100%;
-  }
-  
-  .searchInput {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 0.8rem 1.2rem;
-    padding-right: 3rem;
-  }
-
-  .desktopAddBtn {
-    display: none;
-  }
-
-
-  
-  .grid {
-    grid-template-columns: 1fr;
-    gap: 0.6rem;
-  }
-
-  .card {
-    padding: 0.6rem 0.8rem;
-    border-radius: 12px;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-  }
-
-  .cardHeader {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.4rem;
-    width: 100%;
-    margin-bottom: 0;
-  }
-
-  .cardTitle {
-    font-size: 0.95rem;
-    margin: 0;
-    text-align: center;
-    word-break: break-word;
-    width: 100%;
-    padding-right: 0;
-  }
-
-  .cardActions {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    width: 100%;
-  }
-
-  .iconBtn {
-    padding: 0.2rem;
-  }
-
-  .iconBtn svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  .manageImagesBtn {
-    padding: 0.5rem;
-    font-size: 0.85rem;
-    white-space: nowrap;
-    width: 100%;
-    margin-top: 0;
-  }
 }
 
 .loadingContainer {
@@ -524,38 +418,169 @@
   color: #111;
 }
 
-@media (max-width: 768px), (max-width: 950px) and (max-height: 500px) {
-  .modalContent {
-    width: 98%;
-  }
-  
-  .modalBody {
-    padding: 1rem 0.5rem;
-  }
+/* ==========================================================================
+   Responsive Design (Media Queries)
+   ========================================================================== */
 
-  .imageGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.3rem;
-    padding-right: 0.2rem;
-  }
+/* 1. Large Desktop (min-width: 1440px) */
+@media (min-width: 1440px) {
 
-  .imageGridItem {
-    gap: 0.3rem;
-    padding: 0.2rem;
-    min-width: 0;
-  }
-
-  .imageItemText {
-    font-size: 0.85rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    flex: 1;
-    min-width: 0;
-  }
-
-  .imageCheckbox {
-    width: 16px;
-    height: 16px;
-  }
 }
+
+/* 2. Normal Desktop
+   (Uses Base Styles above, targeting 1025px - 1439px) */
+
+/* 3. Small Desktop / Tablet Landscape (max-width: 1024px) */
+@media (max-width: 1024px) {
+
+}
+
+/* 4. Tablet Portrait / Mobile Landscape (max-width: 768px) */
+@media (max-width: 768px), (max-width: 950px) and (max-height: 500px) {
+  
+    .headerContainer {
+      display: block;
+      position: relative;
+      margin-bottom: 2rem;
+    }
+    
+    .controlsRow {
+      flex-direction: column-reverse;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .mobileAddBtn {
+      display: flex;
+      background: #76f387;
+      border: none;
+      border-radius: 15px;
+      width: 70px;
+      height: 60px;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 4px 10px rgba(118, 243, 135, 0.4);
+      cursor: pointer;
+      flex-shrink: 0;
+      padding: 0;
+    }
+    
+    .title {
+      font-size: 2.2rem;
+      margin-bottom: 1rem;
+    }
+    
+    .searchContainer {
+      width: 100%;
+      max-width: 100%;
+    }
+    
+    .searchInput {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0.8rem 1.2rem;
+      padding-right: 3rem;
+    }
+  
+    .desktopAddBtn {
+      display: none;
+    }
+  
+  
+    
+    .grid {
+      grid-template-columns: 1fr;
+      gap: 0.6rem;
+    }
+  
+    .card {
+      padding: 0.6rem 0.8rem;
+      border-radius: 12px;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+  
+    .cardHeader {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      width: 100%;
+      margin-bottom: 0;
+    }
+  
+    .cardTitle {
+      font-size: 0.95rem;
+      margin: 0;
+      text-align: center;
+      word-break: break-word;
+      width: 100%;
+      padding-right: 0;
+    }
+  
+    .cardActions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      width: 100%;
+    }
+  
+    .iconBtn {
+      padding: 0.2rem;
+    }
+  
+    .iconBtn svg {
+      width: 20px;
+      height: 20px;
+    }
+  
+    .manageImagesBtn {
+      padding: 0.5rem;
+      font-size: 0.85rem;
+      white-space: nowrap;
+      width: 100%;
+      margin-top: 0;
+    }
+    .modalContent {
+      width: 98%;
+    }
+    
+    .modalBody {
+      padding: 1rem 0.5rem;
+    }
+  
+    .imageGrid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.3rem;
+      padding-right: 0.2rem;
+    }
+  
+    .imageGridItem {
+      gap: 0.3rem;
+      padding: 0.2rem;
+      min-width: 0;
+    }
+  
+    .imageItemText {
+      font-size: 0.85rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+      min-width: 0;
+    }
+  
+    .imageCheckbox {
+      width: 16px;
+      height: 16px;
+    }
+}
+
+/* 5. Mobile Portrait (max-width: 480px) */
+@media (max-width: 480px) {
+
+}
+
