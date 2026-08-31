@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
+import sharp from "sharp";
 
 export async function POST(req: NextRequest) {
   try {
@@ -25,10 +26,21 @@ export async function POST(req: NextRequest) {
 
     // Generate unique filename
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    const filename = `${uniqueSuffix}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
-    const filePath = path.join(uploadDir, filename);
+    let filename = "";
 
-    await fs.writeFile(filePath, buffer);
+    if (isAudio) {
+      filename = `${uniqueSuffix}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
+      const filePath = path.join(uploadDir, filename);
+      await fs.writeFile(filePath, buffer);
+    } else {
+      const originalNameWithoutExt = file.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9.-]/g, "_");
+      filename = `${uniqueSuffix}-${originalNameWithoutExt}.webp`;
+      const filePath = path.join(uploadDir, filename);
+      
+      await sharp(buffer)
+        .webp({ quality: 80 })
+        .toFile(filePath);
+    }
     
     // File is saved successfully
 
