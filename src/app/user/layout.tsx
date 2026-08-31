@@ -75,27 +75,22 @@ export default function UserLayout({
   }, []);
 
   useEffect(() => {
-    if (typeof window === 'undefined' || sessionDay === 0) return;
+    if (typeof window === 'undefined') return;
 
     const interval = setInterval(() => {
       const now = new Date();
-      const currentDay = now.getDate();
+      const idleTime = now.getTime() - lastActivity;
+      const threeHours = 3 * 60 * 60 * 1000;
       
-      // If we've crossed midnight since the session started
-      if (currentDay !== sessionDay) {
-        const idleTime = now.getTime() - lastActivity;
-        const thirtyMins = 30 * 60 * 1000;
-        
-        // If inactive for 30 mins
-        if (idleTime >= thirtyMins) {
-           handleLogout();
-        }
+      // If inactive for 3 hours
+      if (idleTime >= threeHours) {
+         handleLogout();
       }
     }, 60000); // Check every minute
 
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionDay, lastActivity]);
+  }, [lastActivity]);
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
