@@ -1,5 +1,5 @@
 import './globals.css';
-import Footer from '@/components/Footer/Footer';
+import Footer from '@/app/components/Footer/Footer';
 
 export const metadata = {
   title: 'Vejjarak Lampang Hospital',
