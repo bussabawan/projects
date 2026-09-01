@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
-import LoadingSpinner from "@/app/components/LoadingSpinner/LoadingSpinner";
+
 import Skeleton from "@/app/components/Skeleton/Skeleton";
 import styles from "./images.module.css";
 import ImageFormModal from "./components/ImageFormModal";
@@ -339,7 +339,7 @@ export default function ManageImagesPage() {
       {!isLoading && currentPage < totalPages && (
         <div ref={lastElementRef} className={styles.loadMoreTarget}>
           {loadingMore && (
-            <LoadingSpinner text="กำลังโหลดเพิ่มเติม..." size="small" svgSize={32} />
+            <Skeleton type="card" count={4} />
           )}
         </div>
       )}

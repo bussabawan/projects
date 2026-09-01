@@ -6,7 +6,7 @@
   import Image from "next/image";
   import styles from "./admin.module.css";
   import { usePathname } from "next/navigation";
-  import LoadingSpinner from "@/app/components/LoadingSpinner/LoadingSpinner";
+  import Skeleton from "@/app/components/Skeleton/Skeleton";
   
   export default function AdminLayout({
     children,
@@ -116,14 +116,12 @@
         <div className={styles.logoContainer}>
           <div className={styles.logo}>
             <Image 
-              src="/vejjarak_logo.png" 
+              src="/vejjarak_logo.webp" 
               alt="Vejjarak Lampang Hospital Logo" 
-              width={90} 
-              height={90} 
+              width={150} 
+              height={77} 
             />
           </div>
-          <div className={styles.hospitalName}>โรงพยาบาลเวชชารักษ์ ลำปาง</div>
-          <div className={styles.hospitalNameEn}>VEJJARAK LAMPANG HOSPITAL</div>
         </div>
 
         <nav className={styles.menu}>
@@ -188,8 +186,8 @@
 
       <main className={styles.mainContent}>
         {isPageLoading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%' }}>
-            <LoadingSpinner text="กำลังโหลดหน้าจอ..." />
+          <div style={{ padding: '2rem', width: '100%' }}>
+            <Skeleton type="table" count={5} />
           </div>
         ) : (
           children

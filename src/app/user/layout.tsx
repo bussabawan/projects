@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { getSession, signOut } from "next-auth/react";
+import Skeleton from "@/app/components/Skeleton/Skeleton";
 import styles from "./user.module.css";
 
 export default function UserLayout({
@@ -16,8 +17,19 @@ export default function UserLayout({
   const [userName, setUserName] = useState("User");
   const [sessionDay, setSessionDay] = useState<number>(0);
   const [lastActivity, setLastActivity] = useState<number>(0);
+  const [isPageLoading, setIsPageLoading] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+
+  useEffect(() => {
+    setIsPageLoading(false);
+  }, [pathname]);
+
+  const handleLinkClick = (href: string) => {
+    if (pathname !== href) {
+      setIsPageLoading(true);
+    }
+  };
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -122,19 +134,17 @@ export default function UserLayout({
         <div className={styles.logoContainer}>
           <div className={styles.logo}>
             <Image 
-              src="/vejjarak_logo.png" 
+              src="/vejjarak_logo.webp" 
               alt="Vejjarak Lampang Hospital Logo" 
-              width={90} 
-              height={90} 
+              width={150} 
+              height={77} 
               priority
             />
           </div>
-          <div className={styles.hospitalName}>โรงพยาบาลเวชชารักษ์ ลำปาง</div>
-          <div className={styles.hospitalNameEn}>VEJJARAK LAMPANG HOSPITAL</div>
         </div>
 
         <nav className={styles.menu}>
-          <Link href="/user/games" className={`${styles.menuItem} ${pathname === '/user/games' ? styles.active : ''}`}>
+          <Link href="/user/games" onClick={() => handleLinkClick('/user/games')} className={`${styles.menuItem} ${pathname === '/user/games' ? styles.active : ''}`}>
             <span className={styles.menuIcon}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="2" y="6" width="20" height="12" rx="2" ry="2"></rect>
@@ -146,7 +156,7 @@ export default function UserLayout({
             </span>
             <span className={styles.menuText}>ประเภทเกม</span>
           </Link>
-          <Link href="/user/history" className={`${styles.menuItem} ${pathname.startsWith('/user/history') ? styles.active : ''}`}>
+          <Link href="/user/history" onClick={() => handleLinkClick('/user/history')} className={`${styles.menuItem} ${pathname.startsWith('/user/history') ? styles.active : ''}`}>
             <span className={styles.menuIcon}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
@@ -158,7 +168,7 @@ export default function UserLayout({
         </nav>
 
         <div className={styles.sidebarBottom}>
-          <Link href="/user/manual" className={styles.manualBtn}>
+          <Link href="/user/manual" onClick={() => handleLinkClick('/user/manual')} className={styles.manualBtn}>
             <span className={styles.menuIcon} style={{ display: isCollapsed ? 'flex' : 'none' }}>
               <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
@@ -192,7 +202,7 @@ export default function UserLayout({
       {!isGameInnerPage && (
       <div className={styles.mobileHeader}>
         <div className={styles.mobileUserPill}>{userName}</div>
-        <Link href="/user/games" className={styles.mobileHomeBtn} aria-label="Home">
+        <Link href="/user/games" onClick={() => handleLinkClick('/user/games')} className={styles.mobileHomeBtn} aria-label="Home">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
             <polyline points="9 22 9 12 15 12 15 22"></polyline>
@@ -209,12 +219,18 @@ export default function UserLayout({
       )}
 
       <main className={isGameInnerPage ? styles.fullMainContent : styles.mainContent}>
-        {children}
+        {isPageLoading ? (
+          <div style={{ padding: '2rem', width: '100%' }}>
+            <Skeleton type="table" count={5} />
+          </div>
+        ) : (
+          children
+        )}
       </main>
 
       {/* Mobile Manual Button */}
       {!isGameInnerPage && (
-      <Link href="/user/manual" className={styles.mobileManualBtn} aria-label="Manual">
+      <Link href="/user/manual" onClick={() => handleLinkClick('/user/manual')} className={styles.mobileManualBtn} aria-label="Manual">
         ?
       </Link>
       )}

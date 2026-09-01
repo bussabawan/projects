@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import LoadingSpinner from "@/app/components/LoadingSpinner/LoadingSpinner";
+import Skeleton from "@/app/components/Skeleton/Skeleton";
 import styles from './PatientStatsPopup.module.css';
 import { 
   PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer,
@@ -172,7 +172,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
             <h3 className={styles.sectionTitle}>สถิติคะแนน</h3>
             
             {loading ? (
-              <LoadingSpinner text="กำลังโหลดข้อมูลสถิติ..." />
+              <Skeleton type="card" count={4} />
             ) : data && data.dailyStats ? (
               <div className={styles.statsGrid}>
                 <div className={styles.statItem}>

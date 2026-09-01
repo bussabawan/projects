@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import LoadingSpinner from "@/app/components/LoadingSpinner/LoadingSpinner";
+
 import Skeleton from "@/app/components/Skeleton/Skeleton";
 import styles from './patientStats.module.css';
 import { PatientStatInfo } from '@/lib/models/patientStats';
@@ -281,7 +281,7 @@ export default function PatientStatsPage() {
 
             {mobileVisibleCount < filteredPatients.length && (
               <div ref={lastElementRef} style={{ padding: '1rem', width: '100%', gridColumn: '1 / -1' }}>
-                <LoadingSpinner text="กำลังโหลดเพิ่มเติม..." size="small" svgSize={32} />
+                <Skeleton type="table" count={3} />
               </div>
             )}
           </div>

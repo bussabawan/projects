@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
-import LoadingSpinner from "@/app/components/LoadingSpinner/LoadingSpinner";
+
 import Skeleton from "@/app/components/Skeleton/Skeleton";
 import DeleteConfirmModal from "@/app/admin/components/DeleteConfirmModal";
 import RestoreConfirmModal from "@/app/admin/components/RestoreConfirmModal";
@@ -444,7 +444,9 @@ export default function ManageExercisesPage() {
               );
             })}
             {loadingMore && (
-              <LoadingSpinner text="กำลังโหลดเพิ่มเติม..." size="small" svgSize={32} />
+              <div style={{ gridColumn: '1 / -1', width: '100%' }}>
+                <Skeleton type="card" count={4} />
+              </div>
             )}
           </>
         )}
@@ -632,7 +634,7 @@ export default function ManageExercisesPage() {
                     })}
                     {isLoadingMoreImages && (
                       <div style={{ gridColumn: '1/-1', padding: '1rem 0' }}>
-                        <LoadingSpinner text="กำลังโหลดเพิ่มเติม..." size="small" svgSize={32} />
+                        <Skeleton type="card" count={4} />
                       </div>
                     )}
                   </>
