@@ -50,7 +50,7 @@ export default function ManageUsersPage() {
     
     try {
       const role = activeTab === "patient" ? 1 : 2;
-      const res = await fetch(`/api/admin/users?role=${role}&page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}`);
+      const res = await fetch(`/api/admin/users?role=${role}&page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}&t=${Date.now()}`);
       const result = await res.json();
       
       if (result.success) {

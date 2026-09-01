@@ -22,7 +22,7 @@ export class PatientStatsModel {
           SELECT 
             u.user_id as id,
             u.full_name as name,
-            u.user_id as patientId,
+            u.user_name as patientId,
             IFNULL(ex.exercises_name, '-') as testSet
           FROM users_data u
           INNER JOIN patient_data p ON u.user_id = p.user_id
