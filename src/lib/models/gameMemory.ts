@@ -109,6 +109,6 @@ export class GameMemoryModel {
        LIMIT ?`,
       [userId, limit]
     );
-    return rows.reverse();
+    return rows.reverse() as MemoryGameHistory[];
   }
 }

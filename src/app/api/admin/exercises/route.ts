@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidateTag } from 'next/cache';
 import { ManageExercisesModel } from '@/lib/models/manageExercises';
 
 export async function GET(request: Request) {
@@ -52,6 +53,7 @@ export async function POST(request: Request) {
       });
     }
 
+    revalidateTag('exercises', 'max');
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
     const err = error as Error;

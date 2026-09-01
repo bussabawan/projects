@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidateTag } from 'next/cache';
 import { ManageExercisesModel } from '@/lib/models/manageExercises';
 
 export async function PUT(
@@ -13,6 +14,7 @@ export async function PUT(
 
     if (action === 'restore') {
       await ManageExercisesModel.restoreExercise(oldName);
+      revalidateTag('exercises', 'max');
       return NextResponse.json({ success: true });
     }
 
@@ -23,7 +25,7 @@ export async function PUT(
     }
 
     await ManageExercisesModel.updateExerciseName(oldName, newName.trim());
-
+    revalidateTag('exercises', 'max');
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
     const err = error as Error;
@@ -44,7 +46,7 @@ export async function DELETE(
     const name = decodeURIComponent(resolvedParams.name);
     
     await ManageExercisesModel.deleteExercise(name);
-
+    revalidateTag('exercises', 'max');
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
     const err = error as Error;

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidateTag } from 'next/cache';
 import { ManageUsersModel } from '@/lib/models/manageUsers';
 
 export async function GET(request: Request) {
@@ -68,6 +69,9 @@ export async function POST(request: Request) {
       exercises_id: parsedExercisesId
     });
 
+    revalidateTag('users', 'max');
+    revalidateTag('patient-stats', 'max');
+    
     return NextResponse.json({
       success: true,
       message: 'User created successfully',

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidateTag } from 'next/cache';
 import { ManageImagesModel } from "@/lib/models/manageImages";
 
 export async function GET(req: NextRequest) {
@@ -39,6 +40,7 @@ export async function POST(req: NextRequest) {
         });
       }
 
+      revalidateTag('images', 'max');
       return NextResponse.json({ success: true, id: result });
     } catch (modelError: unknown) {
       const mErr = modelError as Error;

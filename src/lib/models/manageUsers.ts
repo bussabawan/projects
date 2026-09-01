@@ -1,6 +1,7 @@
 import { db } from '@/lib/db';
 import { RowDataPacket, ResultSetHeader } from 'mysql2';
 import bcrypt from 'bcryptjs';
+import { unstable_cache } from 'next/cache';
 
 export interface UserInfo {
   user_id: number;
@@ -20,73 +21,77 @@ export class ManageUsersModel {
    * @param page current page (1-indexed)
    * @param limit items per page
    */
-  static async getUsers(role: number, search: string = '', page: number = 1, limit: number = 10): Promise<{ data: UserInfo[], total: number }> {
-    const offset = (page - 1) * limit;
-    
-    let baseQuery = '';
-    let countQuery = '';
-    const queryParams: (string | number | boolean | null)[] = [];
-    const countParams: (string | number | boolean | null)[] = [];
+  static getUsers = unstable_cache(
+    async (role: number, search: string = '', page: number = 1, limit: number = 10): Promise<{ data: UserInfo[], total: number }> => {
+      const offset = (page - 1) * limit;
+      
+      let baseQuery = '';
+      let countQuery = '';
+      const queryParams: (string | number | boolean | null)[] = [];
+      const countParams: (string | number | boolean | null)[] = [];
 
-    // Assuming staff role is 2 or 0. We'll search exactly the role passed.
-    if (role === 1) {
-      // Patient Query
-      baseQuery = `
-        SELECT 
-          u.user_id, u.user_name, u.full_name, u.role, u.update_time,
-          GROUP_CONCAT(p.exercises_id) as exercises_id,
-          GROUP_CONCAT(ex.exercises_name SEPARATOR '||') as exercises_name
-        FROM users_data u
-        LEFT JOIN patient_data p ON u.user_id = p.user_id AND p.remove = 0
-        LEFT JOIN exercises_data ex ON p.exercises_id = ex.exercises_id
-        WHERE u.role = ? AND u.remove = 0
-      `;
-      countQuery = `
-        SELECT COUNT(u.user_id) as total
-        FROM users_data u
-        WHERE u.role = ? AND u.remove = 0
-      `;
-    } else {
-      // Staff Query
-      baseQuery = `
-        SELECT 
-          u.user_id, u.user_name, u.full_name, u.role, u.update_time
-        FROM users_data u
-        WHERE u.role = ? AND u.remove = 0
-      `;
-      countQuery = `
-        SELECT COUNT(u.user_id) as total
-        FROM users_data u
-        WHERE u.role = ? AND u.remove = 0
-      `;
-    }
-    
-    queryParams.push(role);
-    countParams.push(role);
+      // Assuming staff role is 2 or 0. We'll search exactly the role passed.
+      if (role === 1) {
+        // Patient Query
+        baseQuery = `
+          SELECT 
+            u.user_id, u.user_name, u.full_name, u.role, u.update_time,
+            GROUP_CONCAT(p.exercises_id) as exercises_id,
+            GROUP_CONCAT(ex.exercises_name SEPARATOR '||') as exercises_name
+          FROM users_data u
+          LEFT JOIN patient_data p ON u.user_id = p.user_id AND p.remove = 0
+          LEFT JOIN exercises_data ex ON p.exercises_id = ex.exercises_id
+          WHERE u.role = ? AND u.remove = 0
+        `;
+        countQuery = `
+          SELECT COUNT(u.user_id) as total
+          FROM users_data u
+          WHERE u.role = ? AND u.remove = 0
+        `;
+      } else {
+        // Staff Query
+        baseQuery = `
+          SELECT 
+            u.user_id, u.user_name, u.full_name, u.role, u.update_time
+          FROM users_data u
+          WHERE u.role = ? AND u.remove = 0
+        `;
+        countQuery = `
+          SELECT COUNT(u.user_id) as total
+          FROM users_data u
+          WHERE u.role = ? AND u.remove = 0
+        `;
+      }
+      
+      queryParams.push(role);
+      countParams.push(role);
 
-    if (search) {
-      const searchPattern = `%${search}%`;
-      baseQuery += ` AND (u.user_name LIKE ? OR u.full_name LIKE ?)`;
-      countQuery += ` AND (u.user_name LIKE ? OR u.full_name LIKE ?)`;
-      queryParams.push(searchPattern, searchPattern);
-      countParams.push(searchPattern, searchPattern);
-    }
+      if (search) {
+        const searchPattern = `%${search}%`;
+        baseQuery += ` AND (u.user_name LIKE ? OR u.full_name LIKE ?)`;
+        countQuery += ` AND (u.user_name LIKE ? OR u.full_name LIKE ?)`;
+        queryParams.push(searchPattern, searchPattern);
+        countParams.push(searchPattern, searchPattern);
+      }
 
-    if (role === 1) {
-      baseQuery += ` GROUP BY u.user_id, u.user_name, u.full_name, u.role, u.update_time`;
-    }
+      if (role === 1) {
+        baseQuery += ` GROUP BY u.user_id, u.user_name, u.full_name, u.role, u.update_time`;
+      }
 
-    baseQuery += ` ORDER BY u.user_id ASC LIMIT ? OFFSET ?`;
-    queryParams.push(limit, offset);
+      baseQuery += ` ORDER BY u.user_id ASC LIMIT ? OFFSET ?`;
+      queryParams.push(limit, offset);
 
-    const [rows] = await db.query<RowDataPacket[]>(baseQuery, queryParams);
-    const [countRows] = await db.query<RowDataPacket[]>(countQuery, countParams);
+      const [rows] = await db.query<RowDataPacket[]>(baseQuery, queryParams);
+      const [countRows] = await db.query<RowDataPacket[]>(countQuery, countParams);
 
-    return {
-      data: rows as UserInfo[],
-      total: countRows[0].total as number,
-    };
-  }
+      return {
+        data: rows as UserInfo[],
+        total: countRows[0].total as number,
+      };
+    },
+    ['ManageUsersModel-getUsers'],
+    { tags: ['users'] }
+  );
 
   /**
    * Create a new user (and patient data if role === 1)

@@ -108,6 +108,6 @@ export class GameMatchingModel {
        LIMIT ?`,
       [userId, limit]
     );
-    return rows.reverse();
+    return rows.reverse() as MatchingGameHistory[];
   }
 }

@@ -1,5 +1,6 @@
 import { db } from '@/lib/db';
 import { RowDataPacket } from 'mysql2';
+import { unstable_cache } from 'next/cache';
 
 export interface PatientStatInfo {
   id: number;
@@ -14,87 +15,91 @@ export class PatientStatsModel {
   /**
    * Get patient statistics list
    */
-  static async getPatientStats(): Promise<PatientStatInfo[]> {
-    try {
-      const query = `
-        SELECT 
-          u.user_id as id,
-          u.full_name as name,
-          u.user_id as patientId,
-          IFNULL(ex.exercises_name, '-') as testSet
-        FROM users_data u
-        INNER JOIN patient_data p ON u.user_id = p.user_id
-        LEFT JOIN exercises_data ex ON p.exercises_id = ex.exercises_id
-        WHERE u.role = 1 AND u.remove = 0 AND p.remove = 0
-        ORDER BY u.user_id ASC
-      `;
-      
-      const playedMatchingQuery = `
-        SELECT DISTINCT m.user_id as id, ed.exercises_name as testSet
-        FROM matching_exercises_log m
-        JOIN matching_question_time_log mt ON m.id_matching = mt.id_matching
-        JOIN photo_in_exercises pie ON mt.photo_id = pie.photo_id
-        JOIN exercises_data ed ON pie.exercises_id = ed.exercises_id
-        WHERE m.remove = 0 AND mt.remove = 0 AND pie.remove = 0 AND ed.remove = 0
-      `;
-      
-      const playedMemoryQuery = `
-        SELECT DISTINCT m.user_id as id, ed.exercises_name as testSet
-        FROM memory_exercises_log m
-        JOIN memory_question_time_log mt ON m.id_memory = mt.id_memory
-        JOIN photo_in_exercises pie ON mt.photo_id = pie.photo_id
-        JOIN exercises_data ed ON pie.exercises_id = ed.exercises_id
-        WHERE m.remove = 0 AND mt.remove = 0 AND pie.remove = 0 AND ed.remove = 0
-      `;
-      
-      const [rows] = await db.execute<RowDataPacket[]>(query);
-      const [matchingRows] = await db.execute<RowDataPacket[]>(playedMatchingQuery);
-      const [memoryRows] = await db.execute<RowDataPacket[]>(playedMemoryQuery);
-      
-      const patientMap = new Map<number, PatientStatInfo>();
-      
-      rows.forEach((row) => {
-        if (!patientMap.has(row.id)) {
-          patientMap.set(row.id, {
-            id: row.id,
-            name: row.name || 'Unknown',
-            patientId: row.patientId != null ? String(row.patientId) : 'N/A',
-            testSets: [],
-            assignedSets: [],
-            playedSets: []
-          });
-        }
-        if (row.testSet && row.testSet !== '-') {
-          const patient = patientMap.get(row.id)!;
-          if (!patient.assignedSets.includes(row.testSet)) {
-            patient.assignedSets.push(row.testSet);
+  static getPatientStats = unstable_cache(
+    async (): Promise<PatientStatInfo[]> => {
+      try {
+        const query = `
+          SELECT 
+            u.user_id as id,
+            u.full_name as name,
+            u.user_id as patientId,
+            IFNULL(ex.exercises_name, '-') as testSet
+          FROM users_data u
+          INNER JOIN patient_data p ON u.user_id = p.user_id
+          LEFT JOIN exercises_data ex ON p.exercises_id = ex.exercises_id
+          WHERE u.role = 1 AND u.remove = 0 AND p.remove = 0
+          ORDER BY u.user_id ASC
+        `;
+        
+        const playedMatchingQuery = `
+          SELECT DISTINCT m.user_id as id, ed.exercises_name as testSet
+          FROM matching_exercises_log m
+          JOIN matching_question_time_log mt ON m.id_matching = mt.id_matching
+          JOIN photo_in_exercises pie ON mt.photo_id = pie.photo_id
+          JOIN exercises_data ed ON pie.exercises_id = ed.exercises_id
+          WHERE m.remove = 0 AND mt.remove = 0 AND pie.remove = 0 AND ed.remove = 0
+        `;
+        
+        const playedMemoryQuery = `
+          SELECT DISTINCT m.user_id as id, ed.exercises_name as testSet
+          FROM memory_exercises_log m
+          JOIN memory_question_time_log mt ON m.id_memory = mt.id_memory
+          JOIN photo_in_exercises pie ON mt.photo_id = pie.photo_id
+          JOIN exercises_data ed ON pie.exercises_id = ed.exercises_id
+          WHERE m.remove = 0 AND mt.remove = 0 AND pie.remove = 0 AND ed.remove = 0
+        `;
+        
+        const [rows] = await db.execute<RowDataPacket[]>(query);
+        const [matchingRows] = await db.execute<RowDataPacket[]>(playedMatchingQuery);
+        const [memoryRows] = await db.execute<RowDataPacket[]>(playedMemoryQuery);
+        
+        const patientMap = new Map<number, PatientStatInfo>();
+        
+        rows.forEach((row) => {
+          if (!patientMap.has(row.id)) {
+            patientMap.set(row.id, {
+              id: row.id,
+              name: row.name || 'Unknown',
+              patientId: row.patientId != null ? String(row.patientId) : 'N/A',
+              testSets: [],
+              assignedSets: [],
+              playedSets: []
+            });
           }
-          if (!patient.testSets.includes(row.testSet)) {
-            patient.testSets.push(row.testSet);
+          if (row.testSet && row.testSet !== '-') {
+            const patient = patientMap.get(row.id)!;
+            if (!patient.assignedSets.includes(row.testSet)) {
+              patient.assignedSets.push(row.testSet);
+            }
+            if (!patient.testSets.includes(row.testSet)) {
+              patient.testSets.push(row.testSet);
+            }
           }
-        }
-      });
-      
-      const addPlayedSet = (row: RowDataPacket) => {
-        if (patientMap.has(row.id) && row.testSet) {
-          const patient = patientMap.get(row.id)!;
-          if (!patient.playedSets.includes(row.testSet)) {
-            patient.playedSets.push(row.testSet);
+        });
+        
+        const addPlayedSet = (row: RowDataPacket) => {
+          if (patientMap.has(row.id) && row.testSet) {
+            const patient = patientMap.get(row.id)!;
+            if (!patient.playedSets.includes(row.testSet)) {
+              patient.playedSets.push(row.testSet);
+            }
+            if (!patient.testSets.includes(row.testSet)) {
+              patient.testSets.push(row.testSet);
+            }
           }
-          if (!patient.testSets.includes(row.testSet)) {
-            patient.testSets.push(row.testSet);
-          }
-        }
-      };
-      
-      matchingRows.forEach(addPlayedSet);
-      memoryRows.forEach(addPlayedSet);
-      
-      return Array.from(patientMap.values());
-    } catch (error) {
-      console.error('Error fetching patient stats:', error);
-      throw new Error('Failed to fetch patient statistics');
-    }
-  }
+        };
+        
+        matchingRows.forEach(addPlayedSet);
+        memoryRows.forEach(addPlayedSet);
+        
+        return Array.from(patientMap.values());
+      } catch (error) {
+        console.error('Error fetching patient stats:', error);
+        throw new Error('Failed to fetch patient statistics');
+      }
+    },
+    ['PatientStatsModel-getPatientStats'],
+    { tags: ['patient-stats'] }
+  );
 
 }
