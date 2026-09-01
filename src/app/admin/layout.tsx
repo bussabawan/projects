@@ -120,6 +120,7 @@
               alt="Vejjarak Lampang Hospital Logo" 
               width={150} 
               height={77} 
+              priority
             />
           </div>
         </div>

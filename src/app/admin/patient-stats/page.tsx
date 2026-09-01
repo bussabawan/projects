@@ -6,7 +6,9 @@ import Skeleton from "@/app/components/Skeleton/Skeleton";
 import styles from './patientStats.module.css';
 import { PatientStatInfo } from '@/lib/models/patientStats';
 import { useDebounce } from '@/app/hooks/useDebounce';
-import PatientStatsPopup from './components/PatientStatsPopup';
+import dynamic from 'next/dynamic';
+
+const PatientStatsPopup = dynamic(() => import('./components/PatientStatsPopup'), { ssr: false });
 
 const extractCategory = (testSet?: string) => {
   if (!testSet) return '';
