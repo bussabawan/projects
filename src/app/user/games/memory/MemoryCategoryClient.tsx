@@ -88,6 +88,8 @@ export default function MemoryCategoryClient() {
           
           <div className={styles.searchContainer}>
             <input 
+              id="searchExercises"
+              name="searchExercises"
               type="text" 
               placeholder="ค้นหา" 
               className={styles.searchInput}

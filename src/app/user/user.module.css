@@ -463,7 +463,7 @@
       flex-direction: column;
       -ms-overflow-style: none;
       scrollbar-width: none;
-      background-color: transparent;
+      background-color: #eaeaea;
     }
     
     .mainContent::-webkit-scrollbar,
