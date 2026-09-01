@@ -4,6 +4,15 @@ const nextConfig: NextConfig = {
   output: "standalone",
   images: {
     unoptimized: false,
+    localPatterns: [
+      {
+        pathname: '/api/files/**',
+        search: '?type=image',
+      },
+      {
+        pathname: '/**',
+      }
+    ],
   },
 };
 
