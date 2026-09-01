@@ -113,11 +113,29 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             console.error("Error fetching user for JWT:", error);
           }
         }
+        
+        // Set custom expiration on initial login based on role
+        if (token.role === 2) {
+          // Staff: 1 hour absolute from login
+          token.exp = Math.floor(Date.now() / 1000) + (60 * 60);
+        }
+      } else {
+        // Subsequent requests - Staff rolling session (1 hour)
+        if (token.role === 2 && token.exp) {
+          const now = Math.floor(Date.now() / 1000);
+          const timeLeft = (token.exp as number) - now;
+          // Extend if less than 30 minutes left
+          if (timeLeft < 30 * 60 && timeLeft > 0) {
+            token.exp = now + (60 * 60);
+          }
+        }
       }
       return token;
     },
   },
   session: {
     strategy: "jwt",
+    maxAge: 7 * 24 * 60 * 60, // 7 days (Patient rolling session)
+    updateAge: 24 * 60 * 60,  // Update session cookie every 24 hours
   },
 })
