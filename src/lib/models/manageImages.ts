@@ -88,7 +88,7 @@ export class ManageImagesModel {
   static async createImage(data: { title: string, imageUrl: string, audioUrl?: string, audioTitle?: string, audioGen?: number }): Promise<number | { isDuplicateDeleted: boolean, duplicateId: number }> {
     // Check if the title already exists (including deleted ones)
     const [existingRows] = await db.query<RowDataPacket[]>(
-      `SELECT photo_id as id, remove FROM photo_data WHERE photo_title = ?`,
+      `SELECT photo_id as id, remove FROM photo_data WHERE photo_title COLLATE utf8mb4_bin = ?`,
       [data.title]
     );
 
@@ -125,7 +125,7 @@ export class ManageImagesModel {
   static async updateImage(id: number, data: { title: string, imageUrl: string, audioUrl?: string, audioTitle?: string, audioGen?: number }): Promise<void | { isDuplicateDeleted: boolean, duplicateId: number }> {
     // Check if title is duplicated by another image
     const [existingRows] = await db.query<RowDataPacket[]>(
-      `SELECT photo_id as id, remove FROM photo_data WHERE photo_title = ? AND photo_id != ?`,
+      `SELECT photo_id as id, remove FROM photo_data WHERE photo_title COLLATE utf8mb4_bin = ? AND photo_id != ?`,
       [data.title, id]
     );
 
