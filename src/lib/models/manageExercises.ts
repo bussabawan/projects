@@ -1,5 +1,6 @@
 import { db } from '@/lib/db';
 import { RowDataPacket } from 'mysql2';
+import { unstable_cache } from 'next/cache';
 
 export interface ExerciseInfo {
   exercises_id: number;
@@ -10,54 +11,66 @@ export class ManageExercisesModel {
   /**
    * Get all exercises for dropdown selection
    */
-  static async getExercises(): Promise<ExerciseInfo[]> {
-    const [rows] = await db.execute<RowDataPacket[]>(
-      'SELECT exercises_id, exercises_name FROM exercises_data WHERE remove = 0 ORDER BY exercises_id ASC'
-    );
-    return rows as ExerciseInfo[];
-  }
+  static getExercises = unstable_cache(
+    async (): Promise<ExerciseInfo[]> => {
+      const [rows] = await db.execute<RowDataPacket[]>(
+        'SELECT exercises_id, exercises_name FROM exercises_data WHERE remove = 0 ORDER BY exercises_id ASC'
+      );
+      return rows as ExerciseInfo[];
+    },
+    ['ManageExercisesModel-getExercises'],
+    { tags: ['exercises'] }
+  );
 
   /**
    * Get exercises assigned to a specific patient
    */
-  static async getExercisesByPatientId(userId: number): Promise<ExerciseInfo[]> {
-    const [rows] = await db.execute<RowDataPacket[]>(
-      `SELECT ed.exercises_id, ed.exercises_name 
-       FROM exercises_data ed
-       JOIN patient_data pd ON ed.exercises_id = pd.exercises_id
-       WHERE pd.user_id = ? AND pd.remove = 0 AND ed.remove = 0
-       ORDER BY ed.exercises_id ASC`,
-      [userId]
-    );
-    return rows as ExerciseInfo[];
-  }
+  static getExercisesByPatientId = unstable_cache(
+    async (userId: number): Promise<ExerciseInfo[]> => {
+      const [rows] = await db.execute<RowDataPacket[]>(
+        `SELECT ed.exercises_id, ed.exercises_name 
+         FROM exercises_data ed
+         JOIN patient_data pd ON ed.exercises_id = pd.exercises_id
+         WHERE pd.user_id = ? AND pd.remove = 0 AND ed.remove = 0
+         ORDER BY ed.exercises_id ASC`,
+        [userId]
+      );
+      return rows as ExerciseInfo[];
+    },
+    ['ManageExercisesModel-getExercisesByPatientId'],
+    { tags: ['exercises', 'patients'] }
+  );
 
   /**
    * Get paginated list of exercises with search
    */
-  static async getExercisesPaginated(page: number, limit: number, search: string = ''): Promise<{ data: ExerciseInfo[], total: number }> {
-    const offset = (page - 1) * limit;
-    let baseQuery = 'SELECT exercises_id, exercises_name FROM exercises_data WHERE remove = 0';
-    let countQuery = 'SELECT COUNT(exercises_id) as total FROM exercises_data WHERE remove = 0';
-    const queryParams: (string | number)[] = [];
-    
-    if (search) {
-      const searchPattern = `%${search}%`;
-      baseQuery += ' AND LOWER(exercises_name) COLLATE utf8mb4_bin LIKE LOWER(?) COLLATE utf8mb4_bin';
-      countQuery += ' AND LOWER(exercises_name) COLLATE utf8mb4_bin LIKE LOWER(?) COLLATE utf8mb4_bin';
-      queryParams.push(searchPattern);
-    }
-    
-    baseQuery += ' ORDER BY exercises_id DESC LIMIT ? OFFSET ?';
-    
-    const [rows] = await db.query<RowDataPacket[]>(baseQuery, [...queryParams, limit, offset]);
-    const [countRows] = await db.query<RowDataPacket[]>(countQuery, queryParams);
-    
-    return {
-      data: rows as ExerciseInfo[],
-      total: countRows[0].total as number,
-    };
-  }
+  static getExercisesPaginated = unstable_cache(
+    async (page: number, limit: number, search: string = ''): Promise<{ data: ExerciseInfo[], total: number }> => {
+      const offset = (page - 1) * limit;
+      let baseQuery = 'SELECT exercises_id, exercises_name FROM exercises_data WHERE remove = 0';
+      let countQuery = 'SELECT COUNT(exercises_id) as total FROM exercises_data WHERE remove = 0';
+      const queryParams: (string | number)[] = [];
+      
+      if (search) {
+        const searchPattern = `%${search}%`;
+        baseQuery += ' AND LOWER(exercises_name) COLLATE utf8mb4_bin LIKE LOWER(?) COLLATE utf8mb4_bin';
+        countQuery += ' AND LOWER(exercises_name) COLLATE utf8mb4_bin LIKE LOWER(?) COLLATE utf8mb4_bin';
+        queryParams.push(searchPattern);
+      }
+      
+      baseQuery += ' ORDER BY exercises_id DESC LIMIT ? OFFSET ?';
+      
+      const [rows] = await db.query<RowDataPacket[]>(baseQuery, [...queryParams, limit, offset]);
+      const [countRows] = await db.query<RowDataPacket[]>(countQuery, queryParams);
+      
+      return {
+        data: rows as ExerciseInfo[],
+        total: countRows[0].total as number,
+      };
+    },
+    ['ManageExercisesModel-getExercisesPaginated'],
+    { tags: ['exercises'] }
+  );
 
   /**
    * Add a new exercise set (empty)

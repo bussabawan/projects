@@ -34,7 +34,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ file
     return new NextResponse(buffer, {
       headers: {
         "Content-Type": contentType,
-        "Cache-Control": "private, max-age=3600",
+        "Cache-Control": "public, max-age=86400, stale-while-revalidate=86400",
       },
     });
   } catch {

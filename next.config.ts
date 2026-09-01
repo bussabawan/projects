@@ -3,7 +3,16 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   output: "standalone",
   images: {
-    unoptimized: true,
+    unoptimized: false,
+    localPatterns: [
+      {
+        pathname: '/api/files/**',
+        search: '?type=image',
+      },
+      {
+        pathname: '/**',
+      }
+    ],
   },
 };
 

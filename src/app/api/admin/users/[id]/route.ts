@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidateTag } from 'next/cache';
 import { ManageUsersModel } from '@/lib/models/manageUsers';
 
 export async function PUT(
@@ -31,6 +32,9 @@ export async function PUT(
 
     await ManageUsersModel.updateUser(userId, body);
 
+    revalidateTag('users', 'max');
+    revalidateTag('patient-stats', 'max');
+
     return NextResponse.json({
       success: true,
       message: 'User updated successfully'
@@ -61,6 +65,9 @@ export async function DELETE(
     }
 
     await ManageUsersModel.deleteUser(userId);
+
+    revalidateTag('users', 'max');
+    revalidateTag('patient-stats', 'max');
 
     return NextResponse.json({
       success: true,
@@ -104,6 +111,10 @@ export async function PATCH(
         }
         await ManageUsersModel.updateUser(userId, body.data);
       }
+      
+      revalidateTag('users', 'max');
+      revalidateTag('patient-stats', 'max');
+      
       return NextResponse.json({
         success: true,
         message: 'User restored successfully'

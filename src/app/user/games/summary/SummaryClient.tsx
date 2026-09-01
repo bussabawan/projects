@@ -2,8 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import dynamic from 'next/dynamic';
 import styles from './summary.module.css';
+
+const SummaryChart = dynamic(() => import('./SummaryChart'), { ssr: false, loading: () => <div style={{ height: 200, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>กำลังโหลดสถิติ...</div> });
 
 interface SummaryClientProps {
   historyData: { name: string; date: string; score: number }[];
@@ -50,28 +52,7 @@ export default function SummaryClient({ historyData }: SummaryClientProps) {
 
         <div className={styles.statsSection}>
           <div className={styles.chartContainer}>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={historyData}>
-                <XAxis dataKey="name" hide />
-                <YAxis hide domain={[0, 100]} />
-                <Tooltip 
-                  cursor={{fill: 'transparent'}} 
-                  content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
-                      const data = payload[0].payload;
-                      return (
-                        <div style={{ backgroundColor: '#fff', padding: '10px', border: '1px solid #ccc', borderRadius: '8px' }}>
-                          <p style={{ margin: 0, fontWeight: 'bold' }}>{data.date}</p>
-                          <p style={{ margin: 0, color: '#000' }}>คะแนน: {data.score}</p>
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-                <Bar dataKey="score" fill="#9B59B6" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <SummaryChart data={historyData} />
             <div className={styles.chartLabel}>
               สถิติคะแนน
             </div>

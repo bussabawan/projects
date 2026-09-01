@@ -21,8 +21,8 @@ export class GameMemoryModel {
     );
     const formattedRows = rows.map((row) => ({
       ...row,
-      imageUrl: row.imageUrl ? `/api/files/${row.id}?type=image` : "",
-      audioUrl: row.audioUrl ? `/api/files/${row.id}?type=audio` : "",
+      imageUrl: row.imageUrl ? `/api/files/${row.id}?type=image&v=${encodeURIComponent(row.imageUrl)}` : "",
+      audioUrl: row.audioUrl ? `/api/files/${row.id}?type=audio&v=${encodeURIComponent(row.audioUrl)}` : "",
     }));
     return formattedRows as ImageInfo[];
   }
@@ -44,8 +44,8 @@ export class GameMemoryModel {
     const [rows] = await db.query<RowDataPacket[]>(query, params);
     const formattedRows = rows.map((row) => ({
       ...row,
-      imageUrl: row.imageUrl ? `/api/files/${row.id}?type=image` : "",
-      audioUrl: row.audioUrl ? `/api/files/${row.id}?type=audio` : "",
+      imageUrl: row.imageUrl ? `/api/files/${row.id}?type=image&v=${encodeURIComponent(row.imageUrl)}` : "",
+      audioUrl: row.audioUrl ? `/api/files/${row.id}?type=audio&v=${encodeURIComponent(row.audioUrl)}` : "",
     }));
     return formattedRows as ImageInfo[];
   }
@@ -109,6 +109,6 @@ export class GameMemoryModel {
        LIMIT ?`,
       [userId, limit]
     );
-    return rows.reverse();
+    return rows.reverse() as MemoryGameHistory[];
   }
 }

@@ -1,5 +1,6 @@
 import { db } from '@/lib/db';
 import { RowDataPacket, ResultSetHeader } from 'mysql2';
+import { unstable_cache } from 'next/cache';
 
 export interface ImageInfo {
   id: number;
@@ -14,67 +15,71 @@ export class ManageImagesModel {
   /**
    * Get all active images
    */
-  static async getImages(
-    page: number = 1,
-    limit: number = 12,
-    search: string = "",
-    prioritizeIds: number[] = []
-  ): Promise<{ data: ImageInfo[]; totalPages: number }> {
-    const offset = (page - 1) * limit;
-    const queryParams: (string | number)[] = [];
-    const countParams: (string | number)[] = [];
+  static getImages = unstable_cache(
+    async (
+      page: number = 1,
+      limit: number = 12,
+      search: string = "",
+      prioritizeIds: number[] = []
+    ): Promise<{ data: ImageInfo[]; totalPages: number }> => {
+      const offset = (page - 1) * limit;
+      const queryParams: (string | number)[] = [];
+      const countParams: (string | number)[] = [];
 
-    let whereClause = "WHERE remove = 0";
-    if (search) {
-      whereClause += " AND LOWER(photo_title) COLLATE utf8mb4_bin LIKE LOWER(?) COLLATE utf8mb4_bin";
-      queryParams.push(`%${search}%`);
-      countParams.push(`%${search}%`);
-    }
+      let whereClause = "WHERE remove = 0";
+      if (search) {
+        whereClause += " AND LOWER(photo_title) COLLATE utf8mb4_bin LIKE LOWER(?) COLLATE utf8mb4_bin";
+        queryParams.push(`%${search}%`);
+        countParams.push(`%${search}%`);
+      }
 
-    // Get total count
-    const [countRows] = await db.query<RowDataPacket[]>(
-      `SELECT COUNT(*) as total FROM photo_data ${whereClause}`,
-      countParams
-    );
-    const totalCount = countRows[0].total;
-    const totalPages = Math.ceil(totalCount / limit);
+      // Get total count
+      const [countRows] = await db.query<RowDataPacket[]>(
+        `SELECT COUNT(*) as total FROM photo_data ${whereClause}`,
+        countParams
+      );
+      const totalCount = countRows[0].total;
+      const totalPages = Math.ceil(totalCount / limit);
 
-    let orderClause = "ORDER BY photo_id DESC";
-    if (prioritizeIds.length > 0) {
-      const idsStr = prioritizeIds.map(() => '?').join(',');
-      orderClause = `ORDER BY CASE WHEN photo_id IN (${idsStr}) THEN 0 ELSE 1 END ASC, photo_id DESC`;
-    }
+      let orderClause = "ORDER BY photo_id DESC";
+      if (prioritizeIds.length > 0) {
+        const idsStr = prioritizeIds.map(() => '?').join(',');
+        orderClause = `ORDER BY CASE WHEN photo_id IN (${idsStr}) THEN 0 ELSE 1 END ASC, photo_id DESC`;
+      }
 
-    const finalParams: (string | number)[] = [];
-    if (search) {
-      finalParams.push(`%${search}%`);
-    }
-    if (prioritizeIds.length > 0) {
-      finalParams.push(...prioritizeIds);
-    }
-    finalParams.push(limit, offset);
+      const finalParams: (string | number)[] = [];
+      if (search) {
+        finalParams.push(`%${search}%`);
+      }
+      if (prioritizeIds.length > 0) {
+        finalParams.push(...prioritizeIds);
+      }
+      finalParams.push(limit, offset);
 
-    // Get paginated data
-    const [rows] = await db.query<RowDataPacket[]>(
-      `SELECT photo_id as id, photo_title as title, photo_name as imageUrl, audio_name as audioUrl, audio_title as audioTitle, audio_gen as audioGen
-       FROM photo_data 
-       ${whereClause} 
-       ${orderClause} 
-       LIMIT ? OFFSET ?`,
-      finalParams
-    );
+      // Get paginated data
+      const [rows] = await db.query<RowDataPacket[]>(
+        `SELECT photo_id as id, photo_title as title, photo_name as imageUrl, audio_name as audioUrl, audio_title as audioTitle, audio_gen as audioGen
+         FROM photo_data 
+         ${whereClause} 
+         ${orderClause} 
+         LIMIT ? OFFSET ?`,
+        finalParams
+      );
 
-    const formattedRows = rows.map((row) => ({
-      ...row,
-      imageUrl: row.imageUrl ? `/api/files/${row.id}?type=image` : "",
-      audioUrl: row.audioUrl ? `/api/files/${row.id}?type=audio` : "",
-    }));
+      const formattedRows = rows.map((row) => ({
+        ...row,
+        imageUrl: row.imageUrl ? `/api/files/${row.id}?type=image` : "",
+        audioUrl: row.audioUrl ? `/api/files/${row.id}?type=audio` : "",
+      }));
 
-    return {
-      data: formattedRows as ImageInfo[],
-      totalPages: totalPages === 0 ? 1 : totalPages
-    };
-  }
+      return {
+        data: formattedRows as ImageInfo[],
+        totalPages: totalPages === 0 ? 1 : totalPages
+      };
+    },
+    ['ManageImagesModel-getImages'],
+    { tags: ['images'] }
+  );
 
   /**
    * Create a new image
@@ -83,7 +88,7 @@ export class ManageImagesModel {
   static async createImage(data: { title: string, imageUrl: string, audioUrl?: string, audioTitle?: string, audioGen?: number }): Promise<number | { isDuplicateDeleted: boolean, duplicateId: number }> {
     // Check if the title already exists (including deleted ones)
     const [existingRows] = await db.query<RowDataPacket[]>(
-      `SELECT photo_id as id, remove FROM photo_data WHERE photo_title = ?`,
+      `SELECT photo_id as id, remove FROM photo_data WHERE photo_title COLLATE utf8mb4_bin = ?`,
       [data.title]
     );
 
@@ -120,7 +125,7 @@ export class ManageImagesModel {
   static async updateImage(id: number, data: { title: string, imageUrl: string, audioUrl?: string, audioTitle?: string, audioGen?: number }): Promise<void | { isDuplicateDeleted: boolean, duplicateId: number }> {
     // Check if title is duplicated by another image
     const [existingRows] = await db.query<RowDataPacket[]>(
-      `SELECT photo_id as id, remove FROM photo_data WHERE photo_title = ? AND photo_id != ?`,
+      `SELECT photo_id as id, remove FROM photo_data WHERE photo_title COLLATE utf8mb4_bin = ? AND photo_id != ?`,
       [data.title, id]
     );
 

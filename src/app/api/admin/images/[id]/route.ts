@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidateTag } from 'next/cache';
 import { ManageImagesModel } from "@/lib/models/manageImages";
 
 export async function DELETE(
@@ -17,7 +18,7 @@ export async function DELETE(
     }
 
     await ManageImagesModel.deleteImage(imageId);
-
+    revalidateTag('images', 'max');
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
     const err = error as Error;
@@ -60,6 +61,7 @@ export async function PUT(
         });
       }
 
+      revalidateTag('images', 'max');
       return NextResponse.json({ success: true });
     } catch (modelError: unknown) {
       const mErr = modelError as Error;

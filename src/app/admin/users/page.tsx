@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import LoadingSpinner from "@/app/components/LoadingSpinner/LoadingSpinner";
 import Skeleton from "@/app/components/Skeleton/Skeleton";
 import styles from "./users.module.css";
 import UserFormModal from "./components/UserFormModal";
@@ -51,7 +50,7 @@ export default function ManageUsersPage() {
     
     try {
       const role = activeTab === "patient" ? 1 : 2;
-      const res = await fetch(`/api/admin/users?role=${role}&page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}`);
+      const res = await fetch(`/api/admin/users?role=${role}&page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}&t=${Date.now()}`);
       const result = await res.json();
       
       if (result.success) {
@@ -392,7 +391,7 @@ export default function ManageUsersPage() {
         {/* Mobile observer target */}
         {!loading && currentPage < totalPages && (
           <div ref={lastElementRef} className={styles.loadMoreTarget} style={{ padding: '1.5rem 0', textAlign: 'center', gridColumn: '1/-1' }}>
-            {loadingMore && <LoadingSpinner text="กำลังโหลดเพิ่มเติม..." size="small" svgSize={32} />}
+            {loadingMore && <Skeleton type="table" count={3} />}
           </div>
         )}
       </div>

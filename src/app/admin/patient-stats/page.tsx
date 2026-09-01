@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import LoadingSpinner from "@/app/components/LoadingSpinner/LoadingSpinner";
+
 import Skeleton from "@/app/components/Skeleton/Skeleton";
 import styles from './patientStats.module.css';
 import { PatientStatInfo } from '@/lib/models/patientStats';
 import { useDebounce } from '@/app/hooks/useDebounce';
-import PatientStatsPopup from './components/PatientStatsPopup';
+import dynamic from 'next/dynamic';
+
+const PatientStatsPopup = dynamic(() => import('./components/PatientStatsPopup'), { ssr: false });
 
 const extractCategory = (testSet?: string) => {
   if (!testSet) return '';
@@ -281,7 +283,7 @@ export default function PatientStatsPage() {
 
             {mobileVisibleCount < filteredPatients.length && (
               <div ref={lastElementRef} style={{ padding: '1rem', width: '100%', gridColumn: '1 / -1' }}>
-                <LoadingSpinner text="กำลังโหลดเพิ่มเติม..." size="small" svgSize={32} />
+                <Skeleton type="table" count={3} />
               </div>
             )}
           </div>
