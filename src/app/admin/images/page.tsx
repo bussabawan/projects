@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import Image from "next/image";
 import LoadingSpinner from "@/app/components/LoadingSpinner/LoadingSpinner";
 import Skeleton from "@/app/components/Skeleton/Skeleton";
 import styles from "./images.module.css";
@@ -27,8 +28,7 @@ function CardImage({ src, alt }: { src: string; alt: string }) {
     );
   }
 
-  // eslint-disable-next-line @next/next/no-img-element
-  return <img src={src.startsWith('/') || src.startsWith('blob:') ? src : `/api/uploads/${src}`} alt={alt} onError={() => setError(true)} loading="lazy" />;
+  return <Image src={src.startsWith('/') || src.startsWith('blob:') ? src : `/api/uploads/${src}`} alt={alt} width={400} height={400} style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={() => setError(true)} />;
 }
 
 interface ImageData {

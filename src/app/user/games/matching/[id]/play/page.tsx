@@ -6,6 +6,7 @@ import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import styles from './matchingGame.module.css';
 import { getGameData, saveMatchingGameResult } from '@/app/actions/matchingActions';
 import AlertMessage from '@/app/components/AlertMessage/AlertMessage';
+import Image from 'next/image';
 
 // Volume Icon SVG
 const VolumeIcon = ({ isMuted }: { isMuted: boolean }) => (
@@ -307,12 +308,16 @@ export default function MatchingGamePage() {
               <span className={styles.wordText}>{currentQ.target.title}</span>
             </div>
           ) : (
-            <img 
+            <Image 
               src={currentQ.target.imageUrl} 
               alt="Target" 
               className={styles.targetImage} 
+              width={400}
+              height={400}
+              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
               onError={(e) => {
-                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400?text=Image+Not+Found';
+                e.currentTarget.src = 'https://via.placeholder.com/400?text=Image+Not+Found';
+                e.currentTarget.srcset = '';
               }}
             />
           )}
@@ -325,12 +330,16 @@ export default function MatchingGamePage() {
               className={`${styles.choiceBox} ${wrongChoiceId === choice.id ? styles.wrongChoice : ''} ${correctChoiceId === choice.id ? styles.correctChoice : ''}`}
               onClick={() => handleChoiceClick(choice.id, choice.audioUrl)}
             >
-              <img 
+              <Image 
                 src={choice.imageUrl} 
                 alt={`Choice ${idx + 1}`} 
                 className={styles.choiceImage} 
+                width={200}
+                height={200}
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/200?text=Image+Not+Found';
+                  e.currentTarget.src = 'https://via.placeholder.com/200?text=Image+Not+Found';
+                  e.currentTarget.srcset = '';
                 }}
               />
             </div>
@@ -341,9 +350,9 @@ export default function MatchingGamePage() {
       {/* Preload Next Question Images */}
       {currentIndex < questions.length - 1 && (
         <div style={{ display: 'none' }}>
-          <img src={questions[currentIndex + 1].target.imageUrl} alt="preload target" />
+          <Image src={questions[currentIndex + 1].target.imageUrl} alt="preload target" width={1} height={1} />
           {questions[currentIndex + 1].choices.map((choice, idx) => (
-            <img key={`preload-${choice.id}-${idx}`} src={choice.imageUrl} alt={`preload choice ${idx}`} />
+            <Image key={`preload-${choice.id}-${idx}`} src={choice.imageUrl} alt={`preload choice ${idx}`} width={1} height={1} />
           ))}
         </div>
       )}

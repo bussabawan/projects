@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import Image from "next/image";
 import LoadingSpinner from "@/app/components/LoadingSpinner/LoadingSpinner";
 import Skeleton from "@/app/components/Skeleton/Skeleton";
 import DeleteConfirmModal from "@/app/admin/components/DeleteConfirmModal";
@@ -606,17 +607,15 @@ export default function ManageExercisesPage() {
                           />
                           <div className={styles.imageIconPlaceholder}>
                             {img.imageUrl ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img 
+                              <Image 
                                 src={img.imageUrl.startsWith('/') ? img.imageUrl : `/api/uploads/${img.imageUrl}`} 
-                                alt={img.title} 
-                                loading="lazy"
-                                decoding="async"
+                                alt={img.title}
+                                width={40}
+                                height={40}
                                 style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 4 }} 
                                 onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  target.onerror = null;
-                                  target.src = "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Ccircle cx='8.5' cy='8.5' r='1.5'%3E%3C/circle%3E%3Cpolyline points='21 15 16 10 5 21'%3E%3C/polyline%3E%3C/svg%3E";
+                                  e.currentTarget.src = "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Ccircle cx='8.5' cy='8.5' r='1.5'%3E%3C/circle%3E%3Cpolyline points='21 15 16 10 5 21'%3E%3C/polyline%3E%3C/svg%3E";
+                                  e.currentTarget.srcset = '';
                                 }}
                               />
                             ) : (

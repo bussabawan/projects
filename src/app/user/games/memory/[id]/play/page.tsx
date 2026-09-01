@@ -5,6 +5,7 @@ import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import styles from './memoryPlay.module.css';
 import { getMemoryGameData, saveMemoryGameResult } from '@/app/actions/memoryActions';
 import AlertMessage from '@/app/components/AlertMessage/AlertMessage';
+import Image from 'next/image';
 
 type ImageInfo = {
   id: number;
@@ -349,7 +350,7 @@ export default function MemoryGamePlayPage() {
             {mode === 'word' ? (
               <h1 className={styles.targetWord}>{currentQ.target.title}</h1>
             ) : (
-              <img src={currentQ.target.imageUrl} alt="Target" loading="lazy" />
+              <Image src={currentQ.target.imageUrl} alt="Target" width={300} height={300} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
             )}
           </div>
           <div className={styles.countdownText}>
@@ -367,7 +368,7 @@ export default function MemoryGamePlayPage() {
                 className={`${styles.optionCard} ${wrongGuesses.includes(choice.id) ? styles.wrong : ''} ${correctChoiceId === choice.id ? styles.selected : ''}`}
                 onClick={() => handleOptionClick(choice)}
               >
-                <img src={choice.imageUrl} alt={`Option ${index + 1}`} loading="lazy" />
+                <Image src={choice.imageUrl} alt={`Option ${index + 1}`} width={300} height={300} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
               </div>
             ))}
           </div>
@@ -377,9 +378,9 @@ export default function MemoryGamePlayPage() {
       {/* Preload Next Question Images */}
       {currentQuestionIndex < questions.length - 1 && (
         <div style={{ display: 'none' }}>
-          <img src={questions[currentQuestionIndex + 1].target.imageUrl} alt="preload target" />
+          <Image src={questions[currentQuestionIndex + 1].target.imageUrl} alt="preload target" width={1} height={1} />
           {questions[currentQuestionIndex + 1].choices.map((choice, idx) => (
-            <img key={`preload-${choice.id}-${idx}`} src={choice.imageUrl} alt={`preload choice ${idx}`} />
+            <Image key={`preload-${choice.id}-${idx}`} src={choice.imageUrl} alt={`preload choice ${idx}`} width={1} height={1} />
           ))}
         </div>
       )}

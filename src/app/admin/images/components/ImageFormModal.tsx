@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import styles from "./ImageFormModal.module.css";
 
 interface ImageData {
@@ -234,10 +235,11 @@ export default function ImageFormModal({ image, onClose, onSave }: ImageFormModa
               <div className={styles.imagePreview}>
                 {imagePreviewUrl && !imageError ? (
                   <>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img 
+                    <Image 
                       src={imagePreviewUrl.startsWith('/') || imagePreviewUrl.startsWith('blob:') ? imagePreviewUrl : `/api/uploads/${imagePreviewUrl}`} 
                       alt="Preview" 
+                      width={400}
+                      height={400}
                       style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '12px' }} 
                       onError={() => setImageError(true)}
                     />
