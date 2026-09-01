@@ -242,6 +242,7 @@ export default function ImageFormModal({ image, onClose, onSave }: ImageFormModa
                       height={400}
                       style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '12px' }} 
                       onError={() => setImageError(true)}
+                      unoptimized
                     />
                   </>
                 ) : (

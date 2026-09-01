@@ -28,7 +28,7 @@ function CardImage({ src, alt }: { src: string; alt: string }) {
     );
   }
 
-  return <Image src={src.startsWith('/') || src.startsWith('blob:') ? src : `/api/uploads/${src}`} alt={alt} width={400} height={400} style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={() => setError(true)} />;
+  return <Image src={src.startsWith('/') || src.startsWith('blob:') ? src : `/api/uploads/${src}`} alt={alt} width={400} height={400} style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={() => setError(true)} unoptimized />;
 }
 
 interface ImageData {
@@ -242,7 +242,8 @@ export default function ManageImagesPage() {
       alert("ไม่มีไฟล์เสียง");
       return;
     }
-    const audio = new Audio(audioUrl);
+    const fullAudioUrl = audioUrl.startsWith('/') || audioUrl.startsWith('blob:') ? audioUrl : `/api/uploads/${audioUrl}`;
+    const audio = new Audio(fullAudioUrl);
     audio.play().catch(e => {
       console.error(e);
       alert("ไม่สามารถเล่นเสียงได้");
