@@ -1,2 +1,9 @@
-docker compose -f compose.dev.yaml up -d --build
-docker compose -f compose.dev.yaml watch
+@echo off
+echo Starting Docker Database...
+docker compose -f compose.dev.yaml up -d
+
+echo Installing dependencies...
+call npm install
+
+echo Starting Next.js Dev Server...
+call npm run dev
