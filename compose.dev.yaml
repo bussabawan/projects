@@ -1,38 +1,38 @@
 services:
-  server:
-    build:
-      context: .
-      target: dev
-    working_dir: /usr/src/app
-    command: npm run dev
-    env_file:
-      - .env
-    environment:
-      TZ: "Asia/Bangkok"
-      NODE_ENV: development
-      HOSTNAME: "0.0.0.0"
-      PORT: ${PORT:-3000}
-      MYSQL_HOST: mysql
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-    ports:
-      - "${PORT:-3000}:${PORT:-3000}"
-    depends_on:
-      mysql:
-        condition: service_healthy
-    volumes:
-      - ./uploads:/usr/src/app/uploads
-    develop:
-      watch:
-        - action: sync
-          path: ./
-          target: /usr/src/app
-          ignore:
-            - node_modules/
-            - .next/
-        - action: rebuild
-          path: package.json
+#   server:
+#     build:
+#       context: .
+#       target: dev
+#     working_dir: /usr/src/app
+#     command: npm run dev
+#     env_file:
+#       - .env
+#     environment:
+#       TZ: "Asia/Bangkok"
+#       NODE_ENV: development
+#       HOSTNAME: "0.0.0.0"
+#       PORT: ${PORT:-3000}
+#       MYSQL_HOST: mysql
+#       MYSQL_USER: ${MYSQL_USER}
+#       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+#       MYSQL_DATABASE: ${MYSQL_DATABASE}
+#     ports:
+#       - "${PORT:-3000}:${PORT:-3000}"
+#     depends_on:
+#       mysql:
+#         condition: service_healthy
+#     volumes:
+#       - ./uploads:/usr/src/app/uploads
+#     develop:
+#       watch:
+#         - action: sync
+#           path: ./
+#           target: /usr/src/app
+#           ignore:
+#             - node_modules/
+#             - .next/
+#         - action: rebuild
+#           path: package.json
 
   mysql:
     image: mysql:8

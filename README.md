@@ -63,11 +63,17 @@ ot-project-2026/
 │   │   │       └── route.ts  # API สำหรับจัดการการอัปโหลดไฟล์
 │   │   ├── admin/            # (View & Controller) ส่วนของผู้ดูแลระบบ
 │   │   ├── user/             # (View & Controller) ส่วนของผู้ใช้งานทั่วไป (ผู้ป่วย)
+│   │   ├── login/            # (View & Controller) ส่วนของการเข้าสู่ระบบ
+│   │   ├── hooks/            # React Hooks ที่ใช้ซ้ำได้
 │   │   ├── components/       # (View) React Components ที่ใช้ร่วมกัน
+│   │   ├── globals.css       # สไตล์ CSS หลักของเว็บไซต์
+│   │   ├── layout.tsx        # (View) โครงสร้าง Layout หลัก
 │   │   └── page.tsx          # (View) หน้าจอ UI หลัก
 │   ├── lib/                  # (Model) สำหรับเก็บโค้ดที่เกี่ยวกับฐานข้อมูลหรือลอจิกส่วนกลาง
 │   │   ├── db.ts             # โค้ดเชื่อมต่อฐานข้อมูล MySQL
+│   │   ├── ffmpeg.ts         # โค้ดจัดการและแปลงไฟล์เสียง/วิดีโอ
 │   │   └── models/           # (Model) โค้ดจัดการข้อมูลแต่ละส่วน (เช่น user.ts, patientStats.ts)
+│   ├── auth.config.ts        # การตั้งค่าสำหรับ Auth.js
 │   ├── auth.ts               # โค้ดจัดการการเข้าสู่ระบบ (Auth.js)
 │   └── proxy.ts              # (Middleware) สำหรับจัดการ Request ก่อนเข้าถึงแอป
 ├── uploads/                  # โฟลเดอร์เก็บไฟล์ภาพและเสียงที่ผู้ใช้อัปโหลด

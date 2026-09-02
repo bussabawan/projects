@@ -2,6 +2,8 @@ services:
   server:
     build:
       context: .
+    env_file:
+      - .env
     environment:
       NODE_ENV: production
       PORT: ${PORT:-3000}
@@ -26,7 +28,7 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
-      - mysql-data:/var/lib/mysql
+      - mysql-dev-data:/var/lib/mysql
     ports:
       - "3306:3306"
     healthcheck:
@@ -48,4 +50,4 @@ services:
         condition: service_healthy
 
 volumes:
-  mysql-data:
+  mysql-dev-data:

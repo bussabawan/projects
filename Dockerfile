@@ -1,6 +1,9 @@
 # syntax=docker/dockerfile:1
 FROM node:24.14.0-alpine AS base
 
+# Install ffmpeg for audio transcoding
+RUN apk add --no-cache ffmpeg
+
 # Install dependencies only when needed
 FROM base AS deps
 WORKDIR /usr/src/app

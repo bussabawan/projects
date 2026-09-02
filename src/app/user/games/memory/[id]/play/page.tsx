@@ -132,7 +132,12 @@ export default function MemoryGamePlayPage() {
         audioRef.current.pause();
       }
       
-      const audio = new Audio(url);
+      // Determine bitrate based on screen size (Mobile L: 425px)
+      const bitrate = window.innerWidth <= 425 ? 32 : 64;
+      const separator = url.includes('?') ? '&' : '?';
+      const audioUrlWithBitrate = `${url}${separator}bitrate=${bitrate}`;
+      
+      const audio = new Audio(audioUrlWithBitrate);
       audioRef.current = audio;
       
       audio.onended = () => resolve();

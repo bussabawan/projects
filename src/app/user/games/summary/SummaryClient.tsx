@@ -82,6 +82,10 @@ export default function SummaryClient({ historyData }: SummaryClientProps) {
           </div>
         </div>
       </div>
+
+      <button className={styles.mobileBackBtn} onClick={() => router.push(returnUrl)}>
+        ย้อนกลับ
+      </button>
     </div>
   );
 }
