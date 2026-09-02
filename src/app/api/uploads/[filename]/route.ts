@@ -73,7 +73,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ file
     else if (ext === 'wav') contentType = 'audio/wav';
     else if (ext === 'ogg') contentType = 'audio/ogg';
     
-    return new NextResponse(buffer as any, {
+    return new NextResponse(buffer, {
       headers: {
         "Content-Type": contentType,
         // Aggressive caching: 1 year, immutable

@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
   try {
     // 1. Try to serve from disk cache
     const cachedBuffer = await fs.readFile(cachedFilePath);
-    return new NextResponse(cachedBuffer as any, {
+    return new NextResponse(cachedBuffer, {
       headers: {
         "Content-Type": "audio/mpeg",
         "Cache-Control": "public, max-age=31536000, immutable",
@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
     }
 
     const arrayBuffer = await response.arrayBuffer();
-    let buffer = Buffer.from(arrayBuffer) as unknown as Buffer;
+    let buffer = Buffer.from(arrayBuffer);
 
     if (validBitrate) {
       try {
@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
       .then(() => fs.writeFile(cachedFilePath, buffer))
       .catch((err) => console.error("Failed to write TTS cache:", err));
 
-    return new NextResponse(buffer as any, {
+    return new NextResponse(buffer, {
       headers: {
         "Content-Type": "audio/mpeg",
         "Cache-Control": "public, max-age=31536000, immutable",
