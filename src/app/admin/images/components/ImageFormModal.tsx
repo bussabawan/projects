@@ -139,7 +139,8 @@ export default function ImageFormModal({ image, onClose, onSave }: ImageFormModa
     setIsPlaying(true);
     setTtsError(null);
     try {
-      const audio = new Audio(`/api/tts?text=${encodeURIComponent(speechText)}`);
+      const bitrate = window.innerWidth <= 425 ? 32 : 64;
+      const audio = new Audio(`/api/tts?text=${encodeURIComponent(speechText)}&bitrate=${bitrate}`);
       
       audio.onended = () => setIsPlaying(false);
       audio.onerror = () => {

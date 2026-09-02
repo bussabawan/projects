@@ -101,7 +101,12 @@ export default function MatchingGamePage() {
       audioRef.current.src = "";
     }
     
-    const audio = new Audio(url);
+    // Determine bitrate based on screen size (Mobile L: 425px)
+    const bitrate = window.innerWidth <= 425 ? 32 : 64;
+    const separator = url.includes('?') ? '&' : '?';
+    const audioUrlWithBitrate = `${url}${separator}bitrate=${bitrate}`;
+    
+    const audio = new Audio(audioUrlWithBitrate);
     audioRef.current = audio;
     audio.play().catch(() => {});
   };
@@ -152,7 +157,10 @@ export default function MatchingGamePage() {
             audioRef.current.pause();
             audioRef.current.src = "";
           }
-          const audio = new Audio(currentQ.target.audioUrl);
+          const bitrate = window.innerWidth <= 425 ? 32 : 64;
+          const separator = currentQ.target.audioUrl!.includes('?') ? '&' : '?';
+          const audioUrlWithBitrate = `${currentQ.target.audioUrl}${separator}bitrate=${bitrate}`;
+          const audio = new Audio(audioUrlWithBitrate);
           audioRef.current = audio;
           audio.play().catch(() => {});
         }, 500); // Small delay allows UI to render first and helps with browser autoplay policies

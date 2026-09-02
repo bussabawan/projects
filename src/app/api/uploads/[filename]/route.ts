@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
+import { transcodeAudioBuffer } from "@/lib/ffmpeg";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ filename: string }> }) {
   const { filename } = await params;
@@ -18,8 +19,22 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ file
   const filePath = path.join(process.cwd(), "uploads", folder, filename);
   
   try {
-    const buffer = await fs.readFile(filePath);
+    let buffer = await fs.readFile(filePath);
     
+    // Check for bitrate param
+    const bitrateParam = req.nextUrl.searchParams.get("bitrate");
+    if (isAudio && bitrateParam) {
+      const bitrate = parseInt(bitrateParam, 10);
+      if (!isNaN(bitrate) && bitrate > 0) {
+        try {
+          buffer = await transcodeAudioBuffer(buffer, bitrate);
+        } catch (err) {
+          console.error("Transcoding failed:", err);
+          // Fallback to original buffer if transcoding fails
+        }
+      }
+    }
+
     // Determine content type
     let contentType = "application/octet-stream";
     if (ext === 'png') contentType = 'image/png';

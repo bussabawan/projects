@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { transcodeAudioBuffer } from "@/lib/ffmpeg";
 
 export async function GET(req: NextRequest) {
   const text = req.nextUrl.searchParams.get("text");
@@ -18,8 +19,23 @@ export async function GET(req: NextRequest) {
     }
 
     const arrayBuffer = await response.arrayBuffer();
+    let buffer = Buffer.from(arrayBuffer);
 
-    return new NextResponse(arrayBuffer, {
+    // Check for bitrate param
+    const bitrateParam = req.nextUrl.searchParams.get("bitrate");
+    if (bitrateParam) {
+      const bitrate = parseInt(bitrateParam, 10);
+      if (!isNaN(bitrate) && bitrate > 0) {
+        try {
+          buffer = await transcodeAudioBuffer(buffer, bitrate);
+        } catch (err) {
+          console.error("Transcoding failed:", err);
+          // Fallback to original buffer if transcoding fails
+        }
+      }
+    }
+
+    return new NextResponse(buffer, {
       headers: {
         "Content-Type": "audio/mpeg",
         "Cache-Control": "public, max-age=31536000, immutable",
