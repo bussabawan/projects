@@ -26,7 +26,7 @@ This is a Next.js application using TypeScript, integrated with a MySQL database
 - **Authentication**: Auth.js (NextAuth.js v5) with Google OAuth & Credentials
 - **Database**: MySQL (via `mysql2/promise`)
 - **Environment**: Development (Docker Compose)
-- **File Structure**: `src/app` for pages, `src/components` for components, `src/lib` for utilities/database, `src/lib/models` for data models
+- **File Structure**: `src/app` for pages and routing (`admin`, `user`, `login`), `src/app/components` for shared UI components, `src/app/hooks` for custom React hooks, `src/app/actions` for Server Actions, `src/lib` for utilities (`db.ts`, `ffmpeg.ts`), `src/lib/models` for data models
 
 ## 3. Development Setup (Docker)
 - Use `compose.dev.yaml` for development
