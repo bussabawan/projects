@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
     }
 
     const arrayBuffer = await response.arrayBuffer();
-    let buffer = Buffer.from(arrayBuffer);
+    let buffer: any = Buffer.from(arrayBuffer);
 
     if (validBitrate) {
       try {

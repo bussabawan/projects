@@ -324,7 +324,7 @@ export default function MatchingGamePage() {
               height={400}
               style={{ width: '100%', height: '100%', objectFit: 'contain' }}
               onError={(e) => {
-                e.currentTarget.src = 'https://via.placeholder.com/400?text=Image+Not+Found';
+                e.currentTarget.src = '/placeholder-image.png';
                 e.currentTarget.srcset = '';
               }}
             />
@@ -346,7 +346,7 @@ export default function MatchingGamePage() {
                 height={200}
                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                 onError={(e) => {
-                  e.currentTarget.src = 'https://via.placeholder.com/200?text=Image+Not+Found';
+                  e.currentTarget.src = '/placeholder-image.png';
                   e.currentTarget.srcset = '';
                 }}
               />

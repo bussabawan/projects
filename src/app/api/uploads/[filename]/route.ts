@@ -19,7 +19,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ file
   const filePath = path.join(process.cwd(), "uploads", folder, filename);
   
   try {
-    let buffer: Buffer | null = null;
+    let buffer: any = null;
     
     // Check for bitrate param
     const bitrateParam = req.nextUrl.searchParams.get("bitrate");
