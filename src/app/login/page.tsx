@@ -93,7 +93,7 @@ function LoginContent() {
             <h1 className={styles.title}>เข้าสู่ระบบ</h1>
             
             <form className={styles.form} onSubmit={handleLogin} noValidate>
-              {error && <div style={{ color: 'red', textAlign: 'center' }}>{error}</div>}
+              {error && <div key={error} className={styles.errorAlert}>{error}</div>}
               <div className={styles.inputGroup}>
                 <label htmlFor="username" className={styles.label}>Username</label>
                 <input 
