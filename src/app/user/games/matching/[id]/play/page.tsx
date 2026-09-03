@@ -7,6 +7,7 @@ import styles from './matchingGame.module.css';
 import { getGameData, saveMatchingGameResult } from '@/app/actions/matchingActions';
 import AlertMessage from '@/app/components/AlertMessage/AlertMessage';
 import Image from 'next/image';
+import Skeleton from '@/app/components/Skeleton/Skeleton';
 
 // Volume Icon SVG
 const VolumeIcon = ({ isMuted }: { isMuted: boolean }) => (
@@ -129,6 +130,43 @@ export default function MatchingGamePage() {
     return () => clearInterval(interval);
   }, [loading, isFinished, feedback, startTime]);
 
+  const preloadAssets = async (questionsList: Question[]) => {
+    const assets: Promise<void>[] = [];
+    
+    const preloadImage = (url: string) => {
+      assets.push(new Promise((resolve) => {
+        const img = new window.Image();
+        img.src = url;
+        img.onload = () => resolve();
+        img.onerror = () => resolve();
+      }));
+    };
+
+    const preloadAudio = (url: string) => {
+      assets.push(new Promise((resolve) => {
+        const audio = new window.Audio();
+        const bitrate = window.innerWidth <= 425 ? 32 : 64;
+        const separator = url.includes('?') ? '&' : '?';
+        audio.src = `${url}${separator}bitrate=${bitrate}`;
+        audio.oncanplaythrough = () => resolve();
+        audio.onerror = () => resolve();
+        setTimeout(resolve, 3000); // timeout for audio
+      }));
+    };
+
+    questionsList.forEach(q => {
+      if (q.target.imageUrl) preloadImage(q.target.imageUrl);
+      if (q.target.audioUrl) preloadAudio(q.target.audioUrl);
+      
+      q.choices.forEach((c) => {
+        if (c.imageUrl) preloadImage(c.imageUrl);
+        if (c.audioUrl) preloadAudio(c.audioUrl);
+      });
+    });
+
+    await Promise.all(assets);
+  };
+
   // Fetch data
   useEffect(() => {
     if (!exerciseId) return;
@@ -138,6 +176,7 @@ export default function MatchingGamePage() {
       const result = await getGameData(exerciseId, numQuestions, numAnswers);
       if (result.success && result.data) {
         setQuestions(result.data);
+        await preloadAssets(result.data);
       } else {
         setError(result.error || 'Failed to load game');
       }
@@ -256,7 +295,17 @@ export default function MatchingGamePage() {
   };
 
   if (loading) {
-    return <div className={styles.container}><div className={styles.loading}>กำลังโหลดเกม...</div></div>;
+    return (
+      <div className={styles.container}>
+        <div style={{ padding: '2rem 0' }}>
+           <Skeleton type="table" count={1} />
+        </div>
+        <div style={{ padding: '2rem 0', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+           <Skeleton type="card" count={numAnswers > 4 ? 6 : 4} />
+        </div>
+        <div style={{ textAlign: 'center', fontSize: '1.2rem', color: '#666' }}>กำลังโหลดไฟล์ กรุณารอสักครู่...</div>
+      </div>
+    );
   }
 
   if (error || questions.length === 0) {

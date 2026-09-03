@@ -6,6 +6,7 @@ import styles from './memoryPlay.module.css';
 import { getMemoryGameData, saveMemoryGameResult } from '@/app/actions/memoryActions';
 import AlertMessage from '@/app/components/AlertMessage/AlertMessage';
 import Image from 'next/image';
+import Skeleton from '@/app/components/Skeleton/Skeleton';
 
 type ImageInfo = {
   id: number;
@@ -55,11 +56,49 @@ export default function MemoryGamePlayPage() {
   const [isMuted, setIsMuted] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  const preloadAssets = async (questionsList: GameData[]) => {
+    const assets: Promise<void>[] = [];
+    
+    const preloadImage = (url: string) => {
+      assets.push(new Promise((resolve) => {
+        const img = new window.Image();
+        img.src = url;
+        img.onload = () => resolve();
+        img.onerror = () => resolve();
+      }));
+    };
+
+    const preloadAudio = (url: string) => {
+      assets.push(new Promise((resolve) => {
+        const audio = new window.Audio();
+        const bitrate = window.innerWidth <= 425 ? 32 : 64;
+        const separator = url.includes('?') ? '&' : '?';
+        audio.src = `${url}${separator}bitrate=${bitrate}`;
+        audio.oncanplaythrough = () => resolve();
+        audio.onerror = () => resolve();
+        setTimeout(resolve, 3000); // timeout for audio
+      }));
+    };
+
+    questionsList.forEach(q => {
+      if (q.target.imageUrl) preloadImage(q.target.imageUrl);
+      if (q.target.audioUrl) preloadAudio(q.target.audioUrl);
+      
+      q.choices.forEach((c) => {
+        if (c.imageUrl) preloadImage(c.imageUrl);
+        if (c.audioUrl) preloadAudio(c.audioUrl);
+      });
+    });
+
+    await Promise.all(assets);
+  };
+
   const loadGameData = async (exerciseId: number) => {
     try {
       const result = await getMemoryGameData(exerciseId, numQuestionsSetting, numAnswersSetting);
       if (result.success && result.data) {
         setQuestions(result.data);
+        await preloadAssets(result.data);
         setGameState('question');
       } else {
         setGameState('error');
@@ -283,7 +322,17 @@ export default function MemoryGamePlayPage() {
   };
 
   if (gameState === 'loading') {
-    return <div className={styles.loadingContainer}>กำลังโหลดข้อมูลเกม...</div>;
+    return (
+      <div className={styles.container}>
+        <div style={{ padding: '2rem 0' }}>
+           <Skeleton type="table" count={1} />
+        </div>
+        <div style={{ padding: '2rem 0', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+           <Skeleton type="card" count={4} />
+        </div>
+        <div style={{ textAlign: 'center', fontSize: '1.2rem', color: '#666' }}>กำลังโหลดไฟล์ กรุณารอสักครู่...</div>
+      </div>
+    );
   }
 
   if (gameState === 'error') {
