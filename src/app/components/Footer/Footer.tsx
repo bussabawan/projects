@@ -18,7 +18,10 @@ export default function Footer() {
   return (
     <div className={`${styles.footerContainer} ${isCornerPage ? styles.cornerFixed : ''}`}>
       <div className={styles.footerText}>
-        © 2026 ระบบ........ (OT) | ความร่วมมือระหว่าง โรงพยาบาลเวชชารักษ์ ลำปาง และ มหาวิทยาลัยราชภัฏลำปาง
+        © 2026 ระบบ............................................... (OT)
+      </div>
+      <div className={styles.footerText}>
+        ความร่วมมือระหว่าง โรงพยาบาลเวชชารักษ์ ลำปาง มหาวิทยาลัยราชภัฏลำปาง และ วิทยาลัยเทคนิคนครลำปาง
       </div>
       <div className={styles.footerLinks}>
         <Link href="https://www.vjlh.go.th/about/structureIT" target="_blank" rel="noopener noreferrer">
