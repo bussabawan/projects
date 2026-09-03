@@ -90,27 +90,28 @@
 .menuItem {
   background-color: #fff;
   color: #333;
-  padding: 0.8rem 1.2rem;
+  padding: 0.8rem 1.2rem 0.8rem 2.5rem;
   border-radius: 20px;
   text-decoration: none;
   font-weight: 500;
   font-size: 1.1rem;
-  text-align: center;
+  text-align: left;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.8rem;
+  justify-content: flex-start;
+  gap: 1rem;
   white-space: nowrap;
   width: 100%;
   box-sizing: border-box;
 }
 
 .collapsed .menuItem {
-  padding: 0.8rem;
+  padding: 0;
   border-radius: 50%;
   width: 50px;
   height: 50px;
+  justify-content: center;
 }
 
 .menuItem:hover {
@@ -131,6 +132,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 28px;
+  flex-shrink: 0;
 }
 
 .sidebarBottom {
@@ -148,19 +151,29 @@
 .manualBtn {
   background-color: #fff;
   color: #333;
-  padding: 0.6rem 1.2rem;
+  padding: 0.8rem 1.2rem 0.8rem 2.5rem;
   border-radius: 20px;
   text-decoration: none;
   font-weight: 500;
-  font-size: 1rem;
-  text-align: center;
-  display: inline-block;
-  width: fit-content;
+  font-size: 1.1rem;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1rem;
+  width: 100%;
   box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.manualBtn:hover {
+  background-color: #f8f8f8;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .collapsed .manualBtn {
-  padding: 0.6rem;
+  padding: 0;
   width: 50px;
   height: 50px;
   border-radius: 50%;

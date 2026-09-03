@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { getSession, signOut } from "next-auth/react";
 import Skeleton from "@/app/components/Skeleton/Skeleton";
+import AboutModal from "@/app/components/AboutModal/AboutModal";
 import styles from "./user.module.css";
 
 export default function UserLayout({
@@ -14,6 +15,7 @@ export default function UserLayout({
   children: React.ReactNode;
 }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
   const [userName, setUserName] = useState("User");
   const [sessionDay, setSessionDay] = useState<number>(0);
   const [lastActivity, setLastActivity] = useState<number>(0);
@@ -168,9 +170,22 @@ export default function UserLayout({
         </nav>
 
         <div className={styles.sidebarBottom}>
+          <button onClick={() => setIsAboutModalOpen(true)} className={styles.manualBtn} style={{ border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>
+            <span className={styles.menuIcon}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="5" width="20" height="14" rx="3" />
+                <circle cx="8" cy="9" r="1.5" />
+                <path d="M4.5 16a3.5 3.5 0 0 1 7 0" />
+                <line x1="14" y1="10" x2="18" y2="10" />
+                <line x1="14" y1="14" x2="18" y2="14" />
+              </svg>
+            </span>
+            <span className={styles.manualText}>ผู้จัดทำ</span>
+          </button>
+
           <Link href="/user/manual" onClick={() => handleLinkClick('/user/manual')} className={styles.manualBtn}>
-            <span className={styles.menuIcon} style={{ display: isCollapsed ? 'flex' : 'none' }}>
-              <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <span className={styles.menuIcon}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
                 <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
                 <line x1="12" y1="17" x2="12.01" y2="17"></line>
@@ -234,6 +249,8 @@ export default function UserLayout({
         ?
       </Link>
       )}
+
+      <AboutModal isOpen={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)} />
     </div>
   );
 }

@@ -13,6 +13,23 @@
   background-color: #dfcce3;
   font-family: sans-serif;
   padding: 1.5rem;
+  position: relative;
+}
+
+.creatorsBtn {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  color: #666;
+  transition: color 0.2s, transform 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.creatorsBtn:hover {
+  color: #333;
+  transform: scale(1.1);
 }
 
 .logoContainer {
