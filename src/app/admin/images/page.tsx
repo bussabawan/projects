@@ -54,6 +54,7 @@ export default function ManageImagesPage() {
   const [totalPages, setTotalPages] = useState(1);
   const itemsPerPage = 12;
   const isLoadMoreRef = useRef(false);
+  const audioCache = useRef<Record<string, HTMLAudioElement>>({});
 
   const fetchImages = useCallback(async () => {
     const isLoadMore = isLoadMoreRef.current;
@@ -69,6 +70,40 @@ export default function ManageImagesPage() {
       });
       const json = await res.json();
       if (json.success) {
+        const newImages: ImageData[] = json.data;
+        const preloadPromises: Promise<void>[] = [];
+
+        newImages.forEach(img => {
+          if (img.imageUrl) {
+            preloadPromises.push(new Promise((resolve) => {
+              const fullImageUrl = img.imageUrl.startsWith('/') || img.imageUrl.startsWith('blob:') ? img.imageUrl : `/api/uploads/${img.imageUrl}`;
+              const image = new window.Image();
+              image.onload = () => resolve();
+              image.onerror = () => resolve();
+              image.src = fullImageUrl;
+            }));
+          }
+          if (img.audioUrl) {
+            preloadPromises.push(new Promise((resolve) => {
+              const fullAudioUrl = img.audioUrl!.startsWith('/') || img.audioUrl!.startsWith('blob:') ? img.audioUrl! : `/api/uploads/${img.audioUrl}`;
+              if (!audioCache.current[fullAudioUrl]) {
+                const audio = new window.Audio(fullAudioUrl);
+                audio.preload = 'auto';
+                audioCache.current[fullAudioUrl] = audio;
+                fetch(fullAudioUrl)
+                  .then(() => resolve())
+                  .catch(() => resolve());
+              } else {
+                resolve();
+              }
+            }));
+          }
+        });
+
+        // Wait up to 8 seconds for all media to cache
+        const timeoutPromise = new Promise<void>((resolve) => setTimeout(resolve, 8000));
+        await Promise.race([Promise.all(preloadPromises), timeoutPromise]);
+
         if (isLoadMore) {
           setImages(prev => [...prev, ...json.data]);
         } else {
@@ -100,6 +135,8 @@ export default function ManageImagesPage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentPage(1);
   }, [debouncedSearchQuery]);
+
+
 
   // Infinite Scroll Observer
   const observer = useRef<IntersectionObserver | null>(null);
@@ -243,7 +280,15 @@ export default function ManageImagesPage() {
       return;
     }
     const fullAudioUrl = audioUrl.startsWith('/') || audioUrl.startsWith('blob:') ? audioUrl : `/api/uploads/${audioUrl}`;
-    const audio = new Audio(fullAudioUrl);
+    
+    let audio = audioCache.current[fullAudioUrl];
+    if (!audio) {
+      audio = new Audio(fullAudioUrl);
+      audio.preload = 'auto';
+      audioCache.current[fullAudioUrl] = audio;
+    }
+    
+    audio.currentTime = 0;
     audio.play().catch(e => {
       console.error(e);
       alert("ไม่สามารถเล่นเสียงได้");

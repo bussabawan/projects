@@ -7,8 +7,10 @@ import Skeleton from "@/app/components/Skeleton/Skeleton";
 import { useSearchParams, useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
+import AboutModal from '@/app/components/AboutModal/AboutModal';
 
 function LoginContent() {
+  const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [usernameEmpty, setUsernameEmpty] = useState(false);
@@ -73,15 +75,15 @@ function LoginContent() {
 
   return (
     <div className={styles.container}>
-      <Link href="/about" className={styles.creatorsBtn} aria-label="เกี่ยวกับผู้จัดทำ" title="เกี่ยวกับผู้จัดทำ">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <button onClick={() => setIsAboutModalOpen(true)} className={styles.creatorsBtn} aria-label="เกี่ยวกับผู้จัดทำ" title="เกี่ยวกับผู้จัดทำ">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <rect x="2" y="5" width="20" height="14" rx="3" />
           <circle cx="8" cy="9" r="1.5" />
           <path d="M4.5 16a3.5 3.5 0 0 1 7 0" />
           <line x1="14" y1="10" x2="18" y2="10" />
           <line x1="14" y1="14" x2="18" y2="14" />
         </svg>
-      </Link>
+      </button>
       <div className={styles.logoContainer}>
         <Image
           src="/vejjarak_logo.webp"
@@ -156,6 +158,8 @@ function LoginContent() {
           </>
         )}
       </div>
+
+      <AboutModal isOpen={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)} />
     </div>
   );
 }

@@ -18,18 +18,26 @@
 
 .creatorsBtn {
   position: absolute;
-  bottom: 1.5rem;
-  left: 1.5rem;
-  color: #666;
-  transition: color 0.2s, transform 0.2s;
+  bottom: 2rem;
+  left: 2rem;
+  color: #333;
+  background-color: #fff;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 2px solid #f0f0f0;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  cursor: pointer;
 }
 
 .creatorsBtn:hover {
-  color: #333;
-  transform: scale(1.1);
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  border-color: #e0e0e0;
 }
 
 .logoContainer {
@@ -185,7 +193,9 @@
 
 /* 4. Tablet Portrait / Mobile Landscape (max-width: 768px) */
 @media (max-width: 768px) {
-
+  .creatorsBtn {
+    display: none;
+  }
 }
 
 /* 5. Mobile Portrait (max-width: 480px) */
