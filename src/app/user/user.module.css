@@ -357,10 +357,12 @@
       background-color: #fadff8;
       position: relative;
       padding-bottom: calc(85px + env(safe-area-inset-bottom, 0px));
-      overflow: hidden;
+      overflow: visible;
       box-sizing: border-box;
       -ms-overflow-style: none; /* IE and Edge */
       scrollbar-width: none; /* Firefox */
+      min-height: 100dvh;
+      height: auto;
     }
     
     .noBottomPadding {
@@ -561,26 +563,27 @@
       width: 100%;
       flex: 1;
       min-height: 0;
-      overflow-y: auto;
+      overflow-y: visible;
       overflow-x: hidden;
       display: flex;
       flex-direction: column;
       -ms-overflow-style: none; /* IE and Edge */
       scrollbar-width: none; /* Firefox */
-      overscroll-behavior-y: contain;
+      height: auto;
     }
   
     .fullMainContent {
       padding: 0;
       width: 100%;
       flex: 1;
-      overflow-y: auto;
+      overflow-y: visible;
       overflow-x: hidden;
       display: flex;
       flex-direction: column;
       -ms-overflow-style: none;
       scrollbar-width: none;
       background-color: #eaeaea;
+      height: auto;
     }
     
     .mainContent::-webkit-scrollbar,

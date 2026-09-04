@@ -22,7 +22,7 @@ export default function Footer({ inline = false }: FooterProps) {
   // ถ้าไม่ใช่หน้าหลัก (เช่น /login, หน้าเล่นเกม, ตั้งค่าเกม, สรุปคะแนน) ให้ footer ชิดขวาล่าง
   const isCornerPage = !(isUserMainPage || isAdminPage);
 
-  const isGamesTypesPage = pathname === '/user/games';
+  const isUserPage = pathname.startsWith('/user');
 
   return (
     <div
@@ -30,7 +30,7 @@ export default function Footer({ inline = false }: FooterProps) {
         ${styles.footerContainer}
         ${inline ? styles.inlineFooter : ''}
         ${isCornerPage && !inline ? styles.cornerFixed : ''}
-        ${!inline && isGamesTypesPage ? styles.hideOnMobile : ''}
+        ${!inline && isUserPage ? styles.hideOnMobile : ''}
       `}
     >
       <div className={styles.footerText}>

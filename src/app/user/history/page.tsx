@@ -40,6 +40,8 @@ export default function HistoryPage() {
   const [isMobile, setIsMobile] = useState(false);
   const [isStartPickerOpen, setIsStartPickerOpen] = useState(false);
   const [isEndPickerOpen, setIsEndPickerOpen] = useState(false);
+  const startDateRef = React.useRef<HTMLInputElement>(null);
+  const endDateRef = React.useRef<HTMLInputElement>(null);
   const observer = React.useRef<IntersectionObserver | null>(null);
   const rowsPerPage = 7;
 
