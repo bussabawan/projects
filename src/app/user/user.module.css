@@ -260,6 +260,7 @@
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+  min-height: 0;
 }
 
 .mainContent::after {
@@ -552,12 +553,14 @@
       padding: 1.5rem 1.5rem 0 1.5rem;
       width: 100%;
       flex: 1;
+      min-height: 0;
       overflow-y: auto;
       overflow-x: hidden;
       display: flex;
       flex-direction: column;
       -ms-overflow-style: none; /* IE and Edge */
       scrollbar-width: none; /* Firefox */
+      overscroll-behavior-y: contain;
     }
   
     .fullMainContent {
