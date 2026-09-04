@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { getSession, signOut } from "next-auth/react";
-import Skeleton from "@/app/components/Skeleton/Skeleton";
+import Loader from "@/app/components/Loader/Loader";
 import AboutModal from "@/app/components/AboutModal/AboutModal";
 import styles from "./user.module.css";
 
@@ -235,9 +235,7 @@ export default function UserLayout({
 
       <main className={isGameInnerPage ? styles.fullMainContent : styles.mainContent}>
         {isPageLoading ? (
-          <div style={{ padding: '2rem', width: '100%' }}>
-            <Skeleton type="table" count={5} />
-          </div>
+          <Loader text="กำลังโหลดข้อมูล..." />
         ) : (
           children
         )}

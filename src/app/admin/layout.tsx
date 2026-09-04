@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import styles from "./admin.module.css";
 import { usePathname } from "next/navigation";
-import Skeleton from "@/app/components/Skeleton/Skeleton";
+import Loader from "@/app/components/Loader/Loader";
 import AboutModal from "@/app/components/AboutModal/AboutModal";
 
 export default function AdminLayout({
@@ -195,9 +195,7 @@ export default function AdminLayout({
 
       <main className={styles.mainContent}>
         {isPageLoading ? (
-          <div style={{ padding: '2rem', width: '100%' }}>
-            <Skeleton type="table" count={5} />
-          </div>
+          <Loader text="กำลังโหลดข้อมูล..." />
         ) : (
           children
         )}

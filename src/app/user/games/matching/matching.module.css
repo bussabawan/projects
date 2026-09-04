@@ -139,6 +139,9 @@
   width: 24px;
   height: 24px;
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .categoriesGrid {

@@ -6,7 +6,7 @@ import styles from './memoryPlay.module.css';
 import { getMemoryGameData, saveMemoryGameResult } from '@/app/actions/memoryActions';
 import AlertMessage from '@/app/components/AlertMessage/AlertMessage';
 import Image from 'next/image';
-import Skeleton from '@/app/components/Skeleton/Skeleton';
+import Loader from '@/app/components/Loader/Loader';
 
 type ImageInfo = {
   id: number;
@@ -324,13 +324,7 @@ export default function MemoryGamePlayPage() {
   if (gameState === 'loading') {
     return (
       <div className={styles.container}>
-        <div style={{ padding: '2rem 0' }}>
-           <Skeleton type="table" count={1} />
-        </div>
-        <div style={{ padding: '2rem 0', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-           <Skeleton type="card" count={4} />
-        </div>
-        <div style={{ textAlign: 'center', fontSize: '1.2rem', color: '#666' }}>กำลังโหลดไฟล์ กรุณารอสักครู่...</div>
+        <Loader text="กำลังโหลดไฟล์ กรุณารอสักครู่..." />
       </div>
     );
   }
@@ -346,7 +340,9 @@ export default function MemoryGamePlayPage() {
 
   if (gameState === 'summary') {
     return (
-      <div className={styles.loadingContainer}>กำลังบันทึกข้อมูล...</div>
+      <div className={styles.container}>
+        <Loader text="กำลังบันทึกข้อมูลผลการฝึก..." />
+      </div>
     );
   }
 

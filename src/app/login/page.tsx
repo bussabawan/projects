@@ -3,11 +3,11 @@
 import Image from 'next/image';
 import styles from './login.module.css';
 import { useState, useEffect, Suspense } from 'react';
-import Skeleton from "@/app/components/Skeleton/Skeleton";
 import { useSearchParams, useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 import AboutModal from '@/app/components/AboutModal/AboutModal';
+import Loader from '@/app/components/Loader/Loader';
 
 function LoginContent() {
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
@@ -97,9 +97,7 @@ function LoginContent() {
 
       <div className={styles.card}>
         {loading ? (
-          <div style={{ width: '100%', padding: '2rem' }}>
-            <Skeleton type="card" count={1} />
-          </div>
+          <Loader text="กำลังเข้าสู่ระบบ..." />
         ) : (
           <>
             <h1 className={styles.title}>เข้าสู่ระบบ</h1>
@@ -166,7 +164,7 @@ function LoginContent() {
 
 export default function Login() {
   return (
-    <Suspense fallback={<div style={{ padding: '2rem' }}><Skeleton type="card" count={1} /></div>}>
+    <Suspense fallback={<Loader text="กำลังโหลด..." />}>
       <LoginContent />
     </Suspense>
   );

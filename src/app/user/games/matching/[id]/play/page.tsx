@@ -7,7 +7,7 @@ import styles from './matchingGame.module.css';
 import { getGameData, saveMatchingGameResult } from '@/app/actions/matchingActions';
 import AlertMessage from '@/app/components/AlertMessage/AlertMessage';
 import Image from 'next/image';
-import Skeleton from '@/app/components/Skeleton/Skeleton';
+import Loader from '@/app/components/Loader/Loader';
 
 // Volume Icon SVG
 const VolumeIcon = ({ isMuted }: { isMuted: boolean }) => (
@@ -297,13 +297,7 @@ export default function MatchingGamePage() {
   if (loading) {
     return (
       <div className={styles.container}>
-        <div style={{ padding: '2rem 0' }}>
-           <Skeleton type="table" count={1} />
-        </div>
-        <div style={{ padding: '2rem 0', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-           <Skeleton type="card" count={numAnswers > 4 ? 6 : 4} />
-        </div>
-        <div style={{ textAlign: 'center', fontSize: '1.2rem', color: '#666' }}>กำลังโหลดไฟล์ กรุณารอสักครู่...</div>
+        <Loader text="กำลังโหลดไฟล์ กรุณารอสักครู่..." />
       </div>
     );
   }
@@ -321,7 +315,11 @@ export default function MatchingGamePage() {
   }
 
   if (isFinished) {
-    return <div className={styles.container}><div className={styles.loading}>กำลังบันทึกข้อมูล...</div></div>;
+    return (
+      <div className={styles.container}>
+        <Loader text="กำลังบันทึกข้อมูลผลการฝึก..." />
+      </div>
+    );
   }
 
   const currentQ = questions[currentIndex];

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import Skeleton from "@/app/components/Skeleton/Skeleton";
+import Loader from "@/app/components/Loader/Loader";
 import styles from './PatientStatsPopup.module.css';
 import { 
   PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer,
@@ -172,7 +172,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
             <h3 className={styles.sectionTitle}>สถิติคะแนน</h3>
             
             {loading ? (
-              <Skeleton type="card" count={4} />
+              <Loader text="กำลังโหลดสถิติคะแนน..." />
             ) : data && data.dailyStats ? (
               <div className={styles.statsGrid}>
                 <div className={styles.statItem}>

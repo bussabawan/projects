@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import Loader from '@/app/components/Loader/Loader';
 import styles from './history.module.css';
 
 // Remove static mock data, will fetch dynamically
@@ -219,7 +220,7 @@ export default function HistoryPage() {
 
         <div className={styles.tableBody}>
           {isLoading ? (
-            <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>กำลังโหลดข้อมูล...</div>
+            <Loader text="กำลังโหลดประวัติการฝึก..." />
           ) : currentData.length === 0 ? (
             <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>ไม่มีข้อมูลในช่วงเวลานี้</div>
           ) : (

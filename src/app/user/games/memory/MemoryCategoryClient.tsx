@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Loader from '@/app/components/Loader/Loader';
 import styles from './memory.module.css';
 
 
@@ -105,10 +106,10 @@ export default function MemoryCategoryClient() {
       </div>
 
       <div className={styles.categoriesGrid}>
-        {isLoading ? (
-          Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className={styles.skeletonCard}></div>
-          ))
+        {isLoading || searchQuery !== debouncedSearchQuery ? (
+          <div style={{ gridColumn: '1 / -1', width: '100%', minHeight: '320px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Loader text={searchQuery.trim() ? "กำลังค้นหาแบบฝึกหัด..." : "กำลังโหลดหมวดหมู่แบบฝึกหัด..."} />
+          </div>
         ) : filteredExercises.length > 0 ? (
           filteredExercises.map((ex, index) => (
             <Link key={`${ex.exercises_id}-${index}`} href={`/user/games/memory/${ex.exercises_id}?mode=${activeTab}`} className={styles.categoryCard}>

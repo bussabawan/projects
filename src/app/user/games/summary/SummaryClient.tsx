@@ -4,8 +4,12 @@ import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import styles from './summary.module.css';
+import Loader from '@/app/components/Loader/Loader';
 
-const SummaryChart = dynamic(() => import('./SummaryChart'), { ssr: false, loading: () => <div style={{ height: 200, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>กำลังโหลดสถิติ...</div> });
+const SummaryChart = dynamic(() => import('./SummaryChart'), { 
+  ssr: false, 
+  loading: () => <Loader size="1.5px" text="กำลังโหลดกราฟสถิติ..." /> 
+});
 
 interface SummaryClientProps {
   historyData: { name: string; date: string; score: number }[];

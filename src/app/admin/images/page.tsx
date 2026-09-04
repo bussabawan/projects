@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 
-import Skeleton from "@/app/components/Skeleton/Skeleton";
+import Loader from "@/app/components/Loader/Loader";
 import styles from "./images.module.css";
 import ImageFormModal from "./components/ImageFormModal";
 import DeleteConfirmModal from "../components/DeleteConfirmModal";
@@ -331,9 +331,9 @@ export default function ManageImagesPage() {
       </div>
 
       <div className={styles.grid}>
-        {isLoading ? (
-          <div style={{ padding: '2rem 0', gridColumn: '1 / -1', width: '100%' }}>
-            <Skeleton type="card" count={8} />
+        {isLoading || searchQuery !== debouncedSearchQuery ? (
+          <div style={{ padding: '4rem 0', minHeight: '350px', gridColumn: '1 / -1', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Loader text={searchQuery.trim() ? "กำลังค้นหารูปภาพ..." : "กำลังโหลดรูปภาพ..."} />
           </div>
         ) : images.length === 0 ? (
           <div>ไม่พบรูปภาพ</div>
@@ -385,7 +385,9 @@ export default function ManageImagesPage() {
       {!isLoading && currentPage < totalPages && (
         <div ref={lastElementRef} className={styles.loadMoreTarget}>
           {loadingMore && (
-            <Skeleton type="card" count={4} />
+            <div style={{ width: '100%', padding: '1rem 0' }}>
+              <Loader size="1.5px" text="กำลังโหลดเพิ่มเติม..." />
+            </div>
           )}
         </div>
       )}

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 
-import Skeleton from "@/app/components/Skeleton/Skeleton";
+import Loader from "@/app/components/Loader/Loader";
 import styles from './patientStats.module.css';
 import { PatientStatInfo } from '@/lib/models/patientStats';
 import { useDebounce } from '@/app/hooks/useDebounce';
@@ -179,9 +179,9 @@ export default function PatientStatsPage() {
         </div>
       </div>
 
-      {loading ? (
-        <div style={{ padding: '2rem 0', width: '100%' }}>
-          <Skeleton type="table" count={5} />
+      {loading || searchQuery !== debouncedSearchQuery ? (
+        <div style={{ padding: '4rem 0', minHeight: '320px', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Loader text={searchQuery.trim() ? "กำลังค้นหาสถิติผู้ป่วย..." : "กำลังโหลดสถิติผู้ป่วย..."} />
         </div>
       ) : error ? (
         <div style={{ textAlign: 'center', padding: '2rem', color: 'red' }}>เกิดข้อผิดพลาด: {error}</div>
@@ -283,7 +283,7 @@ export default function PatientStatsPage() {
 
             {mobileVisibleCount < filteredPatients.length && (
               <div ref={lastElementRef} style={{ padding: '1rem', width: '100%', gridColumn: '1 / -1' }}>
-                <Skeleton type="table" count={3} />
+                <Loader size="1.5px" text="กำลังโหลดเพิ่มเติม..." />
               </div>
             )}
           </div>
