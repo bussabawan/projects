@@ -55,7 +55,20 @@ export default function MatchingCategoryClient() {
     <div className={styles.container}>
       <div className={styles.header}>
         <div className={styles.titleRow}>
-          <h1 className={styles.title}>จับคู่</h1>
+          <div className={styles.titleWithIcon}>
+            <div className={styles.titleIcon}>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#f4a261" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" fill="#fff" strokeWidth="1.5"></circle>
+                <path d="M14.5 12h-5a2.5 2.5 0 0 1-2.5-2.5v-5"></path>
+                <path d="M9.5 12h5a2.5 2.5 0 0 1 2.5 2.5v5"></path>
+                <rect x="5.5" y="4.5" width="4" height="4" rx="1"></rect>
+                <rect x="14.5" y="15.5" width="4" height="4" rx="1"></rect>
+                <circle cx="9.5" cy="15.5" r="1.5" fill="#e76f51" stroke="none"></circle>
+                <circle cx="14.5" cy="8.5" r="1.5" fill="#e76f51" stroke="none"></circle>
+              </svg>
+            </div>
+            <h1 className={styles.title}>จับคู่</h1>
+          </div>
           <Link href="/user/games" className={styles.backBtn}>
             ย้อนกลับ
           </Link>
@@ -94,7 +107,7 @@ export default function MatchingCategoryClient() {
 
       <div className={styles.categoriesGrid}>
         {loading || searchQuery !== debouncedSearchQuery ? (
-          <div style={{ gridColumn: '1 / -1', width: '100%', minHeight: '320px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ gridColumn: '1 / -1', width: '100%', minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Loader text={searchQuery.trim() ? "กำลังค้นหาแบบฝึกหัด..." : "กำลังโหลดหมวดหมู่แบบฝึกหัด..."} />
           </div>
         ) : filteredExercises.length > 0 ? (

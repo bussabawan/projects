@@ -215,6 +215,14 @@
     display: none;
   }
 
+  .container {
+    min-height: 100dvh;
+    height: auto;
+    padding: 1.5rem 1rem;
+    justify-content: center;
+    align-items: center;
+  }
+
   .logo {
     width: calc(100vw / 3);
     height: calc(100vw / 3);
@@ -236,6 +244,7 @@
       max-width: 100vw;
       box-sizing: border-box;
       justify-content: center;
+      align-items: center;
     }
   
     .logoContainer {

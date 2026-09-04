@@ -23,9 +23,23 @@ export default function UserLayout({
   const pathname = usePathname();
   const router = useRouter();
 
+  const [activeTab, setActiveTab] = useState<"games" | "history">("games");
+
   useEffect(() => {
+    if (pathname.startsWith('/user/history')) {
+      setActiveTab("history");
+    } else {
+      setActiveTab("games");
+    }
     setIsPageLoading(false);
   }, [pathname]);
+
+  const handleTabClick = (tab: "games" | "history", href: string) => {
+    setActiveTab(tab);
+    if (pathname !== href) {
+      setIsPageLoading(true);
+    }
+  };
 
   const handleLinkClick = (href: string) => {
     if (pathname !== href) {
@@ -145,12 +159,13 @@ export default function UserLayout({
           </div>
         </div>
 
-        <nav className={styles.menu}>
-          <div 
-            className={styles.activeIndicator} 
-            style={{ transform: pathname.startsWith('/user/history') ? 'translateX(100%)' : 'translateX(0)' }} 
-          />
-          <Link href="/user/games" onClick={() => handleLinkClick('/user/games')} className={`${styles.menuItem} ${pathname === '/user/games' ? styles.active : ''}`}>
+        <nav className={`${styles.menu} ${activeTab === 'history' ? styles.menuHistoryActive : styles.menuGamesActive}`}>
+          <div className={styles.sliderIndicator} aria-hidden="true" />
+          <Link
+            href="/user/games"
+            onClick={() => handleTabClick('games', '/user/games')}
+            className={`${styles.menuItem} ${activeTab === 'games' ? styles.active : ''}`}
+          >
             <span className={styles.menuIcon}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="2" y="6" width="20" height="12" rx="2" ry="2"></rect>
@@ -162,7 +177,11 @@ export default function UserLayout({
             </span>
             <span className={styles.menuText}>ประเภทเกม</span>
           </Link>
-          <Link href="/user/history" onClick={() => handleLinkClick('/user/history')} className={`${styles.menuItem} ${pathname.startsWith('/user/history') ? styles.active : ''}`}>
+          <Link
+            href="/user/history"
+            onClick={() => handleTabClick('history', '/user/history')}
+            className={`${styles.menuItem} ${activeTab === 'history' ? styles.active : ''}`}
+          >
             <span className={styles.menuIcon}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
@@ -222,13 +241,13 @@ export default function UserLayout({
       <div className={styles.mobileHeader}>
         <div className={styles.mobileUserPill}>{userName}</div>
         <Link href="/user/games" onClick={() => handleLinkClick('/user/games')} className={styles.mobileHomeBtn} aria-label="Home">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
             <polyline points="9 22 9 12 15 12 15 22"></polyline>
           </svg>
         </Link>
         <button className={styles.mobileLogoutBtn} aria-label="Logout" title="Logout" onClick={handleLogout}>
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
             <polyline points="16 17 21 12 16 7"></polyline>
             <line x1="21" y1="12" x2="9" y2="12"></line>

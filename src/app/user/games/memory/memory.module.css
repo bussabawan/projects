@@ -5,8 +5,6 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  flex: 1;
-  padding: 1rem 1rem 2rem 1rem;
   box-sizing: border-box;
 }
 
@@ -23,6 +21,27 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
+}
+
+.titleWithIcon {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.titleIcon {
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.titleIcon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .title {
@@ -222,140 +241,152 @@
 /* 2. Normal Desktop
    (Uses Base Styles above, targeting 1025px - 1439px) */
 
-/* 3. Small Desktop / Tablet Landscape (max-width: 1024px) */
-@media (max-width: 1024px) {
-
+/* 3. Small Desktop / Tablet Landscape (max-width: 1200px) */
+@media (max-width: 1200px) and (min-width: 901px) {
+  .categoriesGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+  .categoryCard {
+    padding: 1.5rem;
+    font-size: 1.5rem;
+  }
 }
 
-/* 4. Tablet Portrait / Mobile Landscape (max-width: 768px) */
+/* 4. Tablet Landscape / Medium Screens (max-width: 900px) and (min-width: 769px) */
+@media (max-width: 900px) and (min-width: 769px) {
+  .header {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .controlsRow {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    width: 100%;
+    gap: 1rem;
+    margin-bottom: 0;
+  }
+  .searchContainer {
+    flex: 1;
+  }
+  .tabsContainer {
+    flex: 1;
+    justify-content: center;
+  }
+  .tabButton {
+    flex: 1;
+    padding: 0.5rem 0.5rem;
+    font-size: 0.9rem;
+  }
+  .searchInput {
+    padding: 0.5rem 1rem;
+    padding-right: 2.5rem;
+    font-size: 0.9rem;
+  }
+  .searchIcon {
+    right: 0.8rem;
+    width: 18px;
+    height: 18px;
+  }
+  .categoriesGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+  .categoryCard {
+    padding: 1.5rem;
+    font-size: 1.5rem;
+  }
+}
+
+/* 5. Tablet Portrait / Mobile Landscape (max-width: 768px) */
 @media (max-width: 768px) {
-  
-    .title {
-      font-size: 2.2rem;
-    }
-  
-    .controlsRow {
-      flex-direction: column;
-      align-items: stretch;
-      gap: 1rem;
-    }
-    
-    .tabsContainer {
-      width: 100%;
-      padding: 2px;
-    }
-  
-    .tabButton {
-      padding: 0.5rem 0.1rem;
-      font-size: 0.9rem;
-      flex: 1;
-      text-align: center;
-      white-space: nowrap;
-    }
-  
-    .searchContainer {
-      width: 100%;
-    }
-  
-    .searchInput {
-      padding: 0.5rem 1rem;
-      padding-right: 2.5rem;
-      font-size: 0.9rem;
-    }
-  
-    .searchIcon {
-      right: 0.8rem;
-      width: 18px;
-      height: 18px;
-    }
-  
-    .categoriesGrid {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
-    }
-  
-    .categoryCard {
-      width: 100%;
-      padding: 1rem;
-      font-size: 1.1rem;
-      border-radius: 12px;
-      min-height: 90px;
-    }
-    
-    .skeletonCard {
-      min-height: 90px;
-    }
-  
-    .backBtn {
-      display: none;
-    }
+  .container {
+    width: 100%;
+    padding: 0;
+  }
+  .header {
+    gap: 0.85rem;
+    margin-bottom: 0.85rem;
+  }
+  .titleWithIcon {
+    gap: 0.65rem;
+  }
+  .titleIcon {
+    width: 36px;
+    height: 36px;
+  }
+  .title {
+    font-size: 2rem;
+  }
+  .controlsRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  .searchContainer, .tabsContainer {
+    width: 100%;
+  }
+  .tabsContainer {
+    padding: 2px;
+  }
+  .tabButton {
+    padding: 0.5rem 0.1rem;
+    font-size: 0.9rem;
+    flex: 1;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .searchInput {
+    padding: 0.75rem 1.2rem;
+    padding-right: 3rem;
+    font-size: 1rem;
+  }
+  .searchIcon {
+    right: 1rem;
+    width: 20px;
+    height: 20px;
+  }
+  .categoriesGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+    margin-top: 0.85rem;
+    padding-bottom: 1.5rem;
+  }
+  .categoryCard {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.1rem;
+    border-radius: 12px;
+    min-height: 90px;
+  }
+  .skeletonCard {
+    min-height: 90px;
+  }
+  .backBtn {
+    display: none;
+  }
 }
 
-/* 5. Mobile Portrait (max-width: 480px) */
+/* 6. Mobile Portrait (max-width: 480px) */
 @media (max-width: 480px) {
-
-}
-
-/* Custom Breakpoint */
-@media (max-width: 1200px) and (min-width: 769px) {
-  
-    .categoriesGrid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 1.5rem;
-    }
-    .categoryCard {
-      padding: 1.5rem;
-      font-size: 1.5rem;
-    }
-}
-
-/* Custom Breakpoint */
-@media (max-width: 900px) {
-  
-    .header {
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-    .controlsRow {
-      flex-direction: row;
-      flex-wrap: nowrap;
-      align-items: center;
-      width: 100%;
-      gap: 1rem;
-      margin-bottom: 0;
-    }
-    .searchContainer {
-      flex: 1;
-    }
-    .tabsContainer {
-      flex: 1;
-      justify-content: center;
-    }
-    .tabButton {
-      flex: 1;
-      padding: 0.5rem 0.5rem;
-      font-size: 0.9rem;
-    }
-    .searchInput {
-      padding: 0.5rem 1rem;
-      padding-right: 2.5rem;
-      font-size: 0.9rem;
-    }
-    .searchIcon {
-      right: 0.8rem;
-      width: 18px;
-      height: 18px;
-    }
-}
-
-/* Mobile Portrait (max-width: 480px) Overrides */
-@media (max-width: 480px) {
-    .controlsRow {
-      flex-direction: column !important;
-      align-items: stretch !important;
-    }
-    .searchContainer, .tabsContainer {
-      width: 100% !important;
-    }
+  .titleWithIcon {
+    gap: 0.5rem;
+  }
+  .titleIcon {
+    width: 32px;
+    height: 32px;
+  }
+  .title {
+    font-size: 1.8rem;
+  }
+  .tabButton {
+    padding: 0.5rem 0.1rem;
+    font-size: 0.85rem;
+  }
+  .searchInput {
+    padding: 0.65rem 1rem;
+    font-size: 0.95rem;
+  }
 }
 
