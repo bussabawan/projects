@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Loader from '@/app/components/Loader/Loader';
 import DatePicker from '@/app/components/DatePicker/DatePicker';
+import Footer from '@/app/components/Footer/Footer';
 import styles from './history.module.css';
 
 // Remove static mock data, will fetch dynamically
@@ -505,6 +506,8 @@ export default function HistoryPage() {
           />
         </>
       )}
+
+      <Footer inline={true} />
     </div>
   );
 }
