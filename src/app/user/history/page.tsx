@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Loader from '@/app/components/Loader/Loader';
+import DatePicker from '@/app/components/DatePicker/DatePicker';
 import styles from './history.module.css';
 
 // Remove static mock data, will fetch dynamically
@@ -34,6 +35,8 @@ export default function HistoryPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isMobile, setIsMobile] = useState(false);
+  const [isStartPickerOpen, setIsStartPickerOpen] = useState(false);
+  const [isEndPickerOpen, setIsEndPickerOpen] = useState(false);
   const observer = React.useRef<IntersectionObserver | null>(null);
   const rowsPerPage = 7;
 
@@ -182,7 +185,13 @@ export default function HistoryPage() {
               value={startDate}
               onChange={(e) => { setStartDate(e.target.value); setCurrentPage(1); }}
             />
-            <button className={styles.datePicker} onClick={() => startDateRef.current?.showPicker()}>
+            <button className={styles.datePicker} onClick={() => {
+              if (isMobile) {
+                setIsStartPickerOpen(true);
+              } else {
+                startDateRef.current?.showPicker();
+              }
+            }}>
               {startDate ? formatThaiDate(startDate) : "เลือกวันที่"}
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="6 9 12 15 18 9"></polyline>
@@ -200,7 +209,13 @@ export default function HistoryPage() {
               value={endDate}
               onChange={(e) => { setEndDate(e.target.value); setCurrentPage(1); }}
             />
-            <button className={styles.datePicker} onClick={() => endDateRef.current?.showPicker()}>
+            <button className={styles.datePicker} onClick={() => {
+              if (isMobile) {
+                setIsEndPickerOpen(true);
+              } else {
+                endDateRef.current?.showPicker();
+              }
+            }}>
               {endDate ? formatThaiDate(endDate) : "เลือกวันที่"}
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="6 9 12 15 18 9"></polyline>
@@ -346,6 +361,25 @@ export default function HistoryPage() {
           </div>
         )}
       </div>
+
+      {isMobile && (
+        <>
+          <DatePicker 
+            isOpen={isStartPickerOpen}
+            onClose={() => setIsStartPickerOpen(false)}
+            onSelect={(date) => { setStartDate(date); setCurrentPage(1); }}
+            initialDate={startDate}
+            title="เลือกวันที่เริ่มต้น"
+          />
+          <DatePicker 
+            isOpen={isEndPickerOpen}
+            onClose={() => setIsEndPickerOpen(false)}
+            onSelect={(date) => { setEndDate(date); setCurrentPage(1); }}
+            initialDate={endDate}
+            title="เลือกวันที่สิ้นสุด"
+          />
+        </>
+      )}
     </div>
   );
 }

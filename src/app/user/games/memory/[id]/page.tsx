@@ -232,7 +232,7 @@ export default function MemorySettingsPage() {
             <div className={styles.controlGroup}>
               <button 
                 className={styles.controlBtn} 
-                onClick={() => updateValue(setShowTime, showTime, -1, 1, 20)}
+                onClick={() => updateValue(setShowTime, showTime, -1, 1, 30)}
                 disabled={showTime <= 1}
               >
                 -
@@ -245,8 +245,8 @@ export default function MemorySettingsPage() {
               />
               <button 
                 className={styles.controlBtn} 
-                onClick={() => updateValue(setShowTime, showTime, 1, 1, 20)}
-                disabled={showTime >= 20}
+                onClick={() => updateValue(setShowTime, showTime, 1, 1, 30)}
+                disabled={showTime >= 30}
               >
                 +
               </button>

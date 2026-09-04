@@ -133,7 +133,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                     <circle cx="12" cy="7" r="4"></circle>
                   </svg>
                 </div>
-                <div className={styles.profileName}>นางสาว เขมินทรา พันธุ์บุญปลูก</div>
+                <div className={styles.profileName}>นางสาวเขมินทรา พันธุ์บุญปลูก</div>
                 <div className={styles.profileTitle}>นักกิจกรรมบำบัดชำนาญการ<br/>รองผู้อำนวยการด้านการพัฒนาระบบสุขภาพ</div>
               </div>
               <div className={`${styles.profileCard} ${styles.twoCols}`}>
@@ -143,28 +143,18 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                     <circle cx="12" cy="7" r="4"></circle>
                   </svg>
                 </div>
-                <div className={styles.profileName}>นาย ณัฐวุฒิ ฟูพงษ์</div>
-                <div className={styles.profileTitle}>นักเวชศาสตร์การสื่อความหมายชำนาญการ</div>
-              </div>
-              <div className={`${styles.profileCard} ${styles.twoCols}`}>
-                <div className={styles.avatarCircle}>
-                  <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                  </svg>
-                </div>
-                <div className={styles.profileName}>นางสาว จิรัชญา พิณอุดม</div>
-                <div className={styles.profileTitle}>นักเวชศาสตร์การสื่อความหมายปฏิบัติการ</div>
-              </div>
-              <div className={`${styles.profileCard} ${styles.twoCols}`}>
-                <div className={styles.avatarCircle}>
-                  <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                  </svg>
-                </div>
-                <div className={styles.profileName}>นาย ชุติพงศ์ หาญยุทธ</div>
+                <div className={styles.profileName}>นายชุติพงศ์ หาญยุทธ</div>
                 <div className={styles.profileTitle}>นักวิชาการคอมพิวเตอร์ปฏิบัติการ</div>
+              </div>
+              <div className={`${styles.profileCard} ${styles.twoCols}`}>
+                <div className={styles.avatarCircle}>
+                  <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                </div>
+                <div className={styles.profileName}>นางสาวณิชชารีย์ ชีวรัตนาพันธ์</div>
+                <div className={styles.profileTitle}>นักกิจกรรมบำบัด</div>
               </div>
             </div>
           </div>

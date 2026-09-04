@@ -146,6 +146,10 @@ export default function UserLayout({
         </div>
 
         <nav className={styles.menu}>
+          <div 
+            className={styles.activeIndicator} 
+            style={{ transform: pathname.startsWith('/user/history') ? 'translateX(100%)' : 'translateX(0)' }} 
+          />
           <Link href="/user/games" onClick={() => handleLinkClick('/user/games')} className={`${styles.menuItem} ${pathname === '/user/games' ? styles.active : ''}`}>
             <span className={styles.menuIcon}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
