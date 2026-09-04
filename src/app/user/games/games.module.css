@@ -3,13 +3,17 @@
    ========================================================================== */
 .container {
   width: 100%;
-  height: 100vh;
+  min-height: 100%;
+  height: auto;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 4rem;
+  padding: 3rem 4rem;
   box-sizing: border-box;
-  overflow: hidden;
+}
+
+.footerWrapper {
+  display: none; /* ซ่อนบน Desktop เพื่อให้แสดงผลเฉพาะบนมือถือ */
 }
 
 .title {
@@ -103,7 +107,7 @@
       height: auto;
       min-height: 100%;
       justify-content: flex-start;
-      padding: 0 0 6rem 0;
+      padding: 0 0 10.5rem 0;
       overflow: visible;
     }
   
@@ -123,6 +127,16 @@
       gap: 1.5rem;
       width: 100%;
       margin: 0;
+    }
+
+    .footerWrapper {
+      display: flex;
+      justify-content: center;
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0 1rem;
     }
     
     .gameCard {

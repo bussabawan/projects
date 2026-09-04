@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Footer from '@/app/components/Footer/Footer';
 import styles from './games.module.css';
 
 export default function GameTypesPage() {
@@ -39,6 +40,10 @@ export default function GameTypesPage() {
           <div className={styles.gameTitle}>ความจำ</div>
         </Link>
         
+      </div>
+
+      <div className={styles.footerWrapper}>
+        <Footer inline={true} />
       </div>
     </div>
   );

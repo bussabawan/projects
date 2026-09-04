@@ -82,6 +82,10 @@
   flex: 1;
 }
 
+.sliderIndicator {
+  display: none;
+}
+
 .collapsed .menu {
   padding: 0 0.5rem;
   align-items: center;
@@ -261,7 +265,6 @@
 .mainContent::after {
   content: "";
   display: block;
-  min-height: 4rem;
   flex-shrink: 0;
 }
 
@@ -350,7 +353,7 @@
       flex-direction: column;
       background-color: #fadff8;
       position: relative;
-      padding-bottom: 79px;
+      padding-bottom: calc(85px + env(safe-area-inset-bottom, 0px));
       overflow: hidden;
       box-sizing: border-box;
       -ms-overflow-style: none; /* IE and Edge */
@@ -367,7 +370,7 @@
   
     .sidebar, .sidebar.collapsed {
       position: fixed;
-      bottom: 1.5rem;
+      bottom: calc(2.2rem + env(safe-area-inset-bottom, 0px));
       left: 50%;
       transform: translateX(-50%);
       width: max-content !important;
@@ -375,12 +378,24 @@
       background-color: white;
       border-radius: 30px;
       flex-direction: row;
-      padding: 0.3rem;
+      padding: 0.35rem;
       align-items: center;
       justify-content: center;
-      z-index: 100;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      z-index: 1000;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.16);
       box-sizing: border-box;
+      animation: bottomNavFloat 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes bottomNavFloat {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, 25px);
+      }
+      100% {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
     }
   
     .toggleBtn, .logoContainer, .manualBtn, .collapsed .logoContainer, .collapsed .manualBtn {
@@ -394,11 +409,40 @@
       padding: 0;
       margin: 0;
       gap: 0;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .sliderIndicator {
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 50%;
+      height: 45px;
+      background-color: #dcdcdc;
+      border-radius: 25px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      z-index: 1;
+      pointer-events: none;
+      transition: transform 0.35s cubic-bezier(0.34, 1.25, 0.64, 1);
+      will-change: transform;
+    }
+
+    .menuGamesActive .sliderIndicator {
+      transform: translateX(0%);
+    }
+
+    .menuHistoryActive .sliderIndicator {
+      transform: translateX(100%);
     }
   
     .menuItem, .collapsed .menuItem {
       padding: 0 1.2rem;
-      background: transparent;
+      background: transparent !important;
+      min-width: 145px;
+      flex: 1 1 0;
       width: auto;
       height: 45px;
       border-radius: 25px;
@@ -406,11 +450,44 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      color: #111;
+      color: #555;
+      transition: color 0.25s ease, transform 0.15s ease;
+      position: relative;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      z-index: 2;
+      box-shadow: none !important;
+      white-space: nowrap;
+    }
+
+    .menuItem:hover:not(.active), .collapsed .menuItem:hover:not(.active) {
+      background-color: transparent;
+      transform: translateY(-1px);
+    }
+
+    .menuItem:active, .collapsed .menuItem:active {
+      transform: scale(0.95);
+      transition: transform 0.1s ease;
     }
   
     .menuItem.active, .collapsed .menuItem.active {
-      background-color: #dcdcdc;
+      background-color: transparent !important;
+      color: #000;
+      font-weight: 600;
+      box-shadow: none !important;
+      animation: none !important;
+    }
+
+    .menuItem .menuIcon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s cubic-bezier(0.34, 1.3, 0.64, 1);
+    }
+
+    .menuItem.active .menuIcon {
+      transform: scale(1.1);
+      animation: none !important;
     }
   
     .menuText, .collapsed .menuText {
@@ -427,14 +504,14 @@
       display: flex;
       align-items: center;
       justify-content: flex-end;
-      gap: 1rem;
+      gap: 1.5rem;
       padding: 1.5rem 1.5rem 0.5rem 1.5rem;
       width: 100%;
       box-sizing: border-box;
     }
     
     .mobileUserPill {
-      background-color: #dcdcdc;
+      background-color: #f5f5f5;
       color: #111;
       padding: 0.4rem 1.2rem;
       border-radius: 20px;
@@ -445,13 +522,30 @@
     
     .mobileHomeBtn, .mobileLogoutBtn {
       color: #111;
-      background: none;
-      border: none;
-      padding: 0;
+      background-color: #ffffff;
+      border: 2px solid #f0f0f0;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+      flex-shrink: 0;
+    }
+
+    .mobileHomeBtn:hover, .mobileLogoutBtn:hover {
+      transform: scale(1.06) translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.14);
+      border-color: #e0e0e0;
+    }
+
+    .mobileHomeBtn:active, .mobileLogoutBtn:active {
+      transform: scale(0.92);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     }
   
     .mainContent {
@@ -517,7 +611,7 @@
     .mobileManualBtn {
       display: flex;
       position: fixed;
-      bottom: 95px; /* Above the bottom menu */
+      bottom: calc(115px + env(safe-area-inset-bottom, 0px)); /* Above the raised bottom menu */
       right: 1.5rem;
       width: 50px;
       height: 50px;
@@ -530,14 +624,31 @@
       font-size: 1.8rem;
       font-weight: 600;
       text-decoration: none;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-      z-index: 100;
-      transition: transform 0.2s ease;
+      box-shadow: 0 6px 20px rgba(130, 90, 171, 0.35), 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
       font-family: sans-serif;
+      animation: buttonFloatIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .mobileManualBtn:hover {
+      transform: scale(1.08) translateY(-2px);
+      box-shadow: 0 8px 24px rgba(130, 90, 171, 0.45);
     }
   
     .mobileManualBtn:active {
-      transform: scale(0.95);
+      transform: scale(0.92);
+    }
+
+    @keyframes buttonFloatIn {
+      0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.9);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     }
 }
 

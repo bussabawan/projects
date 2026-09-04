@@ -21,10 +21,13 @@ interface HistoryRow {
   }[];
 }
 
+const THAI_MONTHS = [
+  "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+  "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+];
+
 export default function HistoryPage() {
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
-  
-
 
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
@@ -37,8 +40,124 @@ export default function HistoryPage() {
   const observer = React.useRef<IntersectionObserver | null>(null);
   const rowsPerPage = 7;
 
-  const startDateRef = React.useRef<HTMLInputElement>(null);
-  const endDateRef = React.useRef<HTMLInputElement>(null);
+  // Custom Full-Width Calendar State
+  const [calendarOpen, setCalendarOpen] = useState<'start' | 'end' | null>(null);
+  const [calYear, setCalYear] = useState<number>(() => new Date().getFullYear());
+  const [calMonth, setCalMonth] = useState<number>(() => new Date().getMonth());
+
+  const openCalendar = (type: 'start' | 'end') => {
+    const val = type === 'start' ? startDate : endDate;
+    if (val) {
+      const parts = val.split('-');
+      if (parts.length === 3) {
+        setCalYear(parseInt(parts[0], 10));
+        setCalMonth(parseInt(parts[1], 10) - 1);
+      }
+    } else {
+      const now = new Date();
+      setCalYear(now.getFullYear());
+      setCalMonth(now.getMonth());
+    }
+    setCalendarOpen(type);
+  };
+
+  const handlePrevMonth = () => {
+    if (calMonth === 0) {
+      setCalMonth(11);
+      setCalYear(y => y - 1);
+    } else {
+      setCalMonth(m => m - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (calMonth === 11) {
+      setCalMonth(0);
+      setCalYear(y => y + 1);
+    } else {
+      setCalMonth(m => m + 1);
+    }
+  };
+
+  const handleSelectDate = (dateStr: string) => {
+    if (calendarOpen === 'start') {
+      setStartDate(dateStr);
+    } else if (calendarOpen === 'end') {
+      setEndDate(dateStr);
+    }
+    setCurrentPage(1);
+    setCalendarOpen(null);
+  };
+
+  const handleClearDate = () => {
+    if (calendarOpen === 'start') {
+      setStartDate('');
+    } else if (calendarOpen === 'end') {
+      setEndDate('');
+    }
+    setCurrentPage(1);
+    setCalendarOpen(null);
+  };
+
+  const handleSelectToday = () => {
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    if (calendarOpen === 'start') {
+      setStartDate(todayStr);
+    } else if (calendarOpen === 'end') {
+      setEndDate(todayStr);
+    }
+    setCurrentPage(1);
+    setCalendarOpen(null);
+  };
+
+  const getCalendarDays = () => {
+    const firstDayIndex = (new Date(calYear, calMonth, 1).getDay() + 6) % 7;
+    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+    const daysInPrevMonth = new Date(calYear, calMonth, 0).getDate();
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    const selectedDate = calendarOpen === 'start' ? startDate : endDate;
+
+    const days = [];
+
+    // Prev month trailing days
+    for (let i = firstDayIndex - 1; i >= 0; i--) {
+      days.push({
+        day: daysInPrevMonth - i,
+        dateStr: '',
+        isCurrentMonth: false,
+        isToday: false,
+        isSelected: false,
+      });
+    }
+
+    // Current month days
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      days.push({
+        day: d,
+        dateStr,
+        isCurrentMonth: true,
+        isToday: dateStr === todayStr,
+        isSelected: dateStr === selectedDate,
+      });
+    }
+
+    // Next month leading days
+    const remaining = (7 - (days.length % 7)) % 7;
+    for (let d = 1; d <= remaining; d++) {
+      days.push({
+        day: d,
+        dateStr: '',
+        isCurrentMonth: false,
+        isToday: false,
+        isSelected: false,
+      });
+    }
+
+    return days;
+  };
 
   React.useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 768);
@@ -174,39 +293,29 @@ export default function HistoryPage() {
       <div className={styles.filterSection}>
         <div className={styles.filterGroup}>
           <span>เริ่ม</span>
-          <div className={styles.datePickerWrapper}>
-            <input 
-              type="date" 
-              ref={startDateRef}
-              className={styles.nativeDatePicker}
-              value={startDate}
-              onChange={(e) => { setStartDate(e.target.value); setCurrentPage(1); }}
-            />
-            <button className={styles.datePicker} onClick={() => startDateRef.current?.showPicker()}>
-              {startDate ? formatThaiDate(startDate) : "เลือกวันที่"}
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
-            </button>
-          </div>
+          <button 
+            type="button" 
+            className={`${styles.datePicker} ${calendarOpen === 'start' ? styles.datePickerActive : ''}`} 
+            onClick={() => openCalendar('start')}
+          >
+            {startDate ? formatThaiDate(startDate) : "เลือกวันที่"}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
         </div>
         <div className={styles.filterGroup}>
           <span>สิ้นสุด</span>
-          <div className={styles.datePickerWrapper}>
-            <input 
-              type="date" 
-              ref={endDateRef}
-              className={styles.nativeDatePicker}
-              value={endDate}
-              onChange={(e) => { setEndDate(e.target.value); setCurrentPage(1); }}
-            />
-            <button className={styles.datePicker} onClick={() => endDateRef.current?.showPicker()}>
-              {endDate ? formatThaiDate(endDate) : "เลือกวันที่"}
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
-            </button>
-          </div>
+          <button 
+            type="button" 
+            className={`${styles.datePicker} ${calendarOpen === 'end' ? styles.datePickerActive : ''}`} 
+            onClick={() => openCalendar('end')}
+          >
+            {endDate ? formatThaiDate(endDate) : "เลือกวันที่"}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
         </div>
       </div>
 
@@ -229,6 +338,7 @@ export default function HistoryPage() {
                 key={row.id} 
                 className={styles.rowGroup}
                 ref={index === currentData.length - 1 ? lastElementRef : null}
+                style={{ '--row-index': index } as React.CSSProperties}
               >
                 <div 
                   className={`${styles.mainRow} ${expandedRow === row.id ? styles.expanded : ''}`}
@@ -250,7 +360,10 @@ export default function HistoryPage() {
                       <div 
                         key={detail.id} 
                         className={styles.detailRow}
-                        style={{ backgroundColor: index % 2 === 0 ? '#f5f9fc' : '#e8f1f8' }}
+                        style={{ 
+                          backgroundColor: index % 2 === 0 ? '#f5f9fc' : '#e8f1f8',
+                          '--detail-index': index 
+                        } as React.CSSProperties}
                       >
                         <div>{detail.time}</div>
                         <div className={styles.gameInfo}>
@@ -346,6 +459,72 @@ export default function HistoryPage() {
           </div>
         )}
       </div>
+
+      {/* Full Width Calendar Sheet */}
+      {calendarOpen && (
+        <div className={styles.calendarBackdrop} onClick={() => setCalendarOpen(null)}>
+          <div className={styles.calendarCard} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.calendarTopBar}>
+              <div className={styles.calendarTag}>
+                {calendarOpen === 'start' ? 'เลือกวันที่เริ่มต้น' : 'เลือกวันที่สิ้นสุด'}
+              </div>
+            </div>
+            
+            <div className={styles.calendarHeader}>
+              <button type="button" onClick={handlePrevMonth} className={styles.monthNavBtn} aria-label="Previous Month">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+              </button>
+              <div className={styles.calendarMonthTitle}>
+                {THAI_MONTHS[calMonth]} {calYear}
+              </div>
+              <button type="button" onClick={handleNextMonth} className={styles.monthNavBtn} aria-label="Next Month">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </button>
+            </div>
+
+            <div className={styles.calendarWeekdays}>
+              {['จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส', 'อา'].map((day) => (
+                <div key={day} className={styles.weekdayCell}>{day}</div>
+              ))}
+            </div>
+
+            <div className={styles.calendarDaysGrid}>
+              {getCalendarDays().map((item, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  disabled={!item.isCurrentMonth}
+                  className={`
+                    ${styles.dayCell}
+                    ${!item.isCurrentMonth ? styles.dayCellOutside : ''}
+                    ${item.isToday ? styles.dayCellToday : ''}
+                    ${item.isSelected ? styles.dayCellSelected : ''}
+                  `}
+                  onClick={() => item.isCurrentMonth && handleSelectDate(item.dateStr)}
+                >
+                  {item.day}
+                </button>
+              ))}
+            </div>
+
+            <div className={styles.calendarFooter}>
+              <button type="button" onClick={handleClearDate} className={styles.calActionBtn}>
+                ล้าง
+              </button>
+              <button type="button" onClick={handleSelectToday} className={styles.calActionBtnToday}>
+                วันนี้
+              </button>
+              <button type="button" onClick={() => setCalendarOpen(null)} className={styles.calCloseBtn}>
+                ปิด
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
