@@ -230,8 +230,18 @@ export default function MatchingSettingsPage() {
       </div>
 
       <div className={styles.buttonGroup}>
-        <button className={styles.backBtn} onClick={handleBack}>ย้อนกลับ</button>
-        <button className={styles.startBtn} onClick={handleStart}>เริ่มเกม</button>
+        <button className={styles.backBtn} onClick={handleBack}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px', verticalAlign: 'middle' }}>
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>
+          ย้อนกลับ
+        </button>
+        <button className={styles.startBtn} onClick={handleStart}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px', verticalAlign: 'middle' }}>
+            <polygon points="5 3 19 12 5 21 5 3" />
+          </svg>
+          เริ่มเกม
+        </button>
       </div>
     </div>
   );
