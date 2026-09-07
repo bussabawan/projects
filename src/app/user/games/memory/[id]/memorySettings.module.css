@@ -8,7 +8,7 @@
   height: 115%;
   padding: 2rem;
   padding-bottom: 5rem; /* Prevent footer overlap */
-  background-color: #EFEFEF;
+  background-color: #fafafa;
   border-radius: 10px;
   position: relative;
 }
@@ -77,7 +77,7 @@
   font-weight: bold;
   font-size: 1.5rem;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  z-index: 10;
+  z-index: 30;
   color: #000;
 }
 
@@ -222,6 +222,13 @@
   background: transparent;
   border: none;
   font-weight: bold;
+  -moz-appearance: textfield;
+}
+
+.controlValue::-webkit-outer-spin-button,
+.controlValue::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .buttonGroup {

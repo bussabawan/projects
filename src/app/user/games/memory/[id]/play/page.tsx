@@ -329,7 +329,7 @@ export default function MemoryGamePlayPage() {
 
   if (gameState === 'loading') {
     return (
-      <div className={styles.container}>
+      <div className={styles.container} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <Loader text="กำลังโหลดไฟล์ กรุณารอสักครู่..." />
       </div>
     );
@@ -346,7 +346,7 @@ export default function MemoryGamePlayPage() {
 
   if (gameState === 'summary') {
     return (
-      <div className={styles.container}>
+      <div className={styles.container} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <Loader text="กำลังบันทึกข้อมูลผลการฝึก..." />
       </div>
     );
@@ -364,15 +364,20 @@ export default function MemoryGamePlayPage() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <div className={styles.progressInfo}>
-          ข้อ {currentQuestionIndex + 1} จาก {questions.length}
-        </div>
-        
         <div className={styles.timerContainer}>
           เวลา : {formatTimeMMSS(totalElapsedSeconds)}
         </div>
         
         <div className={styles.controlsContainer}>
+          <button className={styles.endGameBtn} onClick={handleEndGame}>
+            จบเกม
+          </button>
+        </div>
+      </div>
+
+      <div className={styles.progressSection}>
+        <div className={styles.progressInfo}>
+          ข้อ {currentQuestionIndex + 1} จาก {questions.length}
           <button className={styles.audioBtn} onClick={toggleMute}>
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               {isMuted ? (
@@ -390,9 +395,15 @@ export default function MemoryGamePlayPage() {
               )}
             </svg>
           </button>
-          <button className={styles.endGameBtn} onClick={handleEndGame}>
-            จบเกม
-          </button>
+        </div>
+        <div className={styles.progressBarWrapper}>
+          <div 
+            className={styles.progressBarFill} 
+            style={{ width: `${Math.round(((currentQuestionIndex + 1) / questions.length) * 100)}%` }}
+          ></div>
+          <div className={styles.progressPercentText}>
+            {Math.round(((currentQuestionIndex + 1) / questions.length) * 100)}%
+          </div>
         </div>
       </div>
 

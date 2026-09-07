@@ -78,7 +78,7 @@
   font-weight: bold;
   font-size: 1.5rem;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  z-index: 10;
+  z-index: 30;
   color: #000;
 }
 
@@ -103,7 +103,7 @@
 }
 
 .wordText {
-  font-size: 3.5rem;
+  font-size: 2.5rem;
   font-weight: 500;
   color: #000;
   text-align: center;
@@ -240,6 +240,13 @@
   background: transparent;
   border: none;
   font-weight: bold;
+  -moz-appearance: textfield;
+}
+
+.controlValue::-webkit-outer-spin-button,
+.controlValue::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .buttonGroup {

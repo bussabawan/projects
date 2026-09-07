@@ -134,12 +134,12 @@
 
 .popupBtnCancel {
   background-color: #f8b4aa;
-  color: white;
+  color: #000000;
   border: none;
 }
 
 .popupBtnCancel:hover {
-  background-color: #dfa299;
+  background-color: #f8b4aa;
 }
 
 /* ==========================================================================

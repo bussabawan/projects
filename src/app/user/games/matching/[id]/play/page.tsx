@@ -302,7 +302,7 @@ export default function MatchingGamePage() {
 
   if (loading) {
     return (
-      <div className={styles.container}>
+      <div className={styles.container} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <Loader text="กำลังโหลดไฟล์ กรุณารอสักครู่..." />
       </div>
     );
@@ -322,7 +322,7 @@ export default function MatchingGamePage() {
 
   if (isFinished) {
     return (
-      <div className={styles.container}>
+      <div className={styles.container} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <Loader text="กำลังบันทึกข้อมูลผลการฝึก..." />
       </div>
     );
@@ -340,22 +340,30 @@ export default function MatchingGamePage() {
           เวลา : {formatTime(elapsedSeconds)}
         </div>
         <div className={styles.headerRight}>
-          <button className={styles.audioBtnDesktop} onClick={toggleMute} aria-label="Toggle Audio">
-            <VolumeIcon isMuted={isMuted} />
-          </button>
           <button className={styles.endGameBtn} onClick={handleEndGame}>
             จบเกม
           </button>
         </div>
       </div>
 
-      <div className={styles.progressContainer}>
-        <div className={styles.progressText}>
-          ข้อ {currentIndex + 1} จาก {questions.length}
+      <div className={styles.progressSection}>
+        <div className={styles.progressContainer}>
+          <div className={styles.progressText}>
+            ข้อ {currentIndex + 1} จาก {questions.length}
+          </div>
+          <button className={styles.audioBtn} onClick={toggleMute} aria-label="Toggle Audio">
+            <VolumeIcon isMuted={isMuted} />
+          </button>
         </div>
-        <button className={styles.audioBtnMobile} onClick={toggleMute} aria-label="Toggle Audio">
-          <VolumeIcon isMuted={isMuted} />
-        </button>
+        <div className={styles.progressBarWrapper}>
+          <div 
+            className={styles.progressBarFill} 
+            style={{ width: `${Math.round(((currentIndex + 1) / questions.length) * 100)}%` }}
+          ></div>
+          <div className={styles.progressPercentText}>
+            {Math.round(((currentIndex + 1) / questions.length) * 100)}%
+          </div>
+        </div>
       </div>
 
       <div className={styles.gameArea}>

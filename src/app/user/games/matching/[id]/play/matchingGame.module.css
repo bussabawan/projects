@@ -6,7 +6,7 @@
   box-sizing: border-box;
   overflow: hidden;
   padding: 2rem 4rem;
-  background-color: #f0f0f0; /* Match setting page if possible, or just gray */
+  background-color: #f8f8f8; /* Match setting page if possible, or just gray */
   position: relative;
   display: flex;
   flex-direction: column;
@@ -33,7 +33,7 @@
   gap: 1.5rem;
 }
 
-.audioBtnDesktop {
+.audioBtn {
   background-color: #ffffff;
   border: 2px solid #e0e0e0;
   border-radius: 50%;
@@ -48,33 +48,14 @@
   box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 
-.audioBtnDesktop svg {
+.audioBtn svg {
   width: 24px;
   height: 24px;
 }
 
-.audioBtnDesktop:hover {
+.audioBtn:hover {
   transform: scale(1.05);
   box-shadow: 0 4px 10px rgba(0,0,0,0.12);
-}
-
-.audioBtnMobile {
-  display: none;
-  background-color: #ffffff;
-  border: 2px solid #e0e0e0;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  cursor: pointer;
-  color: #333;
-  transition: all 0.2s ease;
-  padding: 0;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-}
-
-.audioBtnMobile svg {
-  width: 20px;
-  height: 20px;
 }
 
 .endGameBtn {
@@ -93,10 +74,53 @@
   background-color: #dfa299;
 }
 
+.progressSection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 3rem;
+  width: 100%;
+}
+
+.progressContainer {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.progressBarWrapper {
+  width: 100%;
+  max-width: 400px;
+  background-color: #e0e0e0;
+  border-radius: 20px;
+  height: 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.15);
+}
+
+.progressBarFill {
+  height: 100%;
+  background-color: #9ffaac;
+  transition: width 0.4s ease;
+  border-radius: 20px;
+}
+
+.progressPercentText {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111;
+  z-index: 2;
+}
+
 .progressText {
   font-size: 2.5rem;
   font-weight: 500;
-  margin-bottom: 3rem;
   color: #111;
 }
 
@@ -367,7 +391,7 @@
     }
   
     .timer {
-      font-size: 1.1rem;
+      font-size: 1.5rem;
       padding: 0.5rem 1rem;
       background-color: #ffffff;
     }
@@ -377,26 +401,36 @@
       font-size: 1rem;
     }
   
-    .audioBtnDesktop {
-      display: none;
+    .audioBtn {
+      width: 40px;
+      height: 40px;
+      padding: 0;
+    }
+
+    .audioBtn svg {
+      width: 20px;
+      height: 20px;
     }
   
-    .audioBtnMobile {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .progressSection {
+      margin-bottom: 1.5rem;
     }
-  
+
     .progressContainer {
       display: flex;
-      flex-direction: column;
-      align-items: flex-start;
+      flex-direction: row;
+      align-items: center;
+      gap: 1.5rem;
       margin-bottom: 1rem;
     }
   
+    .progressBarWrapper {
+      max-width: 100%;
+    }
+  
     .progressText {
-      font-size: 1.2rem;
-      margin-bottom: 0.5rem;
+      font-size: 1.5rem;
+      margin-bottom: 0;
     }
   
     .gameArea {
