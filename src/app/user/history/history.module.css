@@ -27,302 +27,47 @@
 .filterGroup {
   display: flex;
   align-items: center;
-  gap: 0.8rem;
+  gap: 0.5rem;
 }
 
 .filterGroup span {
-  min-width: 48px;
-  font-weight: 500;
-  color: #333;
+  min-width: 45px;
+}
+
+.datePickerWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.nativeDatePicker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2; /* Ensure it is above the custom button */
 }
 
 .datePicker {
   background-color: #ffffff;
-  border: 1.5px solid #eaeaea;
-  padding: 0.6rem 1.2rem;
+  border: none;
+  padding: 0.5rem 1rem;
   border-radius: 20px;
   font-size: 1rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-width: 160px;
+  min-width: 200px;
   color: #333;
+  position: relative;
+  z-index: 3; /* Above the invisible input so it receives clicks */
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  transition: all 0.2s ease;
-  font-family: inherit;
-}
-
-.datePicker:hover, .datePickerActive {
-  border-color: #825aab;
-  background-color: #faf6fd;
-  box-shadow: 0 4px 12px rgba(130, 90, 171, 0.12);
 }
 
 .datePicker svg {
   margin-left: 0.5rem;
-  color: #666;
-  transition: transform 0.2s ease;
-}
-
-.datePickerActive svg {
-  transform: rotate(180deg);
-  color: #825aab;
-}
-
-/* ==========================================================================
-   Custom Calendar (Full Width / Sheet)
-   ========================================================================== */
-.calendarBackdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(3px);
-  z-index: 2000;
-  display: flex;
-  align-items: flex-end; /* Mobile Bottom Sheet */
-  justify-content: center;
-  animation: calBackdropFade 0.2s ease-out;
-}
-
-@keyframes calBackdropFade {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.calendarCard {
-  width: 100%;
-  max-width: 100%; /* เต็มหน้าจอซ้ายขวา */
-  background-color: #ffffff;
-  border-top-left-radius: 28px;
-  border-top-right-radius: 28px;
-  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2);
-  padding: 1.5rem 1.2rem calc(1.8rem + env(safe-area-inset-bottom, 0px)) 1.2rem;
-  box-sizing: border-box;
-  animation: calSlideUp 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  display: flex;
-  flex-direction: column;
-  gap: 1.1rem;
-}
-
-@keyframes calSlideUp {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
-  }
-}
-
-.calendarTopBar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.calendarTag {
-  background-color: #f3ecf8;
-  color: #723b9d;
-  font-size: 0.95rem;
-  font-weight: 600;
-  padding: 0.35rem 1.2rem;
-  border-radius: 20px;
-}
-
-.calendarHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 0.5rem;
-}
-
-.calendarMonthTitle {
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: #111;
-  letter-spacing: -0.2px;
-}
-
-.monthNavBtn {
-  background: #f4f4f7;
-  border: none;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #333;
-  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  -webkit-tap-highlight-color: transparent;
-}
-
-.monthNavBtn:hover {
-  background: #e8e8ed;
-  transform: scale(1.08);
-}
-
-.monthNavBtn:active {
-  transform: scale(0.92);
-}
-
-.calendarWeekdays {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  text-align: center;
-  font-weight: 600;
-  font-size: 1.05rem;
-  color: #888;
-  padding-bottom: 0.6rem;
-  border-bottom: 1.5px solid #f0f0f4;
-}
-
-.weekdayCell {
-  padding: 0.2rem 0;
-}
-
-.calendarDaysGrid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 0.45rem;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.dayCell {
-  aspect-ratio: 1;
-  min-height: 44px;
-  border: none;
-  background: transparent;
-  border-radius: 50%;
-  font-size: 1.2rem;
-  font-weight: 500;
-  color: #222;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  -webkit-tap-highlight-color: transparent;
-  font-family: inherit;
-}
-
-.dayCell:hover:not(:disabled) {
-  background-color: #f2f2f7;
-  transform: scale(1.08);
-}
-
-.dayCell:active:not(:disabled) {
-  transform: scale(0.92);
-}
-
-.dayCellOutside {
-  color: #ccc !important;
-  cursor: default !important;
-  pointer-events: none;
-}
-
-.dayCellToday {
-  border: 2px solid #825aab;
-  font-weight: 700;
-  color: #825aab;
-}
-
-.dayCellSelected {
-  background-color: #3b82f6 !important;
-  color: #ffffff !important;
-  font-weight: 700;
-  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
-  transform: scale(1.05);
-}
-
-.calendarFooter {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding-top: 0.8rem;
-  border-top: 1.5px solid #f0f0f4;
-  margin-top: 0.4rem;
-}
-
-.calActionBtn {
-  background: none;
-  border: none;
-  color: #e53e3e;
-  font-size: 1.05rem;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 0.6rem 1rem;
-  border-radius: 14px;
-  transition: background-color 0.2s;
-  font-family: inherit;
-}
-
-.calActionBtn:hover {
-  background-color: #fff5f5;
-}
-
-.calActionBtnToday {
-  background: none;
-  border: none;
-  color: #3b82f6;
-  font-size: 1.05rem;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 0.6rem 1.2rem;
-  border-radius: 14px;
-  transition: background-color 0.2s;
-  font-family: inherit;
-}
-
-.calActionBtnToday:hover {
-  background-color: #ebf5ff;
-}
-
-.calCloseBtn {
-  background-color: #f0f0f4;
-  border: none;
-  color: #333;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 0.6rem 1.5rem;
-  border-radius: 20px;
-  transition: all 0.2s;
-  font-family: inherit;
-}
-
-.calCloseBtn:hover {
-  background-color: #e2e2e8;
-}
-
-@media (min-width: 769px) {
-  .calendarBackdrop {
-    align-items: center;
-  }
-
-  .calendarCard {
-    max-width: 460px; /* Big and generous on desktop/tablet */
-    border-radius: 28px;
-    padding: 2rem;
-    animation: calPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-
-  @keyframes calPopIn {
-    from {
-      opacity: 0;
-      transform: scale(0.92);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
 }
 
 .tableContainer {
@@ -333,18 +78,6 @@
   display: flex;
   flex-direction: column;
   flex: 1;
-  animation: tableFadeIn 0.35s ease-out;
-}
-
-@keyframes tableFadeIn {
-  0% {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .tableHeader {
@@ -371,19 +104,6 @@
 
 .rowGroup {
   border-bottom: 1px solid #f0f0f0;
-  animation: rowSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
-  animation-delay: calc(var(--row-index, 0) * 0.04s);
-}
-
-@keyframes rowSlideIn {
-  0% {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .rowGroup:last-child {
@@ -396,16 +116,12 @@
   padding: 1.2rem 2rem;
   align-items: center;
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  transition: background-color 0.2s;
   font-size: 1.1rem;
 }
 
 .mainRow:hover {
-  background-color: #f8fafc;
-}
-
-.mainRow:active {
-  transform: scale(0.995);
+  background-color: #f9f9f9;
 }
 
 .mainRow > div:first-child {
@@ -417,42 +133,39 @@
   color: #000;
   border-top-left-radius: 12px;
   border-top-right-radius: 12px;
-  box-shadow: inset 4px 0 0 #3b82f6;
-  transition: background-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .expandIcon {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.3s ease;
 }
 
 .expanded .expandIcon {
   transform: rotate(180deg);
 }
 
+.detailsWrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease-in-out;
+}
+
+.detailsWrapper.expanded {
+  grid-template-rows: 1fr;
+}
+
 .detailsContainer {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.detailsInner {
   background-color: #f5f9fc;
   padding: 0 1rem;
   border-bottom-left-radius: 12px;
   border-bottom-right-radius: 12px;
-  overflow: hidden;
-  animation: expandDetails 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  transform-origin: top;
-}
-
-@keyframes expandDetails {
-  0% {
-    opacity: 0;
-    max-height: 0;
-    transform: translateY(-6px) scaleY(0.97);
-  }
-  100% {
-    opacity: 1;
-    max-height: 800px;
-    transform: translateY(0) scaleY(1);
-  }
 }
 
 .detailRow {
@@ -462,24 +175,6 @@
   align-items: center;
   border-bottom: 1px solid #ccc;
   font-size: 1.05rem;
-  animation: detailRowFade 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
-  animation-delay: calc(var(--detail-index, 0) * 0.035s);
-  transition: background-color 0.2s ease, filter 0.2s ease;
-}
-
-.detailRow:hover {
-  filter: brightness(0.97);
-}
-
-@keyframes detailRowFade {
-  0% {
-    opacity: 0;
-    transform: translateX(-8px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
 }
 
 .detailRow:last-child {
@@ -502,11 +197,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.detailRow:hover .gameIcon {
-  transform: scale(1.1);
 }
 
 .gameIconMatching {
@@ -601,25 +291,9 @@
 
     .filterSection {
       flex-direction: column;
-      align-items: stretch;
-      gap: 0.8rem;
-      margin-bottom: 1.2rem;
-      width: 100%;
-    }
-    
-    .filterGroup {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.8rem;
-    }
-
-    .datePicker {
-      flex: 1;
-      width: 100%;
-      min-width: 0;
-      box-sizing: border-box;
+      align-items: flex-start;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
     }
     
     .tableHeader {

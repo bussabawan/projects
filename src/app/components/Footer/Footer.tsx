@@ -6,11 +6,7 @@ import { usePathname } from 'next/navigation';
 import AboutModal from '@/app/components/AboutModal/AboutModal';
 import styles from './Footer.module.css';
 
-interface FooterProps {
-  inline?: boolean;
-}
-
-export default function Footer({ inline = false }: FooterProps) {
+export default function Footer() {
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
   const pathname = usePathname() || '';
 
@@ -22,17 +18,21 @@ export default function Footer({ inline = false }: FooterProps) {
   // ถ้าไม่ใช่หน้าหลัก (เช่น /login, หน้าเล่นเกม, ตั้งค่าเกม, สรุปคะแนน) ให้ footer ชิดขวาล่าง
   const isCornerPage = !(isUserMainPage || isAdminPage);
 
-  const isUserPage = pathname.startsWith('/user');
-
   return (
-    <div
-      className={`
-        ${styles.footerContainer}
-        ${inline ? styles.inlineFooter : ''}
-        ${isCornerPage && !inline ? styles.cornerFixed : ''}
-        ${!inline && isUserPage ? styles.hideOnMobile : ''}
-      `}
-    >
+    <div className={`${styles.footerContainer} ${isCornerPage ? styles.cornerFixed : ''}`}>
+      <div className={styles.mobileCreatorsContainer}>
+        <button onClick={() => setIsAboutModalOpen(true)} className={styles.mobileCreatorsLink} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="2" y="5" width="20" height="14" rx="3" />
+            <circle cx="8" cy="9" r="1.5" />
+            <path d="M4.5 16a3.5 3.5 0 0 1 7 0" />
+            <line x1="14" y1="10" x2="18" y2="10" />
+            <line x1="14" y1="14" x2="18" y2="14" />
+          </svg>
+          เกี่ยวกับผู้จัดทำ
+        </button>
+      </div>
+      <hr className={styles.mobileDivider} />
       <div className={styles.footerText}>
         © 2026 ระบบ<span className={styles.dots}>&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;</span> (OT)
       </div>
@@ -43,16 +43,6 @@ export default function Footer({ inline = false }: FooterProps) {
         <Link href="https://www.vjlh.go.th/about/structureIT" target="_blank" rel="noopener noreferrer">
           เงื่อนไขการให้บริการ | นโยบายความเป็นส่วนตัว
         </Link>
-        <span className={styles.mobileCreatorsWrapper}>
-          {" | "}
-          <button
-            onClick={() => setIsAboutModalOpen(true)}
-            className={styles.mobileCreatorsInlineBtn}
-            type="button"
-          >
-            เกี่ยวกับผู้จัดทำ
-          </button>
-        </span>
       </div>
       <AboutModal isOpen={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)} />
     </div>

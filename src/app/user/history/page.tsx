@@ -23,13 +23,10 @@ interface HistoryRow {
   }[];
 }
 
-const THAI_MONTHS = [
-  "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
-  "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
-];
-
 export default function HistoryPage() {
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
+  
+
 
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
@@ -41,129 +38,8 @@ export default function HistoryPage() {
   const [isMobile, setIsMobile] = useState(false);
   const [isStartPickerOpen, setIsStartPickerOpen] = useState(false);
   const [isEndPickerOpen, setIsEndPickerOpen] = useState(false);
-  const startDateRef = React.useRef<HTMLInputElement>(null);
-  const endDateRef = React.useRef<HTMLInputElement>(null);
   const observer = React.useRef<IntersectionObserver | null>(null);
   const rowsPerPage = 7;
-
-  // Custom Full-Width Calendar State
-  const [calendarOpen, setCalendarOpen] = useState<'start' | 'end' | null>(null);
-  const [calYear, setCalYear] = useState<number>(() => new Date().getFullYear());
-  const [calMonth, setCalMonth] = useState<number>(() => new Date().getMonth());
-
-  const openCalendar = (type: 'start' | 'end') => {
-    const val = type === 'start' ? startDate : endDate;
-    if (val) {
-      const parts = val.split('-');
-      if (parts.length === 3) {
-        setCalYear(parseInt(parts[0], 10));
-        setCalMonth(parseInt(parts[1], 10) - 1);
-      }
-    } else {
-      const now = new Date();
-      setCalYear(now.getFullYear());
-      setCalMonth(now.getMonth());
-    }
-    setCalendarOpen(type);
-  };
-
-  const handlePrevMonth = () => {
-    if (calMonth === 0) {
-      setCalMonth(11);
-      setCalYear(y => y - 1);
-    } else {
-      setCalMonth(m => m - 1);
-    }
-  };
-
-  const handleNextMonth = () => {
-    if (calMonth === 11) {
-      setCalMonth(0);
-      setCalYear(y => y + 1);
-    } else {
-      setCalMonth(m => m + 1);
-    }
-  };
-
-  const handleSelectDate = (dateStr: string) => {
-    if (calendarOpen === 'start') {
-      setStartDate(dateStr);
-    } else if (calendarOpen === 'end') {
-      setEndDate(dateStr);
-    }
-    setCurrentPage(1);
-    setCalendarOpen(null);
-  };
-
-  const handleClearDate = () => {
-    if (calendarOpen === 'start') {
-      setStartDate('');
-    } else if (calendarOpen === 'end') {
-      setEndDate('');
-    }
-    setCurrentPage(1);
-    setCalendarOpen(null);
-  };
-
-  const handleSelectToday = () => {
-    const now = new Date();
-    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    if (calendarOpen === 'start') {
-      setStartDate(todayStr);
-    } else if (calendarOpen === 'end') {
-      setEndDate(todayStr);
-    }
-    setCurrentPage(1);
-    setCalendarOpen(null);
-  };
-
-  const getCalendarDays = () => {
-    const firstDayIndex = (new Date(calYear, calMonth, 1).getDay() + 6) % 7;
-    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-    const daysInPrevMonth = new Date(calYear, calMonth, 0).getDate();
-    const today = new Date();
-    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-    const selectedDate = calendarOpen === 'start' ? startDate : endDate;
-
-    const days = [];
-
-    // Prev month trailing days
-    for (let i = firstDayIndex - 1; i >= 0; i--) {
-      days.push({
-        day: daysInPrevMonth - i,
-        dateStr: '',
-        isCurrentMonth: false,
-        isToday: false,
-        isSelected: false,
-      });
-    }
-
-    // Current month days
-    for (let d = 1; d <= daysInMonth; d++) {
-      const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-      days.push({
-        day: d,
-        dateStr,
-        isCurrentMonth: true,
-        isToday: dateStr === todayStr,
-        isSelected: dateStr === selectedDate,
-      });
-    }
-
-    // Next month leading days
-    const remaining = (7 - (days.length % 7)) % 7;
-    for (let d = 1; d <= remaining; d++) {
-      days.push({
-        day: d,
-        dateStr: '',
-        isCurrentMonth: false,
-        isToday: false,
-        isSelected: false,
-      });
-    }
-
-    return days;
-  };
 
   React.useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 768);
@@ -300,49 +176,37 @@ export default function HistoryPage() {
         <div className={styles.filterGroup}>
           <span>เริ่ม</span>
           <div className={styles.datePickerWrapper}>
-            <input 
-              type="date" 
-              ref={startDateRef}
-              className={styles.nativeDatePicker}
-              value={startDate}
-              onChange={(e) => { setStartDate(e.target.value); setCurrentPage(1); }}
-            />
-            <button className={styles.datePicker} onClick={() => {
-              if (isMobile) {
-                setIsStartPickerOpen(true);
-              } else {
-                startDateRef.current?.showPicker();
-              }
-            }}>
+            <button className={styles.datePicker} onClick={() => setIsStartPickerOpen(true)}>
               {startDate ? formatThaiDate(startDate) : "เลือกวันที่"}
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
             </button>
+            <DatePicker 
+              isOpen={isStartPickerOpen} 
+              onClose={() => setIsStartPickerOpen(false)} 
+              onSelect={(date) => { setStartDate(date); setCurrentPage(1); }} 
+              initialDate={startDate} 
+              title="เลือกวันที่เริ่มต้น" 
+            />
           </div>
         </div>
         <div className={styles.filterGroup}>
           <span>สิ้นสุด</span>
           <div className={styles.datePickerWrapper}>
-            <input 
-              type="date" 
-              ref={endDateRef}
-              className={styles.nativeDatePicker}
-              value={endDate}
-              onChange={(e) => { setEndDate(e.target.value); setCurrentPage(1); }}
-            />
-            <button className={styles.datePicker} onClick={() => {
-              if (isMobile) {
-                setIsEndPickerOpen(true);
-              } else {
-                endDateRef.current?.showPicker();
-              }
-            }}>
+            <button className={styles.datePicker} onClick={() => setIsEndPickerOpen(true)}>
               {endDate ? formatThaiDate(endDate) : "เลือกวันที่"}
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
             </button>
+            <DatePicker 
+              isOpen={isEndPickerOpen} 
+              onClose={() => setIsEndPickerOpen(false)} 
+              onSelect={(date) => { setEndDate(date); setCurrentPage(1); }} 
+              initialDate={endDate} 
+              title="เลือกวันที่สิ้นสุด" 
+            />
           </div>
         </div>
       </div>
@@ -366,7 +230,6 @@ export default function HistoryPage() {
                 key={row.id} 
                 className={styles.rowGroup}
                 ref={index === currentData.length - 1 ? lastElementRef : null}
-                style={{ '--row-index': index } as React.CSSProperties}
               >
                 <div 
                   className={`${styles.mainRow} ${expandedRow === row.id ? styles.expanded : ''}`}
@@ -382,50 +245,51 @@ export default function HistoryPage() {
                   </div>
                 </div>
 
-                {expandedRow === row.id && row.details.length > 0 && (
-                  <div className={styles.detailsContainer}>
-                    {row.details.map((detail, index) => (
-                      <div 
-                        key={detail.id} 
-                        className={styles.detailRow}
-                        style={{ 
-                          backgroundColor: index % 2 === 0 ? '#f5f9fc' : '#e8f1f8',
-                          '--detail-index': index 
-                        } as React.CSSProperties}
-                      >
-                        <div>{detail.time}</div>
-                        <div className={styles.gameInfo}>
-                          <div className={`${styles.gameIcon} ${detail.game === 'จับคู่' ? styles.gameIconMatching : detail.game === 'ความจำ' ? styles.gameIconMemory : ''}`}>
-                            {detail.game === 'จับคู่' ? (
-                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <path d="M14.5 12h-5a2.5 2.5 0 0 1-2.5-2.5v-5"></path>
-                                <path d="M9.5 12h5a2.5 2.5 0 0 1 2.5 2.5v5"></path>
-                                <rect x="5.5" y="4.5" width="4" height="4" rx="1"></rect>
-                                <rect x="14.5" y="15.5" width="4" height="4" rx="1"></rect>
-                                <circle cx="9.5" cy="15.5" r="1.5" fill="currentColor"></circle>
-                                <circle cx="14.5" cy="8.5" r="1.5" fill="currentColor"></circle>
-                              </svg>
-                            ) : detail.game === 'ความจำ' ? (
-                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"></path>
-                                <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"></path>
-                                <line x1="12" y1="4.5" x2="12" y2="19.5"></line>
-                              </svg>
-                            ) : (
-                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                <circle cx="12" cy="10" r="3"></circle>
-                                <path d="M7 21v-2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2"></path>
-                              </svg>
-                            )}
+                {row.details.length > 0 && (
+                  <div className={`${styles.detailsWrapper} ${expandedRow === row.id ? styles.expanded : ''}`}>
+                    <div className={styles.detailsContainer}>
+                      <div className={styles.detailsInner}>
+                        {row.details.map((detail, index) => (
+                          <div 
+                            key={detail.id} 
+                            className={styles.detailRow}
+                            style={{ backgroundColor: index % 2 === 0 ? '#f5f9fc' : '#e8f1f8' }}
+                          >
+                            <div>{detail.time}</div>
+                            <div className={styles.gameInfo}>
+                              <div className={`${styles.gameIcon} ${detail.game === 'จับคู่' ? styles.gameIconMatching : detail.game === 'ความจำ' ? styles.gameIconMemory : ''}`}>
+                                {detail.game === 'จับคู่' ? (
+                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <path d="M14.5 12h-5a2.5 2.5 0 0 1-2.5-2.5v-5"></path>
+                                    <path d="M9.5 12h5a2.5 2.5 0 0 1 2.5 2.5v5"></path>
+                                    <rect x="5.5" y="4.5" width="4" height="4" rx="1"></rect>
+                                    <rect x="14.5" y="15.5" width="4" height="4" rx="1"></rect>
+                                    <circle cx="9.5" cy="15.5" r="1.5" fill="currentColor"></circle>
+                                    <circle cx="14.5" cy="8.5" r="1.5" fill="currentColor"></circle>
+                                  </svg>
+                                ) : detail.game === 'ความจำ' ? (
+                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"></path>
+                                    <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"></path>
+                                    <line x1="12" y1="4.5" x2="12" y2="19.5"></line>
+                                  </svg>
+                                ) : (
+                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                    <path d="M7 21v-2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2"></path>
+                                  </svg>
+                                )}
+                              </div>
+                              {detail.game}
+                            </div>
+                            <div className={styles.detailScore}>{detail.score}</div>
+                            <div className={styles.detailDuration}>{detail.duration}</div>
                           </div>
-                          {detail.game}
-                        </div>
-                        <div className={styles.detailScore}>{detail.score}</div>
-                        <div className={styles.detailDuration}>{detail.duration}</div>
+                        ))}
                       </div>
-                    ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -487,27 +351,6 @@ export default function HistoryPage() {
           </div>
         )}
       </div>
-
-      {isMobile && (
-        <>
-          <DatePicker 
-            isOpen={isStartPickerOpen}
-            onClose={() => setIsStartPickerOpen(false)}
-            onSelect={(date) => { setStartDate(date); setCurrentPage(1); }}
-            initialDate={startDate}
-            title="เลือกวันที่เริ่มต้น"
-          />
-          <DatePicker 
-            isOpen={isEndPickerOpen}
-            onClose={() => setIsEndPickerOpen(false)}
-            onSelect={(date) => { setEndDate(date); setCurrentPage(1); }}
-            initialDate={endDate}
-            title="เลือกวันที่สิ้นสุด"
-          />
-        </>
-      )}
-
-      <Footer inline={true} />
     </div>
   );
 }
