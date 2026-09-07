@@ -84,8 +84,8 @@
 }
 
 .endGameBtn {
-  background-color: #F38776;
-  color: white;
+  background-color: #f8b4aa;
+  color: #000;
   border: none;
   padding: 10px 30px;
   border-radius: 10px;
@@ -96,7 +96,7 @@
 }
 
 .endGameBtn:hover {
-  background-color: #E27665;
+  background-color: #dfa299;
 }
 
 /* Question Phase Styles */

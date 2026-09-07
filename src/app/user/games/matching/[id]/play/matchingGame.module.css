@@ -78,8 +78,8 @@
 }
 
 .endGameBtn {
-  background-color: #F38776;
-  color: white;
+  background-color: #f8b4aa;
+  color: #000;
   border: none;
   border-radius: 12px;
   padding: 0.8rem 2.5rem;
@@ -90,7 +90,7 @@
 }
 
 .endGameBtn:hover {
-  background-color: #e27564;
+  background-color: #dfa299;
 }
 
 .progressText {

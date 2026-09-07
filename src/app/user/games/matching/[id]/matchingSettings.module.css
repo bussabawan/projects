@@ -270,19 +270,19 @@
 }
 
 .startBtn {
-  background-color: #76f387;
+  background-color: #9ffaac;
 }
 
 .startBtn:hover {
-  background-color: #5edb6f;
+  background-color: #8be499;
 }
 
 .backBtn {
-  background-color: #F38776;
+  background-color: #f8b4aa;
 }
 
 .backBtn:hover {
-  background-color: #db796a;
+  background-color: #dfa299;
 }
 
 .audioToggleBtn {

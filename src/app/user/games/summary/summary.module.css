@@ -27,8 +27,8 @@
 }
 
 .backBtn {
-  background-color: #F38776;
-  color: white;
+  background-color: #f8b4aa;
+  color: #000;
   border: none;
   padding: 10px 30px;
   border-radius: 25px;
@@ -226,8 +226,8 @@
     
     .mobileBackBtn {
       display: block;
-      background-color: #F38776;
-      color: white;
+      background-color: #f8b4aa;
+      color: #000;
       border: none;
       padding: 12px 30px;
       border-radius: 25px;
