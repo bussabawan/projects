@@ -4,8 +4,6 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Loader from '@/app/components/Loader/Loader';
 import styles from './matching.module.css';
-
-
 import { useDebounce } from '@/app/hooks/useDebounce';
 
 export default function MatchingCategoryClient() {

@@ -6,8 +6,8 @@ import Image from "next/image";
 import Loader from "@/app/components/Loader/Loader";
 import styles from "./images.module.css";
 import ImageFormModal from "./components/ImageFormModal";
-import DeleteConfirmModal from "../components/DeleteConfirmModal";
-import RestoreConfirmModal from "../components/RestoreConfirmModal";
+import DeleteConfirmModal from "@/app/components/Admin/DeleteConfirmModal";
+import RestoreConfirmModal from "@/app/components/Admin/RestoreConfirmModal";
 import { useDebounce } from '@/app/hooks/useDebounce';
 
 function CardImage({ src, alt }: { src: string; alt: string }) {

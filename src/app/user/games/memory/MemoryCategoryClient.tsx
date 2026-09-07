@@ -5,7 +5,6 @@ import Link from 'next/link';
 import Loader from '@/app/components/Loader/Loader';
 import styles from './memory.module.css';
 
-
 interface Exercise {
   exercises_id: number;
   exercises_name: string;

@@ -4,9 +4,9 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 
 import Loader from "@/app/components/Loader/Loader";
-import DeleteConfirmModal from "@/app/admin/components/DeleteConfirmModal";
-import RestoreConfirmModal from "@/app/admin/components/RestoreConfirmModal";
-import AlertModal from "@/app/admin/components/AlertModal";
+import DeleteConfirmModal from "@/app/components/Admin/DeleteConfirmModal";
+import RestoreConfirmModal from "@/app/components/Admin/RestoreConfirmModal";
+import AlertModal from "@/app/components/Admin/AlertModal";
 import styles from "./exercises.module.css";
 import { useDebounce } from '@/app/hooks/useDebounce';
 
