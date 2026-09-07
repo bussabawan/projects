@@ -349,8 +349,13 @@
     padding-bottom: 1.5rem;
   }
   .categoryBtn {
-    padding: 1rem 0.5rem;
+    padding: 1rem;
     font-size: 1.1rem;
+    border-radius: 15px;
+    min-height: 90px;
+  }
+  .skeletonCard {
+    min-height: 90px;
     border-radius: 15px;
   }
   .backBtn {

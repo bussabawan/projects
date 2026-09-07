@@ -145,7 +145,7 @@ export default function UserLayout({
           </div>
         </div>
 
-        <nav className={styles.menu}>
+        <nav className={`${styles.menu} ${pathname.startsWith('/user/history') ? styles.historyActive : styles.gamesActive}`}>
           <Link href="/user/games" onClick={() => handleLinkClick('/user/games')} className={`${styles.menuItem} ${pathname === '/user/games' ? styles.active : ''}`}>
             <span className={styles.menuIcon}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

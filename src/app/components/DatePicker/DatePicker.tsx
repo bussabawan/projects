@@ -120,7 +120,8 @@ export default function DatePicker({ isOpen, onClose, onSelect, initialDate, tit
   };
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
+    <>
+      <div className={styles.backdrop} onClick={onClose} />
       <div className={styles.bottomSheet} onClick={(e) => e.stopPropagation()}>
         {title && <div className={styles.titlePill}>{title}</div>}
         
@@ -167,6 +168,6 @@ export default function DatePicker({ isOpen, onClose, onSelect, initialDate, tit
           <button className={styles.closeButton} onClick={onClose}>ปิด</button>
         </div>
       </div>
-    </div>
+    </>
   );
 }
