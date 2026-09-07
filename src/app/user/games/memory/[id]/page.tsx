@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import styles from './memorySettings.module.css';
 import { getExerciseImageCount, getGameData } from '@/app/actions/matchingActions';
+import { useClickSound } from '@/app/hooks/useClickSound';
 
 const StackedPictureIcon = () => (
   <svg width="180" height="180" viewBox="0 0 120 120" fill="none" stroke="black" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round">
@@ -82,6 +83,7 @@ export default function MemorySettingsPage() {
   
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const playClick = useClickSound();
 
   // For Preview Animation
   const [previewImages, setPreviewImages] = useState<any[]>([]);
@@ -161,6 +163,7 @@ export default function MemorySettingsPage() {
   }, [mode]);
 
   const toggleAudio = () => {
+    playClick();
     if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
@@ -173,17 +176,20 @@ export default function MemorySettingsPage() {
   };
 
   const handleStart = () => {
+    playClick();
     // Logic to start the game with the selected settings
     router.push(`/user/games/memory/${params.id}/play?mode=${mode}&q=${questions}&a=${answers}&t=${showTime}`);
   };
 
   const handleBack = () => {
+    playClick();
     router.push(`/user/games/memory`);
   };
 
   const updateValue = (setter: React.Dispatch<React.SetStateAction<number>>, current: number, delta: number, min: number, max: number) => {
     const newValue = current + delta;
     if (newValue >= min && newValue <= max) {
+      playClick();
       setter(newValue);
     }
   };
@@ -295,23 +301,13 @@ export default function MemorySettingsPage() {
 
         {/* Graphics Section */}
         <div className={styles.graphicsContainer}>
-          <div className={styles.mainBox} style={{ overflow: 'hidden', position: 'relative' }}>
+          <div className={styles.mainBox}>
+            <div className={styles.questionBadge}>
+              {questions}
+            </div>
             {/* Countdown Badge */}
             {previewImages.length > 0 && (
-              <div style={{ 
-                position: 'absolute', 
-                top: '10px', 
-                right: '10px', 
-                display: 'flex', 
-                alignItems: 'center', 
-                backgroundColor: 'rgba(255, 255, 255, 0.85)', 
-                padding: '4px 8px', 
-                borderRadius: '15px', 
-                fontWeight: 'bold', 
-                zIndex: 10, 
-                color: '#000',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-              }}>
+              <div className={styles.countdownBadge}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}>
                   <circle cx="12" cy="12" r="10"></circle>
                   <polyline points="12 6 12 12 16 14"></polyline>
@@ -322,52 +318,32 @@ export default function MemorySettingsPage() {
             
             {previewImages.length > 0 ? (
               <div 
-                style={{ 
-                  width: '100%', 
-                  height: '100%', 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  justifyContent: 'center', 
-                  alignItems: 'center',
-                  opacity: fade ? 1 : 0,
-                  transition: 'opacity 0.3s ease-in-out'
-                }}
+                className={styles.previewContainer}
+                style={{ opacity: fade ? 1 : 0 }}
               >
                 {mode === 'word' ? (
-                  <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                    <div style={{ position: 'absolute', top: '15px', left: '15px' }}>
+                  <div className={styles.wordContainer}>
+                    <div className={styles.volumeIconWrapper}>
                       <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
                         <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
                         <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
                       </svg>
                     </div>
-                    <div style={{ fontSize: '2rem', fontWeight: 500, color: '#000', textAlign: 'center', padding: '10px' }}>
-                      {previewImages[currentImageIndex].name}
+                    <div className={styles.wordText}>
+                      {previewImages[currentImageIndex].title}
                     </div>
-                    <div style={{ position: 'absolute', bottom: '0px', right: '15px', fontSize: '3rem', color: '#000' }}>?</div>
                   </div>
                 ) : (
-                  <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  <div className={styles.imageContainer}>
                     {!imageError ? (
                       <>
                         <img 
                           src={previewImages[currentImageIndex].imageUrl} 
                           alt="preview" 
-                          style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '10px' }} 
+                          className={styles.previewImage}
                           onError={() => setImageError(true)}
                         />
-                        <div style={{ 
-                          position: 'absolute', 
-                          bottom: '-5px', 
-                          right: '10px', 
-                          fontSize: '3.5rem', 
-                          fontWeight: 900, 
-                          color: '#4f4f4f', 
-                          WebkitTextStroke: '2px white' 
-                        }}>
-                          ?
-                        </div>
                       </>
                     ) : (
                       <StackedPictureIcon />

@@ -7,6 +7,7 @@ import { getMemoryGameData, saveMemoryGameResult } from '@/app/actions/memoryAct
 import AlertMessage from '@/app/components/AlertMessage/AlertMessage';
 import Image from 'next/image';
 import Loader from '@/app/components/Loader/Loader';
+import { useClickSound } from '@/app/hooks/useClickSound';
 
 type ImageInfo = {
   id: number;
@@ -55,6 +56,7 @@ export default function MemoryGamePlayPage() {
   // Audio
   const [isMuted, setIsMuted] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const playClick = useClickSound();
 
   const preloadAssets = async (questionsList: GameData[]) => {
     const assets: Promise<void>[] = [];
@@ -303,18 +305,22 @@ export default function MemoryGamePlayPage() {
   }, [gameState, questions.length, numAnswersSetting, showTimeSetting, clickCount, correctCount, incorrectCount, timeLogs, totalElapsedSeconds, router, params.id, mode]);
 
   const handleEndGame = () => {
+    playClick();
     setShowExitPopup(true);
   };
 
   const confirmEndGame = () => {
+    playClick();
     router.push(`/user/games/memory/${params.id}?mode=${mode}`);
   };
 
   const cancelEndGame = () => {
+    playClick();
     setShowExitPopup(false);
   };
 
   const toggleMute = () => {
+    playClick();
     setIsMuted(!isMuted);
     if (audioRef.current && !isMuted) {
       audioRef.current.pause();

@@ -30,7 +30,7 @@
 }
 
 .subtitle {
-  font-size: 16px;
+  font-size: 30px;
   color: #333;
   margin: 0;
 }
@@ -40,7 +40,7 @@
   justify-content: center;
   align-items: center;
   gap: 5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 0.5rem;
 }
 
 /* Graphics Section */
@@ -52,15 +52,86 @@
 }
 
 .mainBox {
-  width: 150px;
-  height: 150px;
+  width: 250px;
+  height: 250px;
   background-color: #D9D9D9;
   border: 1px solid #777;
-  border-radius: 15px;
+  border-radius: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
+  overflow: hidden;
+}
+
+.questionBadge {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  background-color: rgba(255, 255, 255, 0.85);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  z-index: 10;
+  color: #000;
+}
+
+.previewContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.wordContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.wordText {
+  font-size: 3.5rem;
+  font-weight: 500;
+  color: #000;
+  text-align: center;
+  padding: 10px;
+  word-break: break-word;
+  z-index: 20;
+}
+
+.imageContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.previewImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 10px;
+}
+
+.volumeIconWrapper {
+  position: absolute;
+  top: 10px;
+  left: 10px;
 }
 
 .questionMark {
@@ -74,12 +145,20 @@
 
 .optionsBoxContainer {
   display: flex;
-  gap: 1.5rem;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 350px;
 }
 
 .optionBox {
-  width: 130px;
-  height: 130px;
+  flex: 1 1 0;
+  aspect-ratio: 1 / 1;
+  max-width: 130px;
+  min-width: 0;
+  height: auto;
   background-color: #D9D9D9;
   border: 1px solid #777;
   border-radius: 15px;
@@ -96,7 +175,7 @@
 }
 
 .settingsTitle {
-  font-size: 16px;
+  font-size: 30px;
   font-weight: bold;
   margin-bottom: 2rem;
   color: #000;
@@ -111,7 +190,7 @@
 }
 
 .settingLabel {
-  font-size: 16px;
+  font-size: 22px;
   color: #000;
 }
 
@@ -156,7 +235,7 @@
 .controlValue {
   width: 60px;
   text-align: center;
-  font-size: 1.5rem;
+  font-size: 2rem;
   color: #e76f51;
   background: transparent;
   border: none;
@@ -168,7 +247,7 @@
   flex-direction: row;
   justify-content: center;
   gap: 1.5rem;
-  margin-top: 3rem;
+  margin-top: 1rem;
   margin-bottom: 2rem; /* Prevent footer overlap */
   width: 100%;
 }
@@ -235,10 +314,6 @@
   transform: scale(1.05);
 }
 
-/* Mobile Portrait Responsive */
-
-/* Mobile Landscape Responsiveness */
-
 /* ==========================================================================
    Responsive Design (Media Queries)
    ========================================================================== */
@@ -263,7 +338,7 @@
       padding: 2rem 1.5rem;
       flex: 1;
       justify-content: flex-start;
-      background-color: #EFEFEF;
+      background-color: #fafafa;
     }
     
     .audioToggleBtn {
@@ -301,7 +376,7 @@
   
     .contentRow {
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0rem;
     }
   
     /* Settings Row (Order 1 on mobile) */
@@ -356,7 +431,7 @@
     /* Graphics Row (Order 2 on mobile) */
     .graphicsContainer {
       order: 2;
-      flex-direction: row;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       gap: 1.5rem;
@@ -372,13 +447,13 @@
     }
   
     .optionsBoxContainer {
-      flex-direction: column;
-      gap: 1rem;
+      flex-direction: row;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
     }
   
     .optionBox {
-      width: 100px;
-      height: 100px;
       border-radius: 15px;
     }
   
@@ -398,7 +473,7 @@
       width: auto;
       font-size: 1.2rem;
       padding: 0.8rem;
-      border-radius: 15px;
+      border-radius: 50px;
       white-space: nowrap;
     }
 }
@@ -501,7 +576,7 @@
   
     .graphicsContainer {
       margin-top: 0;
-      flex-direction: row;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       gap: 1.5rem;
@@ -515,13 +590,13 @@
     }
   
     .optionsBoxContainer {
-      flex-direction: column;
-      gap: 1rem;
+      flex-direction: row;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
     }
   
     .optionBox {
-      width: 90px;
-      height: 90px;
       border-radius: 15px;
     }
   

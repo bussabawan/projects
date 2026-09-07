@@ -8,6 +8,7 @@ import { getGameData, saveMatchingGameResult } from '@/app/actions/matchingActio
 import AlertMessage from '@/app/components/AlertMessage/AlertMessage';
 import Image from 'next/image';
 import Loader from '@/app/components/Loader/Loader';
+import { useClickSound } from '@/app/hooks/useClickSound';
 
 // Volume Icon SVG
 const VolumeIcon = ({ isMuted }: { isMuted: boolean }) => (
@@ -75,6 +76,7 @@ export default function MatchingGamePage() {
   
   const [isMuted, setIsMuted] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const playClick = useClickSound();
 
   // Format timer MM.SS
   const formatTime = (totalSeconds: number) => {
@@ -276,18 +278,22 @@ export default function MatchingGamePage() {
   }, [isFinished, questions.length, currentIndex, clickCount, correctCount, incorrectCount, timeLogs, elapsedSeconds, router, exerciseId, type]);
 
   const handleEndGame = () => {
+    playClick();
     setShowExitPopup(true);
   };
 
   const confirmEndGame = () => {
+    playClick();
     router.push(`/user/games/matching/${exerciseId}?type=${type}`);
   };
 
   const cancelEndGame = () => {
+    playClick();
     setShowExitPopup(false);
   };
 
   const toggleMute = () => {
+    playClick();
     setIsMuted(!isMuted);
     if (!isMuted && audioRef.current) {
       audioRef.current.pause();
