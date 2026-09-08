@@ -27,8 +27,8 @@
 }
 
 .backBtn {
-  background-color: #F38776;
-  color: white;
+  background-color: #f8b4aa;
+  color: #000;
   border: none;
   padding: 10px 30px;
   border-radius: 25px;
@@ -36,6 +36,10 @@
   cursor: pointer;
   box-shadow: 0 4px 6px #0000001a;
   transition: transform 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .backBtn:hover {
@@ -188,7 +192,7 @@
     }
   
     .chartContainer {
-      width: 80%;
+      width: 100%;
     }
   
     .statsList {
@@ -214,8 +218,8 @@
   
     .statValue {
       padding: 6px 12px;
-      font-size: 1rem;
-      min-width: 60px;
+      font-size: 1.5rem;
+      min-width: 80px;
     }
   
     .statUnit {
@@ -225,9 +229,12 @@
     }
     
     .mobileBackBtn {
-      display: block;
-      background-color: #F38776;
-      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      background-color: #f8b4aa;
+      color: #000;
       border: none;
       padding: 12px 30px;
       border-radius: 25px;

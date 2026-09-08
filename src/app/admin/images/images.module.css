@@ -83,6 +83,9 @@
   transform: translateY(-50%);
   color: #888;
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Grid & Cards */

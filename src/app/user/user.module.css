@@ -90,27 +90,28 @@
 .menuItem {
   background-color: #fff;
   color: #333;
-  padding: 0.8rem 1.2rem;
+  padding: 0.8rem 1.2rem 0.8rem 2.5rem;
   border-radius: 30px;
   text-decoration: none;
   font-weight: 500;
   font-size: 1.1rem;
-  text-align: center;
+  text-align: left;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.8rem;
+  justify-content: flex-start;
+  gap: 1rem;
   white-space: nowrap;
   width: 100%;
   box-sizing: border-box;
 }
 
 .collapsed .menuItem {
-  padding: 0.8rem;
+  padding: 0;
   border-radius: 50%;
   width: 50px;
   height: 50px;
+  justify-content: center;
 }
 
 .menuItem:hover {
@@ -131,6 +132,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 28px;
+  flex-shrink: 0;
 }
 
 .sidebarBottom {
@@ -148,19 +151,29 @@
 .manualBtn {
   background-color: #fff;
   color: #333;
-  padding: 0.6rem 1.2rem;
-  border-radius: 20px;
+  padding: 0.8rem 1.2rem 0.8rem 2.5rem;
+  border-radius: 30px;
   text-decoration: none;
   font-weight: 500;
-  font-size: 1rem;
-  text-align: center;
-  display: inline-block;
-  width: fit-content;
+  font-size: 1.1rem;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1rem;
+  width: 100%;
   box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.manualBtn:hover {
+  background-color: #f8f8f8;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .collapsed .manualBtn {
-  padding: 0.6rem;
+  padding: 0;
   width: 50px;
   height: 50px;
   border-radius: 50%;
@@ -174,6 +187,10 @@
 }
 
 .collapsed .manualText {
+  display: none;
+}
+
+.activeIndicator {
   display: none;
 }
 
@@ -243,13 +260,7 @@
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-}
-
-.mainContent::after {
-  content: "";
-  display: block;
-  min-height: 4rem;
-  flex-shrink: 0;
+  min-height: 0;
 }
 
 .fullMainContent {
@@ -342,6 +353,7 @@
       box-sizing: border-box;
       -ms-overflow-style: none; /* IE and Edge */
       scrollbar-width: none; /* Firefox */
+      height: 100dvh;
     }
     
     .noBottomPadding {
@@ -357,15 +369,16 @@
       bottom: 1.5rem;
       left: 50%;
       transform: translateX(-50%);
-      width: max-content !important;
+      width: 90% !important;
+      max-width: 340px !important;
       height: 55px;
       background-color: white;
       border-radius: 30px;
       flex-direction: row;
-      padding: 0.3rem;
+      padding: 4px;
       align-items: center;
       justify-content: center;
-      z-index: 100;
+      z-index: 99999;
       box-shadow: 0 4px 20px rgba(0,0,0,0.1);
       box-sizing: border-box;
     }
@@ -377,18 +390,42 @@
     .menu, .collapsed .menu {
       flex-direction: row;
       justify-content: center;
-      width: auto;
+      width: 100%;
+      height: 100%;
       padding: 0;
       margin: 0;
       gap: 0;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .menu::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 50%;
+      background-color: #dcdcdc;
+      border-radius: 26px;
+      z-index: -1;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .menu.historyActive::before {
+      transform: translateX(100%);
+    }
+    
+    .menu.gamesActive::before {
+      transform: translateX(0);
     }
   
     .menuItem, .collapsed .menuItem {
-      padding: 0 1.2rem;
+      padding: 0;
       background: transparent;
-      width: auto;
-      height: 45px;
-      border-radius: 25px;
+      flex: 1;
+      height: 100%;
+      border-radius: 26px;
       gap: 0.5rem;
       display: flex;
       justify-content: center;
@@ -397,13 +434,16 @@
     }
   
     .menuItem.active, .collapsed .menuItem.active {
-      background-color: #dcdcdc;
+      background-color: transparent;
     }
   
     .menuText, .collapsed .menuText {
       display: block !important;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   
     .sidebarBottom, .collapsed .sidebarBottom {
@@ -414,14 +454,14 @@
       display: flex;
       align-items: center;
       justify-content: flex-end;
-      gap: 1rem;
+      gap: 1.5rem;
       padding: 1.5rem 1.5rem 0.5rem 1.5rem;
       width: 100%;
       box-sizing: border-box;
     }
     
     .mobileUserPill {
-      background-color: #dcdcdc;
+      background-color: #ffffff;
       color: #111;
       padding: 0.4rem 1.2rem;
       border-radius: 20px;
@@ -431,14 +471,26 @@
     }
     
     .mobileHomeBtn, .mobileLogoutBtn {
-      color: #111;
-      background: none;
-      border: none;
-      padding: 0;
+      color: #333;
+      background-color: #fff;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border: 2px solid #f0f0f0;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
       cursor: pointer;
+      padding: 0;
+      flex-shrink: 0;
+    }
+
+    .mobileHomeBtn:hover, .mobileLogoutBtn:hover {
+      transform: scale(1.05) translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+      border-color: #e0e0e0;
     }
   
     .mainContent {
@@ -451,19 +503,21 @@
       flex-direction: column;
       -ms-overflow-style: none; /* IE and Edge */
       scrollbar-width: none; /* Firefox */
+      height: 100%;
     }
   
     .fullMainContent {
       padding: 0;
       width: 100%;
       flex: 1;
-      overflow-y: auto;
+      overflow-y: visible;
       overflow-x: hidden;
       display: flex;
       flex-direction: column;
       -ms-overflow-style: none;
       scrollbar-width: none;
       background-color: #eaeaea;
+      height: auto;
     }
     
     .mainContent::-webkit-scrollbar,

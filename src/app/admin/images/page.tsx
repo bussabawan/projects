@@ -3,11 +3,11 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 
-import Skeleton from "@/app/components/Skeleton/Skeleton";
+import Loader from "@/app/components/Loader/Loader";
 import styles from "./images.module.css";
 import ImageFormModal from "./components/ImageFormModal";
-import DeleteConfirmModal from "../components/DeleteConfirmModal";
-import RestoreConfirmModal from "../components/RestoreConfirmModal";
+import DeleteConfirmModal from "@/app/components/Admin/DeleteConfirmModal";
+import RestoreConfirmModal from "@/app/components/Admin/RestoreConfirmModal";
 import { useDebounce } from '@/app/hooks/useDebounce';
 
 function CardImage({ src, alt }: { src: string; alt: string }) {
@@ -54,6 +54,7 @@ export default function ManageImagesPage() {
   const [totalPages, setTotalPages] = useState(1);
   const itemsPerPage = 12;
   const isLoadMoreRef = useRef(false);
+  const audioCache = useRef<Record<string, HTMLAudioElement>>({});
 
   const fetchImages = useCallback(async () => {
     const isLoadMore = isLoadMoreRef.current;
@@ -69,6 +70,40 @@ export default function ManageImagesPage() {
       });
       const json = await res.json();
       if (json.success) {
+        const newImages: ImageData[] = json.data;
+        const preloadPromises: Promise<void>[] = [];
+
+        newImages.forEach(img => {
+          if (img.imageUrl) {
+            preloadPromises.push(new Promise((resolve) => {
+              const fullImageUrl = img.imageUrl.startsWith('/') || img.imageUrl.startsWith('blob:') ? img.imageUrl : `/api/uploads/${img.imageUrl}`;
+              const image = new window.Image();
+              image.onload = () => resolve();
+              image.onerror = () => resolve();
+              image.src = fullImageUrl;
+            }));
+          }
+          if (img.audioUrl) {
+            preloadPromises.push(new Promise((resolve) => {
+              const fullAudioUrl = img.audioUrl!.startsWith('/') || img.audioUrl!.startsWith('blob:') ? img.audioUrl! : `/api/uploads/${img.audioUrl}`;
+              if (!audioCache.current[fullAudioUrl]) {
+                const audio = new window.Audio(fullAudioUrl);
+                audio.preload = 'auto';
+                audioCache.current[fullAudioUrl] = audio;
+                fetch(fullAudioUrl)
+                  .then(() => resolve())
+                  .catch(() => resolve());
+              } else {
+                resolve();
+              }
+            }));
+          }
+        });
+
+        // Wait up to 8 seconds for all media to cache
+        const timeoutPromise = new Promise<void>((resolve) => setTimeout(resolve, 8000));
+        await Promise.race([Promise.all(preloadPromises), timeoutPromise]);
+
         if (isLoadMore) {
           setImages(prev => [...prev, ...json.data]);
         } else {
@@ -100,6 +135,8 @@ export default function ManageImagesPage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentPage(1);
   }, [debouncedSearchQuery]);
+
+
 
   // Infinite Scroll Observer
   const observer = useRef<IntersectionObserver | null>(null);
@@ -243,7 +280,15 @@ export default function ManageImagesPage() {
       return;
     }
     const fullAudioUrl = audioUrl.startsWith('/') || audioUrl.startsWith('blob:') ? audioUrl : `/api/uploads/${audioUrl}`;
-    const audio = new Audio(fullAudioUrl);
+    
+    let audio = audioCache.current[fullAudioUrl];
+    if (!audio) {
+      audio = new Audio(fullAudioUrl);
+      audio.preload = 'auto';
+      audioCache.current[fullAudioUrl] = audio;
+    }
+    
+    audio.currentTime = 0;
     audio.play().catch(e => {
       console.error(e);
       alert("ไม่สามารถเล่นเสียงได้");
@@ -286,9 +331,9 @@ export default function ManageImagesPage() {
       </div>
 
       <div className={styles.grid}>
-        {isLoading ? (
-          <div style={{ padding: '2rem 0', gridColumn: '1 / -1', width: '100%' }}>
-            <Skeleton type="card" count={8} />
+        {isLoading || searchQuery !== debouncedSearchQuery ? (
+          <div style={{ padding: '4rem 0', minHeight: '350px', gridColumn: '1 / -1', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Loader text={searchQuery.trim() ? "กำลังค้นหารูปภาพ..." : "กำลังโหลดรูปภาพ..."} />
           </div>
         ) : images.length === 0 ? (
           <div>ไม่พบรูปภาพ</div>
@@ -340,7 +385,9 @@ export default function ManageImagesPage() {
       {!isLoading && currentPage < totalPages && (
         <div ref={lastElementRef} className={styles.loadMoreTarget}>
           {loadingMore && (
-            <Skeleton type="card" count={4} />
+            <div style={{ width: '100%', padding: '1rem 0' }}>
+              <Loader size="1.5px" text="กำลังโหลดเพิ่มเติม..." />
+            </div>
           )}
         </div>
       )}

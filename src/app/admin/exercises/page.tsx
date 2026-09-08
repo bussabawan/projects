@@ -3,10 +3,10 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 
-import Skeleton from "@/app/components/Skeleton/Skeleton";
-import DeleteConfirmModal from "@/app/admin/components/DeleteConfirmModal";
-import RestoreConfirmModal from "@/app/admin/components/RestoreConfirmModal";
-import AlertModal from "@/app/admin/components/AlertModal";
+import Loader from "@/app/components/Loader/Loader";
+import DeleteConfirmModal from "@/app/components/Admin/DeleteConfirmModal";
+import RestoreConfirmModal from "@/app/components/Admin/RestoreConfirmModal";
+import AlertModal from "@/app/components/Admin/AlertModal";
 import styles from "./exercises.module.css";
 import { useDebounce } from '@/app/hooks/useDebounce';
 
@@ -419,9 +419,9 @@ export default function ManageExercisesPage() {
       </div>
 
       <div className={styles.grid}>
-        {isLoading ? (
-          <div style={{ padding: '2rem 0', gridColumn: '1 / -1', width: '100%' }}>
-            <Skeleton type="card" count={8} />
+        {isLoading || searchQuery !== debouncedSearchQuery ? (
+          <div style={{ padding: '4rem 0', minHeight: '350px', gridColumn: '1 / -1', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Loader text={searchQuery.trim() ? "กำลังค้นหาแบบฝึกหัด..." : "กำลังโหลดรายการแบบฝึกหัด..."} />
           </div>
         ) : error ? (
           <p style={{ color: 'red', gridColumn: '1 / -1', textAlign: 'center' }}>{error}</p>
@@ -465,7 +465,7 @@ export default function ManageExercisesPage() {
             })}
             {loadingMore && (
               <div style={{ gridColumn: '1 / -1', width: '100%' }}>
-                <Skeleton type="card" count={4} />
+                <Loader size="1.5px" text="กำลังโหลดแบบฝึกหัดเพิ่มเติม..." />
               </div>
             )}
           </>
@@ -638,8 +638,10 @@ export default function ManageExercisesPage() {
               </div>
               
               <div className={styles.imageGrid}>
-                {isLoadingImages ? (
-                  <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '2rem' }}>กำลังโหลดรูปภาพ...</p>
+                {isLoadingImages || imageSearchQuery !== debouncedImageSearchQuery ? (
+                  <div style={{ gridColumn: '1/-1', width: '100%', minHeight: '220px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Loader text={imageSearchQuery.trim() ? "กำลังค้นหารูปภาพ..." : "กำลังโหลดรูปภาพ..."} />
+                  </div>
                 ) : allImages.length === 0 ? (
                   <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '2rem' }}>ไม่พบรูปภาพ</p>
                 ) : (
@@ -691,8 +693,8 @@ export default function ManageExercisesPage() {
                       );
                     })}
                     {isLoadingMoreImages && (
-                      <div style={{ gridColumn: '1/-1', padding: '1rem 0' }}>
-                        <Skeleton type="card" count={4} />
+                      <div style={{ gridColumn: '1/-1', padding: '1rem 0', width: '100%' }}>
+                        <Loader size="1.5px" text="กำลังโหลดรูปภาพเพิ่มเติม..." />
                       </div>
                     )}
                   </>

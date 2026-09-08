@@ -1,6 +1,7 @@
 import './globals.css';
 import { Sarabun } from 'next/font/google';
 import Footer from '@/app/components/Footer/Footer';
+import CookieBanner from '@/app/components/CookieBanner/CookieBanner';
 
 const sarabun = Sarabun({
   subsets: ['latin', 'thai'],
@@ -22,6 +23,7 @@ export default function RootLayout({
     <html lang="th" className={sarabun.className}>
       <body style={{ margin: 0, padding: 0, backgroundColor: '#f5f5f5' }}>
         {children}
+        <CookieBanner />
         <Footer />
       </body>
     </html>

@@ -66,6 +66,9 @@
   transform: translateY(-50%);
   color: #666;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Desktop Table View */

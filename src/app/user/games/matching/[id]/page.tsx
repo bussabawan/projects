@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import styles from './matchingSettings.module.css';
-import { getExerciseImageCount } from '@/app/actions/matchingActions';
+import { getExerciseImageCount, getGameData } from '@/app/actions/matchingActions';
+import { useClickSound } from '@/app/hooks/useClickSound';
 
 // Generic picture icon SVG
 const PictureIcon = () => (
@@ -45,6 +46,13 @@ export default function MatchingSettingsPage() {
   const [answers, setAnswers] = useState(2);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const playClick = useClickSound();
+
+  // For Preview Animation
+  const [previewData, setPreviewData] = useState<any[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [fade, setFade] = useState(true);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     if (params.id) {
@@ -52,8 +60,31 @@ export default function MatchingSettingsPage() {
         setMaxQuestions(count);
         setQuestions(prev => Math.min(prev, count));
       });
+      // Fetch some images for preview, we need up to 6 choices to show in the small boxes based on answers setting
+      getGameData(Number(params.id), 5, 6).then(res => {
+        if (res.success && res.data) {
+          setPreviewData(res.data);
+        }
+      });
     }
   }, [params.id]);
+
+  useEffect(() => {
+    if (previewData.length === 0) return;
+    
+    setFade(true); // Ensure it's visible initially
+    
+    const interval = setInterval(() => {
+      setFade(false); // start fade out
+      setTimeout(() => {
+        setCurrentIndex(idx => (idx + 1) % previewData.length);
+        setImageError(false);
+        setFade(true); // start fade in
+      }, 300); // 300ms transition time
+    }, 8000); // Change every 8 seconds
+    
+    return () => clearInterval(interval);
+  }, [previewData.length]);
 
   useEffect(() => {
     // Initialize audio
@@ -86,6 +117,7 @@ export default function MatchingSettingsPage() {
   }, [type]);
 
   const toggleAudio = () => {
+    playClick();
     if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
@@ -98,18 +130,21 @@ export default function MatchingSettingsPage() {
   };
 
   const handleStart = () => {
+    playClick();
     // Logic to start the game
     router.push(`/user/games/matching/${params.id}/play?type=${type}&q=${questions}&a=${answers}`);
     console.log("Starting game with:", { questions, answers });
   };
 
   const handleBack = () => {
+    playClick();
     router.push(`/user/games/matching?type=${type}`);
   };
 
   const updateValue = (setter: React.Dispatch<React.SetStateAction<number>>, current: number, delta: number, min: number, max: number) => {
     const newValue = current + delta;
     if (newValue >= min && newValue <= max) {
+      playClick();
       setter(newValue);
     }
   };
@@ -140,30 +175,88 @@ export default function MatchingSettingsPage() {
         {/* Graphics Section */}
         <div className={styles.graphicsContainer}>
           <div className={styles.mainBox}>
-            {type === 'image' ? (
-              <>
-                <PictureIcon />
-                <div className={styles.questionMark}>?</div>
-              </>
+            <div className={styles.questionBadge}>
+              {questions}
+            </div>
+            {previewData.length > 0 ? (
+              <div 
+                className={styles.previewContainer}
+                style={{ opacity: fade ? 1 : 0 }}
+              >
+                {type === 'word' ? (
+                  <div className={styles.wordContainer}>
+                    <div className={styles.volumeIconWrapper}>
+                      <VolumeIcon isMuted={false} />
+                    </div>
+                    <div className={styles.wordText}>
+                      {previewData[currentIndex].target.title}
+                    </div>
+                  </div>
+                ) : (
+                  <div className={styles.imageContainer}>
+                    {!imageError ? (
+                      <>
+                        <img 
+                          src={previewData[currentIndex].target.imageUrl} 
+                          alt="preview target" 
+                          className={styles.previewImage}
+                          onError={() => setImageError(true)}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <PictureIcon />
+                        <div className={styles.questionMark}>?</div>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
             ) : (
-              <>
-                <div style={{ position: 'absolute', top: '10px', left: '10px' }}>
-                  <VolumeIcon isMuted={false} />
-                </div>
-                <div style={{ fontSize: '2rem', fontWeight: 'normal', color: '#000', display: 'flex', alignItems: 'flex-end', gap: '2px' }}>
-                  Text<span style={{ fontSize: '2.5rem', marginBottom: '-5px' }}>?</span>
-                </div>
-              </>
+              type === 'image' ? (
+                <>
+                  <PictureIcon />
+                </>
+              ) : (
+                <>
+                  <div style={{ position: 'absolute', top: '10px', left: '10px' }}>
+                    <VolumeIcon isMuted={false} />
+                  </div>
+                  <div style={{ fontSize: '2rem', fontWeight: 'normal', color: '#000', display: 'flex', alignItems: 'flex-end', gap: '2px' }}>
+                    Text<span style={{ fontSize: '2.5rem', marginBottom: '-5px' }}>?</span>
+                  </div>
+                </>
+              )
             )}
           </div>
           
           <div className={styles.optionsBoxContainer}>
-            <div className={styles.optionBox}>
-              <PictureIcon />
-            </div>
-            <div className={styles.optionBox}>
-              <PictureIcon />
-            </div>
+            {previewData.length > 0 ? (
+               previewData[currentIndex].choices.slice(0, answers).map((choice: any, idx: number) => (
+                 <div key={idx} className={styles.optionBox} style={{ overflow: 'hidden' }}>
+                    <div style={{ 
+                      width: '100%', 
+                      height: '100%', 
+                      opacity: fade ? 1 : 0, 
+                      transition: 'opacity 0.3s ease-in-out',
+                      padding: '8px'
+                    }}>
+                      <img 
+                        src={choice.imageUrl} 
+                        alt="choice" 
+                        style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                      />
+                    </div>
+                 </div>
+               ))
+            ) : (
+               Array.from({ length: answers }).map((_, idx) => (
+                 <div key={idx} className={styles.optionBox}>
+                   <PictureIcon />
+                 </div>
+               ))
+            )}
           </div>
         </div>
 
@@ -230,8 +323,18 @@ export default function MatchingSettingsPage() {
       </div>
 
       <div className={styles.buttonGroup}>
-        <button className={styles.backBtn} onClick={handleBack}>ย้อนกลับ</button>
-        <button className={styles.startBtn} onClick={handleStart}>เริ่มเกม</button>
+        <button className={styles.backBtn} onClick={handleBack}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px', verticalAlign: 'middle' }}>
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>
+          ย้อนกลับ
+        </button>
+        <button className={styles.startBtn} onClick={handleStart}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px', verticalAlign: 'middle' }}>
+            <polygon points="5 3 19 12 5 21 5 3" />
+          </svg>
+          เริ่มเกม
+        </button>
       </div>
     </div>
   );

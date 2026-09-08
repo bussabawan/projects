@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import styles from './memorySettings.module.css';
-import { getExerciseImageCount } from '@/app/actions/matchingActions';
+import { getExerciseImageCount, getGameData } from '@/app/actions/matchingActions';
+import { useClickSound } from '@/app/hooks/useClickSound';
 
 const StackedPictureIcon = () => (
   <svg width="180" height="180" viewBox="0 0 120 120" fill="none" stroke="black" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round">
@@ -61,6 +62,14 @@ const VolumeIcon = ({ isMuted }: { isMuted: boolean }) => (
   </svg>
 );
 
+// Clock Icon SVG
+const ClockIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px', verticalAlign: 'text-bottom' }}>
+    <circle cx="12" cy="12" r="10"></circle>
+    <polyline points="12 6 12 12 16 14"></polyline>
+  </svg>
+);
+
 export default function MemorySettingsPage() {
   const router = useRouter();
   const params = useParams();
@@ -74,6 +83,14 @@ export default function MemorySettingsPage() {
   
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const playClick = useClickSound();
+
+  // For Preview Animation
+  const [previewImages, setPreviewImages] = useState<any[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [fade, setFade] = useState(true);
+  const [timeLeft, setTimeLeft] = useState(5);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     if (params.id) {
@@ -81,8 +98,39 @@ export default function MemorySettingsPage() {
         setMaxQuestions(count);
         setQuestions(prev => Math.min(prev, count));
       });
+      // Fetch some images for preview
+      getGameData(Number(params.id), 5, 2).then(res => {
+        if (res.success && res.data) {
+          setPreviewImages(res.data.map(q => q.target));
+        }
+      });
     }
   }, [params.id]);
+
+  useEffect(() => {
+    if (previewImages.length === 0) return;
+    
+    setTimeLeft(showTime); // Reset time when setting changes
+    setFade(true); // Ensure it's visible initially
+    
+    const interval = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          setFade(false); // start fade out
+          setTimeout(() => {
+            setCurrentImageIndex(idx => (idx + 1) % previewImages.length);
+            setImageError(false);
+            setTimeLeft(showTime); // Reset time after fade out
+            setFade(true); // start fade in
+          }, 300); // 300ms transition time
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [previewImages.length, showTime]);
 
   useEffect(() => {
     // Initialize audio with instruction voice file based on mode
@@ -115,6 +163,7 @@ export default function MemorySettingsPage() {
   }, [mode]);
 
   const toggleAudio = () => {
+    playClick();
     if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
@@ -127,17 +176,20 @@ export default function MemorySettingsPage() {
   };
 
   const handleStart = () => {
+    playClick();
     // Logic to start the game with the selected settings
     router.push(`/user/games/memory/${params.id}/play?mode=${mode}&q=${questions}&a=${answers}&t=${showTime}`);
   };
 
   const handleBack = () => {
+    playClick();
     router.push(`/user/games/memory`);
   };
 
   const updateValue = (setter: React.Dispatch<React.SetStateAction<number>>, current: number, delta: number, min: number, max: number) => {
     const newValue = current + delta;
     if (newValue >= min && newValue <= max) {
+      playClick();
       setter(newValue);
     }
   };
@@ -164,13 +216,6 @@ export default function MemorySettingsPage() {
       </div>
 
       <div className={styles.contentRow}>
-        {/* Graphics Section */}
-        <div className={styles.graphicsContainer}>
-          <div className={styles.mainBox}>
-            {mode === 'word' ? <WordToImageIcon /> : <StackedPictureIcon />}
-          </div>
-        </div>
-
         {/* Settings Section */}
         <div className={styles.settingsContainer}>
           <h2 className={styles.settingsTitle}>ตั้งค่าการฝึก</h2>
@@ -232,7 +277,7 @@ export default function MemorySettingsPage() {
             <div className={styles.controlGroup}>
               <button 
                 className={styles.controlBtn} 
-                onClick={() => updateValue(setShowTime, showTime, -1, 1, 20)}
+                onClick={() => updateValue(setShowTime, showTime, -1, 1, 30)}
                 disabled={showTime <= 1}
               >
                 -
@@ -245,19 +290,87 @@ export default function MemorySettingsPage() {
               />
               <button 
                 className={styles.controlBtn} 
-                onClick={() => updateValue(setShowTime, showTime, 1, 1, 20)}
-                disabled={showTime >= 20}
+                onClick={() => updateValue(setShowTime, showTime, 1, 1, 30)}
+                disabled={showTime >= 30}
               >
                 +
               </button>
             </div>
           </div>
         </div>
+
+        {/* Graphics Section */}
+        <div className={styles.graphicsContainer}>
+          <div className={styles.mainBox}>
+            <div className={styles.questionBadge}>
+              {questions}
+            </div>
+            {/* Countdown Badge */}
+            {previewImages.length > 0 && (
+              <div className={styles.countdownBadge}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}>
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                {timeLeft}s
+              </div>
+            )}
+            
+            {previewImages.length > 0 ? (
+              <div 
+                className={styles.previewContainer}
+                style={{ opacity: fade ? 1 : 0 }}
+              >
+                {mode === 'word' ? (
+                  <div className={styles.wordContainer}>
+                    <div className={styles.volumeIconWrapper}>
+                      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                      </svg>
+                    </div>
+                    <div className={styles.wordText}>
+                      {previewImages[currentImageIndex].title}
+                    </div>
+                  </div>
+                ) : (
+                  <div className={styles.imageContainer}>
+                    {!imageError ? (
+                      <>
+                        <img 
+                          src={previewImages[currentImageIndex].imageUrl} 
+                          alt="preview" 
+                          className={styles.previewImage}
+                          onError={() => setImageError(true)}
+                        />
+                      </>
+                    ) : (
+                      <StackedPictureIcon />
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              mode === 'word' ? <WordToImageIcon /> : <StackedPictureIcon />
+            )}
+          </div>
+        </div>
       </div>
 
       <div className={styles.buttonGroup}>
-        <button className={styles.backBtn} onClick={handleBack}>ย้อนกลับ</button>
-        <button className={styles.startBtn} onClick={handleStart}>เริ่มเกม</button>
+        <button className={styles.backBtn} onClick={handleBack}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px', verticalAlign: 'middle' }}>
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>
+          ย้อนกลับ
+        </button>
+        <button className={styles.startBtn} onClick={handleStart}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px', verticalAlign: 'middle' }}>
+            <polygon points="5 3 19 12 5 21 5 3" />
+          </svg>
+          เริ่มเกม
+        </button>
       </div>
     </div>
   );

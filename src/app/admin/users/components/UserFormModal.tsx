@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import styles from "../users.module.css";
-import RestoreConfirmModal from "../../components/RestoreConfirmModal";
+import RestoreConfirmModal from "@/app/components/Admin/RestoreConfirmModal";
 
 interface User {
   user_id: number;

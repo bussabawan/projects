@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import Skeleton from "@/app/components/Skeleton/Skeleton";
+import Loader from "@/app/components/Loader/Loader";
 import styles from "./users.module.css";
 import UserFormModal from "./components/UserFormModal";
 
@@ -259,9 +259,9 @@ export default function ManageUsersPage() {
         )}
         
         <div className={styles.tableBody}>
-          {loading && users.length === 0 ? (
-            <div style={{ padding: '2rem 0', width: '100%' }}>
-              <Skeleton type="table" count={5} />
+          {loading || searchQuery !== debouncedSearchQuery ? (
+            <div style={{ padding: '4rem 0', minHeight: '320px', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Loader text={searchQuery.trim() ? "กำลังค้นหาข้อมูล..." : "กำลังโหลดข้อมูลผู้ใช้งาน..."} />
             </div>
           ) : users.length === 0 ? (
             <div className={styles.emptyState}>ไม่พบข้อมูล</div>
@@ -391,7 +391,7 @@ export default function ManageUsersPage() {
         {/* Mobile observer target */}
         {!loading && currentPage < totalPages && (
           <div ref={lastElementRef} className={styles.loadMoreTarget} style={{ padding: '1.5rem 0', textAlign: 'center', gridColumn: '1/-1' }}>
-            {loadingMore && <Skeleton type="table" count={3} />}
+            {loadingMore && <Loader size="1.5px" text="กำลังโหลดข้อมูลเพิ่มเติม..." />}
           </div>
         )}
       </div>

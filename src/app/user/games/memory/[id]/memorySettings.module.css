@@ -5,9 +5,10 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  height: 100%;
+  height: 115%;
   padding: 2rem;
-  background-color: #EFEFEF;
+  padding-bottom: 5rem; /* Prevent footer overlap */
+  background-color: #fafafa;
   border-radius: 10px;
   position: relative;
 }
@@ -29,7 +30,7 @@
 }
 
 .subtitle {
-  font-size: 1.5rem;
+  font-size: 30px;
   color: #333;
   margin: 0;
 }
@@ -58,6 +59,93 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.questionBadge {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  background-color: rgba(255, 255, 255, 0.85);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  z-index: 30;
+  color: #000;
+}
+
+.countdownBadge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.85);
+  padding: 4px 8px;
+  border-radius: 15px;
+  font-weight: bold;
+  z-index: 10;
+  color: #000;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.previewContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.wordContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.wordText {
+  font-size: 3.5rem;
+  font-weight: 500;
+  color: #000;
+  text-align: center;
+  padding: 10px;
+  word-break: break-word;
+  z-index: 20;
+}
+
+.imageContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.previewImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 10px;
+}
+
+.volumeIconWrapper {
+  position: absolute;
+  top: 15px;
+  left: 15px;
 }
 
 /* Settings Section */
@@ -68,7 +156,8 @@
 }
 
 .settingsTitle {
-  font-size: 2rem;
+  font-size: 30px;
+  font-weight: bold;
   margin-bottom: 2rem;
   color: #000;
 }
@@ -82,17 +171,19 @@
 }
 
 .settingLabel {
-  font-size: 1.5rem;
+  font-size: 22px;
   color: #000;
 }
 
 .controlGroup {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   background-color: #D9D9D9;
   border: 1px solid #999;
   border-radius: 25px;
   padding: 0.2rem;
+  width: 180px;
 }
 
 .controlBtn {
@@ -126,11 +217,18 @@
 .controlValue {
   width: 60px;
   text-align: center;
-  font-size: 1.5rem;
-  color: #000;
+  font-size: 2rem;
+  color: #e76f51;
   background: transparent;
   border: none;
-  font-weight: 500;
+  font-weight: bold;
+  -moz-appearance: textfield;
+}
+
+.controlValue::-webkit-outer-spin-button,
+.controlValue::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .buttonGroup {
@@ -139,15 +237,16 @@
   justify-content: center;
   gap: 1.5rem;
   margin-top: 3rem;
+  margin-bottom: 2rem; /* Prevent footer overlap */
   width: 100%;
 }
 
 .startBtn, .backBtn {
   width: 200px;
   padding: 1rem;
-  border-radius: 15px;
+  border-radius: 50px;
   font-size: 1.5rem;
-  font-weight: normal;
+  font-weight: bold;
   cursor: pointer;
   border: none;
   box-shadow: 0 4px 6px rgba(0,0,0,0.2);
@@ -159,21 +258,21 @@
 }
 
 .startBtn {
-  background-color: #76f387;
+  background-color: #9ffaac;
   color: #000;
 }
 
 .startBtn:hover {
-  background-color: #5edb6f;
+  background-color: #8be499;
 }
 
 .backBtn {
-  background-color: #F38776;
+  background-color: #f8b4aa;
   color: #000;
 }
 
 .backBtn:hover {
-  background-color: #db796a;
+  background-color: #dfa299;
 }
 
 .audioToggleBtn {
@@ -230,9 +329,9 @@
 @media (max-width: 768px) and (orientation: portrait) {
   
     .container {
-      padding: 2rem 1.5rem;
+      padding: 1rem 1.5rem;
       flex: 1;
-      justify-content: space-between;
+      justify-content: flex-start;
     }
     
     .audioToggleBtn {
@@ -263,14 +362,14 @@
     }
   
     .subtitle {
-      font-size: 1.1rem;
+      font-size: 1.5rem;
       line-height: 1.4;
       margin-bottom: 1rem;
     }
   
     .contentRow {
       flex-direction: column;
-      gap: 1.5rem;
+      gap: 0.5rem;
     }
   
     /* Settings Row (Order 1 on mobile) */
@@ -281,7 +380,7 @@
     }
   
     .settingsTitle {
-      font-size: 1.1rem;
+      font-size: 1.5rem;
       margin-bottom: 0.8rem;
     }
   
@@ -294,7 +393,7 @@
     }
   
     .settingLabel {
-      font-size: 1.1rem;
+      font-size: 1.5rem;
     }
   
     .controlGroup {
@@ -312,14 +411,13 @@
   
     .controlValue {
       width: 50px;
-      font-size: 1.5rem;
+      font-size: 2.5rem;
     }
   
     /* Graphics Row (Order 2 on mobile) */
     .graphicsContainer {
       order: 2;
       width: 100%;
-      margin-top: 1rem;
     }
   
     .mainBox {
@@ -332,7 +430,8 @@
       flex-direction: row;
       justify-content: space-between;
       width: 100%;
-      margin-top: 1.5rem;
+      margin-top: 0rem;
+      margin-bottom: 0.5rem;
       padding-bottom: 0;
       gap: 1rem;
     }
@@ -342,7 +441,7 @@
       width: auto;
       font-size: 1.2rem;
       padding: 0.8rem;
-      border-radius: 15px;
+      border-radius: 50px;
       white-space: nowrap;
     }
 }

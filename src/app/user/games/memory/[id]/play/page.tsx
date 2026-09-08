@@ -6,6 +6,8 @@ import styles from './memoryPlay.module.css';
 import { getMemoryGameData, saveMemoryGameResult } from '@/app/actions/memoryActions';
 import AlertMessage from '@/app/components/AlertMessage/AlertMessage';
 import Image from 'next/image';
+import Loader from '@/app/components/Loader/Loader';
+import { useClickSound } from '@/app/hooks/useClickSound';
 
 type ImageInfo = {
   id: number;
@@ -18,6 +20,15 @@ type GameData = {
   target: ImageInfo;
   choices: ImageInfo[];
 };
+
+// Exit / End Game Icon SVG
+const ExitIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+    <polyline points="16 17 21 12 16 7"></polyline>
+    <line x1="21" y1="12" x2="9" y2="12"></line>
+  </svg>
+);
 
 export default function MemoryGamePlayPage() {
   const router = useRouter();
@@ -54,12 +65,51 @@ export default function MemoryGamePlayPage() {
   // Audio
   const [isMuted, setIsMuted] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const playClick = useClickSound();
+
+  const preloadAssets = async (questionsList: GameData[]) => {
+    const assets: Promise<void>[] = [];
+    
+    const preloadImage = (url: string) => {
+      assets.push(new Promise((resolve) => {
+        const img = new window.Image();
+        img.src = url;
+        img.onload = () => resolve();
+        img.onerror = () => resolve();
+      }));
+    };
+
+    const preloadAudio = (url: string) => {
+      assets.push(new Promise((resolve) => {
+        const audio = new window.Audio();
+        const bitrate = window.innerWidth <= 425 ? 32 : 64;
+        const separator = url.includes('?') ? '&' : '?';
+        audio.src = `${url}${separator}bitrate=${bitrate}`;
+        audio.oncanplaythrough = () => resolve();
+        audio.onerror = () => resolve();
+        setTimeout(resolve, 3000); // timeout for audio
+      }));
+    };
+
+    questionsList.forEach(q => {
+      if (q.target.imageUrl) preloadImage(q.target.imageUrl);
+      if (q.target.audioUrl) preloadAudio(q.target.audioUrl);
+      
+      q.choices.forEach((c) => {
+        if (c.imageUrl) preloadImage(c.imageUrl);
+        if (c.audioUrl) preloadAudio(c.audioUrl);
+      });
+    });
+
+    await Promise.all(assets);
+  };
 
   const loadGameData = async (exerciseId: number) => {
     try {
       const result = await getMemoryGameData(exerciseId, numQuestionsSetting, numAnswersSetting);
       if (result.success && result.data) {
         setQuestions(result.data);
+        await preloadAssets(result.data);
         setGameState('question');
       } else {
         setGameState('error');
@@ -264,18 +314,22 @@ export default function MemoryGamePlayPage() {
   }, [gameState, questions.length, numAnswersSetting, showTimeSetting, clickCount, correctCount, incorrectCount, timeLogs, totalElapsedSeconds, router, params.id, mode]);
 
   const handleEndGame = () => {
+    playClick();
     setShowExitPopup(true);
   };
 
   const confirmEndGame = () => {
+    playClick();
     router.push(`/user/games/memory/${params.id}?mode=${mode}`);
   };
 
   const cancelEndGame = () => {
+    playClick();
     setShowExitPopup(false);
   };
 
   const toggleMute = () => {
+    playClick();
     setIsMuted(!isMuted);
     if (audioRef.current && !isMuted) {
       audioRef.current.pause();
@@ -283,7 +337,11 @@ export default function MemoryGamePlayPage() {
   };
 
   if (gameState === 'loading') {
-    return <div className={styles.loadingContainer}>กำลังโหลดข้อมูลเกม...</div>;
+    return (
+      <div className={styles.container} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <Loader text="กำลังโหลดไฟล์ กรุณารอสักครู่..." />
+      </div>
+    );
   }
 
   if (gameState === 'error') {
@@ -297,7 +355,9 @@ export default function MemoryGamePlayPage() {
 
   if (gameState === 'summary') {
     return (
-      <div className={styles.loadingContainer}>กำลังบันทึกข้อมูล...</div>
+      <div className={styles.container} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <Loader text="กำลังบันทึกข้อมูลผลการฝึก..." />
+      </div>
     );
   }
 
@@ -313,15 +373,21 @@ export default function MemoryGamePlayPage() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <div className={styles.progressInfo}>
-          ข้อ {currentQuestionIndex + 1} จาก {questions.length}
-        </div>
-        
         <div className={styles.timerContainer}>
           เวลา : {formatTimeMMSS(totalElapsedSeconds)}
         </div>
         
         <div className={styles.controlsContainer}>
+          <button className={styles.endGameBtn} onClick={handleEndGame}>
+            <ExitIcon />
+            <span>จบเกม</span>
+          </button>
+        </div>
+      </div>
+
+      <div className={styles.progressSection}>
+        <div className={styles.progressInfo}>
+          ข้อ {currentQuestionIndex + 1} จาก {questions.length}
           <button className={styles.audioBtn} onClick={toggleMute}>
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               {isMuted ? (
@@ -339,9 +405,15 @@ export default function MemoryGamePlayPage() {
               )}
             </svg>
           </button>
-          <button className={styles.endGameBtn} onClick={handleEndGame}>
-            จบเกม
-          </button>
+        </div>
+        <div className={styles.progressBarWrapper}>
+          <div 
+            className={styles.progressBarFill} 
+            style={{ width: `${Math.round(((currentQuestionIndex + 1) / questions.length) * 100)}%` }}
+          ></div>
+          <div className={styles.progressPercentText}>
+            {Math.round(((currentQuestionIndex + 1) / questions.length) * 100)}%
+          </div>
         </div>
       </div>
 

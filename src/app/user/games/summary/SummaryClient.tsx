@@ -4,8 +4,19 @@ import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import styles from './summary.module.css';
+import Loader from '@/app/components/Loader/Loader';
 
-const SummaryChart = dynamic(() => import('./SummaryChart'), { ssr: false, loading: () => <div style={{ height: 200, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>กำลังโหลดสถิติ...</div> });
+const SummaryChart = dynamic(() => import('./SummaryChart'), { 
+  ssr: false, 
+  loading: () => <Loader size="1.5px" text="กำลังโหลดกราฟสถิติ..." /> 
+});
+
+const BackIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="19" y1="12" x2="5" y2="12"></line>
+    <polyline points="12 19 5 12 12 5"></polyline>
+  </svg>
+);
 
 interface SummaryClientProps {
   historyData: { name: string; date: string; score: number }[];
@@ -38,7 +49,8 @@ export default function SummaryClient({ historyData }: SummaryClientProps) {
     <div className={styles.container}>
       <div className={styles.header} style={{ justifyContent: 'flex-end' }}>
         <button className={styles.backBtn} onClick={() => router.push(returnUrl)}>
-          ย้อนกลับ
+          <BackIcon />
+          <span>ย้อนกลับ</span>
         </button>
       </div>
 
@@ -84,7 +96,8 @@ export default function SummaryClient({ historyData }: SummaryClientProps) {
       </div>
 
       <button className={styles.mobileBackBtn} onClick={() => router.push(returnUrl)}>
-        ย้อนกลับ
+        <BackIcon />
+        <span>ย้อนกลับ</span>
       </button>
     </div>
   );

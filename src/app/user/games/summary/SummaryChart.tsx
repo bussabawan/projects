@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface SummaryChartProps {
   data: { name: string; date: string; score: number }[];
@@ -10,11 +10,11 @@ interface SummaryChartProps {
 export default function SummaryChart({ data }: SummaryChartProps) {
   return (
     <ResponsiveContainer width="100%" height={200}>
-      <BarChart data={data}>
-        <XAxis dataKey="name" hide />
-        <YAxis hide domain={[0, 100]} />
+      <LineChart data={data}>
+        <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#666' }} axisLine={{ stroke: '#ccc' }} tickLine={false} />
+        <YAxis domain={[0, 100]} tick={{ fontSize: 12, fill: '#666' }} axisLine={{ stroke: '#ccc' }} tickLine={false} width={30} />
         <Tooltip 
-          cursor={{fill: 'transparent'}} 
+          cursor={{stroke: '#ccc', strokeWidth: 1}} 
           content={({ active, payload }) => {
             if (active && payload && payload.length) {
               const item = payload[0].payload;
@@ -28,8 +28,8 @@ export default function SummaryChart({ data }: SummaryChartProps) {
             return null;
           }}
         />
-        <Bar dataKey="score" fill="#9B59B6" radius={[4, 4, 0, 0]} />
-      </BarChart>
+        <Line type="monotone" dataKey="score" stroke="#9B59B6" strokeWidth={3} dot={{ r: 4, fill: '#9B59B6' }} activeDot={{ r: 6 }} />
+      </LineChart>
     </ResponsiveContainer>
   );
 }
