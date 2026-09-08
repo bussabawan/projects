@@ -91,7 +91,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                       <circle cx="12" cy="7" r="4"></circle>
                     </svg>
                   </div>
-                  <div className={styles.profileName}>นางสาว บุษบาวรรณ ลาพิงค์</div>
+                  <div className={styles.profileName}>นางสาวบุษบาวรรณ ลาพิงค์</div>
                   <div className={styles.profileTitle}>สาขาวิศวกรรมซอฟต์แวร์<br/>คณะเทคโนโลยีสารอุตสหากรรม<br/>มหาวิทยาลัยราชภัฏลำปาง<br/>BussabawanLaping@gmail.com</div>
                 </div>
               </div>
@@ -105,7 +105,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                       <circle cx="12" cy="7" r="4"></circle>
                     </svg>
                   </div>
-                  <div className={styles.profileName}>นาย ธนภัทร หล้าเที่ยง</div>
+                  <div className={styles.profileName}>นายอภิรักษ์ เทพธรรม</div>
                   <div className={styles.profileTitle}>สาขาวิศวกรรมซอฟต์แวร์<br/>คณะเทคโนโลยีสารอุตสหากรรม<br/>มหาวิทยาลัยราชภัฏลำปาง<br/>aphiraktheptham@gmail.com</div>
                 </div>
               </div>
