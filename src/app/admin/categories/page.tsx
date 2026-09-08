@@ -3,10 +3,10 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 
-import Skeleton from "@/app/components/Skeleton/Skeleton";
-import DeleteConfirmModal from "@/app/admin/components/DeleteConfirmModal";
-import RestoreConfirmModal from "@/app/admin/components/RestoreConfirmModal";
-import AlertModal from "@/app/admin/components/AlertModal";
+import Loader from "@/app/components/Loader/Loader";
+import DeleteConfirmModal from "@/app/components/Admin/DeleteConfirmModal";
+import RestoreConfirmModal from "@/app/components/Admin/RestoreConfirmModal";
+import AlertModal from "@/app/components/Admin/AlertModal";
 import styles from "./categories.module.css";
 import { useDebounce } from '@/app/hooks/useDebounce';
 
@@ -398,7 +398,7 @@ export default function ManageCategoriesPage() {
       <div className={styles.grid}>
         {isLoading ? (
           <div style={{ padding: '2rem 0', gridColumn: '1 / -1', width: '100%' }}>
-            <Skeleton type="card" count={8} />
+            <Loader text="กำลังโหลดข้อมูล..." />
           </div>
         ) : error ? (
           <p style={{ color: 'red', gridColumn: '1 / -1', textAlign: 'center' }}>{error}</p>
@@ -442,7 +442,7 @@ export default function ManageCategoriesPage() {
             })}
             {loadingMore && (
               <div style={{ gridColumn: '1 / -1', width: '100%' }}>
-                <Skeleton type="card" count={4} />
+                <Loader />
               </div>
             )}
           </>
@@ -632,7 +632,7 @@ export default function ManageCategoriesPage() {
                     })}
                     {isLoadingMoreImages && (
                       <div style={{ gridColumn: '1/-1', padding: '1rem 0' }}>
-                        <Skeleton type="card" count={4} />
+                        <Loader />
                       </div>
                     )}
                   </>

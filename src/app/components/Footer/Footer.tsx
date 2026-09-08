@@ -18,6 +18,12 @@ export default function Footer() {
   // ถ้าไม่ใช่หน้าหลัก (เช่น /login, หน้าเล่นเกม, ตั้งค่าเกม, สรุปคะแนน) ให้ footer ชิดขวาล่าง
   const isCornerPage = !(isUserMainPage || isAdminPage);
 
+  // ซ่อน footer ในหน้าเล่นเกมและหน้าสรุปผล เพื่อไม่ให้ทับกับเนื้อหา
+  const isGameInnerPage = pathname.startsWith("/user/games/") && pathname.split("/").length > 4;
+  if (isGameInnerPage) {
+    return null;
+  }
+
   return (
     <div className={`${styles.footerContainer} ${isCornerPage ? styles.cornerFixed : ''}`}>
       <div className={styles.mobileCreatorsContainer}>
