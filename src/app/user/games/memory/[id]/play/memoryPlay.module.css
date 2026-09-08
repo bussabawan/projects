@@ -121,12 +121,16 @@
   background-color: #f8b4aa;
   color: #000;
   border: none;
-  padding: 10px 30px;
+  padding: 10px 20px;
   border-radius: 10px;
   font-size: 1.25rem;
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .endGameBtn:hover {
@@ -203,7 +207,10 @@
 }
 
 /* Grid layout for different number of options */
-.grid2 { grid-template-columns: repeat(2, 1fr); }
+.grid2 { 
+  grid-template-columns: 1fr; 
+  max-width: 450px;
+}
 .grid3 { grid-template-columns: repeat(3, 1fr); }
 .grid4 { grid-template-columns: repeat(2, 1fr); }
 .grid5 { grid-template-columns: repeat(3, 1fr); }
@@ -452,7 +459,11 @@
       aspect-ratio: 1/1;
     }
   
-    .grid2, .grid3, .grid4, .grid5, .grid6 {
+    .grid2 {
+      grid-template-columns: 1fr;
+    }
+
+    .grid3, .grid4, .grid5, .grid6 {
       grid-template-columns: repeat(2, 1fr);
     }
   
@@ -553,7 +564,12 @@
       aspect-ratio: 1/1;
     }
   
-    .grid2, .grid4 {
+    .grid2 {
+      grid-template-columns: min(85vw, 85vh);
+      justify-content: center;
+    }
+
+    .grid4 {
       grid-template-columns: repeat(2, min(85vw, 85vh));
       justify-content: center;
     }

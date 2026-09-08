@@ -36,6 +36,10 @@
   cursor: pointer;
   box-shadow: 0 4px 6px #0000001a;
   transition: transform 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .backBtn:hover {
@@ -225,7 +229,10 @@
     }
     
     .mobileBackBtn {
-      display: block;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
       background-color: #f8b4aa;
       color: #000;
       border: none;
