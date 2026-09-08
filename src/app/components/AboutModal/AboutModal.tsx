@@ -49,7 +49,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                 <div className={styles.logoText}>โรงพยาบาลเวชชารักษ์ ลำปาง</div>
                 <Image src="/vejjarak_logo.webp" alt="Vejjarak Logo" width={120} height={120} style={{ objectFit: 'contain' }} />
               </div>
-              <div className={styles.ampersand}>&</div>
+              <div className={styles.ampersand}></div>
               <div className={styles.logoItem}>
                 <div className={styles.logoText}>มหาวิทยาลัยราชภัฏลำปาง</div>
                 {/* Placeholder Icon for University */}
@@ -57,7 +57,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                   <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
                 </svg>
               </div>
-              <div className={styles.ampersand}>&</div>
+              <div className={styles.ampersand}></div>
               <div className={styles.logoItem}>
                 <div className={styles.logoText}>วิทยาลัยเทคนิคนครลำปาง</div>
                 {/* Placeholder Icon for University */}
@@ -106,7 +106,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                     </svg>
                   </div>
                   <div className={styles.profileName}>นายอภิรักษ์ เทพธรรม</div>
-                  <div className={styles.profileTitle}>สาขาวิศวกรรมซอฟต์แวร์<br/>คณะเทคโนโลยีสารอุตสหากรรม<br/>มหาวิทยาลัยราชภัฏลำปาง<br/>aphiraktheptham@gmail.com</div>
+                  <div className={styles.profileTitle}>สาขาวิชาเทคโนโลยีสารสนเทศ<br/>วิทยาลัยเทคนิคนครลำปาง<br/>aphiraktheptham@gmail.com</div>
                 </div>
               </div>
             </div>
