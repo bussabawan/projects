@@ -52,18 +52,12 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
               <div className={styles.ampersand}></div>
               <div className={styles.logoItem}>
                 <div className={styles.logoText}>มหาวิทยาลัยราชภัฏลำปาง</div>
-                {/* Placeholder Icon for University */}
-                <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                </svg>
+                <Image src="/lprulogo.webp" alt="LPRU Logo" width={120} height={120} style={{ objectFit: 'contain' }} />
               </div>
               <div className={styles.ampersand}></div>
               <div className={styles.logoItem}>
                 <div className={styles.logoText}>วิทยาลัยเทคนิคนครลำปาง</div>
-                {/* Placeholder Icon for University */}
-                <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                </svg>
+                <Image src="/nltc_logo.webp" alt="NLTC Logo" width={120} height={120} style={{ objectFit: 'contain' }} />
               </div>
             </div>
           </div>
@@ -86,10 +80,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                 <div className={styles.subTitle}>ผู้พัฒนาโปรแกรม</div>
                 <div className={styles.profileCard}>
                   <div className={styles.avatarCircle}>
-                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
+                    <Image src="/profile1.webp" alt="นางสาวบุษบาวรรณ ลาพิงค์" width={100} height={100} style={{ width: '100%', height: '100%', objectFit: 'cover' }} quality={100}/>
                   </div>
                   <div className={styles.profileName}>นางสาวบุษบาวรรณ ลาพิงค์</div>
                   <div className={styles.profileTitle}>สาขาวิศวกรรมซอฟต์แวร์<br/>คณะเทคโนโลยีสารอุตสหากรรม<br/>มหาวิทยาลัยราชภัฏลำปาง<br/>BussabawanLaping@gmail.com</div>
@@ -100,10 +91,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                 <div className={styles.subTitle}>ผู้จัดเตรียมข้อมูลระบบ</div>
                 <div className={styles.profileCard}>
                   <div className={styles.avatarCircle}>
-                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
+                    <Image src="/profile2.webp" alt="นายอภิรักษ์ เทพธรรม" width={100} height={100} style={{ width: '100%', height: '100%', objectFit: 'cover' }} quality={100}/>
                   </div>
                   <div className={styles.profileName}>นายอภิรักษ์ เทพธรรม</div>
                   <div className={styles.profileTitle}>สาขาวิชาเทคโนโลยีสารสนเทศ<br/>วิทยาลัยเทคนิคนครลำปาง<br/>aphiraktheptham@gmail.com</div>
@@ -128,20 +116,14 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
             <div className={styles.cardsContainer}>
               <div className={`${styles.profileCard} ${styles.twoCols}`}>
                 <div className={styles.avatarCircle}>
-                  <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                  </svg>
+                  <Image src="/specialist-1.webp" alt="นางสาวเขมินทรา พันธุ์บุญปลูก" width={100} height={100} style={{ width: '100%', height: '100%', objectFit: 'cover' }} quality={100}/>
                 </div>
                 <div className={styles.profileName}>นางสาวเขมินทรา พันธุ์บุญปลูก</div>
                 <div className={styles.profileTitle}>นักกิจกรรมบำบัดชำนาญการ<br/>รองผู้อำนวยการด้านการพัฒนาระบบสุขภาพ</div>
               </div>
               <div className={`${styles.profileCard} ${styles.twoCols}`}>
                 <div className={styles.avatarCircle}>
-                  <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                  </svg>
+                  <Image src="/specialist-4.webp" alt="นายชุติพงศ์ หาญยุทธ" width={100} height={100} style={{ width: '100%', height: '100%', objectFit: 'cover' }} quality={100}/>
                 </div>
                 <div className={styles.profileName}>นายชุติพงศ์ หาญยุทธ</div>
                 <div className={styles.profileTitle}>นักวิชาการคอมพิวเตอร์ปฏิบัติการ</div>
