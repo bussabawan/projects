@@ -243,7 +243,8 @@
     width: 100%;
   }
   
-  .cardWrapper.twoCols {
+  .cardWrapper.twoCols,
+  .profileCard.twoCols {
     width: 100%;
     max-width: 100%;
   }
