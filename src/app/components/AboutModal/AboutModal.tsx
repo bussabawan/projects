@@ -80,7 +80,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                 <div className={styles.subTitle}>ผู้พัฒนาโปรแกรม</div>
                 <div className={styles.profileCard}>
                   <div className={styles.avatarCircle}>
-                    <Image src="/profile1.webp" alt="นางสาวบุษบาวรรณ ลาพิงค์" width={100} height={100} style={{ width: '100%', height: '100%', objectFit: 'cover' }} quality={100}/>
+                    <Image src="/profile1.webp" alt="นางสาวบุษบาวรรณ ลาพิงค์" width={100} height={100} style={{ width: '100%', height: '100%', objectFit: 'contain' }} quality={100}/>
                   </div>
                   <div className={styles.profileName}>นางสาวบุษบาวรรณ ลาพิงค์</div>
                   <div className={styles.profileTitle}>สาขาวิศวกรรมซอฟต์แวร์<br/>คณะเทคโนโลยีสารอุตสหากรรม<br/>มหาวิทยาลัยราชภัฏลำปาง<br/>BussabawanLaping@gmail.com</div>
@@ -116,14 +116,14 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
             <div className={styles.cardsContainer}>
               <div className={`${styles.profileCard} ${styles.twoCols}`}>
                 <div className={styles.avatarCircle}>
-                  <Image src="/specialist-1.webp" alt="นางสาวเขมินทรา พันธุ์บุญปลูก" width={100} height={100} style={{ width: '100%', height: '100%', objectFit: 'cover' }} quality={100}/>
+                  <Image src="/specialist-1.webp" alt="นางสาวเขมินทรา พันธุ์บุญปลูก" width={100} height={100} style={{ width: '100%', height: '100%', objectFit: 'contain' }} quality={100}/>
                 </div>
                 <div className={styles.profileName}>นางสาวเขมินทรา พันธุ์บุญปลูก</div>
                 <div className={styles.profileTitle}>นักกิจกรรมบำบัดชำนาญการ<br/>รองผู้อำนวยการด้านการพัฒนาระบบสุขภาพ</div>
               </div>
               <div className={`${styles.profileCard} ${styles.twoCols}`}>
                 <div className={styles.avatarCircle}>
-                  <Image src="/specialist-4.webp" alt="นายชุติพงศ์ หาญยุทธ" width={100} height={100} style={{ width: '100%', height: '100%', objectFit: 'cover' }} quality={100}/>
+                  <Image src="/specialist-4.webp" alt="นายชุติพงศ์ หาญยุทธ" width={100} height={100} style={{ width: '100%', height: '100%', objectFit: 'contain' }} quality={100}/>
                 </div>
                 <div className={styles.profileName}>นายชุติพงศ์ หาญยุทธ</div>
                 <div className={styles.profileTitle}>นักวิชาการคอมพิวเตอร์ปฏิบัติการ</div>
