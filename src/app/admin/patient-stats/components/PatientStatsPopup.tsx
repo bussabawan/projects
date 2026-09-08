@@ -13,15 +13,7 @@ interface PatientStatsPopupProps {
   exerciseSets?: string[];
 }
 
-const extractCategory = (testSet?: string) => {
-  if (!testSet) return '';
-  let cat = testSet.replace(/^(?:แบบฝึกหัด\s*)?(?:หมวด\s*)?/, '');
-  cat = cat.replace(/\s*เลเวล\s*\d*/g, '').trim();
-  if (cat.includes('สิ่งของ')) {
-    cat = 'สิ่งของ';
-  }
-  return cat;
-};
+
 
 const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, patientId, exerciseSets = [] }) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -34,9 +26,11 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
   const [endDate, setEndDate] = useState('');
 
   const baseExerciseSets = (data?.availableExerciseSets || exerciseSets) as string[];
-  const dynamicCategories = Array.from(new Set<string>(baseExerciseSets.map(extractCategory)));
+  const dynamicCategories = (data?.availableCategories || []) as string[];
+  const exerciseCategoryMap = (data?.exerciseCategoryMap || {}) as Record<string, string[]>;
+  
   const dynamicExerciseSets = categoryFilter !== 'all' 
-    ? baseExerciseSets.filter(set => extractCategory(set) === categoryFilter)
+    ? baseExerciseSets.filter(set => exerciseCategoryMap[set]?.includes(categoryFilter))
     : baseExerciseSets;
 
   useEffect(() => {

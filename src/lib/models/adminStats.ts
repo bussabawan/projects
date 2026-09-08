@@ -20,19 +20,11 @@ export class AdminStatsModel {
       const [photoRows] = await db.execute<RowDataPacket[]>('SELECT COUNT(*) as count FROM photo_data WHERE remove = 0');
 
       
-      // Get unique categories by extracting tags from exercises_name
-      const [allExercises] = await db.execute<RowDataPacket[]>('SELECT exercises_name FROM exercises_data WHERE remove = 0');
-      const uniqueCategories = new Set(
-        allExercises.map((row: Record<string, unknown>) => {
-          const match = (row.exercises_name as string)?.match(/หมวด(.*?)(?:\s+เลเวล|$)/);
-          return match ? match[1].trim() : row.exercises_name;
-        }).filter(Boolean)
-      );
-      const totalCategories = uniqueCategories.size;
+      const [categoryRows] = await db.execute<RowDataPacket[]>('SELECT COUNT(*) as count FROM category_data WHERE remove = 0');
 
       return {
         totalPatients: patientRows[0].count || 0,
-        totalCategories: totalCategories,
+        totalCategories: categoryRows[0].count || 0,
         totalPhotos: photoRows[0].count || 0,
         totalExercises: exerciseRows[0].count || 0
       };

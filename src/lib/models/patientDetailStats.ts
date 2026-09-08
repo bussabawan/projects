@@ -32,20 +32,22 @@ export class PatientDetailStatsModel {
     let memoryExtraFilter = '';
     
     if (filters?.category && filters.category !== 'all') {
-      const catParam = `%${filters.category.replace(/\s+/g, '')}%`;
+      const catParam = filters.category;
       matchingExtraFilter += ` AND EXISTS (
         SELECT 1 FROM matching_question_time_log mt
         JOIN photo_in_exercises pie ON mt.photo_id = pie.photo_id
-        JOIN exercises_data ed ON pie.exercises_id = ed.exercises_id
+        JOIN category_in_exercises cie ON pie.exercises_id = cie.exercises_id
+        JOIN category_data cd ON cie.category_id = cd.category_id
         WHERE mt.id_matching = matching_exercises_log.id_matching
-        AND REPLACE(ed.exercises_name, ' ', '') LIKE ? AND pie.remove = 0 AND ed.remove = 0
+        AND cd.category_name = ? AND pie.remove = 0 AND cie.remove = 0 AND cd.remove = 0
       )`;
       memoryExtraFilter += ` AND EXISTS (
         SELECT 1 FROM memory_question_time_log mt
         JOIN photo_in_exercises pie ON mt.photo_id = pie.photo_id
-        JOIN exercises_data ed ON pie.exercises_id = ed.exercises_id
+        JOIN category_in_exercises cie ON pie.exercises_id = cie.exercises_id
+        JOIN category_data cd ON cie.category_id = cd.category_id
         WHERE mt.id_memory = memory_exercises_log.id_memory
-        AND REPLACE(ed.exercises_name, ' ', '') LIKE ? AND pie.remove = 0 AND ed.remove = 0
+        AND cd.category_name = ? AND pie.remove = 0 AND cie.remove = 0 AND cd.remove = 0
       )`;
       matchingParams.push(catParam);
       memoryParams.push(catParam);
@@ -90,6 +92,46 @@ export class PatientDetailStatsModel {
     `;
     const [availableFiltersRows] = await db.execute<RowDataPacket[]>(availableFiltersQuery, [...matchingParams.slice(0, dateFilter ? 3 : 1), ...memoryParams.slice(0, dateFilter ? 3 : 1)]);
     const availableExerciseSets = availableFiltersRows.map(r => r.exercises_name);
+
+    // Get available categories for the given period
+    const availableCategoriesQuery = `
+      SELECT DISTINCT cd.category_name
+      FROM matching_exercises_log m
+      JOIN matching_question_time_log mt ON m.id_matching = mt.id_matching
+      JOIN photo_in_exercises pie ON mt.photo_id = pie.photo_id
+      JOIN category_in_exercises cie ON pie.exercises_id = cie.exercises_id
+      JOIN category_data cd ON cie.category_id = cd.category_id
+      WHERE m.user_id = ? AND m.remove = 0 AND mt.remove = 0 AND pie.remove = 0 AND cie.remove = 0 AND cd.remove = 0
+      ${dateFilter}
+      UNION
+      SELECT DISTINCT cd.category_name
+      FROM memory_exercises_log m
+      JOIN memory_question_time_log mt ON m.id_memory = mt.id_memory
+      JOIN photo_in_exercises pie ON mt.photo_id = pie.photo_id
+      JOIN category_in_exercises cie ON pie.exercises_id = cie.exercises_id
+      JOIN category_data cd ON cie.category_id = cd.category_id
+      WHERE m.user_id = ? AND m.remove = 0 AND mt.remove = 0 AND pie.remove = 0 AND cie.remove = 0 AND cd.remove = 0
+      ${dateFilter.replace(/test_date/g, 'm.test_date')}
+    `;
+    const [availableCatRows] = await db.execute<RowDataPacket[]>(availableCategoriesQuery, [...matchingParams.slice(0, dateFilter ? 3 : 1), ...memoryParams.slice(0, dateFilter ? 3 : 1)]);
+    const availableCategories = availableCatRows.map(r => r.category_name);
+
+    // Get exercise-category mapping for UI filtering
+    const exerciseCategoryMapQuery = `
+      SELECT ed.exercises_name, cd.category_name
+      FROM exercises_data ed
+      JOIN category_in_exercises cie ON ed.exercises_id = cie.exercises_id
+      JOIN category_data cd ON cie.category_id = cd.category_id
+      WHERE ed.remove = 0 AND cie.remove = 0 AND cd.remove = 0
+    `;
+    const [mapRows] = await db.execute<RowDataPacket[]>(exerciseCategoryMapQuery);
+    const exerciseCategoryMap: Record<string, string[]> = {};
+    mapRows.forEach(row => {
+      if (!exerciseCategoryMap[row.exercises_name]) {
+        exerciseCategoryMap[row.exercises_name] = [];
+      }
+      exerciseCategoryMap[row.exercises_name].push(row.category_name);
+    });
 
     // 1. Fetch Score Stats from Matching and Memory logs
     const matchingQuery = `
@@ -367,7 +409,9 @@ export class PatientDetailStatsModel {
       },
       dailyStats: fullDailyStats,
       scatterStats,
-      availableExerciseSets
+      availableExerciseSets,
+      availableCategories,
+      exerciseCategoryMap
     };
   }
 }
