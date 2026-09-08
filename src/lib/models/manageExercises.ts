@@ -127,6 +127,10 @@ export class ManageExercisesModel {
           `UPDATE photo_in_exercises SET remove = 0 WHERE exercises_id IN (${placeholders})`,
           ids
         );
+        await connection.execute(
+          `UPDATE category_in_exercises SET remove = 0 WHERE exercises_id IN (${placeholders})`,
+          ids
+        );
       }
 
       await connection.commit();
@@ -151,6 +155,21 @@ export class ManageExercisesModel {
       [name]
     );
     return rows.map(r => r.photo_id as number);
+  }
+
+  /**
+   * Get selected categories for an exercise
+   */
+  static async getExerciseCategories(name: string): Promise<number[]> {
+    const [rows] = await db.query<RowDataPacket[]>(
+      `SELECT cie.category_id 
+       FROM category_in_exercises cie
+       JOIN exercises_data ed ON cie.exercises_id = ed.exercises_id
+       JOIN category_data cd ON cie.category_id = cd.category_id
+       WHERE ed.exercises_name = ? AND ed.remove = 0 AND cie.remove = 0 AND cd.remove = 0`,
+      [name]
+    );
+    return rows.map(r => r.category_id as number);
   }
 
   /**
@@ -191,6 +210,33 @@ export class ManageExercisesModel {
       await db.execute(
         'INSERT INTO photo_in_exercises (exercises_id, photo_id, remove) VALUES (?, ?, 0)',
         [exercisesId, photoId]
+      );
+    }
+  }
+
+  /**
+   * Update selected categories for an exercise
+   */
+  static async updateExerciseCategories(name: string, newCategoryIds: number[]): Promise<void> {
+    const [existingRows] = await db.query<RowDataPacket[]>(
+      'SELECT exercises_id FROM exercises_data WHERE exercises_name = ? AND remove = 0',
+      [name]
+    );
+
+    if (existingRows.length === 0) {
+      throw new Error("ไม่พบชุดแบบฝึกหัดนี้");
+    }
+
+    const exercisesId = existingRows[0].exercises_id;
+    
+    // Delete existing categories for this exercise
+    await db.execute('DELETE FROM category_in_exercises WHERE exercises_id = ?', [exercisesId]);
+    
+    // Insert new categories
+    for (const categoryId of newCategoryIds) {
+      await db.execute(
+        'INSERT INTO category_in_exercises (exercises_id, category_id, remove) VALUES (?, ?, 0)',
+        [exercisesId, categoryId]
       );
     }
   }
@@ -239,6 +285,10 @@ export class ManageExercisesModel {
         );
         await connection.execute(
           `UPDATE photo_in_exercises SET remove = 1 WHERE exercises_id IN (${placeholders})`,
+          ids
+        );
+        await connection.execute(
+          `UPDATE category_in_exercises SET remove = 1 WHERE exercises_id IN (${placeholders})`,
           ids
         );
       }

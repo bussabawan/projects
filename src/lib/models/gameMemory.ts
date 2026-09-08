@@ -27,21 +27,62 @@ export class GameMemoryModel {
     return formattedRows as ImageInfo[];
   }
 
-  static async getRandomImages(limit: number, excludeIds: number[]): Promise<ImageInfo[]> {
+  static async getRandomImages(limit: number, excludeIds: number[], exerciseId?: number): Promise<ImageInfo[]> {
     let query = `SELECT photo_id as id, photo_title as title, photo_name as imageUrl, audio_name as audioUrl, audio_title as audioTitle, audio_gen as audioGen
-                 FROM photo_data WHERE remove = 0`;
+                 FROM photo_data pd WHERE remove = 0`;
     const params: (string | number)[] = [];
+    let hasCategories = false;
+    let categoryIds: number[] = [];
+
+    if (exerciseId) {
+      const [catRows] = await db.query<RowDataPacket[]>(
+        'SELECT category_id FROM category_in_exercises WHERE exercises_id = ? AND remove = 0',
+        [exerciseId]
+      );
+      if (catRows.length > 0) {
+        hasCategories = true;
+        categoryIds = catRows.map(r => r.category_id);
+        const placeholders = categoryIds.map(() => '?').join(',');
+        query = `SELECT DISTINCT pd.photo_id as id, pd.photo_title as title, pd.photo_name as imageUrl, pd.audio_name as audioUrl, pd.audio_title as audioTitle, pd.audio_gen as audioGen
+                 FROM photo_data pd
+                 JOIN photo_in_category pic ON pd.photo_id = pic.photo_id
+                 WHERE pd.remove = 0 AND pic.remove = 0 AND pic.category_id IN (${placeholders})`;
+        params.push(...categoryIds);
+      }
+    }
     
     if (excludeIds.length > 0) {
       const placeholders = excludeIds.map(() => '?').join(',');
-      query += ` AND photo_id NOT IN (${placeholders})`;
+      query += ` AND pd.photo_id NOT IN (${placeholders})`;
       params.push(...excludeIds);
     }
     
     query += ` ORDER BY RAND() LIMIT ?`;
     params.push(limit);
 
-    const [rows] = await db.query<RowDataPacket[]>(query, params);
+    let [rows] = await db.query<RowDataPacket[]>(query, params);
+
+    // Fallback if not enough images in the selected categories
+    if (rows.length < limit && hasCategories) {
+      const additionalLimit = limit - rows.length;
+      const currentIds = [...excludeIds, ...rows.map(r => r.id)];
+      
+      let fallbackQuery = `SELECT photo_id as id, photo_title as title, photo_name as imageUrl, audio_name as audioUrl, audio_title as audioTitle, audio_gen as audioGen
+                           FROM photo_data WHERE remove = 0`;
+      const fallbackParams: (string | number)[] = [];
+      
+      if (currentIds.length > 0) {
+        const placeholders = currentIds.map(() => '?').join(',');
+        fallbackQuery += ` AND photo_id NOT IN (${placeholders})`;
+        fallbackParams.push(...currentIds);
+      }
+      
+      fallbackQuery += ` ORDER BY RAND() LIMIT ?`;
+      fallbackParams.push(additionalLimit);
+      
+      const [fallbackRows] = await db.query<RowDataPacket[]>(fallbackQuery, fallbackParams);
+      rows = [...rows, ...fallbackRows];
+    }
     const formattedRows = rows.map((row) => ({
       ...row,
       imageUrl: row.imageUrl ? `/api/files/${row.id}?type=image&v=${encodeURIComponent(row.imageUrl)}` : "",

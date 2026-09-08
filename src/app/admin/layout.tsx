@@ -150,6 +150,12 @@
             </span>
             <span className={styles.menuText}>จัดการรูปภาพ</span>
           </Link>
+          <Link href="/admin/categories" onClick={() => handleLinkClick('/admin/categories')} className={`${styles.menuItem} ${pathname === '/admin/categories' ? styles.active : ''}`}>
+            <span className={styles.menuIcon}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            </span>
+            <span className={styles.menuText}>จัดการหมวดหมู่</span>
+          </Link>
           <Link href="/admin/exercises" onClick={() => handleLinkClick('/admin/exercises')} className={`${styles.menuItem} ${pathname === '/admin/exercises' ? styles.active : ''}`}>
             <span className={styles.menuIcon}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>

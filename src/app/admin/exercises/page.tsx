@@ -52,6 +52,10 @@ export default function ManageExercisesPage() {
   const [isLoadingImages, setIsLoadingImages] = useState(false);
   const [isLoadingMoreImages, setIsLoadingMoreImages] = useState(false);
   
+  const [allCategories, setAllCategories] = useState<{ category_id: number, category_name: string }[]>([]);
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([]);
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+  
   const [imagePage, setImagePage] = useState(1);
   const [imageTotalPages, setImageTotalPages] = useState(1);
   const imageItemsPerPage = 20;
@@ -215,6 +219,20 @@ export default function ManageExercisesPage() {
     setImageSearchQuery("");
     setImagePage(1);
     isImageLoadMoreRef.current = false;
+    setIsCategoryDropdownOpen(false);
+    
+    // Fetch categories if not fetched yet
+    if (allCategories.length === 0) {
+      try {
+        const resCat = await fetch('/api/admin/categories');
+        const dataCat = await resCat.json();
+        if (dataCat.success) {
+          setAllCategories(dataCat.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch categories", err);
+      }
+    }
     
     try {
       const resSelected = await fetch(`/api/admin/exercises/${encodeURIComponent(exerciseName)}/images`);
@@ -222,10 +240,12 @@ export default function ManageExercisesPage() {
       if (dataSelected.success) {
         setSelectedImageIds(dataSelected.data);
         latestSelectedIdsRef.current = dataSelected.data;
+        setSelectedCategoryIds(dataSelected.categories || []);
       }
     } catch (err) {
       console.error(err);
       latestSelectedIdsRef.current = [];
+      setSelectedCategoryIds([]);
     }
 
     setIsImageModalOpen(true);
@@ -238,7 +258,7 @@ export default function ManageExercisesPage() {
       const res = await fetch(`/api/admin/exercises/${encodeURIComponent(currentExerciseName)}/images`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ photoIds: selectedImageIds })
+        body: JSON.stringify({ photoIds: selectedImageIds, categoryIds: selectedCategoryIds })
       });
       const data = await res.json();
       if (data.success) {
@@ -564,6 +584,43 @@ export default function ManageExercisesPage() {
               <div className={styles.imageSearchRow}>
                 <div style={{ background: '#f3f4f6', padding: '6px 15px', borderRadius: '20px', fontSize: '0.9rem', color: '#374151', whiteSpace: 'nowrap' }}>
                   จำนวนรูปที่เลือก: <b>{selectedImageIds.length}</b> รูป
+                </div>
+                <div className={styles.categoryDropdownContainer}>
+                  <button 
+                    className={styles.categoryDropdownBtn}
+                    onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
+                  >
+                    หมวดหมู่: {selectedCategoryIds.length === 0 ? "คละหมวดหมู่" : `${selectedCategoryIds.length} รายการ`}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: isCategoryDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  {isCategoryDropdownOpen && (
+                    <div className={styles.categoryDropdownMenu}>
+                      {allCategories.map(cat => (
+                         <label key={cat.category_id} className={styles.categoryDropdownItem}>
+                           <input 
+                             type="checkbox" 
+                             className={styles.categoryCheckbox}
+                             checked={selectedCategoryIds.includes(cat.category_id)}
+                             onChange={() => {
+                               setSelectedCategoryIds(prev => 
+                                 prev.includes(cat.category_id) 
+                                   ? prev.filter(id => id !== cat.category_id)
+                                   : [...prev, cat.category_id]
+                               );
+                             }}
+                           />
+                           {cat.category_name}
+                         </label>
+                      ))}
+                      {allCategories.length === 0 && (
+                        <div style={{ padding: '0.5rem', textAlign: 'center', fontSize: '0.9rem', color: '#888' }}>
+                          ไม่พบหมวดหมู่
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div className={styles.imageSearchContainer}>
                   <input 

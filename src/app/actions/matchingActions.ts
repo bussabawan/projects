@@ -56,7 +56,7 @@ export async function getGameData(exerciseId: number, numQuestions: number, numA
     // 2. For each target image, pick distractor images
     for (const target of selectedTargets) {
       // Get distractors (excluding the target itself)
-      const distractors = await GameMatchingModel.getRandomImages(numAnswers - 1, [target.id]);
+      const distractors = await GameMatchingModel.getRandomImages(numAnswers - 1, [target.id], exerciseId);
       
       // Combine target and distractors
       const rawChoices = [target, ...distractors];
