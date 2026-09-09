@@ -20,9 +20,9 @@ export default async function SummaryPage(props: {
   // Fetch recent game history
   let historyRaw = [];
   if (gameType === 'memory') {
-    historyRaw = await getUserMemoryGameHistory(7);
+    historyRaw = await getUserMemoryGameHistory(10);
   } else {
-    historyRaw = await getUserMatchingGameHistory(7);
+    historyRaw = await getUserMatchingGameHistory(10);
   }
   
   // Transform history data for the chart

@@ -25,7 +25,6 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px 20px;
-  background-color: #e5e5e5;
 }
 
 .progressSection {
@@ -43,7 +42,7 @@
 }
 
 .progressBarWrapper {
-  width: 100%;
+  width: 50%;
   max-width: 100%;
   background-color: #e0e0e0;
   border-radius: 20px;
@@ -76,10 +75,9 @@
   align-items: center;
   gap: 10px;
   background-color: #d1d5db;
-  padding: 10px 20px;
+  padding: 10px 40px;
   border-radius: 8px;
   font-size: 1.5rem;
-  flex: 1;
   justify-content: center;
 }
 
@@ -208,8 +206,8 @@
 
 /* Grid layout for different number of options */
 .grid2 { 
-  grid-template-columns: 1fr; 
-  max-width: 450px;
+  grid-template-columns: repeat(2, 1fr); 
+  max-width: 900px;
 }
 .grid3 { grid-template-columns: repeat(3, 1fr); }
 .grid4 { grid-template-columns: repeat(2, 1fr); }
@@ -424,6 +422,11 @@
       width: 100%;
       margin-top: 5px;
       margin-bottom: 20px;
+    }
+
+    .progressBarWrapper {
+      width: 100%;
+      max-width: 100%;
     }
 
     .progressInfo {

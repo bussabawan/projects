@@ -112,4 +112,8 @@
   .footerContainer.cornerFixed .footerLinks a {
     pointer-events: auto;
   }
+  
+  .hiddenOnMobile {
+    display: none !important;
+  }
 }

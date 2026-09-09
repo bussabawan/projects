@@ -94,8 +94,8 @@
 }
 
 .progressBarWrapper {
-  width: 100%;
-  max-width: 400px;
+  width: 50%;
+  max-width: 100%;
   background-color: #e0e0e0;
   border-radius: 20px;
   height: 24px;
@@ -429,6 +429,7 @@
     }
   
     .progressBarWrapper {
+      width: 100%;
       max-width: 100%;
     }
   
