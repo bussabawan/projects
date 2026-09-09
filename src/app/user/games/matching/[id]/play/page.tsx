@@ -277,7 +277,7 @@ export default function MatchingGamePage() {
           correctCount,
           incorrectCount
         };
-        await saveMatchingGameResult(logData, timeLogs);
+        await saveMatchingGameResult(exerciseId, logData, timeLogs);
         
         const timeStr = formatTime(elapsedSeconds);
         router.push(`/user/games/summary?tq=${questions.length}&c=${clickCount}&co=${correctCount}&time=${timeStr}&returnUrl=/user/games/matching/${exerciseId}?type=${type}`);

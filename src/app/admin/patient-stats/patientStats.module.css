@@ -151,6 +151,13 @@
   font-weight: 500;
 }
 
+.playedNotAssignedTag {
+  border-color: #b8d4f8;
+  background-color: #F4F8FC;
+  color: #5a7b9c;
+  font-weight: 500;
+}
+
 .playBtn {
   background: none;
   border: none;

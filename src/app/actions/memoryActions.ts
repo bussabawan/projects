@@ -62,6 +62,7 @@ export async function getMemoryGameData(exerciseId: number, numQuestions: number
 }
 
 export async function saveMemoryGameResult(
+  exerciseId: number,
   logData: {
     totalQuestions: number;
     totalAnswers: number;
@@ -81,7 +82,7 @@ export async function saveMemoryGameResult(
       return { success: false, error: "Unauthorized" };
     }
     
-    await GameMemoryModel.saveGameLog(Number(session.user.id), logData, timeLogs);
+    await GameMemoryModel.saveGameLog(Number(session.user.id), exerciseId, logData, timeLogs);
     return { success: true };
   } catch (error) {
     console.error("Failed to save memory game result:", error);

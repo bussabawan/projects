@@ -93,6 +93,7 @@ export class GameMatchingModel {
 
   static async saveGameLog(
     userId: number, 
+    exerciseId: number,
     logData: {
       totalQuestions: number;
       totalAnswers: number;
@@ -111,9 +112,9 @@ export class GameMatchingModel {
 
       const [result] = await connection.query<ResultSetHeader>(
         `INSERT INTO matching_exercises_log 
-         (user_id, total_questions, total_answers, click_count, correct_count, incorrect_count, test_date, remove) 
-         VALUES (?, ?, ?, ?, ?, ?, NOW(), 0)`,
-        [userId, logData.totalQuestions, logData.totalAnswers, logData.clickCount, logData.correctCount, logData.incorrectCount]
+         (user_id, exercises_id, total_questions, total_answers, click_count, correct_count, incorrect_count, test_date, remove) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), 0)`,
+        [userId, exerciseId, logData.totalQuestions, logData.totalAnswers, logData.clickCount, logData.correctCount, logData.incorrectCount]
       );
 
       const matchingId = result.insertId;

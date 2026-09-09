@@ -55,18 +55,14 @@ export class PatientDetailStatsModel {
     
     if (filters?.exerciseSet && filters.exerciseSet !== 'all') {
       matchingExtraFilter += ` AND EXISTS (
-        SELECT 1 FROM matching_question_time_log mt
-        JOIN photo_in_exercises pie ON mt.photo_id = pie.photo_id
-        JOIN exercises_data ed ON pie.exercises_id = ed.exercises_id
-        WHERE mt.id_matching = matching_exercises_log.id_matching
-        AND ed.exercises_name = ? AND pie.remove = 0 AND ed.remove = 0
+        SELECT 1 FROM exercises_data ed 
+        WHERE ed.exercises_id = matching_exercises_log.exercises_id
+        AND ed.exercises_name = ? AND ed.remove = 0
       )`;
       memoryExtraFilter += ` AND EXISTS (
-        SELECT 1 FROM memory_question_time_log mt
-        JOIN photo_in_exercises pie ON mt.photo_id = pie.photo_id
-        JOIN exercises_data ed ON pie.exercises_id = ed.exercises_id
-        WHERE mt.id_memory = memory_exercises_log.id_memory
-        AND ed.exercises_name = ? AND pie.remove = 0 AND ed.remove = 0
+        SELECT 1 FROM exercises_data ed 
+        WHERE ed.exercises_id = memory_exercises_log.exercises_id
+        AND ed.exercises_name = ? AND ed.remove = 0
       )`;
       matchingParams.push(filters.exerciseSet);
       memoryParams.push(filters.exerciseSet);
@@ -76,18 +72,14 @@ export class PatientDetailStatsModel {
     const availableFiltersQuery = `
       SELECT DISTINCT ed.exercises_name
       FROM matching_exercises_log m
-      JOIN matching_question_time_log mt ON m.id_matching = mt.id_matching
-      JOIN photo_in_exercises pie ON mt.photo_id = pie.photo_id
-      JOIN exercises_data ed ON pie.exercises_id = ed.exercises_id
-      WHERE m.user_id = ? AND m.remove = 0 AND mt.remove = 0 AND pie.remove = 0 AND ed.remove = 0
+      JOIN exercises_data ed ON m.exercises_id = ed.exercises_id
+      WHERE m.user_id = ? AND m.remove = 0 AND ed.remove = 0
       ${dateFilter}
       UNION
       SELECT DISTINCT ed.exercises_name
       FROM memory_exercises_log m
-      JOIN memory_question_time_log mt ON m.id_memory = mt.id_memory
-      JOIN photo_in_exercises pie ON mt.photo_id = pie.photo_id
-      JOIN exercises_data ed ON pie.exercises_id = ed.exercises_id
-      WHERE m.user_id = ? AND m.remove = 0 AND mt.remove = 0 AND pie.remove = 0 AND ed.remove = 0
+      JOIN exercises_data ed ON m.exercises_id = ed.exercises_id
+      WHERE m.user_id = ? AND m.remove = 0 AND ed.remove = 0
       ${dateFilter.replace(/test_date/g, 'm.test_date')}
     `;
     const [availableFiltersRows] = await db.execute<RowDataPacket[]>(availableFiltersQuery, [...matchingParams.slice(0, dateFilter ? 3 : 1), ...memoryParams.slice(0, dateFilter ? 3 : 1)]);
@@ -97,20 +89,16 @@ export class PatientDetailStatsModel {
     const availableCategoriesQuery = `
       SELECT DISTINCT cd.category_name
       FROM matching_exercises_log m
-      JOIN matching_question_time_log mt ON m.id_matching = mt.id_matching
-      JOIN photo_in_exercises pie ON mt.photo_id = pie.photo_id
-      JOIN category_in_exercises cie ON pie.exercises_id = cie.exercises_id
+      JOIN category_in_exercises cie ON m.exercises_id = cie.exercises_id
       JOIN category_data cd ON cie.category_id = cd.category_id
-      WHERE m.user_id = ? AND m.remove = 0 AND mt.remove = 0 AND pie.remove = 0 AND cie.remove = 0 AND cd.remove = 0
+      WHERE m.user_id = ? AND m.remove = 0 AND cie.remove = 0 AND cd.remove = 0
       ${dateFilter}
       UNION
       SELECT DISTINCT cd.category_name
       FROM memory_exercises_log m
-      JOIN memory_question_time_log mt ON m.id_memory = mt.id_memory
-      JOIN photo_in_exercises pie ON mt.photo_id = pie.photo_id
-      JOIN category_in_exercises cie ON pie.exercises_id = cie.exercises_id
+      JOIN category_in_exercises cie ON m.exercises_id = cie.exercises_id
       JOIN category_data cd ON cie.category_id = cd.category_id
-      WHERE m.user_id = ? AND m.remove = 0 AND mt.remove = 0 AND pie.remove = 0 AND cie.remove = 0 AND cd.remove = 0
+      WHERE m.user_id = ? AND m.remove = 0 AND cie.remove = 0 AND cd.remove = 0
       ${dateFilter.replace(/test_date/g, 'm.test_date')}
     `;
     const [availableCatRows] = await db.execute<RowDataPacket[]>(availableCategoriesQuery, [...matchingParams.slice(0, dateFilter ? 3 : 1), ...memoryParams.slice(0, dateFilter ? 3 : 1)]);
@@ -279,8 +267,8 @@ export class PatientDetailStatsModel {
 
     // 3. Fetch Time Stats
     const mDateFilter = dateFilter.replace(/test_date/g, 'm.test_date');
-    const mMatchingExtra = matchingExtraFilter.replace(/matching_exercises_log\.id_matching/g, 'm.id_matching');
-    const mMemoryExtra = memoryExtraFilter.replace(/memory_exercises_log\.id_memory/g, 'm.id_memory');
+    const mMatchingExtra = matchingExtraFilter.replace(/matching_exercises_log/g, 'm');
+    const mMemoryExtra = memoryExtraFilter.replace(/memory_exercises_log/g, 'm');
 
     const timeQuery = `
       SELECT 

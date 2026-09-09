@@ -37,10 +37,15 @@ const renderTestSetTags = (patient: PatientStatInfo) => {
       {uniqueSets.map((setStr, idx) => {
         const tag = formatTagDisplay(setStr) || setStr;
         const isPlayed = (patient.playedSets || []).includes(setStr);
+        const isAssigned = (patient.assignedSets || []).includes(setStr);
         
         let tagClass = styles.testSetTag;
         if (isPlayed) {
-          tagClass = `${styles.testSetTag} ${styles.playedTag}`;
+          if (!isAssigned) {
+            tagClass = `${styles.testSetTag} ${styles.playedNotAssignedTag}`;
+          } else {
+            tagClass = `${styles.testSetTag} ${styles.playedTag}`;
+          }
         }
         
         return (

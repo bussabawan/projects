@@ -295,6 +295,7 @@ export default function MemoryGamePlayPage() {
     if (gameState === 'summary') {
       const saveLog = async () => {
         await saveMemoryGameResult(
+          exerciseId,
           {
             totalQuestions: questions.length,
             totalAnswers: numAnswersSetting,
