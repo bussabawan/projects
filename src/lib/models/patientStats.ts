@@ -15,8 +15,7 @@ export class PatientStatsModel {
   /**
    * Get patient statistics list
    */
-  static getPatientStats = unstable_cache(
-    async (): Promise<PatientStatInfo[]> => {
+  static async getPatientStats(): Promise<PatientStatInfo[]> {
       try {
         const query = `
           SELECT 
@@ -93,9 +92,5 @@ export class PatientStatsModel {
         console.error('Error fetching patient stats:', error);
         throw new Error('Failed to fetch patient statistics');
       }
-    },
-    ['PatientStatsModel-getPatientStats'],
-    { tags: ['patient-stats'] }
-  );
-
+  }
 }
