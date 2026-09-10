@@ -218,7 +218,7 @@ export default function PatientStatsPage() {
                 <div style={{ padding: '2rem', textAlign: 'center' }}>ไม่พบข้อมูลผู้ป่วย</div>
               )}
             </div>
-            {totalPages > 0 && (
+            {totalPages > 1 && (
               <div className={styles.pagination}>
                 <button 
                   className={styles.pageBtn} 
