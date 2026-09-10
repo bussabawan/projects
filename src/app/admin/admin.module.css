@@ -124,7 +124,7 @@
   background-color: #fcfcfc;
   color: #825aab;
   font-weight: 600;
-  box-shadow: inset 4px 0 0 #825aab, 0 2px 5px rgba(0,0,0,0.05);
+  box-shadow: inset 6px 0 0 #825aab, 0 2px 5px rgba(0,0,0,0.05);
 }
 
 .menuText {
