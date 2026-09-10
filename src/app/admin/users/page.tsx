@@ -37,6 +37,7 @@ export default function ManageUsersPage() {
   // Delete Modal State
   const [deleteUserId, setDeleteUserId] = useState<number | null>(null);
   const [deleteUserRole, setDeleteUserRole] = useState<number>(1);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
@@ -132,30 +133,25 @@ export default function ManageUsersPage() {
 
   const confirmDelete = async () => {
     if (deleteUserId === null) return;
+    setIsProcessing(true);
     try {
       const res = await fetch(`/api/admin/users/${deleteUserId}`, { method: 'DELETE' });
       const result = await res.json();
       if (result.success) {
-        // Remove from local state to preserve infinite scroll items
-        setUsers(prev => prev.filter(u => u.user_id !== deleteUserId));
-        setDeleteUserId(null);
+        window.location.reload();
       } else {
         alert("ลบข้อมูลไม่สำเร็จ: " + result.error);
+        setIsProcessing(false);
       }
     } catch (error) {
       console.error("Error deleting user:", error);
+      setIsProcessing(false);
     }
   };
 
   const handleModalSave = () => {
     setIsModalOpen(false);
-    if (currentPage === 1) {
-      isLoadMoreRef.current = false;
-      fetchUsers();
-    } else {
-      isLoadMoreRef.current = false;
-      setCurrentPage(1);
-    }
+    window.location.reload();
   };
 
   const formatDate = (dateString: string) => {
@@ -431,6 +427,7 @@ export default function ManageUsersPage() {
           </div>
         </div>
       )}
+      {isProcessing && <Loader fullScreen text="กำลังดำเนินการ..." />}
     </div>
   );
 }

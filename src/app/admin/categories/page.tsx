@@ -22,6 +22,7 @@ export default function ManageCategoriesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Modal state
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
@@ -170,6 +171,7 @@ export default function ManageCategoriesPage() {
 
   const confirmDeleteCategory = async () => {
     if (!categoryToDelete) return;
+    setIsProcessing(true);
     
     try {
       const res = await fetch(`/api/admin/categories/${encodeURIComponent(categoryToDelete)}`, {
@@ -185,11 +187,14 @@ export default function ManageCategoriesPage() {
     } catch {
       setAlertMessage('เกิดข้อผิดพลาดในการเชื่อมต่อ');
       setIsDeleteModalOpen(false);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const confirmRestoreCategory = async () => {
     if (!categoryToRestore) return;
+    setIsProcessing(true);
     
     try {
       const res = await fetch(`/api/admin/categories/${encodeURIComponent(categoryToRestore)}`, {
@@ -207,6 +212,8 @@ export default function ManageCategoriesPage() {
     } catch {
       setAlertMessage('เกิดข้อผิดพลาดในการเชื่อมต่อ');
       setIsRestoreModalOpen(false);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -665,6 +672,10 @@ export default function ManageCategoriesPage() {
           title={alertMessage} 
           onConfirm={() => setAlertMessage(null)} 
         />
+      )}
+
+      {(isProcessing || isAddingCategory || isEditingCategory || isSavingImages) && (
+        <Loader fullScreen text="กำลังดำเนินการ..." />
       )}
     </div>
   );

@@ -22,6 +22,7 @@ export default function ManageExercisesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Modal state
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
@@ -174,6 +175,7 @@ export default function ManageExercisesPage() {
 
   const confirmDeleteExercise = async () => {
     if (!exerciseToDelete) return;
+    setIsProcessing(true);
     
     try {
       const res = await fetch(`/api/admin/exercises/${encodeURIComponent(exerciseToDelete)}`, {
@@ -189,11 +191,14 @@ export default function ManageExercisesPage() {
     } catch {
       setAlertMessage('เกิดข้อผิดพลาดในการเชื่อมต่อ');
       setIsDeleteModalOpen(false);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const confirmRestoreExercise = async () => {
     if (!exerciseToRestore) return;
+    setIsProcessing(true);
     
     try {
       const res = await fetch(`/api/admin/exercises/${encodeURIComponent(exerciseToRestore)}`, {
@@ -211,6 +216,8 @@ export default function ManageExercisesPage() {
     } catch {
       setAlertMessage('เกิดข้อผิดพลาดในการเชื่อมต่อ');
       setIsRestoreModalOpen(false);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -727,6 +734,10 @@ export default function ManageExercisesPage() {
           title={alertMessage} 
           onConfirm={() => setAlertMessage(null)} 
         />
+      )}
+
+      {(isProcessing || isAddingExercise || isEditingExercise || isSavingImages) && (
+        <Loader fullScreen text="กำลังดำเนินการ..." />
       )}
     </div>
   );

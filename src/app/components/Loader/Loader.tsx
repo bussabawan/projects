@@ -9,6 +9,7 @@ export interface LoaderProps {
   text?: string;
   center?: boolean;
   inline?: boolean;
+  fullScreen?: boolean;
   className?: string;
   style?: React.CSSProperties;
 }
@@ -19,6 +20,7 @@ export default function Loader({
   text,
   center = true,
   inline = false,
+  fullScreen = false,
   className = '',
   style,
 }: LoaderProps) {
@@ -44,6 +46,10 @@ export default function Loader({
       {text && <p className={styles.loaderText}>{text}</p>}
     </div>
   );
+
+  if (fullScreen) {
+    return <div className={styles.fullScreenWrapper}>{content}</div>;
+  }
 
   if (center) {
     return <div className={styles.centerWrapper}>{content}</div>;

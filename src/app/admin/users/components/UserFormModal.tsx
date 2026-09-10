@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import styles from "../users.module.css";
 import RestoreConfirmModal from "@/app/components/Admin/RestoreConfirmModal";
+import Loader from "@/app/components/Loader/Loader";
 
 interface User {
   user_id: number;
@@ -253,6 +254,7 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
           </div>
           {renderRestoreModal()}
         </div>
+        {loading && <Loader fullScreen text="กำลังดำเนินการ..." />}
       </div>
     );
   }
@@ -412,6 +414,7 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
         </div>
         {renderRestoreModal()}
       </div>
+      {loading && <Loader fullScreen text="กำลังดำเนินการ..." />}
     </div>
   );
 }

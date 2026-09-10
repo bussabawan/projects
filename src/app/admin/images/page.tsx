@@ -157,6 +157,7 @@ export default function ManageImagesPage() {
   const [editingImage, setEditingImage] = useState<ImageData | null>(null);
   const [deletingImageId, setDeletingImageId] = useState<number | null>(null);
   const [duplicateToRestore, setDuplicateToRestore] = useState<{ id: number; data: Record<string, unknown> } | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleAdd = () => {
     setEditingImage(null);
@@ -174,22 +175,26 @@ export default function ManageImagesPage() {
 
   const confirmDelete = async () => {
     if (deletingImageId === null) return;
+    setIsProcessing(true);
     try {
       const res = await fetch(`/api/admin/images/${deletingImageId}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
-        setImages(prev => prev.filter(img => img.id !== deletingImageId));
+        window.location.reload();
       } else {
         alert("ลบข้อมูลไม่สำเร็จ");
+        setIsProcessing(false);
       }
     } catch (err) {
       console.error(err);
+      setIsProcessing(false);
     } finally {
       setDeletingImageId(null);
     }
   };
 
   const handleModalSave = async (data: Record<string, unknown>) => {
+    setIsProcessing(true);
     try {
       const isEdit = !!editingImage;
       const url = isEdit ? `/api/admin/images/${editingImage.id}` : "/api/admin/images";
@@ -211,42 +216,24 @@ export default function ManageImagesPage() {
       const result = await res.json();
       if (result.success) {
         setIsModalOpen(false);
-        if (isEdit) {
-          // Update the specific image locally to prevent scroll jump and data reset
-          setImages(prev => prev.map(img => 
-            img.id === editingImage.id 
-              ? { 
-                  ...img, 
-                  title: payload.title as string,
-                  imageUrl: payload.imageUrl as string,
-                  audioUrl: payload.audioUrl as string | undefined,
-                  audioTitle: payload.audioTitle as string | undefined,
-                  audioGen: payload.audioGen as number
-                } 
-              : img
-          ));
-        } else {
-          if (currentPage === 1) {
-            isLoadMoreRef.current = false;
-            fetchImages();
-          } else {
-            isLoadMoreRef.current = false;
-            setCurrentPage(1);
-          }
-        }
+        window.location.reload();
       } else if (result.isDuplicateDeleted) {
         setDuplicateToRestore({ id: result.duplicateId, data: payload });
+        setIsProcessing(false);
       } else {
         alert(result.error || "บันทึกข้อมูลไม่สำเร็จ");
+        setIsProcessing(false);
       }
     } catch (err) {
       console.error(err);
       alert("เกิดข้อผิดพลาดในการบันทึก");
+      setIsProcessing(false);
     }
   };
 
   const confirmRestore = async () => {
     if (!duplicateToRestore) return;
+    setIsProcessing(true);
     try {
       const res = await fetch(`/api/admin/images/${duplicateToRestore.id}`, {
         method: 'PUT',
@@ -257,18 +244,15 @@ export default function ManageImagesPage() {
       if (result.success) {
         setIsModalOpen(false);
         setEditingImage(null);
-        isLoadMoreRef.current = false;
-        if (currentPage === 1) {
-          fetchImages();
-        } else {
-          setCurrentPage(1);
-        }
+        window.location.reload();
       } else {
         alert(result.error || "กู้คืนข้อมูลไม่สำเร็จ");
+        setIsProcessing(false);
       }
     } catch (err) {
       console.error(err);
       alert("เกิดข้อผิดพลาดในการกู้คืน");
+      setIsProcessing(false);
     } finally {
       setDuplicateToRestore(null);
     }
@@ -413,6 +397,8 @@ export default function ManageImagesPage() {
           onCancel={() => setDuplicateToRestore(null)}
         />
       )}
+
+      {isProcessing && <Loader fullScreen text="กำลังดำเนินการ..." />}
     </div>
   );
 }
