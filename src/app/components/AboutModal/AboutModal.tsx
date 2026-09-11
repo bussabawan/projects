@@ -116,24 +116,21 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
             <div className={styles.cardsContainer}>
               <div className={`${styles.profileCard} ${styles.twoCols}`}>
                 <div className={styles.avatarCircle}>
-                  <Image src="/specialist-1.webp?v=2" alt="นางสาวเขมินทรา พันธุ์บุญปลูก" width={100} height={100} style={{ width: '100%', height: '100%', objectFit: 'cover' }} quality={100}/>
+                  <Image src="/specialist-2.webp?v=2" alt="นางสาวเขมินทรา พันธุ์บุญปลูก" width={250} height={250} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 10%' }} quality={100}/>
                 </div>
                 <div className={styles.profileName}>นางสาวเขมินทรา พันธุ์บุญปลูก</div>
                 <div className={styles.profileTitle}>นักกิจกรรมบำบัดชำนาญการ<br/>รองผู้อำนวยการด้านการพัฒนาระบบสุขภาพ</div>
               </div>
               <div className={`${styles.profileCard} ${styles.twoCols}`}>
                 <div className={styles.avatarCircle}>
-                  <Image src="/specialist-4.webp?v=2" alt="นายชุติพงศ์ หาญยุทธ" width={100} height={100} style={{ width: '100%', height: '100%', objectFit: 'cover' }} quality={100}/>
+                  <Image src="/specialist-4.webp?v=2" alt="นายชุติพงศ์ หาญยุทธ" width={250} height={250} style={{ width: '100%', height: '100%', objectFit: 'cover' }} quality={100}/>
                 </div>
                 <div className={styles.profileName}>นายชุติพงศ์ หาญยุทธ</div>
                 <div className={styles.profileTitle}>นักวิชาการคอมพิวเตอร์ปฏิบัติการ</div>
               </div>
               <div className={`${styles.profileCard} ${styles.twoCols}`}>
                 <div className={styles.avatarCircle}>
-                  <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                  </svg>
+                  <Image src="/specialist-3.webp?v=2" alt="นางสาวณิชชารีย์ ชีวรัตนาพันธ์" width={250} height={250} style={{ width: '100%', height: '100%', objectFit: 'cover' }} quality={100}/>
                 </div>
                 <div className={styles.profileName}>นางสาวณิชชารีย์ ชีวรัตนาพันธ์</div>
                 <div className={styles.profileTitle}>นักกิจกรรมบำบัด</div>
