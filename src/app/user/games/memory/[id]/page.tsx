@@ -6,6 +6,13 @@ import styles from './memorySettings.module.css';
 import { getExerciseImageCount, getGameData } from '@/app/actions/matchingActions';
 import { useClickSound } from '@/app/hooks/useClickSound';
 
+interface GameTarget {
+  id: number;
+  title: string;
+  imageUrl: string;
+  audioUrl?: string;
+}
+
 const StackedPictureIcon = () => (
   <svg width="180" height="180" viewBox="0 0 120 120" fill="none" stroke="black" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round">
     <defs>
@@ -86,7 +93,7 @@ export default function MemorySettingsPage() {
   const playClick = useClickSound();
 
   // For Preview Animation
-  const [previewImages, setPreviewImages] = useState<any[]>([]);
+  const [previewImages, setPreviewImages] = useState<GameTarget[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [fade, setFade] = useState(true);
   const [timeLeft, setTimeLeft] = useState(5);

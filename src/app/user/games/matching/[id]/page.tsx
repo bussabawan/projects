@@ -6,6 +6,18 @@ import styles from './matchingSettings.module.css';
 import { getExerciseImageCount, getGameData } from '@/app/actions/matchingActions';
 import { useClickSound } from '@/app/hooks/useClickSound';
 
+interface GameTarget {
+  id: number;
+  title: string;
+  imageUrl: string;
+  audioUrl?: string;
+}
+
+interface GameDataPreview {
+  target: GameTarget;
+  choices: GameTarget[];
+}
+
 // Generic picture icon SVG
 const PictureIcon = () => (
   <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -49,7 +61,7 @@ export default function MatchingSettingsPage() {
   const playClick = useClickSound();
 
   // For Preview Animation
-  const [previewData, setPreviewData] = useState<any[]>([]);
+  const [previewData, setPreviewData] = useState<GameDataPreview[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fade, setFade] = useState(true);
   const [imageError, setImageError] = useState(false);
@@ -232,7 +244,7 @@ export default function MatchingSettingsPage() {
           
           <div className={styles.optionsBoxContainer}>
             {previewData.length > 0 ? (
-               previewData[currentIndex].choices.slice(0, answers).map((choice: any, idx: number) => (
+               previewData[currentIndex].choices.slice(0, answers).map((choice: GameTarget, idx: number) => (
                  <div key={idx} className={styles.optionBox} style={{ overflow: 'hidden' }}>
                     <div style={{ 
                       width: '100%', 

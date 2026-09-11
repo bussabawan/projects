@@ -13,11 +13,47 @@ interface PatientStatsPopupProps {
   exerciseSets?: string[];
 }
 
+interface PatientStatsData {
+  availableExerciseSets?: string[];
+  availableCategories?: string[];
+  exerciseCategoryMap?: Record<string, string[]>;
+  scoreStats?: {
+    total: { correct: number; incorrect: number };
+    separated: {
+      matching: { correct: number; incorrect: number };
+      memory: { correct: number; incorrect: number };
+    };
+  };
+  dailyStats?: {
+    dateStr: string;
+    logins: number;
+    memoryPlays: number;
+    matchingPlays: number;
+    matchingCorrect: number;
+    matchingIncorrect: number;
+    memoryCorrect: number;
+    memoryIncorrect: number;
+    correct: number;
+    incorrect: number;
+    avgSeconds: number;
+    matchingAvgSeconds: number;
+    memoryAvgSeconds: number;
+    totalMinutes: number;
+    plays: number;
+  }[];
+  scatterStats?: {
+    dateStr: string;
+    timeOfDay: number;
+    timeStr: string;
+    duration: number;
+    mode: string;
+  }[];
+}
+
 
 
 const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, patientId, exerciseSets = [] }) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<PatientStatsData | null>(null);
   const [loading, setLoading] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [periodFilter, setPeriodFilter] = useState('all');
@@ -58,15 +94,15 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
 
   const PIE_COLORS = ['#10B981', '#EF4444']; // Green (Correct), Red (Incorrect)
   const pieTotalData = data ? [
-    { name: 'ถูก', value: data.scoreStats.total.correct || 0 },
-    { name: 'ผิด', value: data.scoreStats.total.incorrect || 0 },
+    { name: 'ถูก', value: data.scoreStats?.total?.correct || 0 },
+    { name: 'ผิด', value: data.scoreStats?.total?.incorrect || 0 },
   ] : [];
 
   const pieSepData = data ? [
-    { name: 'จับคู่-ถูก', value: data.scoreStats.separated.matching.correct || 0 },
-    { name: 'จับคู่-ผิด', value: data.scoreStats.separated.matching.incorrect || 0 },
-    { name: 'ความจำ-ถูก', value: data.scoreStats.separated.memory.correct || 0 },
-    { name: 'ความจำ-ผิด', value: data.scoreStats.separated.memory.incorrect || 0 },
+    { name: 'จับคู่-ถูก', value: data.scoreStats?.separated?.matching?.correct || 0 },
+    { name: 'จับคู่-ผิด', value: data.scoreStats?.separated?.matching?.incorrect || 0 },
+    { name: 'ความจำ-ถูก', value: data.scoreStats?.separated?.memory?.correct || 0 },
+    { name: 'ความจำ-ผิด', value: data.scoreStats?.separated?.memory?.incorrect || 0 },
   ] : [];
   const SEP_COLORS = ['#3B82F6', '#93C5FD', '#8B5CF6', '#C4B5FD'];
 
@@ -88,13 +124,13 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
               {!loading && data && data.dailyStats && (
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                   <div style={{ background: '#f3f4f6', padding: '6px 15px', borderRadius: '20px', fontSize: '0.9rem', color: '#374151' }}>
-                    จำนวน Login: <b>{data.dailyStats.reduce((acc: number, cur: Record<string, number>) => acc + (cur.logins || 0), 0)}</b> ครั้ง
+                    จำนวน Login: <b>{data.dailyStats.reduce((acc, cur) => acc + (cur.logins || 0), 0)}</b> ครั้ง
                   </div>
                   <div style={{ background: '#ede9fe', padding: '6px 15px', borderRadius: '20px', fontSize: '0.9rem', color: '#5b21b6' }}>
-                    ความจำ: <b>{data.dailyStats.reduce((acc: number, cur: Record<string, number>) => acc + (cur.memoryPlays || 0), 0)}</b> ครั้ง
+                    ความจำ: <b>{data.dailyStats.reduce((acc, cur) => acc + (cur.memoryPlays || 0), 0)}</b> ครั้ง
                   </div>
                   <div style={{ background: '#dbeafe', padding: '6px 15px', borderRadius: '20px', fontSize: '0.9rem', color: '#1e40af' }}>
-                    จับคู่: <b>{data.dailyStats.reduce((acc: number, cur: Record<string, number>) => acc + (cur.matchingPlays || 0), 0)}</b> ครั้ง
+                    จับคู่: <b>{data.dailyStats.reduce((acc, cur) => acc + (cur.matchingPlays || 0), 0)}</b> ครั้ง
                   </div>
                 </div>
               )}

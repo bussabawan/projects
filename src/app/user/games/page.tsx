@@ -40,7 +40,7 @@ export default function GameTypesPage() {
         </Link>
         
         {/*ร่างกาย */}
-        <Link href="" className={styles.gameCard}>
+        <div className={`${styles.gameCard} ${styles.disabledCard}`}>
           <div className={styles.iconContainer}>
             {/* Memory Game SVG approximation */}
             <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24">
@@ -51,7 +51,8 @@ export default function GameTypesPage() {
             </svg>
           </div>
           <div className={styles.gameTitle}>ร่างกาย</div>
-        </Link>
+          <div className={styles.comingSoonOverlay}>Coming soon...</div>
+        </div>
       </div>
     </div>
   );
