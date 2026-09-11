@@ -380,6 +380,7 @@
   
     .menuItem.active, .collapsed .menuItem.active {
       background-color: #d8d8d8;
+      box-shadow: none;
     }
   
     .menuText, .collapsed .menuText {

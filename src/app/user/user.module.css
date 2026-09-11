@@ -120,6 +120,13 @@
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
+.menuItem.active {
+  background-color: #fcfcfc;
+  color: #825aab;
+  font-weight: 600;
+  box-shadow: inset 6px 0 0 #825aab, 0 2px 5px rgba(0,0,0,0.05);
+}
+
 .menuText {
   transition: opacity 0.2s;
 }
@@ -435,6 +442,7 @@
   
     .menuItem.active, .collapsed .menuItem.active {
       background-color: transparent;
+      box-shadow: none;
     }
   
     .menuText, .collapsed .menuText {
