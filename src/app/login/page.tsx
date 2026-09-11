@@ -101,8 +101,7 @@ function LoginContent() {
         ) : (
           <>
             <h1 className={styles.title}>เข้าสู่ระบบ</h1>
-            <h3 className={styles.subtitle}>ระบบ<span className={styles.dots}>&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.&#8203;.</span></h3>
-            
+            <h3 className={styles.subtitle}>ระบบฝึกการรับรู้ด้านสมาธิและความจำ</h3>
             <form className={styles.form} onSubmit={handleLogin} noValidate>
               {error && <div key={error} className={styles.errorAlert}>{error}</div>}
               <div className={styles.inputGroup}>
