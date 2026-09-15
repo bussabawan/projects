@@ -119,6 +119,7 @@
   font-size: 1.1rem;
   outline: none;
   box-sizing: border-box;
+  -webkit-appearance: none;
 }
 
 .input:focus {
@@ -133,6 +134,17 @@
 
 .inputError::placeholder {
   color: #ef4444;
+  opacity: 1;
+}
+
+.inputError::-webkit-input-placeholder {
+  color: #ef4444;
+  opacity: 1;
+}
+
+.inputError::-moz-placeholder {
+  color: #ef4444;
+  opacity: 1;
 }
 
 @keyframes shake {
