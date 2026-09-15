@@ -111,6 +111,9 @@ export default function UserLayout({
   };
 
   const isGameInnerPage = pathname.startsWith("/user/games/") && pathname.split("/").length > 4;
+  const isSummaryPage = pathname.startsWith("/user/games/summary");
+  const isHistoryActive = pathname.startsWith("/user/history");
+  const isGamesActive = pathname.startsWith("/user/games") && !isSummaryPage;
 
   return (
     <div className={`${styles.layoutContainer} ${isGameInnerPage ? styles.noBottomPadding : ''}`}>
@@ -145,8 +148,8 @@ export default function UserLayout({
           </div>
         </div>
 
-        <nav className={`${styles.menu} ${pathname.startsWith('/user/history') ? styles.historyActive : styles.gamesActive}`}>
-          <Link href="/user/games" onClick={() => handleLinkClick('/user/games')} className={`${styles.menuItem} ${pathname === '/user/games' ? styles.active : ''}`}>
+        <nav className={`${styles.menu} ${isHistoryActive ? styles.historyActive : isGamesActive ? styles.gamesActive : ''}`}>
+          <Link href="/user/games" onClick={() => handleLinkClick('/user/games')} className={`${styles.menuItem} ${isGamesActive ? styles.active : ''}`}>
             <span className={styles.menuIcon}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="2" y="6" width="20" height="12" rx="2" ry="2"></rect>
@@ -158,7 +161,7 @@ export default function UserLayout({
             </span>
             <span className={styles.menuText}>ประเภทเกม</span>
           </Link>
-          <Link href="/user/history" onClick={() => handleLinkClick('/user/history')} className={`${styles.menuItem} ${pathname.startsWith('/user/history') ? styles.active : ''}`}>
+          <Link href="/user/history" onClick={() => handleLinkClick('/user/history')} className={`${styles.menuItem} ${isHistoryActive ? styles.active : ''}`}>
             <span className={styles.menuIcon}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>

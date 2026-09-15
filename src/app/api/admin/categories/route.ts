@@ -53,7 +53,7 @@ export async function POST(request: Request) {
       });
     }
 
-    revalidateTag('categories');
+    revalidateTag('categories', 'max');
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
     const err = error as Error;
