@@ -1,6 +1,5 @@
-import { db } from '@/lib/db';
+﻿import { db } from '@/lib/db';
 import { RowDataPacket } from 'mysql2';
-import { unstable_cache } from 'next/cache';
 
 export interface CategoryInfo {
   category_id: number;
@@ -11,47 +10,39 @@ export class ManageCategoriesModel {
   /**
    * Get all categories for dropdown selection
    */
-  static getCategories = unstable_cache(
-    async (): Promise<CategoryInfo[]> => {
-      const [rows] = await db.execute<RowDataPacket[]>(
-        'SELECT category_id, category_name FROM category_data WHERE remove = 0 ORDER BY category_id ASC'
-      );
-      return rows as CategoryInfo[];
-    },
-    ['ManageCategoriesModel-getCategories'],
-    { tags: ['categories'] }
-  );
+  static getCategories = async (): Promise<CategoryInfo[]> => {
+    const [rows] = await db.execute<RowDataPacket[]>(
+      'SELECT category_id, category_name FROM category_data WHERE remove = 0 ORDER BY category_id ASC'
+    );
+    return rows as CategoryInfo[];
+  };
 
   /**
    * Get paginated list of categories with search
    */
-  static getCategoriesPaginated = unstable_cache(
-    async (page: number, limit: number, search: string = ''): Promise<{ data: CategoryInfo[], total: number }> => {
-      const offset = (page - 1) * limit;
-      let baseQuery = 'SELECT category_id, category_name FROM category_data WHERE remove = 0';
-      let countQuery = 'SELECT COUNT(category_id) as total FROM category_data WHERE remove = 0';
-      const queryParams: (string | number)[] = [];
-      
-      if (search) {
-        const searchPattern = `%${search}%`;
-        baseQuery += ' AND LOWER(category_name) COLLATE utf8mb4_bin LIKE LOWER(?) COLLATE utf8mb4_bin';
-        countQuery += ' AND LOWER(category_name) COLLATE utf8mb4_bin LIKE LOWER(?) COLLATE utf8mb4_bin';
-        queryParams.push(searchPattern);
-      }
-      
-      baseQuery += ' ORDER BY category_id DESC LIMIT ? OFFSET ?';
-      
-      const [rows] = await db.query<RowDataPacket[]>(baseQuery, [...queryParams, limit, offset]);
-      const [countRows] = await db.query<RowDataPacket[]>(countQuery, queryParams);
-      
-      return {
-        data: rows as CategoryInfo[],
-        total: countRows[0].total as number,
-      };
-    },
-    ['ManageCategoriesModel-getCategoriesPaginated'],
-    { tags: ['categories'] }
-  );
+  static getCategoriesPaginated = async (page: number, limit: number, search: string = ''): Promise<{ data: CategoryInfo[], total: number }> => {
+    const offset = (page - 1) * limit;
+    let baseQuery = 'SELECT category_id, category_name FROM category_data WHERE remove = 0';
+    let countQuery = 'SELECT COUNT(category_id) as total FROM category_data WHERE remove = 0';
+    const queryParams: (string | number)[] = [];
+    
+    if (search) {
+      const searchPattern = `%${search}%`;
+      baseQuery += ' AND LOWER(category_name) COLLATE utf8mb4_bin LIKE LOWER(?) COLLATE utf8mb4_bin';
+      countQuery += ' AND LOWER(category_name) COLLATE utf8mb4_bin LIKE LOWER(?) COLLATE utf8mb4_bin';
+      queryParams.push(searchPattern);
+    }
+    
+    baseQuery += ' ORDER BY category_id DESC LIMIT ? OFFSET ?';
+    
+    const [rows] = await db.query<RowDataPacket[]>(baseQuery, [...queryParams, limit, offset]);
+    const [countRows] = await db.query<RowDataPacket[]>(countQuery, queryParams);
+    
+    return {
+      data: rows as CategoryInfo[],
+      total: countRows[0].total as number,
+    };
+  };
 
   /**
    * Add a new category

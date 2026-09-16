@@ -65,7 +65,7 @@ export default function ManageImagesPage() {
     }
     
     try {
-      const res = await fetch(`/api/admin/images?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}`, {
+      const res = await fetch(`/api/admin/images?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}&t=${Date.now()}`, {
         cache: 'no-store'
       });
       const json = await res.json();

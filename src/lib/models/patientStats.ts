@@ -1,6 +1,5 @@
-import { db } from '@/lib/db';
+﻿import { db } from '@/lib/db';
 import { RowDataPacket } from 'mysql2';
-import { unstable_cache } from 'next/cache';
 
 export interface PatientStatInfo {
   id: number;

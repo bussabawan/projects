@@ -78,7 +78,7 @@ export default function ManageExercisesPage() {
     }
     
     try {
-      const res = await fetch(`/api/admin/exercises?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}`);
+      const res = await fetch(`/api/admin/exercises?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}&t=${Date.now()}`);
       const data = await res.json();
       if (data.success) {
         if (isLoadMore) {
@@ -231,7 +231,7 @@ export default function ManageExercisesPage() {
     // Fetch categories if not fetched yet
     if (allCategories.length === 0) {
       try {
-        const resCat = await fetch('/api/admin/categories');
+        const resCat = await fetch(`/api/admin/categories?t=${Date.now()}`);
         const dataCat = await resCat.json();
         if (dataCat.success) {
           setAllCategories(dataCat.data);
@@ -242,7 +242,7 @@ export default function ManageExercisesPage() {
     }
     
     try {
-      const resSelected = await fetch(`/api/admin/exercises/${encodeURIComponent(exerciseName)}/images`);
+      const resSelected = await fetch(`/api/admin/exercises/${encodeURIComponent(exerciseName)}/images?t=${Date.now()}`);
       const dataSelected = await resSelected.json();
       if (dataSelected.success) {
         setSelectedImageIds(dataSelected.data);
@@ -303,7 +303,7 @@ export default function ManageExercisesPage() {
 
     try {
       const prioritizeIds = latestSelectedIdsRef.current.join(',');
-      const res = await fetch(`/api/admin/images?page=${imagePage}&limit=${imageItemsPerPage}&search=${encodeURIComponent(debouncedImageSearchQuery)}&prioritizeIds=${prioritizeIds}`);
+      const res = await fetch(`/api/admin/images?page=${imagePage}&limit=${imageItemsPerPage}&search=${encodeURIComponent(debouncedImageSearchQuery)}&prioritizeIds=${prioritizeIds}&t=${Date.now()}`);
       const data = await res.json();
       if (data.success) {
         if (isLoadMore) {

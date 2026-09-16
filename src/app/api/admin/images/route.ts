@@ -1,3 +1,4 @@
+﻿export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from "next/server";
 import { revalidateTag } from 'next/cache';
 import { ManageImagesModel } from "@/lib/models/manageImages";
@@ -44,7 +45,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, id: result });
     } catch (modelError: unknown) {
       const mErr = modelError as Error;
-      if (mErr.message === "มีชื่อรูปภาพนี้อยู่ในระบบแล้ว (Image title already exists)") {
+      if (mErr.message === "เธกเธตเธเธทเนเธญเธฃเธนเธเธ เธฒเธเธเธตเนเธญเธขเธนเนเนเธเธฃเธฐเธเธเนเธฅเนเธง (Image title already exists)") {
         return NextResponse.json({ 
           success: false, 
           error: mErr.message 

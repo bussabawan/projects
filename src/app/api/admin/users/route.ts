@@ -1,3 +1,4 @@
+﻿export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { revalidateTag } from 'next/cache';
 import { ManageUsersModel } from '@/lib/models/manageUsers';
@@ -47,7 +48,7 @@ export async function POST(request: Request) {
 
     if (roleId === 1 && (!body.exercises_id || (Array.isArray(body.exercises_id) && body.exercises_id.length === 0))) {
       return NextResponse.json(
-        { success: false, error: 'กรุณาเลือกชุดแบบฝึกหัดเริ่มต้นอย่างน้อย 1 ชุด' },
+        { success: false, error: 'เธเธฃเธธเธ“เธฒเน€เธฅเธทเธญเธเธเธธเธ”เนเธเธเธเธถเธเธซเธฑเธ”เน€เธฃเธดเนเธกเธ•เนเธเธญเธขเนเธฒเธเธเนเธญเธข 1 เธเธธเธ”' },
         { status: 400 }
       );
     }
@@ -89,7 +90,7 @@ export async function POST(request: Request) {
     }
     const status = err.message === 'Username already exists' ? 409 : 500;
     const errorMessage = err.message === 'Username already exists' 
-      ? 'รหัสผู้ป่วยหรืออีเมลนี้มีอยู่ในระบบแล้ว' 
+      ? 'เธฃเธซเธฑเธชเธเธนเนเธเนเธงเธขเธซเธฃเธทเธญเธญเธตเน€เธกเธฅเธเธตเนเธกเธตเธญเธขเธนเนเนเธเธฃเธฐเธเธเนเธฅเนเธง' 
       : err.message || 'Internal Server Error';
       
     return NextResponse.json(

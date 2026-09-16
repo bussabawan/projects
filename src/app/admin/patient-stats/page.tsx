@@ -104,7 +104,7 @@ export default function PatientStatsPage() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch('/api/patient-stats');
+        const response = await fetch(`/api/patient-stats?t=${Date.now()}`);
         if (!response.ok) {
           throw new Error('Failed to fetch patient statistics');
         }

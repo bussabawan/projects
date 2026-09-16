@@ -74,7 +74,7 @@ export default function ManageCategoriesPage() {
     }
     
     try {
-      const res = await fetch(`/api/admin/categories?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}`);
+      const res = await fetch(`/api/admin/categories?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}&t=${Date.now()}`);
       const data = await res.json();
       if (data.success) {
         if (isLoadMore) {
@@ -224,7 +224,7 @@ export default function ManageCategoriesPage() {
     isImageLoadMoreRef.current = false;
     
     try {
-      const resSelected = await fetch(`/api/admin/categories/${encodeURIComponent(categoryName)}/images`);
+      const resSelected = await fetch(`/api/admin/categories/${encodeURIComponent(categoryName)}/images?t=${Date.now()}`);
       const dataSelected = await resSelected.json();
       if (dataSelected.success) {
         setSelectedImageIds(dataSelected.data);
@@ -280,7 +280,7 @@ export default function ManageCategoriesPage() {
 
     try {
       const prioritizeIds = latestSelectedIdsRef.current.join(',');
-      const res = await fetch(`/api/admin/images?page=${imagePage}&limit=${imageItemsPerPage}&search=${encodeURIComponent(debouncedImageSearchQuery)}&prioritizeIds=${prioritizeIds}`);
+      const res = await fetch(`/api/admin/images?page=${imagePage}&limit=${imageItemsPerPage}&search=${encodeURIComponent(debouncedImageSearchQuery)}&prioritizeIds=${prioritizeIds}&t=${Date.now()}`);
       const data = await res.json();
       if (data.success) {
         if (isLoadMore) {
