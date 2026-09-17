@@ -1,10 +1,10 @@
-﻿export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from "next/server";
 import { revalidateTag } from 'next/cache';
 import { ManageImagesModel } from "@/lib/models/manageImages";
 
 export async function DELETE(
-  req: NextRequest,
+  _: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {

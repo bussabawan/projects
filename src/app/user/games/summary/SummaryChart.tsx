@@ -1,6 +1,5 @@
 "use client";
 
-import React from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface SummaryChartProps {

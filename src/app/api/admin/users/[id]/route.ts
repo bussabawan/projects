@@ -1,4 +1,4 @@
-﻿export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { revalidateTag } from 'next/cache';
 import { ManageUsersModel } from '@/lib/models/manageUsers';
@@ -55,7 +55,7 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: Request,
+  _: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {

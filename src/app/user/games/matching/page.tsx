@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from 'next/dynamic';
-import React, { Suspense } from 'react';
+import { Suspense } from 'react';
 import styles from './matching.module.css';
 
 const MatchingCategoryClient = dynamic(() => import('./MatchingCategoryClient'), {

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Loader from '@/app/components/Loader/Loader';
 import styles from './memory.module.css';

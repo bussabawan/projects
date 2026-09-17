@@ -210,7 +210,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie data={pieTotalData} cx="50%" cy="50%" innerRadius={40} outerRadius={80} dataKey="value" stroke="#fff" label={({ value }) => value > 0 ? value : ''}>
-                          {pieTotalData.map((entry, index) => <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />)}
+                          {pieTotalData.map((_, index) => <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />)}
                         </Pie>
                         <RechartsTooltip />
                         <Legend verticalAlign="bottom" height={36} />
@@ -225,7 +225,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie data={pieSepData} cx="50%" cy="50%" innerRadius={40} outerRadius={80} dataKey="value" stroke="#fff" label={({ value }) => value > 0 ? value : ''}>
-                          {pieSepData.map((entry, index) => <Cell key={`cell-${index}`} fill={SEP_COLORS[index % SEP_COLORS.length]} />)}
+                          {pieSepData.map((_, index) => <Cell key={`cell-${index}`} fill={SEP_COLORS[index % SEP_COLORS.length]} />)}
                         </Pie>
                         <RechartsTooltip />
                         <Legend verticalAlign="bottom" height={36} />

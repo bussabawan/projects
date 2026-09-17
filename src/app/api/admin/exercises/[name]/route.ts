@@ -1,4 +1,4 @@
-﻿export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { revalidateTag } from 'next/cache';
 import { ManageExercisesModel } from '@/lib/models/manageExercises';
@@ -39,7 +39,7 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: Request,
+  _: Request,
   { params }: { params: Promise<{ name: string }> | { name: string } }
 ) {
   try {

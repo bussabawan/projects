@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from 'next/dynamic';
-import React, { Suspense } from 'react';
+import { Suspense } from 'react';
 import styles from './memory.module.css';
 
 const MemoryCategoryClient = dynamic(() => import('./MemoryCategoryClient'), {
