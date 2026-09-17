@@ -165,11 +165,27 @@ export default function MatchingGamePage() {
       }));
     };
 
+    const imageCache = new Set<string>();
+
+    const preloadImage = (url: string) => {
+      if (imageCache.has(url)) return;
+      imageCache.add(url);
+
+      assets.push(new Promise((resolve) => {
+        const img = new window.Image();
+        img.src = url;
+        img.onload = () => resolve();
+        img.onerror = () => resolve();
+      }));
+    };
+
     questionsList.forEach(q => {
       if (q.target.audioUrl) preloadAudio(q.target.audioUrl);
+      if (q.target.imageUrl) preloadImage(q.target.imageUrl);
       
       q.choices.forEach((c) => {
         if (c.audioUrl) preloadAudio(c.audioUrl);
+        if (c.imageUrl) preloadImage(c.imageUrl);
       });
     });
 
@@ -398,6 +414,7 @@ export default function MatchingGamePage() {
               width={400}
               height={400}
               priority
+              unoptimized={true}
               style={{ width: '100%', height: '100%', objectFit: 'contain' }}
               onError={(e) => {
                 e.currentTarget.src = '/placeholder-image.png';
@@ -430,6 +447,7 @@ export default function MatchingGamePage() {
                 width={400}
                 height={400}
                 priority
+                unoptimized={true}
                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                 onError={(e) => {
                   e.currentTarget.src = '/placeholder-image.png';
@@ -444,9 +462,9 @@ export default function MatchingGamePage() {
       {/* Preload Next Question Images */}
       {currentIndex < questions.length - 1 && (
         <div style={{ display: 'none' }}>
-          <Image src={questions[currentIndex + 1].target.imageUrl} alt="preload target" width={400} height={400} priority={false} loading="eager" />
+          <Image src={questions[currentIndex + 1].target.imageUrl} alt="preload target" width={400} height={400} priority={false} loading="eager" unoptimized={true} />
           {questions[currentIndex + 1].choices.map((choice, idx) => (
-            <Image key={`preload-${choice.id}-${idx}`} src={choice.imageUrl} alt={`preload choice ${idx}`} width={400} height={400} priority={false} loading="eager" />
+            <Image key={`preload-${choice.id}-${idx}`} src={choice.imageUrl} alt={`preload choice ${idx}`} width={400} height={400} priority={false} loading="eager" unoptimized={true} />
           ))}
         </div>
       )}

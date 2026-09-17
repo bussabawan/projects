@@ -91,11 +91,27 @@ export default function MemoryGamePlayPage() {
       }));
     };
 
+    const imageCache = new Set<string>();
+
+    const preloadImage = (url: string) => {
+      if (imageCache.has(url)) return;
+      imageCache.add(url);
+
+      assets.push(new Promise((resolve) => {
+        const img = new window.Image();
+        img.src = url;
+        img.onload = () => resolve();
+        img.onerror = () => resolve();
+      }));
+    };
+
     questionsList.forEach(q => {
       if (q.target.audioUrl) preloadAudio(q.target.audioUrl);
+      if (q.target.imageUrl) preloadImage(q.target.imageUrl);
       
       q.choices.forEach((c) => {
         if (c.audioUrl) preloadAudio(c.audioUrl);
+        if (c.imageUrl) preloadImage(c.imageUrl);
       });
     });
 
@@ -432,7 +448,7 @@ export default function MemoryGamePlayPage() {
             {mode === 'word' ? (
               <h1 className={styles.targetWord}>{currentQ.target.title}</h1>
             ) : (
-              <Image src={currentQ.target.imageUrl} alt="Target" width={300} height={300} priority style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              <Image src={currentQ.target.imageUrl} alt="Target" width={300} height={300} priority unoptimized={true} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
             )}
           </motion.div>
           <div className={styles.countdownText}>
@@ -458,7 +474,7 @@ export default function MemoryGamePlayPage() {
                 animate={wrongGuesses.includes(choice.id) ? { x: [-10, 10, -10, 10, 0], backgroundColor: '#ffcccc' } : { backgroundColor: '#ffffff' }}
                 transition={{ duration: 0.4 }}
               >
-                <Image src={choice.imageUrl} alt={`Option ${index + 1}`} width={300} height={300} priority style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                <Image src={choice.imageUrl} alt={`Option ${index + 1}`} width={300} height={300} priority unoptimized={true} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
               </motion.div>
             ))}
           </div>
@@ -468,9 +484,9 @@ export default function MemoryGamePlayPage() {
       {/* Preload Next Question Images */}
       {currentQuestionIndex < questions.length - 1 && (
         <div style={{ display: 'none' }}>
-          <Image src={questions[currentQuestionIndex + 1].target.imageUrl} alt="preload target" width={300} height={300} priority={false} loading="eager" />
+          <Image src={questions[currentQuestionIndex + 1].target.imageUrl} alt="preload target" width={300} height={300} priority={false} loading="eager" unoptimized={true} />
           {questions[currentQuestionIndex + 1].choices.map((choice, idx) => (
-            <Image key={`preload-${choice.id}-${idx}`} src={choice.imageUrl} alt={`preload choice ${idx}`} width={300} height={300} priority={false} loading="eager" />
+            <Image key={`preload-${choice.id}-${idx}`} src={choice.imageUrl} alt={`preload choice ${idx}`} width={300} height={300} priority={false} loading="eager" unoptimized={true} />
           ))}
         </div>
       )}
