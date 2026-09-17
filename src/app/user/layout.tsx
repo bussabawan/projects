@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
+import { motion } from "framer-motion";
 import { getSession, signOut } from "next-auth/react";
 import Loader from "@/app/components/Loader/Loader";
 import AboutModal from "@/app/components/AboutModal/AboutModal";
@@ -149,9 +150,16 @@ export default function UserLayout({
           </div>
         </div>
 
-        <nav className={`${styles.menu} ${isHistoryActive ? styles.historyActive : isGamesActive ? styles.gamesActive : ''}`}>
-          <Link href="/user/games" onClick={() => handleLinkClick('/user/games')} className={`${styles.menuItem} ${isGamesActive ? styles.active : ''}`}>
-            <span className={styles.menuIcon}>
+        <nav className={styles.menu}>
+          <Link href="/user/games" onClick={() => handleLinkClick('/user/games')} className={`${styles.menuItem} ${isGamesActive ? styles.active : ''}`} style={{ position: 'relative' }}>
+            {isGamesActive && (
+              <motion.div
+                layoutId="mobile-sidebar-pill"
+                className={styles.activePill}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              />
+            )}
+            <span className={styles.menuIcon} style={{ zIndex: 1, position: 'relative' }}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="2" y="6" width="20" height="12" rx="2" ry="2"></rect>
                 <line x1="6" y1="12" x2="10" y2="12"></line>
@@ -160,16 +168,23 @@ export default function UserLayout({
                 <line x1="18" y1="11" x2="18.01" y2="11"></line>
               </svg>
             </span>
-            <span className={styles.menuText}>ประเภทเกม</span>
+            <span className={styles.menuText} style={{ zIndex: 1, position: 'relative' }}>ประเภทเกม</span>
           </Link>
-          <Link href="/user/history" onClick={() => handleLinkClick('/user/history')} className={`${styles.menuItem} ${isHistoryActive ? styles.active : ''}`}>
-            <span className={styles.menuIcon}>
+          <Link href="/user/history" onClick={() => handleLinkClick('/user/history')} className={`${styles.menuItem} ${isHistoryActive ? styles.active : ''}`} style={{ position: 'relative' }}>
+            {isHistoryActive && (
+              <motion.div
+                layoutId="mobile-sidebar-pill"
+                className={styles.activePill}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              />
+            )}
+            <span className={styles.menuIcon} style={{ zIndex: 1, position: 'relative' }}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
                 <polyline points="12 6 12 12 16 14"></polyline>
               </svg>
             </span>
-            <span className={styles.menuText}>ประวัติการฝึก</span>
+            <span className={styles.menuText} style={{ zIndex: 1, position: 'relative' }}>ประวัติการฝึก</span>
           </Link>
         </nav>
 
