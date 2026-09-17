@@ -355,7 +355,7 @@
       flex-direction: column;
       background-color: #fadff8;
       position: relative;
-      padding-bottom: 79px;
+      padding-bottom: 75px;
       overflow: hidden;
       box-sizing: border-box;
       -ms-overflow-style: none; /* IE and Edge */
@@ -365,6 +365,20 @@
     
     .noBottomPadding {
       padding-bottom: 0 !important;
+      height: auto !important;
+      min-height: 100dvh !important;
+      overflow: visible !important;
+    }
+
+    .summaryLayout {
+      height: auto !important;
+      min-height: 100dvh !important;
+      overflow: visible !important;
+    }
+    
+    .summaryLayout .mainContent {
+      height: auto !important;
+      overflow: visible !important;
     }
     
     .layoutContainer::-webkit-scrollbar {

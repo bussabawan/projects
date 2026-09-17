@@ -208,14 +208,8 @@
   justify-content: center;
   padding: 0;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
   aspect-ratio: 1 / 1;
   position: relative;
-}
-
-.choiceBox:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
 }
 
 .choiceImage {

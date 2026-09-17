@@ -131,6 +131,8 @@
   border-radius: 40px;
   white-space: nowrap;
   text-align: center;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
 }
 
 .toggleBtn.active {

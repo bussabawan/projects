@@ -116,7 +116,7 @@ export default function UserLayout({
   const isGamesActive = pathname.startsWith("/user/games") && !isSummaryPage;
 
   return (
-    <div className={`${styles.layoutContainer} ${isGameInnerPage ? styles.noBottomPadding : ''}`}>
+    <div className={`${styles.layoutContainer} ${isGameInnerPage ? styles.noBottomPadding : ''} ${isSummaryPage ? styles.summaryLayout : ''}`}>
       {!isGameInnerPage && (
       <aside className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ""}`}>
         <button className={styles.toggleBtn} onClick={toggleSidebar} aria-label="Toggle Sidebar">

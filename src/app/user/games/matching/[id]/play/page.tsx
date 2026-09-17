@@ -9,6 +9,10 @@ import AlertMessage from '@/app/components/AlertMessage/AlertMessage';
 import Image from 'next/image';
 import Loader from '@/app/components/Loader/Loader';
 import { useClickSound } from '@/app/hooks/useClickSound';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// Global cache for audio objects to prevent double loading
+const audioCache = new Map<string, HTMLAudioElement>();
 
 // Volume Icon SVG
 const VolumeIcon = ({ isMuted }: { isMuted: boolean }) => (
@@ -117,8 +121,8 @@ export default function MatchingGamePage() {
     const bitrate = window.innerWidth <= 425 ? 32 : 64;
     const separator = url.includes('?') ? '&' : '?';
     const audioUrlWithBitrate = `${url}${separator}bitrate=${bitrate}`;
-    
-    const audio = new Audio(audioUrlWithBitrate);
+    const audio = audioCache.get(audioUrlWithBitrate) || new Audio(audioUrlWithBitrate);
+    audio.currentTime = 0;
     audioRef.current = audio;
     audio.play().catch(() => {});
   };
@@ -144,21 +148,17 @@ export default function MatchingGamePage() {
   const preloadAssets = async (questionsList: Question[]) => {
     const assets: Promise<void>[] = [];
     
-    const preloadImage = (url: string) => {
-      assets.push(new Promise((resolve) => {
-        const img = new window.Image();
-        img.src = url;
-        img.onload = () => resolve();
-        img.onerror = () => resolve();
-      }));
-    };
-
     const preloadAudio = (url: string) => {
+      const bitrate = window.innerWidth <= 425 ? 32 : 64;
+      const separator = url.includes('?') ? '&' : '?';
+      const audioUrlWithBitrate = `${url}${separator}bitrate=${bitrate}`;
+
+      if (audioCache.has(audioUrlWithBitrate)) return;
+
       assets.push(new Promise((resolve) => {
         const audio = new window.Audio();
-        const bitrate = window.innerWidth <= 425 ? 32 : 64;
-        const separator = url.includes('?') ? '&' : '?';
-        audio.src = `${url}${separator}bitrate=${bitrate}`;
+        audioCache.set(audioUrlWithBitrate, audio);
+        audio.src = audioUrlWithBitrate;
         audio.oncanplaythrough = () => resolve();
         audio.onerror = () => resolve();
         setTimeout(resolve, 3000); // timeout for audio
@@ -166,11 +166,9 @@ export default function MatchingGamePage() {
     };
 
     questionsList.forEach(q => {
-      if (q.target.imageUrl) preloadImage(q.target.imageUrl);
       if (q.target.audioUrl) preloadAudio(q.target.audioUrl);
       
       q.choices.forEach((c) => {
-        if (c.imageUrl) preloadImage(c.imageUrl);
         if (c.audioUrl) preloadAudio(c.audioUrl);
       });
     });
@@ -210,7 +208,8 @@ export default function MatchingGamePage() {
           const bitrate = window.innerWidth <= 425 ? 32 : 64;
           const separator = currentQ.target.audioUrl!.includes('?') ? '&' : '?';
           const audioUrlWithBitrate = `${currentQ.target.audioUrl}${separator}bitrate=${bitrate}`;
-          const audio = new Audio(audioUrlWithBitrate);
+          const audio = audioCache.get(audioUrlWithBitrate) || new Audio(audioUrlWithBitrate);
+          audio.currentTime = 0;
           audioRef.current = audio;
           audio.play().catch(() => {});
         }, 500); // Small delay allows UI to render first and helps with browser autoplay policies
@@ -377,10 +376,15 @@ export default function MatchingGamePage() {
       </div>
 
       <div className={styles.gameArea}>
-        <div 
+        <motion.div 
           className={styles.targetContainer} 
           onClick={() => playAudio(currentQ.target.audioUrl)}
           style={{ cursor: currentQ.target.audioUrl && !isMuted ? 'pointer' : 'default' }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          key={`target-${currentIndex}`}
         >
           {type === 'word' ? (
             <div className={styles.wordTarget}>
@@ -393,6 +397,7 @@ export default function MatchingGamePage() {
               className={styles.targetImage} 
               width={400}
               height={400}
+              priority
               style={{ width: '100%', height: '100%', objectFit: 'contain' }}
               onError={(e) => {
                 e.currentTarget.src = '/placeholder-image.png';
@@ -400,28 +405,38 @@ export default function MatchingGamePage() {
               }}
             />
           )}
-        </div>
+        </motion.div>
 
         <div className={styles.choicesContainer} style={{ gridTemplateColumns: numAnswers > 4 ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)' }}>
           {currentQ.choices.map((choice, idx) => (
-            <div 
+            <motion.div 
               key={`${choice.id}-${idx}`} 
-              className={`${styles.choiceBox} ${wrongChoiceId === choice.id ? styles.wrongChoice : ''} ${correctChoiceId === choice.id ? styles.correctChoice : ''}`}
+              className={`${styles.choiceBox} ${correctChoiceId === choice.id ? styles.correctChoice : ''}`}
               onClick={() => handleChoiceClick(choice.id, choice.audioUrl)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={
+                wrongChoiceId === choice.id 
+                  ? { opacity: 1, scale: 1, x: [-10, 10, -10, 10, 0], backgroundColor: '#ffcccc' } 
+                  : { opacity: 1, scale: 1, backgroundColor: '#ffffff' }
+              }
+              transition={{ duration: 0.4 }}
             >
               <Image 
                 src={choice.imageUrl} 
                 alt={`Choice ${idx + 1}`} 
                 className={styles.choiceImage} 
-                width={200}
-                height={200}
+                width={400}
+                height={400}
+                priority
                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                 onError={(e) => {
                   e.currentTarget.src = '/placeholder-image.png';
                   e.currentTarget.srcset = '';
                 }}
               />
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -429,9 +444,9 @@ export default function MatchingGamePage() {
       {/* Preload Next Question Images */}
       {currentIndex < questions.length - 1 && (
         <div style={{ display: 'none' }}>
-          <Image src={questions[currentIndex + 1].target.imageUrl} alt="preload target" width={1} height={1} />
+          <Image src={questions[currentIndex + 1].target.imageUrl} alt="preload target" width={400} height={400} priority={false} loading="eager" />
           {questions[currentIndex + 1].choices.map((choice, idx) => (
-            <Image key={`preload-${choice.id}-${idx}`} src={choice.imageUrl} alt={`preload choice ${idx}`} width={1} height={1} />
+            <Image key={`preload-${choice.id}-${idx}`} src={choice.imageUrl} alt={`preload choice ${idx}`} width={400} height={400} priority={false} loading="eager" />
           ))}
         </div>
       )}

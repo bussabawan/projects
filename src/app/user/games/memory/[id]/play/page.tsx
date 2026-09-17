@@ -8,6 +8,10 @@ import AlertMessage from '@/app/components/AlertMessage/AlertMessage';
 import Image from 'next/image';
 import Loader from '@/app/components/Loader/Loader';
 import { useClickSound } from '@/app/hooks/useClickSound';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// Global cache for audio objects to prevent double loading
+const audioCache = new Map<string, HTMLAudioElement>();
 
 type ImageInfo = {
   id: number;
@@ -69,22 +73,19 @@ export default function MemoryGamePlayPage() {
 
   const preloadAssets = async (questionsList: GameData[]) => {
     const assets: Promise<void>[] = [];
+    const preloadedAudioUrls = new Set<string>();
     
-    const preloadImage = (url: string) => {
-      assets.push(new Promise((resolve) => {
-        const img = new window.Image();
-        img.src = url;
-        img.onload = () => resolve();
-        img.onerror = () => resolve();
-      }));
-    };
-
     const preloadAudio = (url: string) => {
+      const bitrate = window.innerWidth <= 425 ? 32 : 64;
+      const separator = url.includes('?') ? '&' : '?';
+      const audioUrlWithBitrate = `${url}${separator}bitrate=${bitrate}`;
+
+      if (audioCache.has(audioUrlWithBitrate)) return;
+
       assets.push(new Promise((resolve) => {
         const audio = new window.Audio();
-        const bitrate = window.innerWidth <= 425 ? 32 : 64;
-        const separator = url.includes('?') ? '&' : '?';
-        audio.src = `${url}${separator}bitrate=${bitrate}`;
+        audioCache.set(audioUrlWithBitrate, audio);
+        audio.src = audioUrlWithBitrate;
         audio.oncanplaythrough = () => resolve();
         audio.onerror = () => resolve();
         setTimeout(resolve, 3000); // timeout for audio
@@ -92,11 +93,9 @@ export default function MemoryGamePlayPage() {
     };
 
     questionsList.forEach(q => {
-      if (q.target.imageUrl) preloadImage(q.target.imageUrl);
       if (q.target.audioUrl) preloadAudio(q.target.audioUrl);
       
       q.choices.forEach((c) => {
-        if (c.imageUrl) preloadImage(c.imageUrl);
         if (c.audioUrl) preloadAudio(c.audioUrl);
       });
     });
@@ -187,7 +186,8 @@ export default function MemoryGamePlayPage() {
       const separator = url.includes('?') ? '&' : '?';
       const audioUrlWithBitrate = `${url}${separator}bitrate=${bitrate}`;
       
-      const audio = new Audio(audioUrlWithBitrate);
+      const audio = audioCache.get(audioUrlWithBitrate) || new Audio(audioUrlWithBitrate);
+      audio.currentTime = 0;
       audioRef.current = audio;
       
       audio.onended = () => resolve();
@@ -419,46 +419,61 @@ export default function MemoryGamePlayPage() {
       </div>
 
       {gameState === 'question' && (
-        <div className={styles.questionContent}>
-          <div 
+        <motion.div 
+          className={styles.questionContent}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+        >
+          <motion.div 
             className={styles.targetCard} 
             onClick={() => playAudio(currentQ.target.audioUrl)}
             style={{ cursor: 'pointer' }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
             {mode === 'word' ? (
               <h1 className={styles.targetWord}>{currentQ.target.title}</h1>
             ) : (
-              <Image src={currentQ.target.imageUrl} alt="Target" width={300} height={300} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              <Image src={currentQ.target.imageUrl} alt="Target" width={300} height={300} priority style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
             )}
-          </div>
+          </motion.div>
           <div className={styles.countdownText}>
             กำลังจะหายใน {countdown}
           </div>
-        </div>
+        </motion.div>
       )}
 
       {gameState === 'options' && (
-        <div className={styles.optionsContent}>
+        <motion.div 
+          className={styles.optionsContent}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+        >
           <div className={`${styles.optionsGrid} ${gridClass}`}>
             {currentQ.choices.map((choice, index) => (
-              <div 
+              <motion.div 
                 key={index} 
-                className={`${styles.optionCard} ${wrongGuesses.includes(choice.id) ? styles.wrong : ''} ${correctChoiceId === choice.id ? styles.selected : ''}`}
+                className={`${styles.optionCard} ${correctChoiceId === choice.id ? styles.selected : ''}`}
                 onClick={() => handleOptionClick(choice)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                animate={wrongGuesses.includes(choice.id) ? { x: [-10, 10, -10, 10, 0], backgroundColor: '#ffcccc' } : { backgroundColor: '#ffffff' }}
+                transition={{ duration: 0.4 }}
               >
-                <Image src={choice.imageUrl} alt={`Option ${index + 1}`} width={300} height={300} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-              </div>
+                <Image src={choice.imageUrl} alt={`Option ${index + 1}`} width={300} height={300} priority style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* Preload Next Question Images */}
       {currentQuestionIndex < questions.length - 1 && (
         <div style={{ display: 'none' }}>
-          <Image src={questions[currentQuestionIndex + 1].target.imageUrl} alt="preload target" width={1} height={1} />
+          <Image src={questions[currentQuestionIndex + 1].target.imageUrl} alt="preload target" width={300} height={300} priority={false} loading="eager" />
           {questions[currentQuestionIndex + 1].choices.map((choice, idx) => (
-            <Image key={`preload-${choice.id}-${idx}`} src={choice.imageUrl} alt={`preload choice ${idx}`} width={1} height={1} />
+            <Image key={`preload-${choice.id}-${idx}`} src={choice.imageUrl} alt={`preload choice ${idx}`} width={300} height={300} priority={false} loading="eager" />
           ))}
         </div>
       )}
