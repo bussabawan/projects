@@ -1,13 +1,15 @@
 .footerContainer {
-  position: relative;
-  margin: 20px auto 40px auto;
-  text-align: center;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  margin: 0;
+  text-align: right;
+  align-items: flex-end;
   font-size: 14px;
   color: #777;
   z-index: 10;
   background: transparent;
   padding: 8px 12px;
-  border-radius: 8px;
   box-sizing: border-box;
   max-width: 100%;
   display: flex;
@@ -67,6 +69,7 @@
     width: 90%;
     font-size: 16px;
     text-align: center;
+    align-items: center;
     padding: 8px 10px;
     max-width: 100%;
     box-sizing: border-box;
