@@ -272,6 +272,7 @@ export default function ManageImagesPage() {
       audioCache.current[fullAudioUrl] = audio;
     }
     
+    // eslint-disable-next-line react-hooks/immutability
     audio.currentTime = 0;
     audio.play().catch(e => {
       console.error(e);

@@ -84,6 +84,7 @@ export default function MatchingSettingsPage() {
   useEffect(() => {
     if (previewData.length === 0) return;
     
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setFade(true); // Ensure it's visible initially
     
     const interval = setInterval(() => {

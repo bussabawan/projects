@@ -9,6 +9,7 @@ export default function CookieBanner() {
   useEffect(() => {
     const cookieConsent = localStorage.getItem('cookieConsent');
     if (!cookieConsent) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsVisible(true);
     }
   }, []);
@@ -24,7 +25,7 @@ export default function CookieBanner() {
     <div className={styles.cookieBanner}>
       <div className={styles.contentWrapper}>
         <div className={styles.textContainer}>
-          เราใช้คุกกี้เพื่อเพิ่มประสบการณ์และความพึงพอใจในการใช้งานเว็บไซต์ หากคุณกด "ยอมรับ" หรือใช้งานเว็บไซต์ของเราต่อ ถือว่าคุณยินยอมให้มีการใช้งานคุกกี้
+          เราใช้คุกกี้เพื่อเพิ่มประสบการณ์และความพึงพอใจในการใช้งานเว็บไซต์ หากคุณกด &quot;ยอมรับ&quot; หรือใช้งานเว็บไซต์ของเราต่อ ถือว่าคุณยินยอมให้มีการใช้งานคุกกี้
           <a 
             href="https://www.vjlh.go.th/pdf/cookies/CookiesPolicy2567.pdf" 
             target="_blank" 

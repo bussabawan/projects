@@ -8,7 +8,7 @@ import AlertMessage from '@/app/components/AlertMessage/AlertMessage';
 import Image from 'next/image';
 import Loader from '@/app/components/Loader/Loader';
 import { useClickSound } from '@/app/hooks/useClickSound';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion} from 'framer-motion';
 
 // Global cache for audio objects to prevent double loading
 const audioCache = new Map<string, HTMLAudioElement>();
@@ -73,7 +73,6 @@ export default function MemoryGamePlayPage() {
 
   const preloadAssets = async (questionsList: GameData[]) => {
     const assets: Promise<void>[] = [];
-    const preloadedAudioUrls = new Set<string>();
     
     const preloadAudio = (url: string) => {
       const bitrate = window.innerWidth <= 425 ? 32 : 64;
@@ -124,7 +123,6 @@ export default function MemoryGamePlayPage() {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       loadGameData(Number(params.id));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
   // Handle Question Phase Timer
@@ -167,7 +165,6 @@ export default function MemoryGamePlayPage() {
     return () => {
       if (stopwatchRef.current) clearInterval(stopwatchRef.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState, currentQuestionIndex]);
 
   const playAudio = (url?: string): Promise<void> => {

@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 export const useClickSound = () => {
   const playClick = useCallback(() => {
     try {
-      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (!AudioContextClass) return;
       
       const ctx = new AudioContextClass();
@@ -23,7 +23,7 @@ export const useClickSound = () => {
       
       osc.start(ctx.currentTime);
       osc.stop(ctx.currentTime + 0.04);
-    } catch (e) {
+    } catch {
       // Ignore if audio context fails (e.g., due to autoplay policies before user interaction)
     }
   }, []);

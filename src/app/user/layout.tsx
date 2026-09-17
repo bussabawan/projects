@@ -17,13 +17,14 @@ export default function UserLayout({
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
   const [userName, setUserName] = useState("User");
-  const [sessionDay, setSessionDay] = useState<number>(0);
+
   const [lastActivity, setLastActivity] = useState<number>(0);
   const [isPageLoading, setIsPageLoading] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsPageLoading(false);
   }, [pathname]);
 
@@ -59,7 +60,7 @@ export default function UserLayout({
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
-    setSessionDay(new Date().getDate());
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLastActivity(Date.now());
 
     let throttleTimer: NodeJS.Timeout | null = null;

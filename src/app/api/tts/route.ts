@@ -46,6 +46,7 @@ export async function GET(req: NextRequest) {
     }
 
     const arrayBuffer = await response.arrayBuffer();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let buffer: any = Buffer.from(arrayBuffer);
 
     if (validBitrate) {

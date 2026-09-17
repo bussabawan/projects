@@ -283,7 +283,9 @@ export default function HistoryPage() {
                               </div>
                               {detail.game}
                             </div>
-                            <div className={styles.detailScore}>{detail.score}</div>
+                            <div className={styles.detailScore}>
+                              <span className={styles.scoreBadge}>{detail.score}</span>
+                            </div>
                             <div className={styles.detailDuration}>{detail.duration}</div>
                           </div>
                         ))}

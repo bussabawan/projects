@@ -10,15 +10,7 @@ import dynamic from 'next/dynamic';
 
 const PatientStatsPopup = dynamic(() => import('./components/PatientStatsPopup'), { ssr: false });
 
-const extractCategory = (testSet?: string) => {
-  if (!testSet) return '';
-  let cat = testSet.replace(/^(?:แบบฝึกหัด\s*)?(?:หมวด\s*)?/, '');
-  cat = cat.replace(/\s*เลเวล\s*\d*/g, '').trim();
-  if (cat.includes('สิ่งของ')) {
-    cat = 'สิ่งของ';
-  }
-  return cat;
-};
+
 
 const formatTagDisplay = (testSet?: string) => {
   if (!testSet) return '';
@@ -70,9 +62,7 @@ export default function PatientStatsPage() {
 
   const selectedPatient = patients.find(p => String(p.id) === String(selectedPatientId));
 
-  const uniqueCategories = Array.from(new Set(
-    (selectedPatient?.testSets || []).map(ts => extractCategory(ts)).filter(Boolean)
-  ));
+  
 
   const uniqueExerciseSets = Array.from(new Set(
     (selectedPatient?.testSets || []).filter(Boolean)

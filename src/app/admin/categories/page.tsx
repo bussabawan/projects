@@ -280,6 +280,7 @@ export default function ManageCategoriesPage() {
 
     try {
       const prioritizeIds = latestSelectedIdsRef.current.join(',');
+      // eslint-disable-next-line react-hooks/purity
       const res = await fetch(`/api/admin/images?page=${imagePage}&limit=${imageItemsPerPage}&search=${encodeURIComponent(debouncedImageSearchQuery)}&prioritizeIds=${prioritizeIds}&t=${Date.now()}`);
       const data = await res.json();
       if (data.success) {

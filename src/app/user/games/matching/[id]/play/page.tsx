@@ -9,7 +9,7 @@ import AlertMessage from '@/app/components/AlertMessage/AlertMessage';
 import Image from 'next/image';
 import Loader from '@/app/components/Loader/Loader';
 import { useClickSound } from '@/app/hooks/useClickSound';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion} from 'framer-motion';
 
 // Global cache for audio objects to prevent double loading
 const audioCache = new Map<string, HTMLAudioElement>();

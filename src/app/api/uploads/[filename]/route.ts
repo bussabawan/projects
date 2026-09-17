@@ -19,6 +19,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ file
   const filePath = path.join(process.cwd(), "uploads", folder, filename);
   
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let buffer: any = null;
     
     // Check for bitrate param

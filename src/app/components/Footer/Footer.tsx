@@ -19,7 +19,6 @@ export default function Footer() {
   const isCornerPage = !(isUserMainPage || isAdminPage);
 
   // ซ่อน footer ในหน้าเล่นเกมและหน้าสรุปผล *เฉพาะบนมือถือ* เพื่อไม่ให้ทับกับเนื้อหา
-  const isGameInnerPage = pathname.startsWith("/user/games/") && pathname.split("/").length > 4;
 
   return (
     <div className={`${styles.footerContainer} ${isCornerPage ? styles.cornerFixed : ''}`}>

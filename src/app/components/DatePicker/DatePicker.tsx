@@ -28,6 +28,7 @@ export default function DatePicker({ isOpen, onClose, onSelect, initialDate, tit
       if (initialDate) {
         const d = new Date(initialDate);
         if (!isNaN(d.getTime())) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           setCurrentDate(d);
           setSelectedDateStr(initialDate);
         }
