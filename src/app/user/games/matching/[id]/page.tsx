@@ -5,6 +5,7 @@ import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import styles from './matchingSettings.module.css';
 import { getExerciseImageCount, getGameData } from '@/app/actions/matchingActions';
 import { useClickSound } from '@/app/hooks/useClickSound';
+import Image from 'next/image';
 
 interface GameTarget {
   id: number;
@@ -209,11 +210,15 @@ export default function MatchingSettingsPage() {
                   <div className={styles.imageContainer}>
                     {!imageError ? (
                       <>
-                        <img 
+                        <Image 
                           src={previewData[currentIndex].target.imageUrl} 
                           alt="preview target" 
                           className={styles.previewImage}
+                          width={200}
+                          height={200}
+                          style={{ objectFit: 'contain', width: '100%', height: '100%' }}
                           onError={() => setImageError(true)}
+                          unoptimized
                         />
                       </>
                     ) : (
@@ -254,11 +259,14 @@ export default function MatchingSettingsPage() {
                       transition: 'opacity 0.3s ease-in-out',
                       padding: '8px'
                     }}>
-                      <img 
+                      <Image 
                         src={choice.imageUrl} 
                         alt="choice" 
+                        width={200}
+                        height={200}
                         style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
                         onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                        unoptimized
                       />
                     </div>
                  </div>

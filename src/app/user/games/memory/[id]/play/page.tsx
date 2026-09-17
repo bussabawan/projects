@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import styles from './memoryPlay.module.css';
 import { getMemoryGameData, saveMemoryGameResult } from '@/app/actions/memoryActions';
@@ -118,28 +118,27 @@ export default function MemoryGamePlayPage() {
     await Promise.all(assets);
   };
 
-  const loadGameData = async (exerciseId: number) => {
-    try {
-      const result = await getMemoryGameData(exerciseId, numQuestionsSetting, numAnswersSetting);
-      if (result.success && result.data) {
-        setQuestions(result.data);
-        await preloadAssets(result.data);
-        setGameState('question');
-      } else {
+  useEffect(() => {
+    const loadGameData = async (exerciseId: number) => {
+      try {
+        const result = await getMemoryGameData(exerciseId, numQuestionsSetting, numAnswersSetting);
+        if (result.success && result.data) {
+          setQuestions(result.data);
+          await preloadAssets(result.data);
+          setGameState('question');
+        } else {
+          setGameState('error');
+        }
+      } catch (error) {
+        console.error("Error loading game data:", error);
         setGameState('error');
       }
-    } catch (error) {
-      console.error("Error loading game data:", error);
-      setGameState('error');
-    }
-  };
+    };
 
-  useEffect(() => {
     if (params.id) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       loadGameData(Number(params.id));
     }
-  }, [params.id]);
+  }, [params.id, numQuestionsSetting, numAnswersSetting]);
 
   // Handle Question Phase Timer
   useEffect(() => {
@@ -181,9 +180,10 @@ export default function MemoryGamePlayPage() {
     return () => {
       if (stopwatchRef.current) clearInterval(stopwatchRef.current);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState, currentQuestionIndex]);
 
-  const playAudio = (url?: string): Promise<void> => {
+  const playAudio = useCallback((url?: string): Promise<void> => {
     return new Promise((resolve) => {
       if (!url || isMuted) {
         resolve();
@@ -211,7 +211,7 @@ export default function MemoryGamePlayPage() {
         resolve();
       });
     });
-  };
+  }, [isMuted]);
 
   // Play audio when entering question state
   useEffect(() => {
@@ -219,7 +219,7 @@ export default function MemoryGamePlayPage() {
       const currentQ = questions[currentQuestionIndex];
       playAudio(currentQ.target.audioUrl);
     }
-  }, [gameState, currentQuestionIndex, questions]);
+  }, [gameState, currentQuestionIndex, questions, playAudio]);
 
   const formatTimeMMSS = (totalSeconds: number) => {
     const minutes = Math.floor(totalSeconds / 60);

@@ -5,6 +5,7 @@ import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import styles from './memorySettings.module.css';
 import { getExerciseImageCount, getGameData } from '@/app/actions/matchingActions';
 import { useClickSound } from '@/app/hooks/useClickSound';
+import Image from 'next/image';
 
 interface GameTarget {
   id: number;
@@ -109,8 +110,10 @@ export default function MemorySettingsPage() {
   useEffect(() => {
     if (previewImages.length === 0) return;
     
-    setTimeLeft(showTime); // Reset time when setting changes
-    setFade(true); // Ensure it's visible initially
+    setTimeout(() => {
+      setTimeLeft(showTime); // Reset time when setting changes
+      setFade(true); // Ensure it's visible initially
+    }, 0);
     
     const interval = setInterval(() => {
       setTimeLeft(prev => {
@@ -337,11 +340,15 @@ export default function MemorySettingsPage() {
                   <div className={styles.imageContainer}>
                     {!imageError ? (
                       <>
-                        <img 
+                        <Image 
                           src={previewImages[currentImageIndex].imageUrl} 
                           alt="preview" 
                           className={styles.previewImage}
+                          width={200}
+                          height={200}
+                          style={{ objectFit: 'contain', width: '100%', height: '100%' }}
                           onError={() => setImageError(true)}
+                          unoptimized
                         />
                       </>
                     ) : (
