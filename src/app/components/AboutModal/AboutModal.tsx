@@ -1,4 +1,7 @@
-import React, { useEffect } from 'react';
+"use client";
+
+import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import styles from './AboutModal.module.css';
 
@@ -8,6 +11,12 @@ interface AboutModalProps {
 }
 
 export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -19,9 +28,9 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
+  return createPortal(
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
@@ -83,7 +92,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                     <Image src="/profile1.webp?v=2" alt="นางสาวบุษบาวรรณ ลาพิงค์" width={100} height={100} style={{ width: '100%', height: '100%', objectFit: 'cover' }} quality={100}/>
                   </div>
                   <div className={styles.profileName}>นางสาวบุษบาวรรณ ลาพิงค์</div>
-                  <div className={styles.profileTitle}>สาขาวิศวกรรมซอฟต์แวร์<br/>คณะเทคโนโลยีสารอุตสหากรรม<br/>มหาวิทยาลัยราชภัฏลำปาง<br/>BussabawanLaping@gmail.com</div>
+                  <div className={styles.profileTitle}>สาขาวิศวกรรมซอฟต์แวร์<br/>คณะเทคโนโลยีสารอุตสหากรรม<br/>มหาวิทยาลัยราชภัฏลำปาง<br/>bussabawanlaping@gmail.com</div>
                 </div>
               </div>
 
@@ -139,6 +148,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
