@@ -185,13 +185,15 @@ export default function MemoryGamePlayPage() {
 
   const playAudio = useCallback((url?: string): Promise<void> => {
     return new Promise((resolve) => {
+      // 1. หยุดเสียงเก่าทุกกรณี (จำเป็นสำหรับบางเบราว์เซอร์เพื่อให้เริ่มเล่นใหม่ได้)
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+
+      // 2. ถ้าไม่มีเสียงใหม่ให้เล่น หรือปิดเสียงอยู่ ให้จบการทำงาน
       if (!url || isMuted) {
         resolve();
         return;
-      }
-      
-      if (audioRef.current) {
-        audioRef.current.pause();
       }
       
       // Determine bitrate based on screen size (Mobile L: 425px)
@@ -199,13 +201,24 @@ export default function MemoryGamePlayPage() {
       const separator = url.includes('?') ? '&' : '?';
       const audioUrlWithBitrate = `${url}${separator}bitrate=${bitrate}`;
       
-      const audio = audioCache.get(audioUrlWithBitrate) || new Audio(audioUrlWithBitrate);
-      audio.currentTime = 0;
+      let audio = audioCache.get(audioUrlWithBitrate);
+      // Bulletproof: ป้องกัน Cache พังจาก Hot-reload
+      if (!audio || !audio.src || audio.src === "" || audio.src === window.location.href) {
+        audio = new window.Audio(audioUrlWithBitrate);
+        audioCache.set(audioUrlWithBitrate, audio);
+      }
+      
+      // 3. เริ่มเล่นจาก 0
+      try {
+        audio.currentTime = 0;
+      } catch (e) {}
+      
       audioRef.current = audio;
       
       audio.onended = () => resolve();
       audio.onerror = () => resolve();
       
+      // 4. เล่นเสียง
       audio.play().catch(e => {
         console.log("Audio play failed:", e);
         resolve();
@@ -237,6 +250,8 @@ export default function MemoryGamePlayPage() {
 
 
   const handleOptionClick = async (selectedChoice: ImageInfo) => {
+    const audioPromise = playAudio(selectedChoice.audioUrl);
+    
     if (gameState !== 'options' || isTransitioning) return;
     
     setClickCount(prev => prev + 1);
@@ -248,7 +263,6 @@ export default function MemoryGamePlayPage() {
         setFeedback(null);
         setWrongGuesses(prev => prev.filter(id => id !== selectedChoice.id));
       }, 1500);
-      playAudio(selectedChoice.audioUrl);
       return;
     }
     
@@ -272,7 +286,6 @@ export default function MemoryGamePlayPage() {
       }]);
 
       // Play the audio and ensure at least 1.5s delay for feedback
-      const audioPromise = playAudio(selectedChoice.audioUrl);
       const delayPromise = new Promise(resolve => setTimeout(resolve, 1500));
       await Promise.all([audioPromise, delayPromise]);
 
@@ -295,7 +308,6 @@ export default function MemoryGamePlayPage() {
         setFeedback(null);
         setWrongGuesses(prev => prev.filter(id => id !== selectedChoice.id));
       }, 1500);
-      playAudio(selectedChoice.audioUrl);
     }
   };
 

@@ -103,27 +103,40 @@ export default function MatchingGamePage() {
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
-        audioRef.current.src = "";
         audioRef.current = null;
       }
     };
   }, []);
 
   const playAudio = (url?: string) => {
-    if (!url || isMuted) return;
-    
+    // 1. หยุดเสียงเก่าทุกกรณี (จำเป็นสำหรับบางเบราว์เซอร์เพื่อให้เริ่มเล่นใหม่ได้)
     if (audioRef.current) {
       audioRef.current.pause();
-      audioRef.current.src = "";
     }
+    
+    // 2. ถ้าไม่มีเสียงใหม่ให้เล่น หรือปิดเสียงอยู่ ให้จบการทำงาน
+    if (!url || isMuted) return;
     
     // Determine bitrate based on screen size (Mobile L: 425px)
     const bitrate = window.innerWidth <= 425 ? 32 : 64;
     const separator = url.includes('?') ? '&' : '?';
     const audioUrlWithBitrate = `${url}${separator}bitrate=${bitrate}`;
-    const audio = audioCache.get(audioUrlWithBitrate) || new Audio(audioUrlWithBitrate);
-    audio.currentTime = 0;
+    
+    let audio = audioCache.get(audioUrlWithBitrate);
+    // Bulletproof: ป้องกัน Cache พังจาก Hot-reload
+    if (!audio || !audio.src || audio.src === "" || audio.src === window.location.href) {
+      audio = new window.Audio(audioUrlWithBitrate);
+      audioCache.set(audioUrlWithBitrate, audio);
+    }
+
+    // 3. เริ่มเล่นจาก 0
+    try {
+      audio.currentTime = 0;
+    } catch(e) {}
+    
     audioRef.current = audio;
+    
+    // 4. เล่นเสียง
     audio.play().catch(() => {});
   };
 
@@ -219,13 +232,22 @@ export default function MatchingGamePage() {
         const timer = setTimeout(() => {
           if (audioRef.current) {
             audioRef.current.pause();
-            audioRef.current.src = "";
           }
           const bitrate = window.innerWidth <= 425 ? 32 : 64;
           const separator = currentQ.target.audioUrl!.includes('?') ? '&' : '?';
           const audioUrlWithBitrate = `${currentQ.target.audioUrl}${separator}bitrate=${bitrate}`;
-          const audio = audioCache.get(audioUrlWithBitrate) || new Audio(audioUrlWithBitrate);
-          audio.currentTime = 0;
+          
+          let audio = audioCache.get(audioUrlWithBitrate);
+          // Bulletproof: ป้องกัน Cache พังจาก Hot-reload
+          if (!audio || !audio.src || audio.src === "" || audio.src === window.location.href) {
+            audio = new window.Audio(audioUrlWithBitrate);
+            audioCache.set(audioUrlWithBitrate, audio);
+          }
+          
+          try {
+            audio.currentTime = 0;
+          } catch(e) {}
+          
           audioRef.current = audio;
           audio.play().catch(() => {});
         }, 500); // Small delay allows UI to render first and helps with browser autoplay policies
@@ -243,9 +265,9 @@ export default function MatchingGamePage() {
   };
 
   const handleChoiceClick = (choiceId: number, audioUrl?: string) => {
+    playAudio(audioUrl);
     if (feedback !== null || isFinished) return; // Prevent clicking while showing feedback
 
-    playAudio(audioUrl);
     setClickCount(prev => prev + 1);
 
     const currentQ = questions[currentIndex];
