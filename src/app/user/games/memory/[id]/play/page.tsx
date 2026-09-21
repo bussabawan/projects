@@ -211,7 +211,7 @@ export default function MemoryGamePlayPage() {
       // 3. เริ่มเล่นจาก 0
       try {
         audio.currentTime = 0;
-      } catch (e) {}
+      } catch {}
       
       audioRef.current = audio;
       

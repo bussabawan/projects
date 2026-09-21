@@ -132,7 +132,7 @@ export default function MatchingGamePage() {
     // 3. เริ่มเล่นจาก 0
     try {
       audio.currentTime = 0;
-    } catch(e) {}
+    } catch {}
     
     audioRef.current = audio;
     
@@ -246,7 +246,7 @@ export default function MatchingGamePage() {
           
           try {
             audio.currentTime = 0;
-          } catch(e) {}
+          } catch {}
           
           audioRef.current = audio;
           audio.play().catch(() => {});
