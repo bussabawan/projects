@@ -12,7 +12,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh', width: '100%' }}
+      style={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100%', minHeight: 0, width: '100%' }}
     >
       {children}
     </motion.div>
