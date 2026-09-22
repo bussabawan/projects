@@ -904,14 +904,16 @@
     
     .tabSwitcher {
       margin-bottom: 0;
-      width: auto;
+      width: 100%;
+      box-sizing: border-box;
       flex: none;
     }
     
     .tabBtn {
       padding: 0.5rem 1rem;
-      min-width: unset;
+      min-width: 0;
       font-size: 0.9rem;
+      flex: 1;
     }
     
     .searchContainer {

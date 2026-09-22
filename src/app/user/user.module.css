@@ -121,10 +121,9 @@
 }
 
 .menuItem.active {
-  background-color: #fcfcfc;
-  color: #825aab;
+  background-color: #2a0350;
+  color: #ffffff;
   font-weight: 600;
-  box-shadow: inset 6px 0 0 #825aab, 0 2px 5px rgba(0,0,0,0.05);
 }
 
 .menuText {
@@ -197,7 +196,7 @@
   display: none;
 }
 
-.activeIndicator {
+.activePill {
   display: none;
 }
 
@@ -422,12 +421,13 @@
     }
     
     .activePill {
+      display: block;
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: #dcdcdc;
+      background-color: #2a0350;
       border-radius: 26px;
       z-index: 0;
     }

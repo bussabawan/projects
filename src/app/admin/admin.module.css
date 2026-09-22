@@ -121,10 +121,9 @@
 }
 
 .menuItem.active {
-  background-color: #fcfcfc;
-  color: #825aab;
+  background-color: #2a0350;
+  color: #ffffff;
   font-weight: 600;
-  box-shadow: inset 6px 0 0 #825aab, 0 2px 5px rgba(0,0,0,0.05);
 }
 
 .menuText {
@@ -380,7 +379,7 @@
     }
   
     .menuItem.active, .collapsed .menuItem.active {
-      background-color: #d8d8d8;
+      background-color: #2a0350;
       box-shadow: none;
     }
   
