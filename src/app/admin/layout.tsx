@@ -200,7 +200,7 @@ export default function AdminLayout({
         </div>
       </aside>
 
-      <main className={styles.mainContent}>
+      <main className={`${styles.mainContent} ${pathname === '/admin' ? styles.lockedDashboard : ''}`}>
         {isPageLoading ? (
           <Loader text="กำลังโหลดข้อมูล..." />
         ) : (

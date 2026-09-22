@@ -527,3 +527,10 @@
     }
 }
 
+@media (min-width: 1025px) {
+  .lockedDashboard {
+    overflow-y: hidden !important;
+  }
+}
+
+
