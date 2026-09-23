@@ -146,8 +146,8 @@
 }
 
 .targetCard {
-  width: 60%;
-  max-width: 600px;
+  width: 100%;
+  max-width: 800px;
   aspect-ratio: 4/3;
   background-color: #ffffff;
   border-radius: 20px;
@@ -205,14 +205,16 @@
 }
 
 /* Grid layout for different number of options */
-.grid2 { 
-  grid-template-columns: repeat(2, 1fr); 
-  max-width: 900px;
-}
+.grid2 { grid-template-columns: repeat(2, 1fr); max-width: 900px;}
 .grid3 { grid-template-columns: repeat(3, 1fr); }
 .grid4 { grid-template-columns: repeat(2, 1fr); }
 .grid5 { grid-template-columns: repeat(3, 1fr); }
 .grid6 { grid-template-columns: repeat(3, 1fr); }
+.grid7, .grid8 { grid-template-columns: repeat(4, 1fr); }
+.grid9, .grid10 { grid-template-columns: repeat(5, 1fr); }
+.grid11, .grid12 { grid-template-columns: repeat(4, 1fr); }
+.grid13, .grid14, .grid15 { grid-template-columns: repeat(5, 1fr); }
+
 
 .optionCard {
   width: 100%;
@@ -235,6 +237,31 @@
 .optionCard.wrong {
   border: 4px solid #ef4444;
 }
+
+.optionCard.selectedCorrect {
+  border: 4px solid #4ade80;
+  background-color: #dcfce7;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.targetsGrid {
+  display: grid;
+  gap: 20px;
+  max-width: 1000px;
+  width: 100%;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+.targetsGrid.grid1 { grid-template-columns: 1fr; max-width: 800px; }
+.targetsGrid.grid2 { grid-template-columns: repeat(2, 1fr); max-width: 1200px; }
+.targetsGrid.grid3 { grid-template-columns: repeat(3, 1fr); max-width: 1200px; }
+.targetsGrid.grid4 { grid-template-columns: repeat(2, 1fr); max-width: 800px; }
+.targetsGrid.grid5 { grid-template-columns: repeat(3, 1fr); max-width: 1200px; }
+.targetsGrid.grid6 { grid-template-columns: repeat(3, 1fr); max-width: 1200px; }
+.targetsGrid.grid7, .targetsGrid.grid8 { grid-template-columns: repeat(4, 1fr); max-width: 1400px; }
+.targetsGrid.grid9, .targetsGrid.grid10 { grid-template-columns: repeat(5, 1fr); max-width: 1600px; }
+
 
 .optionCard img {
   width: 100%;

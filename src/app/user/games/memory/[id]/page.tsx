@@ -78,6 +78,7 @@ export default function MemorySettingsPage() {
 
   const [questions, setQuestions] = useState(30);
   const [maxQuestions, setMaxQuestions] = useState(30);
+  const [numTargets, setNumTargets] = useState(1);
   const [answers, setAnswers] = useState(2);
   const [showTime, setShowTime] = useState(5);
   
@@ -106,6 +107,13 @@ export default function MemorySettingsPage() {
       });
     }
   }, [params.id]);
+
+  // Ensure answers is always strictly greater than numTargets
+  useEffect(() => {
+    if (answers <= numTargets) {
+      setAnswers(numTargets + 1);
+    }
+  }, [numTargets, answers]);
 
   useEffect(() => {
     if (previewImages.length === 0) return;
@@ -180,7 +188,7 @@ export default function MemorySettingsPage() {
   const handleStart = () => {
     playClick();
     // Logic to start the game with the selected settings
-    router.push(`/user/games/memory/${params.id}/play?mode=${mode}&q=${questions}&a=${answers}&t=${showTime}`);
+    router.push(`/user/games/memory/${params.id}/play?mode=${mode}&q=${questions}&a=${answers}&t=${showTime}&tc=${numTargets}`);
   };
 
   const handleBack = () => {
@@ -249,12 +257,38 @@ export default function MemorySettingsPage() {
           </div>
 
           <div className={styles.settingRow}>
+            <span className={styles.settingLabel}>จำนวนโจทย์ที่ต้องจำ</span>
+            <div className={styles.controlGroup}>
+              <button 
+                className={styles.controlBtn} 
+                onClick={() => updateValue(setNumTargets, numTargets, -1, 1, 10)}
+                disabled={numTargets <= 1}
+              >
+                -
+              </button>
+              <input 
+                type="number" 
+                className={styles.controlValue} 
+                value={numTargets} 
+                readOnly 
+              />
+              <button 
+                className={styles.controlBtn} 
+                onClick={() => updateValue(setNumTargets, numTargets, 1, 1, 10)}
+                disabled={numTargets >= 10}
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          <div className={styles.settingRow}>
             <span className={styles.settingLabel}>จำนวนคำตอบ</span>
             <div className={styles.controlGroup}>
               <button 
                 className={styles.controlBtn} 
-                onClick={() => updateValue(setAnswers, answers, -1, 2, 6)}
-                disabled={answers <= 2}
+                onClick={() => updateValue(setAnswers, answers, -1, numTargets + 1, 15)}
+                disabled={answers <= numTargets + 1}
               >
                 -
               </button>
@@ -266,8 +300,8 @@ export default function MemorySettingsPage() {
               />
               <button 
                 className={styles.controlBtn} 
-                onClick={() => updateValue(setAnswers, answers, 1, 2, 6)}
-                disabled={answers >= 6}
+                onClick={() => updateValue(setAnswers, answers, 1, numTargets + 1, 15)}
+                disabled={answers >= 15}
               >
                 +
               </button>

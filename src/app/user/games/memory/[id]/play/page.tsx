@@ -21,7 +21,7 @@ type ImageInfo = {
 };
 
 type GameData = {
-  target: ImageInfo;
+  targets: ImageInfo[];
   choices: ImageInfo[];
 };
 
@@ -43,6 +43,7 @@ export default function MemoryGamePlayPage() {
   const numQuestionsSetting = parseInt(searchParams.get('q') || '30', 10);
   const numAnswersSetting = parseInt(searchParams.get('a') || '4', 10);
   const showTimeSetting = parseInt(searchParams.get('t') || '5', 10);
+  const numTargetsSetting = parseInt(searchParams.get('tc') || '1', 10);
 
   const [gameState, setGameState] = useState<'loading' | 'question' | 'options' | 'summary' | 'error'>('loading');
   const [questions, setQuestions] = useState<GameData[]>([]);
@@ -57,7 +58,7 @@ export default function MemoryGamePlayPage() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
   const [showExitPopup, setShowExitPopup] = useState(false);
-  const [correctChoiceId, setCorrectChoiceId] = useState<number | null>(null);
+  const [correctChoiceIds, setCorrectChoiceIds] = useState<number[]>([]);
   
   // Timers
   const [countdown, setCountdown] = useState(showTimeSetting);
@@ -106,8 +107,10 @@ export default function MemoryGamePlayPage() {
     };
 
     questionsList.forEach(q => {
-      if (q.target.audioUrl) preloadAudio(q.target.audioUrl);
-      if (q.target.imageUrl) preloadImage(q.target.imageUrl);
+      q.targets.forEach(t => {
+        if (t.audioUrl) preloadAudio(t.audioUrl);
+        if (t.imageUrl) preloadImage(t.imageUrl);
+      });
       
       q.choices.forEach((c) => {
         if (c.audioUrl) preloadAudio(c.audioUrl);
@@ -121,7 +124,7 @@ export default function MemoryGamePlayPage() {
   useEffect(() => {
     const loadGameData = async (exerciseId: number) => {
       try {
-        const result = await getMemoryGameData(exerciseId, numQuestionsSetting, numAnswersSetting);
+        const result = await getMemoryGameData(exerciseId, numQuestionsSetting, numAnswersSetting, numTargetsSetting);
         if (result.success && result.data) {
           setQuestions(result.data);
           await preloadAssets(result.data);
@@ -138,7 +141,7 @@ export default function MemoryGamePlayPage() {
     if (params.id) {
       loadGameData(Number(params.id));
     }
-  }, [params.id, numQuestionsSetting, numAnswersSetting]);
+  }, [params.id, numQuestionsSetting, numAnswersSetting, numTargetsSetting]);
 
   // Handle Question Phase Timer
   useEffect(() => {
@@ -228,10 +231,28 @@ export default function MemoryGamePlayPage() {
 
   // Play audio when entering question state
   useEffect(() => {
-    if (gameState === 'question' && questions[currentQuestionIndex]) {
-      const currentQ = questions[currentQuestionIndex];
-      playAudio(currentQ.target.audioUrl);
-    }
+    let isActive = true;
+
+    const playSequentially = async () => {
+      if (gameState === 'question' && questions[currentQuestionIndex]) {
+        const currentQ = questions[currentQuestionIndex];
+        for (const target of currentQ.targets) {
+          if (!isActive) break;
+          if (target.audioUrl) {
+            await playAudio(target.audioUrl);
+            if (!isActive) break;
+            // Short delay between audios
+            await new Promise(resolve => setTimeout(resolve, 150));
+          }
+        }
+      }
+    };
+
+    playSequentially();
+
+    return () => {
+      isActive = false;
+    };
   }, [gameState, currentQuestionIndex, questions, playAudio]);
 
   const formatTimeMMSS = (totalSeconds: number) => {
@@ -253,6 +274,7 @@ export default function MemoryGamePlayPage() {
     const audioPromise = playAudio(selectedChoice.audioUrl);
     
     if (gameState !== 'options' || isTransitioning) return;
+    if (correctChoiceIds.includes(selectedChoice.id)) return;
     
     setClickCount(prev => prev + 1);
     
@@ -267,38 +289,47 @@ export default function MemoryGamePlayPage() {
     }
     
     const currentQ = questions[currentQuestionIndex];
-    const isCorrect = selectedChoice.id === currentQ.target.id;
+    const isCorrect = currentQ.targets.some(t => t.id === selectedChoice.id);
     
     if (isCorrect) {
-      setIsTransitioning(true);
-      setFeedback('correct');
-      setCorrectChoiceId(selectedChoice.id);
-      if (stopwatchRef.current) {
-        clearInterval(stopwatchRef.current);
-      }
-      
+      const newCorrectChoiceIds = [...correctChoiceIds, selectedChoice.id];
+      setCorrectChoiceIds(newCorrectChoiceIds);
       setCorrectCount(prev => prev + 1);
-      
-      // Log time
-      setTimeLogs(prev => [...prev, {
-        photoId: currentQ.target.id,
-        timePerQuestion: formatTimeForDB(stopwatch)
-      }]);
 
-      // Play the audio and ensure at least 1.5s delay for feedback
-      const delayPromise = new Promise(resolve => setTimeout(resolve, 1500));
-      await Promise.all([audioPromise, delayPromise]);
+      if (newCorrectChoiceIds.length === currentQ.targets.length) {
+        setIsTransitioning(true);
+        setFeedback('correct');
+        if (stopwatchRef.current) {
+          clearInterval(stopwatchRef.current);
+        }
+        
+        // Log time for this question
+        const timeStr = formatTimeForDB(stopwatch);
+        const newLogs = currentQ.targets.map(t => ({
+          photoId: t.id,
+          timePerQuestion: timeStr
+        }));
+        setTimeLogs(prev => [...prev, ...newLogs]);
 
-      // Move to next question or end game
-      setWrongGuesses([]);
-      setFeedback(null);
-      setCorrectChoiceId(null);
-      setIsTransitioning(false);
-      if (currentQuestionIndex < questions.length - 1) {
-        setCurrentQuestionIndex(prev => prev + 1);
-        setGameState('question');
+        // Play the audio and ensure at least 1.5s delay for feedback
+        const delayPromise = new Promise(resolve => setTimeout(resolve, 1500));
+        await Promise.all([audioPromise, delayPromise]);
+
+        // Move to next question or end game
+        setWrongGuesses([]);
+        setFeedback(null);
+        setCorrectChoiceIds([]);
+        setIsTransitioning(false);
+        if (currentQuestionIndex < questions.length - 1) {
+          setCurrentQuestionIndex(prev => prev + 1);
+          setGameState('question');
+        } else {
+          finishGame();
+        }
       } else {
-        finishGame();
+        // Just show correct feedback briefly
+        setFeedback('correct');
+        setTimeout(() => setFeedback(null), 1000);
       }
     } else {
       setIncorrectCount(prev => prev + 1);
@@ -450,19 +481,24 @@ export default function MemoryGamePlayPage() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
         >
-          <motion.div 
-            className={styles.targetCard} 
-            onClick={() => playAudio(currentQ.target.audioUrl)}
-            style={{ cursor: 'pointer' }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            {mode === 'word' ? (
-              <h1 className={styles.targetWord}>{currentQ.target.title}</h1>
-            ) : (
-              <Image src={currentQ.target.imageUrl} alt="Target" width={300} height={300} priority unoptimized={true} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-            )}
-          </motion.div>
+          <div className={`${styles.targetsGrid} ${styles[`grid${Math.min(currentQ.targets.length, 10)}`]}`}>
+            {currentQ.targets.map((target, idx) => (
+              <motion.div 
+                key={idx}
+                className={styles.targetCard} 
+                onClick={() => playAudio(target.audioUrl)}
+                style={{ cursor: 'pointer' }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {mode === 'word' ? (
+                  <h1 className={styles.targetWord} style={{ fontSize: currentQ.targets.length > 4 ? '3rem' : '5rem' }}>{target.title}</h1>
+                ) : (
+                  <Image src={target.imageUrl} alt={`Target ${idx}`} width={300} height={300} priority unoptimized={true} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                )}
+              </motion.div>
+            ))}
+          </div>
           <div className={styles.countdownText}>
             กำลังจะหายใน {countdown}
           </div>
@@ -479,7 +515,7 @@ export default function MemoryGamePlayPage() {
             {currentQ.choices.map((choice, index) => (
               <motion.div 
                 key={index} 
-                className={`${styles.optionCard} ${correctChoiceId === choice.id ? styles.selected : ''}`}
+                className={`${styles.optionCard} ${correctChoiceIds.includes(choice.id) ? styles.selectedCorrect : ''}`}
                 onClick={() => handleOptionClick(choice)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -496,9 +532,11 @@ export default function MemoryGamePlayPage() {
       {/* Preload Next Question Images */}
       {currentQuestionIndex < questions.length - 1 && (
         <div style={{ display: 'none' }}>
-          <Image src={questions[currentQuestionIndex + 1].target.imageUrl} alt="preload target" width={300} height={300} priority={false} loading="eager" unoptimized={true} />
+          {questions[currentQuestionIndex + 1].targets.map((t, idx) => (
+             <Image key={`preload-t-${t.id}-${idx}`} src={t.imageUrl} alt={`preload target ${idx}`} width={300} height={300} priority={false} loading="eager" unoptimized={true} />
+          ))}
           {questions[currentQuestionIndex + 1].choices.map((choice, idx) => (
-            <Image key={`preload-${choice.id}-${idx}`} src={choice.imageUrl} alt={`preload choice ${idx}`} width={300} height={300} priority={false} loading="eager" unoptimized={true} />
+             <Image key={`preload-c-${choice.id}-${idx}`} src={choice.imageUrl} alt={`preload choice ${idx}`} width={300} height={300} priority={false} loading="eager" unoptimized={true} />
           ))}
         </div>
       )}

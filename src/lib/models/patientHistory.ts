@@ -62,7 +62,9 @@ export class PatientHistoryModel {
         TIME_FORMAT(TIME(m.test_date), '%H:%i') as timeStr,
         SUM(TIME_TO_SEC(t.time_per_question)) as duration,
         'จับคู่' as mode,
-        m.correct_count as score
+        m.correct_count,
+        m.total_questions,
+        m.click_count
       FROM matching_exercises_log m
       LEFT JOIN matching_question_time_log t ON m.id_matching = t.id_matching AND t.remove = 0
       WHERE m.user_id = ? AND m.remove = 0
@@ -77,7 +79,9 @@ export class PatientHistoryModel {
         TIME_FORMAT(TIME(m.test_date), '%H:%i') as timeStr,
         SUM(TIME_TO_SEC(t.time_per_question)) as duration,
         'ความจำ' as mode,
-        m.correct_count as score
+        m.correct_count,
+        m.total_questions,
+        m.click_count
       FROM memory_exercises_log m
       LEFT JOIN memory_question_time_log t ON m.id_memory = t.id_memory AND t.remove = 0
       WHERE m.user_id = ? AND m.remove = 0
@@ -113,12 +117,24 @@ export class PatientHistoryModel {
       day.plays += 1;
       day.totalSeconds += Number(row.duration || 0);
       
+      const correct = Number(row.correct_count || 0);
+      const clicks = Number(row.click_count || 0);
+      const totalQ = Number(row.total_questions || 0);
+      const accuracy = clicks > 0 ? (correct / clicks) : 0;
+      let calculatedScore = 0;
+      
+      if (row.mode === 'ความจำ') {
+        calculatedScore = Math.round(accuracy * 100);
+      } else {
+        calculatedScore = totalQ > 0 ? Math.round((correct / totalQ) * accuracy * 100) : 0;
+      }
+      
       day.details.push({
         id: index + 1,
         timeStr: row.timeStr,
         duration: Number(row.duration || 0),
         mode: row.mode,
-        score: Number(row.score || 0)
+        score: calculatedScore
       });
     });
     

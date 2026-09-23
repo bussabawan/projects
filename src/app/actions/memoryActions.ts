@@ -3,17 +3,13 @@
 import { auth } from "@/auth";
 import { GameMemoryModel } from '@/lib/models/gameMemory';
 
-export async function getMemoryGameData(exerciseId: number, numQuestions: number, numAnswers: number) {
+export async function getMemoryGameData(exerciseId: number, numQuestions: number, numAnswers: number, numTargets: number = 1) {
   try {
     // 1. Get all target images for the exercise
     const allTargetImages = await GameMemoryModel.getExerciseImages(exerciseId);
     if (!allTargetImages || allTargetImages.length === 0) {
       return { success: false, error: "ไม่พบข้อมูลรูปภาพสำหรับแบบฝึกหัดนี้ โปรดติดต่อเจ้าหน้าที่" };
     }
-
-    // Shuffle and pick numQuestions target images
-    const shuffledTargets = allTargetImages.sort(() => 0.5 - Math.random());
-    const selectedTargets = shuffledTargets.slice(0, numQuestions);
 
     // Helper to format media URL
     const formatMediaUrl = (url: string | undefined | null) => {
@@ -27,30 +23,38 @@ export async function getMemoryGameData(exerciseId: number, numQuestions: number
 
     const questions = [];
 
-    // 2. For each target image, pick distractor images
-    for (const target of selectedTargets) {
-      // Get distractors (excluding the target itself)
-      const distractors = await GameMemoryModel.getRandomImages(numAnswers - 1, [target.id], exerciseId);
+    // Loop for numQuestions
+    for (let i = 0; i < numQuestions; i++) {
+      // Shuffle to pick random targets for this question
+      const shuffledTargetsForQ = allTargetImages.sort(() => 0.5 - Math.random());
+      const selectedTargets = shuffledTargetsForQ.slice(0, numTargets);
       
-      // Combine target and distractors
-      const rawChoices = [target, ...distractors];
+      const targetIds = selectedTargets.map(t => t.id);
+
+      // Get distractors (excluding all targets)
+      const numDistractors = Math.max(1, numAnswers - numTargets);
+      const distractors = await GameMemoryModel.getRandomImages(numDistractors, targetIds, exerciseId);
       
+      // Combine targets and distractors
+      const rawChoices = [...selectedTargets, ...distractors];
+      
+      // Format choices and shuffle them
       const choices = rawChoices.map(c => ({
         ...c,
         imageUrl: formatMediaUrl(c.imageUrl) || '/placeholder-image.png',
         audioUrl: formatMediaUrl(c.audioUrl)
+      })).sort(() => 0.5 - Math.random());
+
+      // Format targets
+      const formattedTargets = selectedTargets.map(t => ({
+        ...t,
+        imageUrl: formatMediaUrl(t.imageUrl) || '/placeholder-image.png',
+        audioUrl: formatMediaUrl(t.audioUrl)
       }));
 
-      // Shuffle choices
-      const shuffledChoices = choices.sort(() => 0.5 - Math.random());
-
       questions.push({
-        target: { 
-          ...target, 
-          imageUrl: formatMediaUrl(target.imageUrl) || '/placeholder-image.png',
-          audioUrl: formatMediaUrl(target.audioUrl)
-        },
-        choices: shuffledChoices,
+        targets: formattedTargets,
+        choices: choices,
       });
     }
 

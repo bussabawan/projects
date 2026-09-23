@@ -39,9 +39,19 @@ export default function SummaryClient({ historyData }: SummaryClientProps) {
   const correct = Number(searchParams.get('co')) || 0;
   const time = searchParams.get('time') || '0';
   const returnUrl = searchParams.get('returnUrl') || '/user/games';
+  const gameType = searchParams.get('gameType') || 'matching';
 
   const accuracy = clicks > 0 ? (correct / clicks) : 0;
-  const score = totalQuestions > 0 ? Math.round((correct / totalQuestions) * accuracy * 100) : 0;
+  
+  let score = 0;
+  if (gameType === 'memory') {
+    // Memory game score: max 100, based on accuracy
+    score = Math.round(accuracy * 100);
+  } else {
+    // Default Formula for Matching game
+    score = totalQuestions > 0 ? Math.round((correct / totalQuestions) * accuracy * 100) : 0;
+  }
+  
   const accuracyDisplay = Math.round(accuracy * 100);
 
   if (!mounted) return null; // Avoid hydration mismatch
