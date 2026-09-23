@@ -115,6 +115,10 @@
     overflow-x: hidden;
   }
 
+  .adminFooterMobile {
+    margin-bottom: 160px !important; /* Push above mobile manual btn and bottom menu */
+  }
+
   .footerContainer.cornerFixed .footerLinks a {
     pointer-events: auto;
   }

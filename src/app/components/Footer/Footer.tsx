@@ -21,7 +21,7 @@ export default function Footer() {
   // ซ่อน footer ในหน้าเล่นเกมและหน้าสรุปผล *เฉพาะบนมือถือ* เพื่อไม่ให้ทับกับเนื้อหา
 
   return (
-    <div className={`${styles.footerContainer} ${isCornerPage ? styles.cornerFixed : ''}`}>
+    <div className={`${styles.footerContainer} ${isCornerPage ? styles.cornerFixed : ''} ${isAdminPage ? styles.adminFooterMobile : ''}`}>
       <div className={styles.mobileCreatorsContainer}>
         <button onClick={() => setIsAboutModalOpen(true)} className={styles.mobileCreatorsLink} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

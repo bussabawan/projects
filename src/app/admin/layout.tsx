@@ -118,6 +118,13 @@ export default function AdminLayout({
               height={77} 
               priority
             />
+            <Image 
+              src="/Logo OT.jpg" 
+              alt="OT Logo" 
+              width={150} 
+              height={77} 
+              priority
+            />
           </div>
         </div>
 
@@ -200,7 +207,7 @@ export default function AdminLayout({
         </div>
       </aside>
 
-      <main className={`${styles.mainContent} ${pathname === '/admin' ? styles.lockedDashboard : ''}`}>
+      <main className={styles.mainContent}>
         {isPageLoading ? (
           <Loader text="กำลังโหลดข้อมูล..." />
         ) : (

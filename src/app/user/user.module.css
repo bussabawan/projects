@@ -51,25 +51,31 @@
 }
 
 .logo {
-  width: 150px;
+  width: 100%;
+  max-width: 250px;
   height: auto;
   display: flex;
+  flex-direction: row;
   justify-content: center;
   align-items: center;
+  gap: 10px;
   margin-bottom: 1rem;
   background-color: transparent;
-  transition: width 0.3s ease, height 0.3s ease;
+  transition: max-width 0.3s ease, height 0.3s ease;
 }
 
 .collapsed .logo {
-  width: 60px;
-  height: auto;
+  max-width: 60px;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .logo img {
   width: 100%;
+  max-width: 120px;
   height: auto;
   object-fit: contain;
+  border-radius: 10px;
 }
 
 
@@ -260,7 +266,7 @@
 /* Main Content */
 .mainContent {
   flex: 1;
-  padding: 2rem;
+  padding: 3rem 4rem;
   transition: padding 0.3s ease;
   overflow-y: auto;
   display: flex;
@@ -619,7 +625,7 @@
       font-size: 5.5rem;
     }
     .mainContent {
-      padding: 3rem 3rem;
+      padding: 4rem 5rem;
     }
 }
 
