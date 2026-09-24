@@ -3,11 +3,13 @@
 import Image from 'next/image';
 import styles from './login.module.css';
 import { useState, useEffect, Suspense } from 'react';
-import Skeleton from "@/app/components/Skeleton/Skeleton";
 import { useSearchParams, useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
+import AboutModal from '@/app/components/AboutModal/AboutModal';
+import Loader from '@/app/components/Loader/Loader';
 
 function LoginContent() {
+  const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [usernameEmpty, setUsernameEmpty] = useState(false);
@@ -57,6 +59,7 @@ function LoginContent() {
         } else {
           setError("เกิดข้อผิดพลาด: " + res.error);
         }
+        setLoading(false);
       } else if (res?.ok) {
         // Successful login
         router.push('/');
@@ -65,13 +68,21 @@ function LoginContent() {
     } catch (err) {
       console.error(err);
       setError('เกิดข้อผิดพลาดในการเชื่อมต่อ');
-    } finally {
       setLoading(false);
     }
   };
 
   return (
     <div className={styles.container}>
+      <button onClick={() => setIsAboutModalOpen(true)} className={styles.creatorsBtn} aria-label="เกี่ยวกับผู้จัดทำ" title="เกี่ยวกับผู้จัดทำ">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="5" width="20" height="14" rx="3" />
+          <circle cx="8" cy="9" r="1.5" />
+          <path d="M4.5 16a3.5 3.5 0 0 1 7 0" />
+          <line x1="14" y1="10" x2="18" y2="10" />
+          <line x1="14" y1="14" x2="18" y2="14" />
+        </svg>
+      </button>
       <div className={styles.logoContainer}>
         <Image
           src="/vejjarak_logo.webp"
@@ -85,15 +96,13 @@ function LoginContent() {
 
       <div className={styles.card}>
         {loading ? (
-          <div style={{ width: '100%', padding: '2rem' }}>
-            <Skeleton type="card" count={1} />
-          </div>
+          <Loader text="กำลังเข้าสู่ระบบ..." />
         ) : (
           <>
             <h1 className={styles.title}>เข้าสู่ระบบ</h1>
-            
+            <h3 className={styles.subtitle}>Cog-kit : ระบบฝึกการรับรู้ด้านสมาธิและความจำ</h3>
             <form className={styles.form} onSubmit={handleLogin} noValidate>
-              {error && <div style={{ color: 'red', textAlign: 'center' }}>{error}</div>}
+              {error && <div key={error} className={styles.errorAlert}>{error}</div>}
               <div className={styles.inputGroup}>
                 <label htmlFor="username" className={styles.label}>Username</label>
                 <input 
@@ -132,7 +141,10 @@ function LoginContent() {
                   type="button" 
                   className={styles.googleBtn} 
                   aria-label="Log in with Google"
-                  onClick={() => signIn('google', { callbackUrl: '/' })}
+                  onClick={() => {
+                    setLoading(true);
+                    signIn('google', { callbackUrl: '/' });
+                  }}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="40px" height="40px">
                     <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
@@ -146,13 +158,15 @@ function LoginContent() {
           </>
         )}
       </div>
+
+      <AboutModal isOpen={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)} />
     </div>
   );
 }
 
 export default function Login() {
   return (
-    <Suspense fallback={<div style={{ padding: '2rem' }}><Skeleton type="card" count={1} /></div>}>
+    <Suspense fallback={<Loader text="กำลังโหลด..." />}>
       <LoginContent />
     </Suspense>
   );

@@ -20,16 +20,21 @@ export default async function SummaryPage(props: {
   // Fetch recent game history
   let historyRaw = [];
   if (gameType === 'memory') {
-    historyRaw = await getUserMemoryGameHistory(7);
+    historyRaw = await getUserMemoryGameHistory(10);
   } else {
-    historyRaw = await getUserMatchingGameHistory(7);
+    historyRaw = await getUserMatchingGameHistory(10);
   }
   
   // Transform history data for the chart
   const historyData = historyRaw.map((log, index) => {
-    // Score logic: (correctCount / totalQuestions) * (correctCount / clickCount) * 100
     const accuracyLog = log.clickCount > 0 ? (log.correctCount / log.clickCount) : 0;
-    const score = log.totalQuestions > 0 ? Math.round((log.correctCount / log.totalQuestions) * accuracyLog * 100) : 0;
+    
+    let score = 0;
+    if (gameType === 'memory') {
+      score = Math.round(accuracyLog * 100);
+    } else {
+      score = log.totalQuestions > 0 ? Math.round((log.correctCount / log.totalQuestions) * accuracyLog * 100) : 0;
+    }
     
     // Format date to dd/MM/yyyy
     const date = new Date(log.testDate);

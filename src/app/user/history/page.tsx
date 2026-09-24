@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState } from 'react';
+import Loader from '@/app/components/Loader/Loader';
+import DatePicker from '@/app/components/DatePicker/DatePicker';
 import styles from './history.module.css';
 
 // Remove static mock data, will fetch dynamically
@@ -33,11 +35,10 @@ export default function HistoryPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isMobile, setIsMobile] = useState(false);
+  const [isStartPickerOpen, setIsStartPickerOpen] = useState(false);
+  const [isEndPickerOpen, setIsEndPickerOpen] = useState(false);
   const observer = React.useRef<IntersectionObserver | null>(null);
   const rowsPerPage = 7;
-
-  const startDateRef = React.useRef<HTMLInputElement>(null);
-  const endDateRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 768);
@@ -174,37 +175,37 @@ export default function HistoryPage() {
         <div className={styles.filterGroup}>
           <span>เริ่ม</span>
           <div className={styles.datePickerWrapper}>
-            <input 
-              type="date" 
-              ref={startDateRef}
-              className={styles.nativeDatePicker}
-              value={startDate}
-              onChange={(e) => { setStartDate(e.target.value); setCurrentPage(1); }}
-            />
-            <button className={styles.datePicker} onClick={() => startDateRef.current?.showPicker()}>
+            <button className={styles.datePicker} onClick={() => setIsStartPickerOpen(true)}>
               {startDate ? formatThaiDate(startDate) : "เลือกวันที่"}
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
             </button>
+            <DatePicker 
+              isOpen={isStartPickerOpen} 
+              onClose={() => setIsStartPickerOpen(false)} 
+              onSelect={(date) => { setStartDate(date); setCurrentPage(1); }} 
+              initialDate={startDate} 
+              title="เลือกวันที่เริ่มต้น" 
+            />
           </div>
         </div>
         <div className={styles.filterGroup}>
           <span>สิ้นสุด</span>
           <div className={styles.datePickerWrapper}>
-            <input 
-              type="date" 
-              ref={endDateRef}
-              className={styles.nativeDatePicker}
-              value={endDate}
-              onChange={(e) => { setEndDate(e.target.value); setCurrentPage(1); }}
-            />
-            <button className={styles.datePicker} onClick={() => endDateRef.current?.showPicker()}>
+            <button className={styles.datePicker} onClick={() => setIsEndPickerOpen(true)}>
               {endDate ? formatThaiDate(endDate) : "เลือกวันที่"}
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
             </button>
+            <DatePicker 
+              isOpen={isEndPickerOpen} 
+              onClose={() => setIsEndPickerOpen(false)} 
+              onSelect={(date) => { setEndDate(date); setCurrentPage(1); }} 
+              initialDate={endDate} 
+              title="เลือกวันที่สิ้นสุด" 
+            />
           </div>
         </div>
       </div>
@@ -219,7 +220,7 @@ export default function HistoryPage() {
 
         <div className={styles.tableBody}>
           {isLoading ? (
-            <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>กำลังโหลดข้อมูล...</div>
+            <Loader text="กำลังโหลดประวัติการฝึก..." />
           ) : currentData.length === 0 ? (
             <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>ไม่มีข้อมูลในช่วงเวลานี้</div>
           ) : (
@@ -243,47 +244,53 @@ export default function HistoryPage() {
                   </div>
                 </div>
 
-                {expandedRow === row.id && row.details.length > 0 && (
-                  <div className={styles.detailsContainer}>
-                    {row.details.map((detail, index) => (
-                      <div 
-                        key={detail.id} 
-                        className={styles.detailRow}
-                        style={{ backgroundColor: index % 2 === 0 ? '#f5f9fc' : '#e8f1f8' }}
-                      >
-                        <div>{detail.time}</div>
-                        <div className={styles.gameInfo}>
-                          <div className={`${styles.gameIcon} ${detail.game === 'จับคู่' ? styles.gameIconMatching : detail.game === 'ความจำ' ? styles.gameIconMemory : ''}`}>
-                            {detail.game === 'จับคู่' ? (
-                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <path d="M14.5 12h-5a2.5 2.5 0 0 1-2.5-2.5v-5"></path>
-                                <path d="M9.5 12h5a2.5 2.5 0 0 1 2.5 2.5v5"></path>
-                                <rect x="5.5" y="4.5" width="4" height="4" rx="1"></rect>
-                                <rect x="14.5" y="15.5" width="4" height="4" rx="1"></rect>
-                                <circle cx="9.5" cy="15.5" r="1.5" fill="currentColor"></circle>
-                                <circle cx="14.5" cy="8.5" r="1.5" fill="currentColor"></circle>
-                              </svg>
-                            ) : detail.game === 'ความจำ' ? (
-                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"></path>
-                                <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"></path>
-                                <line x1="12" y1="4.5" x2="12" y2="19.5"></line>
-                              </svg>
-                            ) : (
-                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                <circle cx="12" cy="10" r="3"></circle>
-                                <path d="M7 21v-2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2"></path>
-                              </svg>
-                            )}
+                {row.details.length > 0 && (
+                  <div className={`${styles.detailsWrapper} ${expandedRow === row.id ? styles.expanded : ''}`}>
+                    <div className={styles.detailsContainer}>
+                      <div className={styles.detailsInner}>
+                        {row.details.map((detail, index) => (
+                          <div 
+                            key={detail.id} 
+                            className={styles.detailRow}
+                            style={{ backgroundColor: index % 2 === 0 ? '#f5f9fc' : '#e8f1f8' }}
+                          >
+                            <div>{detail.time}</div>
+                            <div className={styles.gameInfo}>
+                              <div className={`${styles.gameIcon} ${detail.game === 'จับคู่' ? styles.gameIconMatching : detail.game === 'ความจำ' ? styles.gameIconMemory : ''}`}>
+                                {detail.game === 'จับคู่' ? (
+                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <path d="M14.5 12h-5a2.5 2.5 0 0 1-2.5-2.5v-5"></path>
+                                    <path d="M9.5 12h5a2.5 2.5 0 0 1 2.5 2.5v5"></path>
+                                    <rect x="5.5" y="4.5" width="4" height="4" rx="1"></rect>
+                                    <rect x="14.5" y="15.5" width="4" height="4" rx="1"></rect>
+                                    <circle cx="9.5" cy="15.5" r="1.5" fill="currentColor"></circle>
+                                    <circle cx="14.5" cy="8.5" r="1.5" fill="currentColor"></circle>
+                                  </svg>
+                                ) : detail.game === 'ความจำ' ? (
+                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"></path>
+                                    <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"></path>
+                                    <line x1="12" y1="4.5" x2="12" y2="19.5"></line>
+                                  </svg>
+                                ) : (
+                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                    <path d="M7 21v-2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2"></path>
+                                  </svg>
+                                )}
+                              </div>
+                              {detail.game}
+                            </div>
+                            <div className={styles.detailScore}>
+                              <span className={styles.scoreBadge}>{detail.score}</span>
+                            </div>
+                            <div className={styles.detailDuration}>{detail.duration}</div>
                           </div>
-                          {detail.game}
-                        </div>
-                        <div className={styles.detailScore}>{detail.score}</div>
-                        <div className={styles.detailDuration}>{detail.duration}</div>
+                        ))}
                       </div>
-                    ))}
+                    </div>
                   </div>
                 )}
               </div>

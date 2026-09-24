@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { revalidateTag } from 'next/cache';
 import { ManageCategoriesModel } from '@/lib/models/manageCategories';
@@ -14,7 +15,7 @@ export async function PUT(
 
     if (action === 'restore') {
       await ManageCategoriesModel.restoreCategory(oldName);
-      revalidateTag('categories');
+      revalidateTag('categories', 'max');
       return NextResponse.json({ success: true });
     }
 
@@ -25,7 +26,7 @@ export async function PUT(
     }
 
     await ManageCategoriesModel.updateCategoryName(oldName, newName.trim());
-    revalidateTag('categories');
+    revalidateTag('categories', 'max');
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
     const err = error as Error;
@@ -38,7 +39,7 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: Request,
+  _: Request,
   { params }: { params: Promise<{ name: string }> | { name: string } }
 ) {
   try {
@@ -46,7 +47,7 @@ export async function DELETE(
     const name = decodeURIComponent(resolvedParams.name);
     
     await ManageCategoriesModel.deleteCategory(name);
-    revalidateTag('categories');
+    revalidateTag('categories', 'max');
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
     const err = error as Error;

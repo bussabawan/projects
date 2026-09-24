@@ -3,10 +3,9 @@
    ========================================================================== */
 .container {
   width: 100%;
-  min-height: 100%;
   display: flex;
   flex-direction: column;
-  padding-bottom: 2rem;
+  box-sizing: border-box;
 }
 
 .header {
@@ -24,6 +23,31 @@
   width: 100%;
 }
 
+.titleWithIcon {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.titleIcon {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background-color: #ffffff;
+  border-radius: 50%;
+  padding: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.titleIcon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 .title {
   font-size: 3.5rem;
   font-weight: 500;
@@ -32,8 +56,8 @@
 }
 
 .backBtn {
-  background-color: #F38776;
-  color: white;
+  background-color: #f8b4aa;
+  color: #000;
   border: none;
   padding: 10px 30px;
   border-radius: 25px;
@@ -42,7 +66,9 @@
   box-shadow: 0 4px 6px #0000001a;
   transition: transform 0.2s;
   text-decoration: none;
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-family: inherit;
 }
 
@@ -105,6 +131,8 @@
   border-radius: 40px;
   white-space: nowrap;
   text-align: center;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
 }
 
 .toggleBtn.active {
@@ -139,6 +167,9 @@
   width: 24px;
   height: 24px;
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .categoriesGrid {
@@ -220,103 +251,149 @@
 /* 2. Normal Desktop
    (Uses Base Styles above, targeting 1025px - 1439px) */
 
-/* 3. Small Desktop / Tablet Landscape (max-width: 1024px) */
-@media (max-width: 1024px) {
-
+/* 3. Small Desktop / Tablet Landscape (max-width: 1200px) */
+@media (max-width: 1200px) and (min-width: 901px) {
+  .categoriesGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+  .categoryBtn {
+    padding: 1.5rem;
+    font-size: 1.5rem;
+  }
 }
 
-/* 4. Tablet Portrait / Mobile Landscape (max-width: 768px) */
+/* 4. Tablet Landscape / Medium Screens (max-width: 900px) and (min-width: 769px) */
+@media (max-width: 900px) and (min-width: 769px) {
+  .header {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .controlsRow {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    width: 100%;
+    gap: 1rem;
+  }
+  .searchContainer {
+    flex: 1;
+  }
+  .toggleContainer {
+    flex: 1;
+    justify-content: center;
+  }
+  .toggleBtn {
+    flex: 1;
+    padding: 0.5rem 0.5rem;
+    font-size: 0.9rem;
+  }
+  .searchInput {
+    padding: 0.5rem 1rem;
+    padding-right: 2.5rem;
+    font-size: 0.9rem;
+  }
+  .searchIcon {
+    right: 0.8rem;
+    width: 18px;
+    height: 18px;
+  }
+  .categoriesGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+  .categoryBtn {
+    padding: 1.5rem;
+    font-size: 1.5rem;
+  }
+}
+
+/* 5. Tablet Portrait / Mobile Landscape (max-width: 768px) */
 @media (max-width: 768px) {
-  
-    .title {
-      font-size: 2rem;
-    }
-    .controlsRow {
-      flex-direction: column;
-      align-items: stretch;
-      gap: 1rem;
-    }
-    .searchContainer, .toggleContainer {
-      width: 100%;
-    }
-    .categoriesGrid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 1rem;
-    }
-    .categoryBtn {
-      padding: 1rem 0.5rem;
-      font-size: 1.1rem;
-      border-radius: 15px;
-    }
-    .backBtn {
-      display: none;
-    }
+  .container {
+    width: 100%;
+    padding: 0;
+  }
+  .header {
+    gap: 0.85rem;
+    margin-bottom: 0.85rem;
+  }
+  .titleRow {
+    justify-content: center;
+  }
+  .titleWithIcon {
+    gap: 0.65rem;
+  }
+  .titleIcon {
+    width: 36px;
+    height: 36px;
+  }
+  .title {
+    font-size: 2rem;
+  }
+  .controlsRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  .searchContainer, .toggleContainer {
+    width: 100%;
+  }
+  .toggleBtn {
+    padding: 0.6rem 1rem;
+    font-size: 1rem;
+  }
+  .searchInput {
+    padding: 0.75rem 1.2rem;
+    padding-right: 3rem;
+    font-size: 1rem;
+  }
+  .searchIcon {
+    right: 1rem;
+    width: 20px;
+    height: 20px;
+  }
+  .categoriesGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+    margin-top: 0.85rem;
+    padding-bottom: 1.5rem;
+  }
+  .categoryBtn {
+    padding: 1rem;
+    font-size: 1.1rem;
+    border-radius: 15px;
+    min-height: 90px;
+  }
+  .skeletonCard {
+    min-height: 90px;
+    border-radius: 15px;
+  }
+  .backBtn {
+    display: none;
+  }
 }
 
-/* 5. Mobile Portrait (max-width: 480px) */
+/* 6. Mobile Portrait (max-width: 480px) */
 @media (max-width: 480px) {
-
+  .titleWithIcon {
+    gap: 0.5rem;
+  }
+  .titleIcon {
+    width: 32px;
+    height: 32px;
+  }
+  .title {
+    font-size: 1.8rem;
+  }
+  .toggleBtn {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.95rem;
+  }
+  .searchInput {
+    padding: 0.65rem 1rem;
+    font-size: 0.95rem;
+  }
 }
 
-/* Custom Breakpoint */
-@media (max-width: 1200px) and (min-width: 769px) {
-  
-    .categoriesGrid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 1.5rem;
-    }
-    .categoryBtn {
-      padding: 1.5rem;
-      font-size: 1.5rem;
-    }
-}
-
-/* Custom Breakpoint */
-@media (max-width: 900px) {
-  
-    .header {
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-    .controlsRow {
-      flex-direction: row;
-      flex-wrap: nowrap;
-      align-items: center;
-      width: 100%;
-      gap: 1rem;
-    }
-    .searchContainer {
-      flex: 1;
-    }
-    .toggleContainer {
-      flex: 1;
-      justify-content: center;
-    }
-    .toggleBtn {
-      flex: 1;
-      padding: 0.5rem 0.5rem;
-      font-size: 0.9rem;
-    }
-    .searchInput {
-      padding: 0.5rem 1rem;
-      padding-right: 2.5rem;
-      font-size: 0.9rem;
-    }
-    .searchIcon {
-      right: 0.8rem;
-      width: 18px;
-      height: 18px;
-    }
-}
-
-/* Mobile Portrait (max-width: 480px) Overrides */
-@media (max-width: 480px) {
-    .controlsRow {
-      flex-direction: column !important;
-      align-items: stretch !important;
-    }
-    .searchContainer, .toggleContainer {
-      width: 100% !important;
-    }
-}
 

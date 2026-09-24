@@ -113,7 +113,8 @@
 }
 
 .searchInput {
-  width: 80%;
+  width: 100%;
+  box-sizing: border-box;
   padding: 0.8rem 1.2rem;
   padding-right: 3rem;
   border: none;
@@ -136,6 +137,9 @@
   transform: translateY(-50%);
   color: #666;
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Table Styles */
@@ -781,8 +785,8 @@
 }
 
 .multiSelectInputOpen {
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 
 .multiSelectArrow {
@@ -797,13 +801,13 @@
 
 .multiSelectDropdown {
   position: absolute;
-  top: 100%;
+  bottom: 100%;
   left: 0;
   width: 100%;
   background-color: #f5f5f5;
-  border-bottom-left-radius: 20px;
-  border-bottom-right-radius: 20px;
-  box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  box-shadow: 0 -15px 30px rgba(0,0,0,0.1);
   z-index: 100;
   padding: 1rem;
   box-sizing: border-box;
@@ -875,6 +879,10 @@
 /* 4. Tablet Portrait / Mobile Landscape (max-width: 768px) */
 @media (max-width: 768px), (max-width: 950px) and (max-height: 500px) {
   
+    .title {
+      font-size: 2.2rem;
+    }
+
     .desktopAddBtn {
       display: none;
     }
@@ -896,14 +904,16 @@
     
     .tabSwitcher {
       margin-bottom: 0;
-      width: auto;
+      width: 100%;
+      box-sizing: border-box;
       flex: none;
     }
     
     .tabBtn {
       padding: 0.5rem 1rem;
-      min-width: unset;
+      min-width: 0;
       font-size: 0.9rem;
+      flex: 1;
     }
     
     .searchContainer {
@@ -1055,6 +1065,9 @@
       padding: 0.5rem 1rem;
       flex: 1 1 50%;
       width: 50%;
+    }
+    .multiSelectGrid {
+      grid-template-columns: repeat(2, 1fr);
     }
 }
 

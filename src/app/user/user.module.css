@@ -51,25 +51,31 @@
 }
 
 .logo {
-  width: 150px;
+  width: 100%;
+  max-width: 250px;
   height: auto;
   display: flex;
+  flex-direction: row;
   justify-content: center;
   align-items: center;
+  gap: 10px;
   margin-bottom: 1rem;
   background-color: transparent;
-  transition: width 0.3s ease, height 0.3s ease;
+  transition: max-width 0.3s ease, height 0.3s ease;
 }
 
 .collapsed .logo {
-  width: 60px;
-  height: auto;
+  max-width: 60px;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .logo img {
   width: 100%;
+  max-width: 120px;
   height: auto;
   object-fit: contain;
+  border-radius: 10px;
 }
 
 
@@ -90,33 +96,40 @@
 .menuItem {
   background-color: #fff;
   color: #333;
-  padding: 0.8rem 1.2rem;
+  padding: 0.8rem 1.2rem 0.8rem 2.5rem;
   border-radius: 30px;
   text-decoration: none;
   font-weight: 500;
   font-size: 1.1rem;
-  text-align: center;
+  text-align: left;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.8rem;
+  justify-content: flex-start;
+  gap: 1rem;
   white-space: nowrap;
   width: 100%;
   box-sizing: border-box;
 }
 
 .collapsed .menuItem {
-  padding: 0.8rem;
+  padding: 0;
   border-radius: 50%;
   width: 50px;
   height: 50px;
+  justify-content: center;
 }
 
 .menuItem:hover {
   background-color: #f8f8f8;
   transform: translateY(-1px);
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.menuItem.active {
+  background-color: #2a0350;
+  color: #ffffff;
+  font-weight: 600;
 }
 
 .menuText {
@@ -131,6 +144,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 28px;
+  flex-shrink: 0;
 }
 
 .sidebarBottom {
@@ -148,19 +163,29 @@
 .manualBtn {
   background-color: #fff;
   color: #333;
-  padding: 0.6rem 1.2rem;
-  border-radius: 20px;
+  padding: 0.8rem 1.2rem 0.8rem 2.5rem;
+  border-radius: 30px;
   text-decoration: none;
   font-weight: 500;
-  font-size: 1rem;
-  text-align: center;
-  display: inline-block;
-  width: fit-content;
+  font-size: 1.1rem;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1rem;
+  width: 100%;
   box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.manualBtn:hover {
+  background-color: #f8f8f8;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .collapsed .manualBtn {
-  padding: 0.6rem;
+  padding: 0;
   width: 50px;
   height: 50px;
   border-radius: 50%;
@@ -174,6 +199,10 @@
 }
 
 .collapsed .manualText {
+  display: none;
+}
+
+.activePill {
   display: none;
 }
 
@@ -237,19 +266,13 @@
 /* Main Content */
 .mainContent {
   flex: 1;
-  padding: 2rem;
+  padding: 3rem 4rem;
   transition: padding 0.3s ease;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-}
-
-.mainContent::after {
-  content: "";
-  display: block;
-  min-height: 4rem;
-  flex-shrink: 0;
+  min-height: 0;
 }
 
 .fullMainContent {
@@ -337,15 +360,31 @@
       flex-direction: column;
       background-color: #fadff8;
       position: relative;
-      padding-bottom: 79px;
-      overflow: hidden;
+      padding-bottom: 75px;
+      overflow: visible;
       box-sizing: border-box;
       -ms-overflow-style: none; /* IE and Edge */
       scrollbar-width: none; /* Firefox */
+      min-height: 100dvh;
+      height: auto;
     }
     
     .noBottomPadding {
       padding-bottom: 0 !important;
+      height: auto !important;
+      min-height: 100dvh !important;
+      overflow: visible !important;
+    }
+
+    .summaryLayout {
+      height: auto !important;
+      min-height: 100dvh !important;
+      overflow: visible !important;
+    }
+    
+    .summaryLayout .mainContent {
+      height: auto !important;
+      overflow: visible !important;
     }
     
     .layoutContainer::-webkit-scrollbar {
@@ -357,15 +396,16 @@
       bottom: 1.5rem;
       left: 50%;
       transform: translateX(-50%);
-      width: max-content !important;
+      width: 90% !important;
+      max-width: 340px !important;
       height: 55px;
       background-color: white;
       border-radius: 30px;
       flex-direction: row;
-      padding: 0.3rem;
+      padding: 4px;
       align-items: center;
       justify-content: center;
-      z-index: 100;
+      z-index: 99999;
       box-shadow: 0 4px 20px rgba(0,0,0,0.1);
       box-sizing: border-box;
     }
@@ -377,18 +417,33 @@
     .menu, .collapsed .menu {
       flex-direction: row;
       justify-content: center;
-      width: auto;
+      width: 100%;
+      height: 100%;
       padding: 0;
       margin: 0;
       gap: 0;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .activePill {
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #2a0350;
+      border-radius: 26px;
+      z-index: 0;
     }
   
     .menuItem, .collapsed .menuItem {
-      padding: 0 1.2rem;
+      padding: 0;
       background: transparent;
-      width: auto;
-      height: 45px;
-      border-radius: 25px;
+      flex: 1;
+      height: 100%;
+      border-radius: 26px;
       gap: 0.5rem;
       display: flex;
       justify-content: center;
@@ -397,13 +452,17 @@
     }
   
     .menuItem.active, .collapsed .menuItem.active {
-      background-color: #dcdcdc;
+      background-color: transparent;
+      box-shadow: none;
     }
   
     .menuText, .collapsed .menuText {
       display: block !important;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   
     .sidebarBottom, .collapsed .sidebarBottom {
@@ -414,14 +473,14 @@
       display: flex;
       align-items: center;
       justify-content: flex-end;
-      gap: 1rem;
+      gap: 1.5rem;
       padding: 1.5rem 1.5rem 0.5rem 1.5rem;
       width: 100%;
       box-sizing: border-box;
     }
     
     .mobileUserPill {
-      background-color: #dcdcdc;
+      background-color: #ffffff;
       color: #111;
       padding: 0.4rem 1.2rem;
       border-radius: 20px;
@@ -431,39 +490,53 @@
     }
     
     .mobileHomeBtn, .mobileLogoutBtn {
-      color: #111;
-      background: none;
-      border: none;
-      padding: 0;
+      color: #333;
+      background-color: #fff;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border: 2px solid #f0f0f0;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
       cursor: pointer;
+      padding: 0;
+      flex-shrink: 0;
+    }
+
+    .mobileHomeBtn:hover, .mobileLogoutBtn:hover {
+      transform: scale(1.05) translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+      border-color: #e0e0e0;
     }
   
     .mainContent {
       padding: 1.5rem 1.5rem 0 1.5rem;
       width: 100%;
       flex: 1;
-      overflow-y: auto;
+      overflow-y: visible;
       overflow-x: hidden;
       display: flex;
       flex-direction: column;
       -ms-overflow-style: none; /* IE and Edge */
       scrollbar-width: none; /* Firefox */
+      height: auto;
     }
   
     .fullMainContent {
       padding: 0;
       width: 100%;
       flex: 1;
-      overflow-y: auto;
+      overflow-y: visible;
       overflow-x: hidden;
       display: flex;
       flex-direction: column;
       -ms-overflow-style: none;
       scrollbar-width: none;
       background-color: #eaeaea;
+      height: auto;
     }
     
     .mainContent::-webkit-scrollbar,
@@ -552,7 +625,7 @@
       font-size: 5.5rem;
     }
     .mainContent {
-      padding: 3rem 3rem;
+      padding: 4rem 5rem;
     }
 }
 

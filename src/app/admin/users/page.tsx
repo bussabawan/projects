@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import Skeleton from "@/app/components/Skeleton/Skeleton";
+import Loader from "@/app/components/Loader/Loader";
 import styles from "./users.module.css";
 import UserFormModal from "./components/UserFormModal";
 
@@ -37,6 +37,7 @@ export default function ManageUsersPage() {
   // Delete Modal State
   const [deleteUserId, setDeleteUserId] = useState<number | null>(null);
   const [deleteUserRole, setDeleteUserRole] = useState<number>(1);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
@@ -132,30 +133,25 @@ export default function ManageUsersPage() {
 
   const confirmDelete = async () => {
     if (deleteUserId === null) return;
+    setIsProcessing(true);
     try {
       const res = await fetch(`/api/admin/users/${deleteUserId}`, { method: 'DELETE' });
       const result = await res.json();
       if (result.success) {
-        // Remove from local state to preserve infinite scroll items
-        setUsers(prev => prev.filter(u => u.user_id !== deleteUserId));
-        setDeleteUserId(null);
+        window.location.reload();
       } else {
         alert("ลบข้อมูลไม่สำเร็จ: " + result.error);
+        setIsProcessing(false);
       }
     } catch (error) {
       console.error("Error deleting user:", error);
+      setIsProcessing(false);
     }
   };
 
   const handleModalSave = () => {
     setIsModalOpen(false);
-    if (currentPage === 1) {
-      isLoadMoreRef.current = false;
-      fetchUsers();
-    } else {
-      isLoadMoreRef.current = false;
-      setCurrentPage(1);
-    }
+    window.location.reload();
   };
 
   const formatDate = (dateString: string) => {
@@ -259,9 +255,9 @@ export default function ManageUsersPage() {
         )}
         
         <div className={styles.tableBody}>
-          {loading && users.length === 0 ? (
-            <div style={{ padding: '2rem 0', width: '100%' }}>
-              <Skeleton type="table" count={5} />
+          {loading || searchQuery !== debouncedSearchQuery ? (
+            <div style={{ padding: '4rem 0', minHeight: '320px', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Loader text={searchQuery.trim() ? "กำลังค้นหาข้อมูล..." : "กำลังโหลดข้อมูลผู้ใช้งาน..."} />
             </div>
           ) : users.length === 0 ? (
             <div className={styles.emptyState}>ไม่พบข้อมูล</div>
@@ -391,7 +387,7 @@ export default function ManageUsersPage() {
         {/* Mobile observer target */}
         {!loading && currentPage < totalPages && (
           <div ref={lastElementRef} className={styles.loadMoreTarget} style={{ padding: '1.5rem 0', textAlign: 'center', gridColumn: '1/-1' }}>
-            {loadingMore && <Skeleton type="table" count={3} />}
+            {loadingMore && <Loader size="1.5px" text="กำลังโหลดข้อมูลเพิ่มเติม..." />}
           </div>
         )}
       </div>
@@ -431,6 +427,7 @@ export default function ManageUsersPage() {
           </div>
         </div>
       )}
+      {isProcessing && <Loader fullScreen text="กำลังดำเนินการ..." />}
     </div>
   );
 }

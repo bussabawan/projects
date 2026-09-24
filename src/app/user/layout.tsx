@@ -4,8 +4,10 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
+import { motion } from "framer-motion";
 import { getSession, signOut } from "next-auth/react";
-import Skeleton from "@/app/components/Skeleton/Skeleton";
+import Loader from "@/app/components/Loader/Loader";
+import AboutModal from "@/app/components/AboutModal/AboutModal";
 import styles from "./user.module.css";
 
 export default function UserLayout({
@@ -14,14 +16,16 @@ export default function UserLayout({
   children: React.ReactNode;
 }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
   const [userName, setUserName] = useState("User");
-  const [sessionDay, setSessionDay] = useState<number>(0);
+
   const [lastActivity, setLastActivity] = useState<number>(0);
   const [isPageLoading, setIsPageLoading] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsPageLoading(false);
   }, [pathname]);
 
@@ -57,7 +61,7 @@ export default function UserLayout({
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
-    setSessionDay(new Date().getDate());
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLastActivity(Date.now());
 
     let throttleTimer: NodeJS.Timeout | null = null;
@@ -101,7 +105,7 @@ export default function UserLayout({
     }, 60000); // Check every minute
 
     return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastActivity]);
 
   const toggleSidebar = () => {
@@ -109,9 +113,12 @@ export default function UserLayout({
   };
 
   const isGameInnerPage = pathname.startsWith("/user/games/") && pathname.split("/").length > 4;
+  const isSummaryPage = pathname.startsWith("/user/games/summary");
+  const isHistoryActive = pathname.startsWith("/user/history");
+  const isGamesActive = pathname.startsWith("/user/games") && !isSummaryPage;
 
   return (
-    <div className={`${styles.layoutContainer} ${isGameInnerPage ? styles.noBottomPadding : ''}`}>
+    <div className={`${styles.layoutContainer} ${isGameInnerPage ? styles.noBottomPadding : ''} ${isSummaryPage ? styles.summaryLayout : ''}`}>
       {!isGameInnerPage && (
       <aside className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ""}`}>
         <button className={styles.toggleBtn} onClick={toggleSidebar} aria-label="Toggle Sidebar">
@@ -140,12 +147,26 @@ export default function UserLayout({
               height={77} 
               priority
             />
+            <Image 
+              src="/Logo OT.jpg" 
+              alt="OT Logo" 
+              width={150} 
+              height={77} 
+              priority
+            />
           </div>
         </div>
 
         <nav className={styles.menu}>
-          <Link href="/user/games" onClick={() => handleLinkClick('/user/games')} className={`${styles.menuItem} ${pathname === '/user/games' ? styles.active : ''}`}>
-            <span className={styles.menuIcon}>
+          <Link href="/user/games" onClick={() => handleLinkClick('/user/games')} className={`${styles.menuItem} ${isGamesActive ? styles.active : ''}`} style={{ position: 'relative' }}>
+            {isGamesActive && (
+              <motion.div
+                layoutId="mobile-sidebar-pill"
+                className={styles.activePill}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              />
+            )}
+            <span className={styles.menuIcon} style={{ zIndex: 1, position: 'relative' }}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="2" y="6" width="20" height="12" rx="2" ry="2"></rect>
                 <line x1="6" y1="12" x2="10" y2="12"></line>
@@ -154,23 +175,43 @@ export default function UserLayout({
                 <line x1="18" y1="11" x2="18.01" y2="11"></line>
               </svg>
             </span>
-            <span className={styles.menuText}>ประเภทเกม</span>
+            <span className={styles.menuText} style={{ zIndex: 1, position: 'relative' }}>ประเภทเกม</span>
           </Link>
-          <Link href="/user/history" onClick={() => handleLinkClick('/user/history')} className={`${styles.menuItem} ${pathname.startsWith('/user/history') ? styles.active : ''}`}>
-            <span className={styles.menuIcon}>
+          <Link href="/user/history" onClick={() => handleLinkClick('/user/history')} className={`${styles.menuItem} ${isHistoryActive ? styles.active : ''}`} style={{ position: 'relative' }}>
+            {isHistoryActive && (
+              <motion.div
+                layoutId="mobile-sidebar-pill"
+                className={styles.activePill}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              />
+            )}
+            <span className={styles.menuIcon} style={{ zIndex: 1, position: 'relative' }}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
                 <polyline points="12 6 12 12 16 14"></polyline>
               </svg>
             </span>
-            <span className={styles.menuText}>ประวัติการฝึก</span>
+            <span className={styles.menuText} style={{ zIndex: 1, position: 'relative' }}>ประวัติการฝึก</span>
           </Link>
         </nav>
 
         <div className={styles.sidebarBottom}>
+          <button onClick={() => setIsAboutModalOpen(true)} className={styles.manualBtn} style={{ border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>
+            <span className={styles.menuIcon}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="5" width="20" height="14" rx="3" />
+                <circle cx="8" cy="9" r="1.5" />
+                <path d="M4.5 16a3.5 3.5 0 0 1 7 0" />
+                <line x1="14" y1="10" x2="18" y2="10" />
+                <line x1="14" y1="14" x2="18" y2="14" />
+              </svg>
+            </span>
+            <span className={styles.manualText}>ผู้จัดทำ</span>
+          </button>
+
           <Link href="/user/manual" onClick={() => handleLinkClick('/user/manual')} className={styles.manualBtn}>
-            <span className={styles.menuIcon} style={{ display: isCollapsed ? 'flex' : 'none' }}>
-              <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <span className={styles.menuIcon}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
                 <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
                 <line x1="12" y1="17" x2="12.01" y2="17"></line>
@@ -220,9 +261,7 @@ export default function UserLayout({
 
       <main className={isGameInnerPage ? styles.fullMainContent : styles.mainContent}>
         {isPageLoading ? (
-          <div style={{ padding: '2rem', width: '100%' }}>
-            <Skeleton type="table" count={5} />
-          </div>
+          <Loader text="กำลังโหลดข้อมูล..." />
         ) : (
           children
         )}
@@ -234,6 +273,8 @@ export default function UserLayout({
         ?
       </Link>
       )}
+
+      <AboutModal isOpen={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)} />
     </div>
   );
 }

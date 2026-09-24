@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { ManageExercisesModel } from '@/lib/models/manageExercises';
 import { auth } from '@/auth';
 

@@ -3,11 +3,11 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 
-import Skeleton from "@/app/components/Skeleton/Skeleton";
+import Loader from "@/app/components/Loader/Loader";
 import styles from "./images.module.css";
 import ImageFormModal from "./components/ImageFormModal";
-import DeleteConfirmModal from "../components/DeleteConfirmModal";
-import RestoreConfirmModal from "../components/RestoreConfirmModal";
+import DeleteConfirmModal from "@/app/components/Admin/DeleteConfirmModal";
+import RestoreConfirmModal from "@/app/components/Admin/RestoreConfirmModal";
 import { useDebounce } from '@/app/hooks/useDebounce';
 
 function CardImage({ src, alt }: { src: string; alt: string }) {
@@ -54,6 +54,7 @@ export default function ManageImagesPage() {
   const [totalPages, setTotalPages] = useState(1);
   const itemsPerPage = 12;
   const isLoadMoreRef = useRef(false);
+  const audioCache = useRef<Record<string, HTMLAudioElement>>({});
 
   const fetchImages = useCallback(async () => {
     const isLoadMore = isLoadMoreRef.current;
@@ -64,11 +65,45 @@ export default function ManageImagesPage() {
     }
     
     try {
-      const res = await fetch(`/api/admin/images?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}`, {
+      const res = await fetch(`/api/admin/images?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}&t=${Date.now()}`, {
         cache: 'no-store'
       });
       const json = await res.json();
       if (json.success) {
+        const newImages: ImageData[] = json.data;
+        const preloadPromises: Promise<void>[] = [];
+
+        newImages.forEach(img => {
+          if (img.imageUrl) {
+            preloadPromises.push(new Promise((resolve) => {
+              const fullImageUrl = img.imageUrl.startsWith('/') || img.imageUrl.startsWith('blob:') ? img.imageUrl : `/api/uploads/${img.imageUrl}`;
+              const image = new window.Image();
+              image.onload = () => resolve();
+              image.onerror = () => resolve();
+              image.src = fullImageUrl;
+            }));
+          }
+          if (img.audioUrl) {
+            preloadPromises.push(new Promise((resolve) => {
+              const fullAudioUrl = img.audioUrl!.startsWith('/') || img.audioUrl!.startsWith('blob:') ? img.audioUrl! : `/api/uploads/${img.audioUrl}`;
+              if (!audioCache.current[fullAudioUrl]) {
+                const audio = new window.Audio(fullAudioUrl);
+                audio.preload = 'auto';
+                audioCache.current[fullAudioUrl] = audio;
+                fetch(fullAudioUrl)
+                  .then(() => resolve())
+                  .catch(() => resolve());
+              } else {
+                resolve();
+              }
+            }));
+          }
+        });
+
+        // Wait up to 8 seconds for all media to cache
+        const timeoutPromise = new Promise<void>((resolve) => setTimeout(resolve, 8000));
+        await Promise.race([Promise.all(preloadPromises), timeoutPromise]);
+
         if (isLoadMore) {
           setImages(prev => [...prev, ...json.data]);
         } else {
@@ -101,6 +136,8 @@ export default function ManageImagesPage() {
     setCurrentPage(1);
   }, [debouncedSearchQuery]);
 
+
+
   // Infinite Scroll Observer
   const observer = useRef<IntersectionObserver | null>(null);
   const lastElementRef = useCallback((node: HTMLDivElement | null) => {
@@ -120,6 +157,7 @@ export default function ManageImagesPage() {
   const [editingImage, setEditingImage] = useState<ImageData | null>(null);
   const [deletingImageId, setDeletingImageId] = useState<number | null>(null);
   const [duplicateToRestore, setDuplicateToRestore] = useState<{ id: number; data: Record<string, unknown> } | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleAdd = () => {
     setEditingImage(null);
@@ -137,22 +175,26 @@ export default function ManageImagesPage() {
 
   const confirmDelete = async () => {
     if (deletingImageId === null) return;
+    setIsProcessing(true);
     try {
       const res = await fetch(`/api/admin/images/${deletingImageId}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
-        setImages(prev => prev.filter(img => img.id !== deletingImageId));
+        window.location.reload();
       } else {
         alert("ลบข้อมูลไม่สำเร็จ");
+        setIsProcessing(false);
       }
     } catch (err) {
       console.error(err);
+      setIsProcessing(false);
     } finally {
       setDeletingImageId(null);
     }
   };
 
   const handleModalSave = async (data: Record<string, unknown>) => {
+    setIsProcessing(true);
     try {
       const isEdit = !!editingImage;
       const url = isEdit ? `/api/admin/images/${editingImage.id}` : "/api/admin/images";
@@ -174,42 +216,24 @@ export default function ManageImagesPage() {
       const result = await res.json();
       if (result.success) {
         setIsModalOpen(false);
-        if (isEdit) {
-          // Update the specific image locally to prevent scroll jump and data reset
-          setImages(prev => prev.map(img => 
-            img.id === editingImage.id 
-              ? { 
-                  ...img, 
-                  title: payload.title as string,
-                  imageUrl: payload.imageUrl as string,
-                  audioUrl: payload.audioUrl as string | undefined,
-                  audioTitle: payload.audioTitle as string | undefined,
-                  audioGen: payload.audioGen as number
-                } 
-              : img
-          ));
-        } else {
-          if (currentPage === 1) {
-            isLoadMoreRef.current = false;
-            fetchImages();
-          } else {
-            isLoadMoreRef.current = false;
-            setCurrentPage(1);
-          }
-        }
+        window.location.reload();
       } else if (result.isDuplicateDeleted) {
         setDuplicateToRestore({ id: result.duplicateId, data: payload });
+        setIsProcessing(false);
       } else {
         alert(result.error || "บันทึกข้อมูลไม่สำเร็จ");
+        setIsProcessing(false);
       }
     } catch (err) {
       console.error(err);
       alert("เกิดข้อผิดพลาดในการบันทึก");
+      setIsProcessing(false);
     }
   };
 
   const confirmRestore = async () => {
     if (!duplicateToRestore) return;
+    setIsProcessing(true);
     try {
       const res = await fetch(`/api/admin/images/${duplicateToRestore.id}`, {
         method: 'PUT',
@@ -220,18 +244,15 @@ export default function ManageImagesPage() {
       if (result.success) {
         setIsModalOpen(false);
         setEditingImage(null);
-        isLoadMoreRef.current = false;
-        if (currentPage === 1) {
-          fetchImages();
-        } else {
-          setCurrentPage(1);
-        }
+        window.location.reload();
       } else {
         alert(result.error || "กู้คืนข้อมูลไม่สำเร็จ");
+        setIsProcessing(false);
       }
     } catch (err) {
       console.error(err);
       alert("เกิดข้อผิดพลาดในการกู้คืน");
+      setIsProcessing(false);
     } finally {
       setDuplicateToRestore(null);
     }
@@ -243,7 +264,16 @@ export default function ManageImagesPage() {
       return;
     }
     const fullAudioUrl = audioUrl.startsWith('/') || audioUrl.startsWith('blob:') ? audioUrl : `/api/uploads/${audioUrl}`;
-    const audio = new Audio(fullAudioUrl);
+    
+    let audio = audioCache.current[fullAudioUrl];
+    if (!audio) {
+      audio = new Audio(fullAudioUrl);
+      audio.preload = 'auto';
+      audioCache.current[fullAudioUrl] = audio;
+    }
+    
+    // eslint-disable-next-line react-hooks/immutability
+    audio.currentTime = 0;
     audio.play().catch(e => {
       console.error(e);
       alert("ไม่สามารถเล่นเสียงได้");
@@ -286,9 +316,9 @@ export default function ManageImagesPage() {
       </div>
 
       <div className={styles.grid}>
-        {isLoading ? (
-          <div style={{ padding: '2rem 0', gridColumn: '1 / -1', width: '100%' }}>
-            <Skeleton type="card" count={8} />
+        {isLoading || searchQuery !== debouncedSearchQuery ? (
+          <div style={{ padding: '4rem 0', minHeight: '350px', gridColumn: '1 / -1', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Loader text={searchQuery.trim() ? "กำลังค้นหารูปภาพ..." : "กำลังโหลดรูปภาพ..."} />
           </div>
         ) : images.length === 0 ? (
           <div>ไม่พบรูปภาพ</div>
@@ -340,7 +370,9 @@ export default function ManageImagesPage() {
       {!isLoading && currentPage < totalPages && (
         <div ref={lastElementRef} className={styles.loadMoreTarget}>
           {loadingMore && (
-            <Skeleton type="card" count={4} />
+            <div style={{ width: '100%', padding: '1rem 0' }}>
+              <Loader size="1.5px" text="กำลังโหลดเพิ่มเติม..." />
+            </div>
           )}
         </div>
       )}
@@ -366,6 +398,8 @@ export default function ManageImagesPage() {
           onCancel={() => setDuplicateToRestore(null)}
         />
       )}
+
+      {isProcessing && <Loader fullScreen text="กำลังดำเนินการ..." />}
     </div>
   );
 }

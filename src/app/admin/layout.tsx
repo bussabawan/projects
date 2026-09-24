@@ -1,93 +1,89 @@
 "use client";
 
-  import { useState, useEffect, useCallback } from "react";
-  import { getSession } from "next-auth/react";
-  import Link from "next/link";
-  import Image from "next/image";
-  import styles from "./admin.module.css";
-  import { usePathname } from "next/navigation";
-  import Skeleton from "@/app/components/Skeleton/Skeleton";
-  
-  export default function AdminLayout({
-    children,
-  }: {
-    children: React.ReactNode;
-  }) {
-    const [isCollapsed, setIsCollapsed] = useState(false);
-    const [isPageLoading, setIsPageLoading] = useState(false);
-    const [userName, setUserName] = useState("กำลังโหลด...");
-    const pathname = usePathname();
+import { useState, useEffect, useCallback } from "react";
+import { getSession, signOut } from "next-auth/react";
+import Link from "next/link";
+import Image from "next/image";
+import styles from "./admin.module.css";
+import { usePathname } from "next/navigation";
+import Loader from "@/app/components/Loader/Loader";
+import AboutModal from "@/app/components/AboutModal/AboutModal";
 
-    useEffect(() => {
-      setIsPageLoading(false);
-    }, [pathname]);
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
+  const [isPageLoading, setIsPageLoading] = useState(false);
+  const [userName, setUserName] = useState("กำลังโหลด...");
+  const pathname = usePathname();
 
-    const handleLinkClick = (href: string) => {
-      if (pathname !== href) {
-        setIsPageLoading(true);
-      }
-    };
-  
-    useEffect(() => {
-      const fetchUser = async () => {
-        try {
-          const session = await getSession();
-          if (session && session.user) {
-            const user = session.user as Record<string, unknown>;
-            setUserName(`คุณ ${user.fullName || user.name || "Admin"}`);
-            return;
-          }
-        } catch (e) {
-          console.error("Failed to get NextAuth session:", e);
-        }
-        
-        setUserName("Admin");
-      };
-  
-      fetchUser();
-    }, []);
-  
-    const handleLogout = useCallback(async () => {
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsPageLoading(false);
+  }, [pathname]);
+
+  const handleLinkClick = (href: string) => {
+    if (pathname !== href) {
+      setIsPageLoading(true);
+    }
+  };
+
+  useEffect(() => {
+    const fetchUser = async () => {
       try {
-        const { signOut } = await import('next-auth/react');
-        await signOut({ callbackUrl: '/login' });
-      } catch {
-        window.location.href = '/login';
+        const session = await getSession();
+        if (session && session.user) {
+          const user = session.user as Record<string, unknown>;
+          setUserName(`คุณ ${user.fullName || user.name || "Admin"}`);
+          return;
+        }
+      } catch (e) {
+        console.error("Failed to get NextAuth session:", e);
       }
-    }, []);
-  
-    // ตั้งค่า Logout อัตโนมัติเมื่อไม่มีการเคลื่อนไหวเกิน 5 นาที
-    useEffect(() => {
-      let timeoutId: NodeJS.Timeout;
-  
-      const resetTimeout = () => {
-        if (timeoutId) clearTimeout(timeoutId);
-        // 5 นาที = 5 * 60 * 1000 = 300000 มิลลิวินาที
-        timeoutId = setTimeout(() => {
-          console.log("ไม่มีการเคลื่อนไหวเกิน 5 นาที กำลังออกจากระบบ...");
-          handleLogout();
-        }, 300000);
-      };
-  
-      // เหตุการณ์ที่ถือว่ามีการเคลื่อนไหว
-      const events = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
-  
-      // เริ่มนับเวลาครั้งแรก
-      resetTimeout();
-  
-      // ดักจับเหตุการณ์
+      
+      setUserName("Admin");
+    };
+
+    fetchUser();
+  }, []);
+
+  const handleLogout = useCallback(async () => {
+    try {
+      await signOut({ callbackUrl: '/login' });
+    } catch {
+      window.location.href = '/login';
+    }
+  }, []);
+
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
+    const resetTimeout = () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        console.log("ไม่มีการเคลื่อนไหวเกิน 5 นาที กำลังออกจากระบบ...");
+        handleLogout();
+      }, 300000);
+    };
+
+    const events = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
+
+    resetTimeout();
+
+    events.forEach(event => {
+      window.addEventListener(event, resetTimeout);
+    });
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
       events.forEach(event => {
-        window.addEventListener(event, resetTimeout);
+        window.removeEventListener(event, resetTimeout);
       });
-  
-      // ทำความสะอาด Event Listeners เมื่อ Component ถูกถอดถอน
-      return () => {
-        if (timeoutId) clearTimeout(timeoutId);
-        events.forEach(event => {
-          window.removeEventListener(event, resetTimeout);
-        });
-      };
-    }, [handleLogout]);
+    };
+  }, [handleLogout]);
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -118,6 +114,13 @@
             <Image 
               src="/vejjarak_logo.webp" 
               alt="Vejjarak Lampang Hospital Logo" 
+              width={150} 
+              height={77} 
+              priority
+            />
+            <Image 
+              src="/Logo OT.jpg" 
+              alt="OT Logo" 
               width={150} 
               height={77} 
               priority
@@ -165,9 +168,22 @@
         </nav>
 
         <div className={styles.sidebarBottom}>
+          <button onClick={() => setIsAboutModalOpen(true)} className={styles.manualBtn} style={{ border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>
+            <span className={styles.menuIcon}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="5" width="20" height="14" rx="3" />
+                <circle cx="8" cy="9" r="1.5" />
+                <path d="M4.5 16a3.5 3.5 0 0 1 7 0" />
+                <line x1="14" y1="10" x2="18" y2="10" />
+                <line x1="14" y1="14" x2="18" y2="14" />
+              </svg>
+            </span>
+            <span className={styles.manualText}>ผู้จัดทำ</span>
+          </button>
+
           <Link href="/admin/manual" onClick={() => handleLinkClick('/admin/manual')} className={styles.manualBtn}>
-            <span className={styles.menuIcon} style={{ display: isCollapsed ? 'flex' : 'none' }}>
-              <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            <span className={styles.menuIcon}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
             </span>
             <span className={styles.manualText}>คู่มือ</span>
           </Link>
@@ -193,9 +209,7 @@
 
       <main className={styles.mainContent}>
         {isPageLoading ? (
-          <div style={{ padding: '2rem', width: '100%' }}>
-            <Skeleton type="table" count={5} />
-          </div>
+          <Loader text="กำลังโหลดข้อมูล..." />
         ) : (
           children
         )}
@@ -204,6 +218,8 @@
       <Link href="/admin/manual" onClick={() => handleLinkClick('/admin/manual')} className={styles.mobileManualBtn} aria-label="คู่มือ">
         ?
       </Link>
+      
+      <AboutModal isOpen={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)} />
     </div>
   );
 }

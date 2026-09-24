@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 
-import Skeleton from "@/app/components/Skeleton/Skeleton";
+import Loader from "@/app/components/Loader/Loader";
 import styles from './patientStats.module.css';
 import { PatientStatInfo } from '@/lib/models/patientStats';
 import { useDebounce } from '@/app/hooks/useDebounce';
@@ -10,15 +10,7 @@ import dynamic from 'next/dynamic';
 
 const PatientStatsPopup = dynamic(() => import('./components/PatientStatsPopup'), { ssr: false });
 
-const extractCategory = (testSet?: string) => {
-  if (!testSet) return '';
-  let cat = testSet.replace(/^(?:แบบฝึกหัด\s*)?(?:หมวด\s*)?/, '');
-  cat = cat.replace(/\s*เลเวล\s*\d*/g, '').trim();
-  if (cat.includes('สิ่งของ')) {
-    cat = 'สิ่งของ';
-  }
-  return cat;
-};
+
 
 const formatTagDisplay = (testSet?: string) => {
   if (!testSet) return '';
@@ -37,10 +29,15 @@ const renderTestSetTags = (patient: PatientStatInfo) => {
       {uniqueSets.map((setStr, idx) => {
         const tag = formatTagDisplay(setStr) || setStr;
         const isPlayed = (patient.playedSets || []).includes(setStr);
+        const isAssigned = (patient.assignedSets || []).includes(setStr);
         
         let tagClass = styles.testSetTag;
         if (isPlayed) {
-          tagClass = `${styles.testSetTag} ${styles.playedTag}`;
+          if (!isAssigned) {
+            tagClass = `${styles.testSetTag} ${styles.playedNotAssignedTag}`;
+          } else {
+            tagClass = `${styles.testSetTag} ${styles.playedTag}`;
+          }
         }
         
         return (
@@ -65,9 +62,7 @@ export default function PatientStatsPage() {
 
   const selectedPatient = patients.find(p => String(p.id) === String(selectedPatientId));
 
-  const uniqueCategories = Array.from(new Set(
-    (selectedPatient?.testSets || []).map(ts => extractCategory(ts)).filter(Boolean)
-  ));
+  
 
   const uniqueExerciseSets = Array.from(new Set(
     (selectedPatient?.testSets || []).filter(Boolean)
@@ -99,7 +94,7 @@ export default function PatientStatsPage() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch('/api/patient-stats');
+        const response = await fetch(`/api/patient-stats?t=${Date.now()}`);
         if (!response.ok) {
           throw new Error('Failed to fetch patient statistics');
         }
@@ -179,9 +174,9 @@ export default function PatientStatsPage() {
         </div>
       </div>
 
-      {loading ? (
-        <div style={{ padding: '2rem 0', width: '100%' }}>
-          <Skeleton type="table" count={5} />
+      {loading || searchQuery !== debouncedSearchQuery ? (
+        <div style={{ padding: '4rem 0', minHeight: '320px', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Loader text={searchQuery.trim() ? "กำลังค้นหาสถิติผู้ป่วย..." : "กำลังโหลดสถิติผู้ป่วย..."} />
         </div>
       ) : error ? (
         <div style={{ textAlign: 'center', padding: '2rem', color: 'red' }}>เกิดข้อผิดพลาด: {error}</div>
@@ -213,7 +208,7 @@ export default function PatientStatsPage() {
                 <div style={{ padding: '2rem', textAlign: 'center' }}>ไม่พบข้อมูลผู้ป่วย</div>
               )}
             </div>
-            {totalPages > 0 && (
+            {totalPages > 1 && (
               <div className={styles.pagination}>
                 <button 
                   className={styles.pageBtn} 
@@ -283,7 +278,7 @@ export default function PatientStatsPage() {
 
             {mobileVisibleCount < filteredPatients.length && (
               <div ref={lastElementRef} style={{ padding: '1rem', width: '100%', gridColumn: '1 / -1' }}>
-                <Skeleton type="table" count={3} />
+                <Loader size="1.5px" text="กำลังโหลดเพิ่มเติม..." />
               </div>
             )}
           </div>

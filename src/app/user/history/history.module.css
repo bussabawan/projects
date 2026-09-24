@@ -4,7 +4,8 @@
 .container {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   color: #111;
   font-family: 'Inter', 'Prompt', sans-serif; /* Fallback fonts */
 }
@@ -14,14 +15,16 @@
   font-weight: 500;
   margin-top: 0;
   margin-bottom: 1rem;
+  text-align: center;
 }
 
 .filterSection {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 5rem;
   margin-bottom: 2rem;
   font-size: 1.1rem;
+  justify-content: center;
 }
 
 .filterGroup {
@@ -59,7 +62,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-width: 150px;
+  min-width: 200px;
   color: #333;
   position: relative;
   z-index: 3; /* Above the invisible input so it receives clicks */
@@ -146,12 +149,26 @@
   transform: rotate(180deg);
 }
 
+.detailsWrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease-in-out;
+}
+
+.detailsWrapper.expanded {
+  grid-template-rows: 1fr;
+}
+
 .detailsContainer {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.detailsInner {
   background-color: #f5f9fc;
   padding: 0 1rem;
   border-bottom-left-radius: 12px;
   border-bottom-right-radius: 12px;
-  overflow: hidden;
 }
 
 .detailRow {
@@ -195,7 +212,23 @@
   color: #fff;
 }
 
-.detailScore, .detailDuration {
+.detailScore {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.scoreBadge {
+  background-color: #F2E6DC;
+  color: #000000;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  display: inline-block;
+  text-align: center;
+}
+
+.detailDuration {
   text-align: right;
 }
 
@@ -271,6 +304,10 @@
       font-size: 2rem;
     }
     
+    .nativeDatePicker {
+      display: none !important;
+    }
+
     .filterSection {
       flex-direction: column;
       align-items: flex-start;

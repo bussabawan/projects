@@ -1,7 +1,8 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from "next/server";
 import { ManageExercisesModel } from "@/lib/models/manageExercises";
 
-export async function GET(req: NextRequest, { params }: { params: Promise<{ name: string }> }) {
+export async function GET(_: NextRequest, { params }: { params: Promise<{ name: string }> }) {
   try {
     const { name } = await params;
     const decodedName = decodeURIComponent(name);
