@@ -6,7 +6,7 @@
   box-sizing: border-box;
   overflow: hidden;
   padding: 2rem 4rem;
-  background-color: #f8f8f8; /* Match setting page if possible, or just gray */
+  background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -21,10 +21,13 @@
 
 .timer {
   font-size: 1.5rem;
-  font-weight: 500;
-  background-color: #e0e0e0;
-  padding: 0.5rem 1.5rem;
-  border-radius: 8px;
+  font-weight: 600;
+  background-color: #ffffff;
+  padding: 0.5rem 2rem;
+  border-radius: 30px;
+  color: #111111;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  border: 1px solid #e2e8f0;
 }
 
 .headerRight {
@@ -35,17 +38,17 @@
 
 .audioBtn {
   background-color: #ffffff;
-  border: 2px solid #e0e0e0;
+  border: 1px solid #cbd5e1;
   border-radius: 50%;
   width: 48px;
   height: 48px;
   cursor: pointer;
-  color: #333;
+  color: #111111;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.08);
 }
 
 .audioBtn svg {
@@ -54,28 +57,32 @@
 }
 
 .audioBtn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+  background-color: #f1f5f9;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.12);
 }
 
 .endGameBtn {
-  background-color: #f8b4aa;
-  color: #000;
+  background: linear-gradient(135deg, #ffb7b2 0%, #ff9e99 100%);
+  color: #5a2a27;
   border: none;
-  border-radius: 12px;
+  border-radius: 30px;
   padding: 0.8rem 1.5rem;
   font-size: 1.2rem;
-  font-weight: bold;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 .endGameBtn:hover {
-  background-color: #dfa299;
+  background: linear-gradient(135deg, #ff9e99 0%, #ff857f 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
 }
 
 .progressSection {
@@ -96,19 +103,21 @@
 .progressBarWrapper {
   width: 50%;
   max-width: 100%;
-  background-color: #e0e0e0;
+  background-color: #e2e8f0;
   border-radius: 20px;
   height: 24px;
   position: relative;
   overflow: hidden;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.15);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+  border: 1px solid #cbd5e1;
 }
 
 .progressBarFill {
   height: 100%;
-  background-color: #9ffaac;
+  background: linear-gradient(90deg, #a8e6cf 0%, #8ae0bd 100%);
   transition: width 0.4s ease;
   border-radius: 20px;
+  box-shadow: 0 2px 6px rgba(138, 224, 189, 0.4);
 }
 
 .progressPercentText {
@@ -141,8 +150,8 @@
   flex: 1;
   max-width: 350px;
   background-color: #ffffff;
-  border-radius: 16px;
-  border: 1px solid #aaa;
+  border-radius: 24px;
+  border: 1px solid #e2e8f0;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -150,6 +159,7 @@
   padding: 0;
   aspect-ratio: 1 / 1;
   position: relative;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
 }
 
 .targetImage {
@@ -200,8 +210,8 @@
 
 .choiceBox {
   background-color: #ffffff;
-  border-radius: 16px;
-  border: 1px solid #aaa;
+  border-radius: 24px;
+  border: 1px solid #e2e8f0;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -210,6 +220,13 @@
   cursor: pointer;
   aspect-ratio: 1 / 1;
   position: relative;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+  transition: all 0.2s ease;
+}
+
+.choiceBox:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.12);
 }
 
 .choiceImage {

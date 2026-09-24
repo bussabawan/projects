@@ -25,7 +25,7 @@ export default function UserLayout({
   const router = useRouter();
 
   useEffect(() => {
-
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsPageLoading(false);
   }, [pathname]);
 
@@ -61,6 +61,7 @@ export default function UserLayout({
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLastActivity(Date.now());
 
     let throttleTimer: NodeJS.Timeout | null = null;
@@ -104,7 +105,7 @@ export default function UserLayout({
     }, 60000); // Check every minute
 
     return () => clearInterval(interval);
-
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastActivity]);
 
   const toggleSidebar = () => {

@@ -59,6 +59,7 @@ export default function MemoryGamePlayPage() {
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
   const [showExitPopup, setShowExitPopup] = useState(false);
   const [correctChoiceIds, setCorrectChoiceIds] = useState<number[]>([]);
+  const [, setIsAudioPlaying] = useState(false);
   
   // Timers
   const [countdown, setCountdown] = useState(showTimeSetting);
@@ -146,8 +147,31 @@ export default function MemoryGamePlayPage() {
   // Handle Question Phase Timer
   useEffect(() => {
     if (gameState === 'question') {
+      const q = questions[currentQuestionIndex];
+      let totalAudioDuration = 0;
+      
+      if (q) {
+         const bitrate = window.innerWidth <= 425 ? 32 : 64;
+         q.targets.forEach(t => {
+           if (t.audioUrl) {
+             const separator = t.audioUrl.includes('?') ? '&' : '?';
+             const url = `${t.audioUrl}${separator}bitrate=${bitrate}`;
+             const audio = audioCache.get(url);
+             if (audio && audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
+               totalAudioDuration += audio.duration + 0.15; // Include the 150ms delay
+             } else {
+               totalAudioDuration += 2; // Safe fallback if duration isn't available
+             }
+           }
+         });
+      }
+      
+      // The countdown is whichever is longer: the setting or the calculated audio duration
+      const initialTime = Math.max(showTimeSetting, Math.ceil(totalAudioDuration));
+      
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setCountdown(showTimeSetting);
+      setCountdown(initialTime);
+      
       timerRef.current = setInterval(() => {
         setCountdown((prev) => {
           if (prev <= 1) {
@@ -163,7 +187,7 @@ export default function MemoryGamePlayPage() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [gameState, currentQuestionIndex, showTimeSetting]);
+  }, [gameState, currentQuestionIndex, showTimeSetting, questions]);
 
   // Handle Options Phase Stopwatch and Total Timer
   useEffect(() => {
@@ -235,6 +259,7 @@ export default function MemoryGamePlayPage() {
 
     const playSequentially = async () => {
       if (gameState === 'question' && questions[currentQuestionIndex]) {
+        setIsAudioPlaying(true);
         const currentQ = questions[currentQuestionIndex];
         for (const target of currentQ.targets) {
           if (!isActive) break;
@@ -244,6 +269,9 @@ export default function MemoryGamePlayPage() {
             // Short delay between audios
             await new Promise(resolve => setTimeout(resolve, 150));
           }
+        }
+        if (isActive) {
+          setIsAudioPlaying(false);
         }
       }
     };
@@ -420,12 +448,8 @@ export default function MemoryGamePlayPage() {
 
   const currentQ = questions[currentQuestionIndex];
   
-  // Determine grid class based on number of answers
-  let gridClass = styles.grid4;
-  if (numAnswersSetting === 2) gridClass = styles.grid2;
-  else if (numAnswersSetting === 3) gridClass = styles.grid3;
-  else if (numAnswersSetting === 5) gridClass = styles.grid5;
-  else if (numAnswersSetting === 6) gridClass = styles.grid6;
+  // Determine grid class based on actual number of answers to handle cases where choices > numAnswersSetting
+  const gridClass = styles[`grid${Math.min(currentQ.choices.length, 15)}`] || styles.grid4;
 
   return (
     <div className={styles.container}>
@@ -466,10 +490,10 @@ export default function MemoryGamePlayPage() {
         <div className={styles.progressBarWrapper}>
           <div 
             className={styles.progressBarFill} 
-            style={{ width: `${Math.round(((currentQuestionIndex + 1) / questions.length) * 100)}%` }}
+            style={{ width: `${Math.round((currentQuestionIndex / questions.length) * 100)}%` }}
           ></div>
           <div className={styles.progressPercentText}>
-            {Math.round(((currentQuestionIndex + 1) / questions.length) * 100)}%
+            {Math.round((currentQuestionIndex / questions.length) * 100)}%
           </div>
         </div>
       </div>
@@ -515,11 +539,11 @@ export default function MemoryGamePlayPage() {
             {currentQ.choices.map((choice, index) => (
               <motion.div 
                 key={index} 
-                className={`${styles.optionCard} ${correctChoiceIds.includes(choice.id) ? styles.selectedCorrect : ''}`}
+                className={`${styles.optionCard} ${correctChoiceIds.includes(choice.id) ? styles.selectedCorrect : ''} ${wrongGuesses.includes(choice.id) ? styles.wrong : ''}`}
                 onClick={() => handleOptionClick(choice)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                animate={wrongGuesses.includes(choice.id) ? { x: [-10, 10, -10, 10, 0], backgroundColor: '#ffcccc' } : { backgroundColor: '#ffffff' }}
+                animate={wrongGuesses.includes(choice.id) ? { x: [-10, 10, -10, 10, 0] } : {}}
                 transition={{ duration: 0.4 }}
               >
                 <Image src={choice.imageUrl} alt={`Option ${index + 1}`} width={300} height={300} priority unoptimized={true} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />

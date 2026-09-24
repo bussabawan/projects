@@ -111,9 +111,19 @@ export default function MemorySettingsPage() {
   // Ensure answers is always strictly greater than numTargets
   useEffect(() => {
     if (answers <= numTargets) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAnswers(numTargets + 1);
     }
   }, [numTargets, answers]);
+
+  // Ensure showTime is sufficient to play audio for all targets (approx 2.5s per audio + delay)
+  useEffect(() => {
+    const minTime = Math.ceil(numTargets * 2.5);
+    if (showTime < minTime) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setShowTime(minTime);
+    }
+  }, [numTargets, showTime]);
 
   useEffect(() => {
     if (previewImages.length === 0) return;
@@ -313,8 +323,8 @@ export default function MemorySettingsPage() {
             <div className={styles.controlGroup}>
               <button 
                 className={styles.controlBtn} 
-                onClick={() => updateValue(setShowTime, showTime, -1, 1, 30)}
-                disabled={showTime <= 1}
+                onClick={() => updateValue(setShowTime, showTime, -1, Math.max(1, Math.ceil(numTargets * 2.5)), 30)}
+                disabled={showTime <= Math.max(1, Math.ceil(numTargets * 2.5))}
               >
                 -
               </button>

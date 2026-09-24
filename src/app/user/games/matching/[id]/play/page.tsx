@@ -405,10 +405,10 @@ export default function MatchingGamePage() {
         <div className={styles.progressBarWrapper}>
           <div 
             className={styles.progressBarFill} 
-            style={{ width: `${Math.round(((currentIndex + 1) / questions.length) * 100)}%` }}
+            style={{ width: `${Math.round((currentIndex / questions.length) * 100)}%` }}
           ></div>
           <div className={styles.progressPercentText}>
-            {Math.round(((currentIndex + 1) / questions.length) * 100)}%
+            {Math.round((currentIndex / questions.length) * 100)}%
           </div>
         </div>
       </div>
@@ -450,15 +450,15 @@ export default function MatchingGamePage() {
           {currentQ.choices.map((choice, idx) => (
             <motion.div 
               key={`${choice.id}-${idx}`} 
-              className={`${styles.choiceBox} ${correctChoiceId === choice.id ? styles.correctChoice : ''}`}
+              className={`${styles.choiceBox} ${correctChoiceId === choice.id ? styles.correctChoice : ''} ${wrongChoiceId === choice.id ? styles.wrongChoice : ''}`}
               onClick={() => handleChoiceClick(choice.id, choice.audioUrl)}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={
                 wrongChoiceId === choice.id 
-                  ? { opacity: 1, scale: 1, x: [-10, 10, -10, 10, 0], backgroundColor: '#ffcccc' } 
-                  : { opacity: 1, scale: 1, backgroundColor: '#ffffff' }
+                  ? { opacity: 1, scale: 1, x: [-10, 10, -10, 10, 0] } 
+                  : { opacity: 1, scale: 1 }
               }
               transition={{ duration: 0.4 }}
             >

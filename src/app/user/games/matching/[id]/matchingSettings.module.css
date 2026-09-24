@@ -7,9 +7,10 @@
   justify-content: center;
   min-height: 100%;
   padding: 2rem;
-  background-color: #EFEFEF;
-  border-radius: 10px;
+  background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+  border-radius: 20px;
   position: relative;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.02);
 }
 
 .header {
@@ -159,11 +160,12 @@
   min-width: 0;
   height: auto;
   background-color: #FFFFFF;
-  border: 1px solid #777;
-  border-radius: 15px;
+  border-radius: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
+  border: 1px solid #e2e8f0;
 }
 
 /* Settings Section */
@@ -175,60 +177,66 @@
 
 .settingsTitle {
   font-size: 30px;
-  font-weight: bold;
+  font-weight: 700;
   margin-bottom: 2rem;
-  color: #000;
+  color: #111111;
 }
 
 .settingRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 350px;
+  width: 450px;
   margin-bottom: 1.5rem;
 }
 
 .settingLabel {
   font-size: 22px;
-  color: #000;
+  color: #111111;
+  font-weight: 600;
 }
 
 .controlGroup {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #D9D9D9;
-  border: 1px solid #999;
-  border-radius: 25px;
-  padding: 0.2rem;
+  background-color: #e2e8f0;
+  border-radius: 30px;
+  padding: 0.3rem;
   width: 180px;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+  border: 1px solid #cbd5e1;
 }
 
 .controlBtn {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  background-color: #fff;
-  border: 1px solid #999;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
   display: flex;
   justify-content: center;
   align-items: center;
   font-size: 1.5rem;
   font-weight: bold;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  color: #000;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  color: #000000;
+  transition: all 0.2s ease;
 }
 
-.controlBtn:hover {
-  background-color: #f0f0f0;
+.controlBtn:hover:not(:disabled) {
+  background-color: #f1f5f9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
 }
 
 .controlBtn:disabled {
-  background-color: #e0e0e0;
-  color: #a0a0a0;
+  background-color: #f1f5f9;
+  color: #94a3b8;
   cursor: not-allowed;
   box-shadow: none;
+  border-color: #e2e8f0;
 }
 
 .controlValue {
@@ -264,32 +272,42 @@
   padding: 1rem;
   border-radius: 50px;
   font-size: 1.5rem;
-  font-weight: bold;
+  font-weight: 600;
   cursor: pointer;
   border: none;
-  color: #000;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-  transition: transform 0.1s;
+  box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
 }
 
 .startBtn:active, .backBtn:active {
   transform: translateY(2px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .startBtn {
-  background-color: #9ffaac;
+  background: linear-gradient(135deg, #a8e6cf 0%, #8ae0bd 100%);
+  color: #1a4d3a;
 }
 
 .startBtn:hover {
-  background-color: #8be499;
+  background: linear-gradient(135deg, #8ae0bd 0%, #6cdba9 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
 }
 
 .backBtn {
-  background-color: #f8b4aa;
+  background: linear-gradient(135deg, #ffb7b2 0%, #ff9e99 100%);
+  color: #5a2a27;
 }
 
 .backBtn:hover {
-  background-color: #dfa299;
+  background: linear-gradient(135deg, #ff9e99 0%, #ff857f 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
 }
 
 .audioToggleBtn {
