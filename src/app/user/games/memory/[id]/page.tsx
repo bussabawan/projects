@@ -155,8 +155,8 @@ export default function MemorySettingsPage() {
   useEffect(() => {
     // Initialize audio with instruction voice file based on mode
     const audioSrc = mode === 'word' 
-      ? '/api/uploads/word_image_memory_instruction.mp3' 
-      : '/api/uploads/image_image_memory_instruction.mp3';
+      ? '/audio/word_image_memory_instruction.mp3' 
+      : '/audio/image_image_memory_instruction.mp3';
       
     audioRef.current = new Audio(audioSrc);
     audioRef.current.onended = () => setIsPlaying(false);

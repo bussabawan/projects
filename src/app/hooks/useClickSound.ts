@@ -1,30 +1,24 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 export const useClickSound = () => {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      audioRef.current = new Audio('/audio/mouse-click-352734.mp3');
+    }
+  }, []);
+
   const playClick = useCallback(() => {
     try {
-      const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      if (!AudioContextClass) return;
-      
-      const ctx = new AudioContextClass();
-      const osc = ctx.createOscillator();
-      const gainNode = ctx.createGain();
-      
-      osc.connect(gainNode);
-      gainNode.connect(ctx.destination);
-      
-      // Settings for a subtle, quick "click" sound
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(800, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.04);
-      
-      gainNode.gain.setValueAtTime(0.5, ctx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.04);
-      
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.04);
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(() => {
+          // Ignore if audio play fails (e.g., due to autoplay policies before user interaction)
+        });
+      }
     } catch {
-      // Ignore if audio context fails (e.g., due to autoplay policies before user interaction)
+      // Ignore errors
     }
   }, []);
 

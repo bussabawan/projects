@@ -103,8 +103,8 @@ export default function MatchingSettingsPage() {
   useEffect(() => {
     // Initialize audio
     const audioSrc = type === 'image' 
-      ? '/api/uploads/image_image_matching_instruction.mp3' 
-      : '/api/uploads/word_image_matching_instruction.mp3';
+      ? '/audio/image_image_matching_instruction.mp3' 
+      : '/audio/word_image_matching_instruction.mp3';
       
     audioRef.current = new Audio(audioSrc);
     audioRef.current.onended = () => setIsPlaying(false);

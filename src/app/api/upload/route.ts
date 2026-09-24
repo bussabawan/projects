@@ -29,15 +29,18 @@ export async function POST(req: NextRequest) {
     let filename = "";
 
     if (isAudio) {
-      filename = `${uniqueSuffix}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
+      filename = `${uniqueSuffix}${ext ? `.${ext}` : ''}`;
       const filePath = path.join(uploadDir, filename);
       await fs.writeFile(filePath, buffer);
     } else {
-      const originalNameWithoutExt = file.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9.-]/g, "_");
-      filename = `${uniqueSuffix}-${originalNameWithoutExt}.webp`;
+      filename = `${uniqueSuffix}.webp`;
       const filePath = path.join(uploadDir, filename);
       
       await sharp(buffer)
+        .resize(1024, 1024, {
+          fit: 'inside',
+          withoutEnlargement: true,
+        })
         .webp({ quality: 80 })
         .toFile(filePath);
     }
