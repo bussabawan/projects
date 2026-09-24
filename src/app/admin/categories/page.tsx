@@ -411,7 +411,26 @@ export default function ManageCategoriesPage() {
         ) : error ? (
           <p style={{ color: 'red', gridColumn: '1 / -1', textAlign: 'center' }}>{error}</p>
         ) : categories.length === 0 ? (
-          <p style={{ gridColumn: '1 / -1', textAlign: 'center' }}>ไม่พบข้อมูลหมวดหมู่</p>
+          <div style={{ 
+            gridColumn: '1 / -1', 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            padding: '5rem 0',
+            color: '#8a8a9a',
+            gap: '0.5rem',
+            textAlign: 'center'
+          }}>
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5, marginBottom: '1rem' }}>
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              <line x1="9" y1="9" x2="13" y2="13"></line>
+              <line x1="13" y1="9" x2="9" y2="13"></line>
+            </svg>
+            <div style={{ fontSize: '1.25rem', fontWeight: 600, color: '#6b6b7b' }}>ไม่พบข้อมูลหมวดหมู่ที่คุณค้นหา</div>
+            <div style={{ fontSize: '0.95rem', opacity: 0.8 }}>ลองเปลี่ยนคำค้นหาใหม่ หรือกดเพิ่มหมวดหมู่เข้าระบบ</div>
+          </div>
         ) : (
           <>
             {categories.map((category, index) => {
@@ -589,7 +608,26 @@ export default function ManageCategoriesPage() {
                 {isLoadingImages ? (
                   <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '2rem' }}>กำลังโหลดรูปภาพ...</p>
                 ) : allImages.length === 0 ? (
-                  <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '2rem' }}>ไม่พบรูปภาพ</p>
+                  <div style={{ 
+                    gridColumn: '1 / -1', 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    padding: '3rem 0',
+                    color: '#8a8a9a',
+                    gap: '0.5rem',
+                    textAlign: 'center'
+                  }}>
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5, marginBottom: '0.5rem' }}>
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                      <line x1="9" y1="9" x2="13" y2="13"></line>
+                      <line x1="13" y1="9" x2="9" y2="13"></line>
+                    </svg>
+                    <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#6b6b7b' }}>ไม่พบรูปภาพที่คุณค้นหา</div>
+                    <div style={{ fontSize: '0.85rem', opacity: 0.8 }}>ลองเปลี่ยนคำค้นหาใหม่</div>
+                  </div>
                 ) : (
                   <>
                     {[...allImages].sort((a, b) => {

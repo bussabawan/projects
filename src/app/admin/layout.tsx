@@ -119,7 +119,7 @@ export default function AdminLayout({
               priority
             />
             <Image 
-              src="/Logo OT.jpg" 
+              src="/logo-ot.webp" 
               alt="OT Logo" 
               width={150} 
               height={77} 

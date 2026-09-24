@@ -199,6 +199,30 @@
   justify-content: center;
   flex-direction: column;
   word-break: break-word;
+  position: relative;
+  overflow: hidden;
+}
+
+.categoryImage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  height: 90%;
+  object-fit: contain;
+  opacity: 0.15;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.categoryText {
+  position: relative;
+  z-index: 1;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #000;
+  line-height: 1.2;
 }
 
 .categoryBtn:hover {

@@ -59,8 +59,8 @@
 }
 
 .scoreCircle {
-  width: 200px;
-  height: 200px;
+  width: 230px;
+  height: 230px;
   background-color: #E2C2E4;
   border-radius: 50%;
   display: flex;
@@ -71,7 +71,7 @@
 
 .scoreValue {
   font-size: 5rem;
-  font-weight: 400;
+  font-weight: 800;
   color: #000;
   line-height: 1;
 }

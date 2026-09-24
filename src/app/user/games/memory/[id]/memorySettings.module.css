@@ -320,8 +320,6 @@
   transform: scale(1.05);
 }
 
-/* Mobile Portrait Responsive */
-
 /* Mobile Landscape Responsiveness */
 
 /* ==========================================================================
@@ -382,7 +380,7 @@
     .subtitle {
       font-size: 1.5rem;
       line-height: 1.4;
-      margin-bottom: 1rem;
+      margin-bottom: 2rem;
     }
   
     .contentRow {

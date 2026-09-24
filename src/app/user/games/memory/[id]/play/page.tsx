@@ -299,6 +299,7 @@ export default function MemoryGamePlayPage() {
 
 
   const handleOptionClick = async (selectedChoice: ImageInfo) => {
+    playClick();
     const audioPromise = playAudio(selectedChoice.audioUrl);
     
     if (gameState !== 'options' || isTransitioning) return;

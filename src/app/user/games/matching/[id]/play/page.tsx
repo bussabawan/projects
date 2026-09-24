@@ -265,6 +265,7 @@ export default function MatchingGamePage() {
   };
 
   const handleChoiceClick = (choiceId: number, audioUrl?: string) => {
+    playClick();
     playAudio(audioUrl);
     if (feedback !== null || isFinished) return; // Prevent clicking while showing feedback
 

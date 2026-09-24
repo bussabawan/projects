@@ -281,12 +281,22 @@ export default function HistoryPage() {
                                   </svg>
                                 )}
                               </div>
-                              {detail.game}
+                              <span className={styles.gameNameText}>
+                                {detail.game}
+                              </span>
                             </div>
                             <div className={styles.detailScore}>
-                              <span className={styles.scoreBadge}>{detail.score}</span>
+                              <span className={styles.scoreBadge}>
+                                <span className={styles.textTop}>{detail.score.split(' ')[0]}</span>
+                                <span className={styles.textBottom}>{detail.score.split(' ')[1] || ''}</span>
+                              </span>
                             </div>
-                            <div className={styles.detailDuration}>{detail.duration}</div>
+                            <div className={styles.detailDuration}>
+                              <span className={styles.splitTextCenter}>
+                                <span className={styles.textTop}>{detail.duration.split(' ')[0]}</span>
+                                <span className={styles.textBottom}>{detail.duration.split(' ')[1] || ''}</span>
+                              </span>
+                            </div>
                           </div>
                         ))}
                       </div>

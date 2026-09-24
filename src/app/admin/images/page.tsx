@@ -56,6 +56,8 @@ export default function ManageImagesPage() {
   const isLoadMoreRef = useRef(false);
   const audioCache = useRef<Record<string, HTMLAudioElement>>({});
 
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   const fetchImages = useCallback(async () => {
     const isLoadMore = isLoadMoreRef.current;
     if (isLoadMore) {
@@ -63,10 +65,17 @@ export default function ManageImagesPage() {
     } else {
       setIsLoading(true);
     }
+
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
     
     try {
       const res = await fetch(`/api/admin/images?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}&t=${Date.now()}`, {
-        cache: 'no-store'
+        cache: 'no-store',
+        signal: abortController.signal
       });
       const json = await res.json();
       if (json.success) {
@@ -104,20 +113,31 @@ export default function ManageImagesPage() {
         const timeoutPromise = new Promise<void>((resolve) => setTimeout(resolve, 8000));
         await Promise.race([Promise.all(preloadPromises), timeoutPromise]);
 
+        if (abortController.signal.aborted) return;
+
         if (isLoadMore) {
-          setImages(prev => [...prev, ...json.data]);
+          setImages(prev => {
+            // Prevent duplicates when appending
+            const existingIds = new Set(prev.map(p => p.id));
+            const filteredNew = json.data.filter((img: ImageData) => !existingIds.has(img.id));
+            return [...prev, ...filteredNew];
+          });
         } else {
           setImages(json.data);
         }
         setTotalPages(json.totalPages || 1);
       }
-    } catch (err) {
+    } catch (err: unknown) {
+      const error = err as Error;
+      if (error.name === 'AbortError') return;
       console.error("Failed to fetch images", err);
     } finally {
-      if (isLoadMore) {
-        setLoadingMore(false);
-      } else {
-        setIsLoading(false);
+      if (!abortController.signal.aborted) {
+        if (isLoadMore) {
+          setLoadingMore(false);
+        } else {
+          setIsLoading(false);
+        }
       }
     }
   }, [currentPage, itemsPerPage, debouncedSearchQuery]);
@@ -321,7 +341,26 @@ export default function ManageImagesPage() {
             <Loader text={searchQuery.trim() ? "กำลังค้นหารูปภาพ..." : "กำลังโหลดรูปภาพ..."} />
           </div>
         ) : images.length === 0 ? (
-          <div>ไม่พบรูปภาพ</div>
+          <div style={{ 
+            gridColumn: '1 / -1', 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            padding: '5rem 0',
+            color: '#8a8a9a',
+            gap: '0.5rem',
+            textAlign: 'center'
+          }}>
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5, marginBottom: '1rem' }}>
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              <line x1="9" y1="9" x2="13" y2="13"></line>
+              <line x1="13" y1="9" x2="9" y2="13"></line>
+            </svg>
+            <div style={{ fontSize: '1.25rem', fontWeight: 600, color: '#6b6b7b' }}>ไม่พบรูปภาพที่คุณค้นหา</div>
+            <div style={{ fontSize: '0.95rem', opacity: 0.8 }}>ลองเปลี่ยนคำค้นหาใหม่ หรือกดเพิ่มรูปภาพเข้าระบบ</div>
+          </div>
         ) : (
           images.map((img) => (
             <div key={img.id} className={styles.card}>
@@ -367,7 +406,7 @@ export default function ManageImagesPage() {
       </div>
 
       {/* Intersection Observer Target */}
-      {!isLoading && currentPage < totalPages && (
+      {!isLoading && searchQuery === debouncedSearchQuery && currentPage < totalPages && (
         <div ref={lastElementRef} className={styles.loadMoreTarget}>
           {loadingMore && (
             <div style={{ width: '100%', padding: '1rem 0' }}>

@@ -79,14 +79,29 @@ export class UserModel {
   /**
    * Get exercises assigned to a user
    */
-  static async getAssignedExercises(userId: string): Promise<{ exercises_id: number, exercises_name: string }[]> {
+  static async getAssignedExercises(userId: string): Promise<{ exercises_id: number, exercises_name: string, thumbnail_id?: number }[]> {
     const [rows] = await db.query<RowDataPacket[]>(`
-      SELECT DISTINCT ex.exercises_id, ex.exercises_name 
+      SELECT 
+        ex.exercises_id, 
+        ex.exercises_name,
+        (
+          SELECT pd.photo_id
+          FROM category_in_exercises cie
+          JOIN photo_in_category pic ON cie.category_id = pic.category_id
+          JOIN photo_data pd ON pic.photo_id = pd.photo_id
+          WHERE cie.exercises_id = ex.exercises_id
+            AND cie.remove = 0 
+            AND pic.remove = 0 
+            AND pd.remove = 0
+          ORDER BY RAND()
+          LIMIT 1
+        ) as thumbnail_id
       FROM patient_data p
       JOIN exercises_data ex ON p.exercises_id = ex.exercises_id
       WHERE p.user_id = ? AND p.remove = 0 AND ex.remove = 0
+      GROUP BY ex.exercises_id, ex.exercises_name
       ORDER BY ex.exercises_id ASC
     `, [userId]);
-    return rows as { exercises_id: number, exercises_name: string }[];
+    return rows as { exercises_id: number, exercises_name: string, thumbnail_id?: number }[];
   }
 }

@@ -10,7 +10,7 @@ export default function MatchingCategoryClient() {
   const [activeTab, setActiveTab] = useState<'image' | 'word'>('image');
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
-  const [exercises, setExercises] = useState<{exercises_id: number, exercises_name: string}[]>([]);
+  const [exercises, setExercises] = useState<{exercises_id: number, exercises_name: string, thumbnail_id?: number}[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -112,12 +112,37 @@ export default function MatchingCategoryClient() {
         ) : filteredExercises.length > 0 ? (
           filteredExercises.map((ex) => (
             <Link key={ex.exercises_id} href={`/user/games/matching/${ex.exercises_id}?type=${activeTab}`} className={styles.categoryBtn}>
-              {ex.exercises_name}
+              {ex.thumbnail_id && (
+                <img 
+                  src={`/api/files/${ex.thumbnail_id}?type=image`} 
+                  alt="" 
+                  className={styles.categoryImage} 
+                  loading="lazy"
+                />
+              )}
+              <span className={styles.categoryText}>{ex.exercises_name}</span>
             </Link>
           ))
         ) : (
-          <div style={{ padding: '2rem', fontSize: '1.2rem', color: '#666', gridColumn: '1 / -1', textAlign: 'center' }}>
-            {searchQuery ? 'ไม่พบแบบฝึกหัดที่ค้นหา' : 'ไม่มีแบบฝึกหัดที่ได้รับมอบหมาย'}
+          <div style={{ padding: '4rem 2rem', fontSize: '1.2rem', color: '#94a3b8', gridColumn: '1 / -1', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+            {searchQuery ? (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  <path d="m14 14-6-6"></path>
+                  <path d="m8 14 6-6"></path>
+                </svg>
+                <span>ไม่พบแบบฝึกหัดที่ค้นหา</span>
+              </>
+            ) : (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span>ไม่มีแบบฝึกหัดที่ได้รับมอบหมาย</span>
+              </>
+            )}
           </div>
         )}
       </div>

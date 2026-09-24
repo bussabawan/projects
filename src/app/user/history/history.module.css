@@ -224,12 +224,30 @@
   padding: 4px 12px;
   border-radius: 6px;
   font-weight: 500;
-  display: inline-block;
+  display: inline-flex;
+  gap: 0.3rem;
+  align-items: center;
+  justify-content: center;
   text-align: center;
 }
 
 .detailDuration {
   text-align: right;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.splitTextLeft {
+  display: inline-flex;
+  gap: 0.2rem;
+  align-items: center;
+}
+
+.splitTextCenter {
+  display: inline-flex;
+  gap: 0.3rem;
+  align-items: center;
 }
 
 .pagination {
@@ -346,7 +364,10 @@
     }
     
     .gameInfo {
-      gap: 0.3rem;
+      flex-direction: column;
+      justify-content: center;
+      gap: 0.2rem;
+      line-height: 1.2;
     }
     
     .gameIcon {
@@ -359,7 +380,21 @@
     }
     
     .detailScore, .detailDuration {
-      text-align: right;
+      justify-content: center;
+    }
+    
+    .splitTextLeft, .splitTextCenter, .scoreBadge {
+      flex-direction: column;
+      gap: 0;
+      line-height: 1.2;
+    }
+
+    .splitTextLeft {
+      align-items: flex-start;
+    }
+    
+    .splitTextCenter, .scoreBadge {
+      align-items: center;
     }
     
     .pageBtn {

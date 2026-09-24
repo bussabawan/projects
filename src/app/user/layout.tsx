@@ -21,16 +21,28 @@ export default function UserLayout({
 
   const [lastActivity, setLastActivity] = useState<number>(0);
   const [isPageLoading, setIsPageLoading] = useState(false);
-  const pathname = usePathname();
+  const pathname = usePathname() || "";
   const router = useRouter();
+
+  const [activeTab, setActiveTab] = useState<string>('');
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsPageLoading(false);
+    
+    if (pathname.startsWith("/user/history")) {
+      setActiveTab('history');
+    } else if (pathname.startsWith("/user/games") && !pathname.startsWith("/user/games/summary")) {
+      setActiveTab('games');
+    } else {
+      setActiveTab('');
+    }
   }, [pathname]);
 
   const handleLinkClick = (href: string) => {
     if (pathname !== href) {
+      if (href.includes('/history')) setActiveTab('history');
+      else if (href.includes('/games')) setActiveTab('games');
       setIsPageLoading(true);
     }
   };
@@ -114,8 +126,8 @@ export default function UserLayout({
 
   const isGameInnerPage = pathname.startsWith("/user/games/") && pathname.split("/").length > 4;
   const isSummaryPage = pathname.startsWith("/user/games/summary");
-  const isHistoryActive = pathname.startsWith("/user/history");
-  const isGamesActive = pathname.startsWith("/user/games") && !isSummaryPage;
+  const isHistoryActive = activeTab === 'history';
+  const isGamesActive = activeTab === 'games';
 
   return (
     <div className={`${styles.layoutContainer} ${isGameInnerPage ? styles.noBottomPadding : ''} ${isSummaryPage ? styles.summaryLayout : ''}`}>
@@ -148,7 +160,7 @@ export default function UserLayout({
               priority
             />
             <Image 
-              src="/Logo OT.jpg" 
+              src="/logo-ot.webp" 
               alt="OT Logo" 
               width={150} 
               height={77} 
