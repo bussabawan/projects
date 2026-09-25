@@ -219,7 +219,7 @@
 .categoryText {
   position: relative;
   z-index: 1;
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #000;
   line-height: 1.2;
@@ -404,8 +404,8 @@
     gap: 0.5rem;
   }
   .titleIcon {
-    width: 32px;
-    height: 32px;
+    width: 42px;
+    height: 42px;
   }
   .title {
     font-size: 1.8rem;

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import Loader from '@/app/components/Loader/Loader';
 import styles from './memory.module.css';
 
@@ -67,12 +68,7 @@ export default function MemoryCategoryClient() {
         <div className={styles.titleRow}>
           <div className={styles.titleWithIcon}>
             <div className={styles.titleIcon}>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#e76f51" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" fill="#fff" strokeWidth="1.5"></circle>
-                <path d="M9.5 5.5A2.5 2.5 0 0 1 12 8v10a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 5.5Z" transform="scale(0.65) translate(6.5, 4.5)"></path>
-                <path d="M14.5 5.5A2.5 2.5 0 0 0 12 8v10a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 5.5Z" transform="scale(0.65) translate(6.5, 4.5)"></path>
-                <line x1="12" y1="8" x2="12" y2="18" transform="scale(0.65) translate(6.5, 4.5)"></line>
-              </svg>
+              <span style={{ fontSize: '2rem', lineHeight: 1 }}>🧠</span>
             </div>
             <h1 className={styles.title}>ความจำ</h1>
           </div>
@@ -125,9 +121,11 @@ export default function MemoryCategoryClient() {
           filteredExercises.map((ex, index) => (
             <Link key={`${ex.exercises_id}-${index}`} href={`/user/games/memory/${ex.exercises_id}?mode=${activeTab}`} className={styles.categoryCard}>
               {ex.thumbnail_id && (
-                <img 
+                <Image 
                   src={`/api/files/${ex.thumbnail_id}?type=image`} 
                   alt="" 
+                  width={200}
+                  height={200}
                   className={styles.categoryImage} 
                   loading="lazy"
                 />
