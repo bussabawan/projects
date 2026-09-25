@@ -69,7 +69,7 @@ export default function DashboardCharts({
     }
 
     return (
-      <text x={x} y={y} fill={fill} textAnchor={textAnchor} fontSize={12} dominantBaseline="central">
+      <text x={x} y={y} fill={fill} textAnchor={textAnchor as "start" | "inherit" | "middle" | "end" | undefined} fontSize={12} dominantBaseline="central">
         {isLong ? (
           <>
             <tspan x={x} dy="-0.6em">{line1}</tspan>
@@ -117,7 +117,8 @@ export default function DashboardCharts({
                   fill="#8884d8"
                   dataKey="value"
                   labelLine={!isMobile}
-                  label={isMobile ? false : renderCustomLabel}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  label={isMobile ? false : renderCustomLabel as any}
                 >
                   {imageCategoryStats.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -125,7 +126,8 @@ export default function DashboardCharts({
                 </Pie>
                 <Tooltip 
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                  formatter={(value: number, name: string) => [`${value} รูป`, name]}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  formatter={(value: any, name: any) => [`${value} รูป`, name]}
                 />
                 {isMobile && (
                   <Legend 

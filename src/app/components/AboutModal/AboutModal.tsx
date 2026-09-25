@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
+import BaseModal from '../BaseModal/BaseModal';
 import styles from './AboutModal.module.css';
 
 interface AboutModalProps {
@@ -33,27 +34,28 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
 
   if (!isOpen || !mounted) return null;
 
-  return createPortal(
-    <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.modalHeader}>
-          <div className={styles.modalTitle}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="2" y="5" width="20" height="14" rx="3" />
-              <circle cx="8" cy="9" r="1.5" />
-              <path d="M4.5 16a3.5 3.5 0 0 1 7 0" />
-              <line x1="14" y1="10" x2="18" y2="10" />
-              <line x1="14" y1="14" x2="18" y2="14" />
-            </svg>
-            เกี่ยวกับผู้จัดทำ ปี 2569
-          </div>
-          <button className={styles.closeButton} onClick={onClose}>
-            &times;
-          </button>
-        </div>
+  const title = (
+    <>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#8a2be2' }}>
+        <rect x="2" y="5" width="20" height="14" rx="3" />
+        <circle cx="8" cy="9" r="1.5" />
+        <path d="M4.5 16a3.5 3.5 0 0 1 7 0" />
+        <line x1="14" y1="10" x2="18" y2="10" />
+        <line x1="14" y1="14" x2="18" y2="14" />
+      </svg>
+      <span style={{ color: '#8a2be2' }}>เกี่ยวกับผู้จัดทำ ปี 2569</span>
+    </>
+  );
 
-        <div className={styles.modalBody}>
-          {/* Section 1: COOPERATION */}
+  return createPortal(
+    <BaseModal 
+      isOpen={isOpen} 
+      onClose={onClose} 
+      title={title}
+      maxWidth="900px"
+    >
+      <div className={styles.modalBody}>
+        {/* Section 1: COOPERATION */}
           <div className={styles.section}>
             <div className={styles.coopTitle}>COOPERATION BETWEEN</div>
             <div className={styles.logosContainer}>
@@ -149,9 +151,8 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
               </div>
             </div>
           </div>
-        </div>
       </div>
-    </div>,
+    </BaseModal>,
     document.body
   );
 }

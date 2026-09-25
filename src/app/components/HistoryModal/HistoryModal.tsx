@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from 'react';
-import styles from './HistoryModal.module.css';
+import { useState } from 'react';
 import Link from 'next/link';
+import BaseModal from '../BaseModal/BaseModal';
+import styles from './HistoryModal.module.css';
 
 interface HistoryDetail {
   id: number;
@@ -69,17 +70,22 @@ export default function HistoryModal({ isOpen, onClose, data }: HistoryModalProp
     return '/user/games';
   }
 
+  const title = data.dateStr;
+  const subtitle = (
+    <div style={{ display: 'flex', gap: '15px' }}>
+      <span>🎮 {data.plays}</span>
+      <span>⏱️ {data.totalTime}</span>
+    </div>
+  );
+
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={e => e.stopPropagation()}>
-        <div className={styles.header}>
-          <button className={styles.closeBtn} onClick={onClose}>✕</button>
-          <h2 className={styles.title}>{data.dateStr}</h2>
-          <div className={styles.subtitle}>
-            <span>🎮 {data.plays}</span>
-            <span>⏱️ {data.totalTime}</span>
-          </div>
-        </div>
+    <BaseModal 
+      isOpen={isOpen} 
+      onClose={onClose} 
+      title={title} 
+      subtitle={subtitle}
+    >
+      <div className={styles.contentWrapper}>
 
         {filters.length > 2 && (
           <div className={styles.filters}>
@@ -131,6 +137,6 @@ export default function HistoryModal({ isOpen, onClose, data }: HistoryModalProp
           ))}
         </div>
       </div>
-    </div>
+    </BaseModal>
   );
 }

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { promises as fs } from "fs";
-import path from "path";
-import { transcodeAudioBuffer } from "@/lib/ffmpeg";
+import { LocalStorageService } from "@/services/storage/LocalStorageService";
+import { AudioProcessor } from "@/services/media/AudioProcessor";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ filename: string }> }) {
   const { filename } = await params;
@@ -14,10 +13,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ file
   // Determine content type and folder based on extension
   const ext = filename.split('.').pop()?.toLowerCase();
   const isAudio = ['mp3', 'wav', 'ogg'].includes(ext || '');
-  const folder = isAudio ? 'audio' : 'images';
-
-  const filePath = path.join(process.cwd(), "uploads", folder, filename);
   
+  const storageService = new LocalStorageService();
+  const audioProcessor = new AudioProcessor();
+
   try {
     let buffer: Buffer | null = null;
     
@@ -28,26 +27,23 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ file
     if (isAudio && bitrateParam) {
       const bitrate = parseInt(bitrateParam, 10);
       if (!isNaN(bitrate) && bitrate > 0) {
-        // Prepare cache directory
-        const cacheDir = path.join(process.cwd(), "uploads", "cache");
-        await fs.mkdir(cacheDir, { recursive: true }).catch(() => {});
+        const cacheSuffix = `${bitrate}kbps.mp3`;
         
-        const cachedFilename = `${filename}_${bitrate}kbps.mp3`;
-        const cachedFilePath = path.join(cacheDir, cachedFilename);
+        // Try to read from disk cache first
+        buffer = await storageService.getCachedFile(filename, cacheSuffix);
         
-        try {
-          // Try to read from disk cache first
-          buffer = await fs.readFile(cachedFilePath);
+        if (buffer) {
           isTranscoded = true;
-        } catch {
+        } else {
           // Cache miss, read original file and transcode
           try {
-            const originalBuffer = await fs.readFile(filePath);
-            buffer = await transcodeAudioBuffer(originalBuffer, bitrate);
-            // Save to disk cache asynchronously (don't await to avoid blocking response)
-            fs.writeFile(cachedFilePath, buffer).catch(err => {
-              console.error("Failed to write cache file:", err);
-            });
+            const originalBuffer = await storageService.getFile(filename, isAudio);
+            if (!originalBuffer) throw new Error("Original file not found");
+            
+            buffer = await audioProcessor.processAudio(originalBuffer, bitrate);
+            
+            // Save to disk cache asynchronously
+            storageService.saveCachedFile(filename, cacheSuffix, buffer);
             isTranscoded = true;
           } catch (err) {
             console.error("Transcoding failed:", err);
@@ -59,7 +55,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ file
 
     // Fallback if not transcoded (or if it's an image)
     if (!buffer) {
-      buffer = await fs.readFile(filePath);
+      buffer = await storageService.getFile(filename, isAudio);
+    }
+    
+    if (!buffer) {
+      return new NextResponse("File not found", { status: 404 });
     }
 
     // Determine content type
@@ -73,7 +73,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ file
     else if (ext === 'wav') contentType = 'audio/wav';
     else if (ext === 'ogg') contentType = 'audio/ogg';
     
-    return new NextResponse(buffer, {
+    return new NextResponse(buffer as unknown as BodyInit, {
       headers: {
         "Content-Type": contentType,
         // Aggressive caching: 1 year, immutable

@@ -1,17 +1,17 @@
-﻿import { db } from '@/lib/db';
-import { RowDataPacket } from 'mysql2';
+import { RowDataPacket } from 'mysql2/promise';
+import { BaseModel } from './BaseModel';
 
 export interface CategoryInfo {
   category_id: number;
   category_name: string;
 }
 
-export class ManageCategoriesModel {
+export class ManageCategoriesModel extends BaseModel {
   /**
    * Get all categories for dropdown selection
    */
   static getCategories = async (): Promise<CategoryInfo[]> => {
-    const [rows] = await db.execute<RowDataPacket[]>(
+    const rows = await this.query<RowDataPacket>(
       'SELECT category_id, category_name FROM category_data WHERE remove = 0 ORDER BY category_id ASC'
     );
     return rows as CategoryInfo[];
@@ -35,8 +35,8 @@ export class ManageCategoriesModel {
     
     baseQuery += ' ORDER BY category_id DESC LIMIT ? OFFSET ?';
     
-    const [rows] = await db.query<RowDataPacket[]>(baseQuery, [...queryParams, limit, offset]);
-    const [countRows] = await db.query<RowDataPacket[]>(countQuery, queryParams);
+    const rows = await this.query<RowDataPacket>(baseQuery, [...queryParams, limit, offset]);
+    const countRows = await this.query<RowDataPacket>(countQuery, queryParams);
     
     return {
       data: rows as CategoryInfo[],
@@ -48,7 +48,7 @@ export class ManageCategoriesModel {
    * Add a new category
    */
   static async addCategory(name: string): Promise<{ success?: boolean; isDuplicateDeleted?: boolean; name?: string }> {
-    const [existing] = await db.query<RowDataPacket[]>(
+    const existing = await this.query<RowDataPacket>(
       'SELECT category_id FROM category_data WHERE category_name = ? AND remove = 0',
       [name]
     );
@@ -56,7 +56,7 @@ export class ManageCategoriesModel {
       throw new Error("มีหมวดหมู่ชื่อนี้อยู่ในระบบแล้ว");
     }
 
-    const [removed] = await db.query<RowDataPacket[]>(
+    const removed = await this.query<RowDataPacket>(
       'SELECT category_name FROM category_data WHERE category_name = ? AND remove = 1 LIMIT 1',
       [name]
     );
@@ -64,7 +64,7 @@ export class ManageCategoriesModel {
       return { isDuplicateDeleted: true, name: name };
     }
 
-    await db.execute(
+    await this.execute(
       'INSERT INTO category_data (category_name, remove) VALUES (?, 0)',
       [name]
     );
@@ -75,10 +75,7 @@ export class ManageCategoriesModel {
    * Restore category
    */
   static async restoreCategory(name: string): Promise<void> {
-    const connection = await db.getConnection();
-    try {
-      await connection.beginTransaction();
-
+    return this.transaction(async (connection) => {
       await connection.execute(
         'UPDATE category_data SET remove = 0 WHERE category_name = ?',
         [name]
@@ -96,21 +93,14 @@ export class ManageCategoriesModel {
           ids
         );
       }
-
-      await connection.commit();
-    } catch (error) {
-      await connection.rollback();
-      throw error;
-    } finally {
-      connection.release();
-    }
+    });
   }
 
   /**
    * Get selected photos for a category
    */
   static async getCategoryImages(name: string): Promise<number[]> {
-    const [rows] = await db.query<RowDataPacket[]>(
+    const rows = await this.query<RowDataPacket>(
       `SELECT pic.photo_id 
        FROM photo_in_category pic
        JOIN category_data cd ON pic.category_id = cd.category_id
@@ -125,7 +115,7 @@ export class ManageCategoriesModel {
    * Get image count for a category
    */
   static async getCategoryImageCount(categoryId: number): Promise<number> {
-    const [rows] = await db.query<RowDataPacket[]>(
+    const rows = await this.query<RowDataPacket>(
       `SELECT COUNT(pic.photo_id) as count 
        FROM photo_in_category pic
        JOIN category_data cd ON pic.category_id = cd.category_id
@@ -140,7 +130,7 @@ export class ManageCategoriesModel {
    * Update selected photos for a category
    */
   static async updateCategoryImages(name: string, newPhotoIds: number[]): Promise<void> {
-    const [existingRows] = await db.query<RowDataPacket[]>(
+    const existingRows = await this.query<RowDataPacket>(
       'SELECT category_id FROM category_data WHERE category_name = ? AND remove = 0',
       [name]
     );
@@ -151,23 +141,25 @@ export class ManageCategoriesModel {
 
     const categoryId = existingRows[0].category_id;
     
-    // Delete existing photos for this category in photo_in_category
-    await db.execute('DELETE FROM photo_in_category WHERE category_id = ?', [categoryId]);
-    
-    // Insert new photos
-    for (const photoId of newPhotoIds) {
-      await db.execute(
-        'INSERT INTO photo_in_category (category_id, photo_id, remove) VALUES (?, ?, 0)',
-        [categoryId, photoId]
-      );
-    }
+    return this.transaction(async (connection) => {
+      // Delete existing photos for this category in photo_in_category
+      await connection.execute('DELETE FROM photo_in_category WHERE category_id = ?', [categoryId]);
+      
+      // Insert new photos
+      for (const photoId of newPhotoIds) {
+        await connection.execute(
+          'INSERT INTO photo_in_category (category_id, photo_id, remove) VALUES (?, ?, 0)',
+          [categoryId, photoId]
+        );
+      }
+    });
   }
 
   /**
    * Update category name
    */
   static async updateCategoryName(oldName: string, newName: string): Promise<void> {
-    const [existing] = await db.query<RowDataPacket[]>(
+    const existing = await this.query<RowDataPacket>(
       'SELECT category_id FROM category_data WHERE category_name = ? AND remove = 0',
       [newName]
     );
@@ -175,7 +167,7 @@ export class ManageCategoriesModel {
       throw new Error("มีหมวดหมู่ชื่อนี้อยู่ในระบบแล้ว");
     }
 
-    await db.execute(
+    await this.execute(
       'UPDATE category_data SET category_name = ? WHERE category_name = ?',
       [newName, oldName]
     );
@@ -185,10 +177,7 @@ export class ManageCategoriesModel {
    * Delete category (Soft delete)
    */
   static async deleteCategory(name: string): Promise<void> {
-    const connection = await db.getConnection();
-    try {
-      await connection.beginTransaction();
-
+    return this.transaction(async (connection) => {
       await connection.execute(
         'UPDATE category_data SET remove = 1 WHERE category_name = ?',
         [name]
@@ -206,13 +195,6 @@ export class ManageCategoriesModel {
           ids
         );
       }
-
-      await connection.commit();
-    } catch (error) {
-      await connection.rollback();
-      throw error;
-    } finally {
-      connection.release();
-    }
+    });
   }
 }

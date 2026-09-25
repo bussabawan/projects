@@ -1,6 +1,6 @@
-﻿import { db } from '@/lib/db';
-import { RowDataPacket, ResultSetHeader } from 'mysql2';
+import { RowDataPacket, ResultSetHeader } from 'mysql2/promise';
 import bcrypt from 'bcryptjs';
+import { BaseModel } from './BaseModel';
 
 export interface UserInfo {
   user_id: number;
@@ -12,7 +12,7 @@ export interface UserInfo {
   exercises_name?: string | null;
 }
 
-export class ManageUsersModel {
+export class ManageUsersModel extends BaseModel {
   /**
    * Get paginated list of users by role
    * @param role 1 for Patient, 2 for Staff (or 0 for Admin)
@@ -79,8 +79,8 @@ export class ManageUsersModel {
     baseQuery += ` ORDER BY u.user_id ASC LIMIT ? OFFSET ?`;
     queryParams.push(limit, offset);
 
-    const [rows] = await db.query<RowDataPacket[]>(baseQuery, queryParams);
-    const [countRows] = await db.query<RowDataPacket[]>(countQuery, countParams);
+    const rows = await this.query<RowDataPacket>(baseQuery, queryParams);
+    const countRows = await this.query<RowDataPacket>(countQuery, countParams);
 
     return {
       data: rows as UserInfo[],
@@ -92,10 +92,7 @@ export class ManageUsersModel {
    * Create a new user (and patient data if role === 1)
    */
   static async createUser(userData: { user_name: string, full_name: string, role: number, password?: string, exercises_id?: number | number[] }): Promise<number> {
-    const connection = await db.getConnection();
-    try {
-      await connection.beginTransaction();
-
+    return this.transaction(async (connection) => {
       // Ensure no duplicate username
       const [existing] = await connection.execute<RowDataPacket[]>(
         'SELECT user_id FROM users_data WHERE user_name = ? AND remove = 0',
@@ -143,24 +140,15 @@ export class ManageUsersModel {
         }
       }
 
-      await connection.commit();
       return userId;
-    } catch (error) {
-      await connection.rollback();
-      throw error;
-    } finally {
-      connection.release();
-    }
+    });
   }
 
   /**
    * Update existing user
    */
   static async updateUser(userId: number, userData: { user_name?: string, full_name?: string, role?: number, password?: string, exercises_id?: number | number[] }): Promise<boolean> {
-    const connection = await db.getConnection();
-    try {
-      await connection.beginTransaction();
-
+    return this.transaction(async (connection) => {
       const updateFields: string[] = [];
       const updateValues: (string | number | boolean | null)[] = [];
 
@@ -227,24 +215,15 @@ export class ManageUsersModel {
         }
       }
 
-      await connection.commit();
       return true;
-    } catch (error) {
-      await connection.rollback();
-      throw error;
-    } finally {
-      connection.release();
-    }
+    });
   }
 
   /**
    * Soft delete user
    */
   static async deleteUser(userId: number): Promise<boolean> {
-    const connection = await db.getConnection();
-    try {
-      await connection.beginTransaction();
-
+    return this.transaction(async (connection) => {
       await connection.execute(
         'UPDATE users_data SET remove = 1 WHERE user_id = ?',
         [userId]
@@ -256,24 +235,15 @@ export class ManageUsersModel {
         [userId]
       );
 
-      await connection.commit();
       return true;
-    } catch (error) {
-      await connection.rollback();
-      throw error;
-    } finally {
-      connection.release();
-    }
+    });
   }
 
   /**
    * Restore user
    */
   static async restoreUser(userId: number): Promise<boolean> {
-    const connection = await db.getConnection();
-    try {
-      await connection.beginTransaction();
-
+    return this.transaction(async (connection) => {
       await connection.execute(
         'UPDATE users_data SET remove = 0 WHERE user_id = ?',
         [userId]
@@ -285,14 +255,8 @@ export class ManageUsersModel {
         [userId]
       );
 
-      await connection.commit();
       return true;
-    } catch (error) {
-      await connection.rollback();
-      throw error;
-    } finally {
-      connection.release();
-    }
+    });
   }
 
 }

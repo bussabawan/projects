@@ -12,8 +12,8 @@ export const useClickSound = () => {
   const playClick = useCallback(() => {
     try {
       if (audioRef.current) {
-        audioRef.current.currentTime = 0;
-        audioRef.current.play().catch(() => {
+        const clone = audioRef.current.cloneNode(true) as HTMLAudioElement;
+        clone.play().catch(() => {
           // Ignore if audio play fails (e.g., due to autoplay policies before user interaction)
         });
       }

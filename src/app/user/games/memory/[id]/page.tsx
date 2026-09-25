@@ -7,6 +7,7 @@ import { getExerciseImageCount, getGameData } from '@/app/actions/matchingAction
 import { getExerciseMaxAudioTime } from '@/app/actions/memoryActions';
 import { useClickSound } from '@/app/hooks/useClickSound';
 import Image from 'next/image';
+import SettingControl from '@/app/components/SettingControl/SettingControl';
 
 interface GameTarget {
   id: number;
@@ -71,6 +72,57 @@ const VolumeIcon = ({ isMuted }: { isMuted: boolean }) => (
   </svg>
 );
 
+const useHoldToIncrement = (playClick: () => void) => {
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const stopHold = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    if (intervalRef.current) clearInterval(intervalRef.current);
+  };
+
+  const startHold = (setter: React.Dispatch<React.SetStateAction<number>>, initialValue: number, delta: number, min: number, max: number) => {
+    // Prevent multiple intervals
+    stopHold();
+    
+    let currentVal = initialValue;
+
+    const doUpdate = () => {
+      const newVal = currentVal + delta;
+      if (newVal >= min && newVal <= max) {
+        currentVal = newVal;
+        playClick();
+        setter(newVal);
+        return true;
+      }
+      return false;
+    };
+
+    // First click immediately
+    if (doUpdate()) {
+      // Start holding logic
+      timeoutRef.current = setTimeout(() => {
+        intervalRef.current = setInterval(() => {
+          if (!doUpdate()) {
+            stopHold();
+          }
+        }, 70); // 70ms per tick for fast increment with rapid sound
+      }, 400); // wait 400ms before repeating
+    } else {
+      // If hitting bound on first click, maybe still play a sound or not.
+      // Usually we play click even if disabled, but disabled buttons won't trigger onMouseDown anyway.
+    }
+  };
+
+  useEffect(() => {
+    return () => stopHold();
+  }, []);
+
+  return { startHold, stopHold };
+};
+
+
+
 export default function MemorySettingsPage() {
   const router = useRouter();
   const params = useParams();
@@ -87,6 +139,7 @@ export default function MemorySettingsPage() {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playClick = useClickSound();
+  const { startHold, stopHold } = useHoldToIncrement(playClick);
 
   // For Preview Animation
   const [previewImages, setPreviewImages] = useState<GameTarget[]>([]);
@@ -224,13 +277,6 @@ export default function MemorySettingsPage() {
     router.push(`/user/games/memory`);
   };
 
-  const updateValue = (setter: React.Dispatch<React.SetStateAction<number>>, current: number, delta: number, min: number, max: number) => {
-    const newValue = current + delta;
-    if (newValue >= min && newValue <= max) {
-      playClick();
-      setter(newValue);
-    }
-  };
 
   return (
     <div className={styles.container}>
@@ -258,109 +304,42 @@ export default function MemorySettingsPage() {
         <div className={styles.settingsContainer}>
           <h2 className={styles.settingsTitle}>ตั้งค่าการฝึก</h2>
           
-          <div className={styles.settingRow}>
-            <span className={styles.settingLabel}>จำนวนคำถาม</span>
-            <div className={styles.controlGroup}>
-              <button 
-                className={styles.controlBtn} 
-                onClick={() => updateValue(setQuestions, questions, -1, 1, maxQuestions)}
-                disabled={questions <= 1}
-              >
-                -
-              </button>
-              <input 
-                type="number" 
-                className={styles.controlValue} 
-                value={questions} 
-                readOnly 
-              />
-              <button 
-                className={styles.controlBtn} 
-                onClick={() => updateValue(setQuestions, questions, 1, 1, maxQuestions)}
-                disabled={questions >= maxQuestions}
-              >
-                +
-              </button>
-            </div>
-          </div>
-
-          <div className={styles.settingRow}>
-            <span className={styles.settingLabel}>จำนวนโจทย์ที่ต้องจำ</span>
-            <div className={styles.controlGroup}>
-              <button 
-                className={styles.controlBtn} 
-                onClick={() => updateValue(setNumTargets, numTargets, -1, 1, 10)}
-                disabled={numTargets <= 1}
-              >
-                -
-              </button>
-              <input 
-                type="number" 
-                className={styles.controlValue} 
-                value={numTargets} 
-                readOnly 
-              />
-              <button 
-                className={styles.controlBtn} 
-                onClick={() => updateValue(setNumTargets, numTargets, 1, 1, 10)}
-                disabled={numTargets >= 10}
-              >
-                +
-              </button>
-            </div>
-          </div>
-
-          <div className={styles.settingRow}>
-            <span className={styles.settingLabel}>จำนวนคำตอบ</span>
-            <div className={styles.controlGroup}>
-              <button 
-                className={styles.controlBtn} 
-                onClick={() => updateValue(setAnswers, answers, -1, numTargets + 1, 15)}
-                disabled={answers <= numTargets + 1}
-              >
-                -
-              </button>
-              <input 
-                type="number" 
-                className={styles.controlValue} 
-                value={answers} 
-                readOnly 
-              />
-              <button 
-                className={styles.controlBtn} 
-                onClick={() => updateValue(setAnswers, answers, 1, numTargets + 1, 15)}
-                disabled={answers >= 15}
-              >
-                +
-              </button>
-            </div>
-          </div>
-
-          <div className={styles.settingRow}>
-            <span className={styles.settingLabel}>เวลาที่แสดงคำถาม</span>
-            <div className={styles.controlGroup}>
-              <button 
-                className={styles.controlBtn} 
-                onClick={() => updateValue(setShowTime, showTime, -1, calculatedMinTime, maxAllowedTime)}
-                disabled={showTime <= calculatedMinTime}
-              >
-                -
-              </button>
-              <input 
-                type="number" 
-                className={styles.controlValue} 
-                value={showTime} 
-                readOnly 
-              />
-              <button 
-                className={styles.controlBtn} 
-                onClick={() => updateValue(setShowTime, showTime, 1, calculatedMinTime, maxAllowedTime)}
-                disabled={showTime >= maxAllowedTime}
-              >
-                +
-              </button>
-            </div>
-          </div>
+          <SettingControl 
+            label="จำนวนคำถาม" 
+            value={questions} 
+            setter={setQuestions} 
+            min={1} 
+            max={maxQuestions} 
+            startHold={startHold}
+            stopHold={stopHold}
+          />
+          <SettingControl 
+            label="จำนวนโจทย์ที่ต้องจำ" 
+            value={numTargets} 
+            setter={setNumTargets} 
+            min={1} 
+            max={10} 
+            startHold={startHold}
+            stopHold={stopHold}
+          />
+          <SettingControl 
+            label="จำนวนคำตอบ" 
+            value={answers} 
+            setter={setAnswers} 
+            min={numTargets + 1} 
+            max={15} 
+            startHold={startHold}
+            stopHold={stopHold}
+          />
+          <SettingControl 
+            label="เวลาที่แสดงคำถาม" 
+            value={showTime} 
+            setter={setShowTime} 
+            min={calculatedMinTime} 
+            max={maxAllowedTime} 
+            startHold={startHold}
+            stopHold={stopHold}
+          />
         </div>
 
         {/* Graphics Section */}

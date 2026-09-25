@@ -163,80 +163,7 @@
   color: #111111;
 }
 
-.settingRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 450px;
-  margin-bottom: 1.5rem;
-}
 
-.settingLabel {
-  font-size: 22px;
-  color: #111111;
-  font-weight: 600;
-}
-
-.controlGroup {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: #e2e8f0;
-  border-radius: 30px;
-  padding: 0.3rem;
-  width: 180px;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-  border: 1px solid #cbd5e1;
-}
-
-.controlBtn {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background-color: #ffffff;
-  border: 1px solid #cbd5e1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 1.5rem;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-  color: #000000;
-  transition: all 0.2s ease;
-}
-
-.controlBtn:hover:not(:disabled) {
-  background-color: #f1f5f9;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-}
-
-.controlBtn:disabled {
-  background-color: #f1f5f9;
-  color: #94a3b8;
-  cursor: not-allowed;
-  box-shadow: none;
-  border-color: #e2e8f0;
-}
-
-.controlValue {
-  width: 60px;
-  text-align: center;
-  font-size: 2rem;
-  color: #e76f51;
-  background: transparent;
-  border: none;
-  font-weight: bold;
-  -moz-appearance: textfield;
-  appearance: textfield;
-}
-
-.controlValue::-webkit-outer-spin-button,
-.controlValue::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
 
 .buttonGroup {
   display: flex;
@@ -400,35 +327,7 @@
       margin-bottom: 0.8rem;
     }
   
-    .settingRow {
-      width: 100%;
-      margin-bottom: 1rem;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.5rem;
-    }
-  
-    .settingLabel {
-      font-size: 1.5rem;
-    }
-  
-    .controlGroup {
-      border-radius: 25px;
-      padding: 0.2rem;
-      background-color: #f0f0f0;
-    }
-  
-    .controlBtn {
-      width: 40px;
-      height: 40px;
-      font-size: 1.5rem;
-      background: white;
-    }
-  
-    .controlValue {
-      width: 50px;
-      font-size: 2.5rem;
-    }
+
   
     /* Graphics Row (Order 2 on mobile) */
     .graphicsContainer {
@@ -521,36 +420,7 @@
       margin-bottom: 0.5rem;
     }
   
-    .settingRow {
-      width: 380px;
-      margin-bottom: 0.9rem;
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0;
-    }
-  
-    .settingLabel {
-      font-size: 1.1rem;
-    }
-  
-    .controlGroup {
-      border-radius: 25px;
-      padding: 0.2rem;
-      background-color: #f0f0f0;
-    }
-  
-    .controlBtn {
-      width: 40px;
-      height: 40px;
-      font-size: 1.5rem;
-      background: white;
-    }
-  
-    .controlValue {
-      width: 50px;
-      font-size: 1.5rem;
-    }
+
   
     .graphicsContainer {
       margin-top: 0;

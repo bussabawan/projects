@@ -1,6 +1,6 @@
-import { db } from '@/lib/db';
-import { RowDataPacket } from 'mysql2';
+import { RowDataPacket } from 'mysql2/promise';
 import bcrypt from 'bcryptjs';
+import { BaseModel } from './BaseModel';
 
 export interface User {
   user_id: number;
@@ -11,37 +11,31 @@ export interface User {
   update_time: Date;
 }
 
-export class UserModel {
+export class UserModel extends BaseModel {
   /**
    * Find user by username
    */
   static async findByUserName(userName: string): Promise<User | null> {
-    const [rows] = await db.execute<RowDataPacket[]>(
+    const userRow = await this.findOne<User & RowDataPacket>(
       'SELECT user_id, user_name, full_name, role, remove, update_time FROM users_data WHERE user_name = ? AND remove = 0',
       [userName]
     );
     
-    if (rows.length === 0) {
-      return null;
-    }
-    
-    return rows[0] as User;
+    return userRow;
   }
 
   /**
    * Authenticate user with username and password
    */
   static async authenticate(userName: string, password: string): Promise<User | null> {
-    const [rows] = await db.execute<RowDataPacket[]>(
+    const userRow = await this.findOne<(User & { stored_password: string }) & RowDataPacket>(
       'SELECT user_id, user_name, full_name, password as stored_password, role, remove, update_time FROM users_data WHERE user_name = ? AND remove = 0',
       [userName]
     );
     
-    if (rows.length === 0) {
+    if (!userRow) {
       return null;
     }
-    
-    const userRow = rows[0];
 
     // For Google API logins, passwords aren't verified this way.
     // If somehow a google user tries to login with a normal form, they shouldn't be able to unless they have a real password.
@@ -67,7 +61,7 @@ export class UserModel {
    */
   static async logLogin(userId: number): Promise<void> {
     try {
-      await db.execute(
+      await this.execute(
         'INSERT INTO login_logs (user_id, login_time) VALUES (?, NOW())',
         [userId]
       );
@@ -80,7 +74,7 @@ export class UserModel {
    * Get exercises assigned to a user
    */
   static async getAssignedExercises(userId: string): Promise<{ exercises_id: number, exercises_name: string, thumbnail_id?: number }[]> {
-    const [rows] = await db.query<RowDataPacket[]>(`
+    const rows = await this.query<{ exercises_id: number, exercises_name: string, thumbnail_id?: number } & RowDataPacket>(`
       SELECT 
         ex.exercises_id, 
         ex.exercises_name,
@@ -102,6 +96,6 @@ export class UserModel {
       GROUP BY ex.exercises_id, ex.exercises_name
       ORDER BY ex.exercises_id ASC
     `, [userId]);
-    return rows as { exercises_id: number, exercises_name: string, thumbnail_id?: number }[];
+    return rows;
   }
 }

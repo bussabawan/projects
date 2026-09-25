@@ -1,5 +1,5 @@
-﻿import { db } from '@/lib/db';
-import { RowDataPacket, ResultSetHeader } from 'mysql2';
+import { RowDataPacket } from 'mysql2/promise';
+import { BaseModel } from './BaseModel';
 
 export interface ImageInfo {
   id: number;
@@ -10,7 +10,7 @@ export interface ImageInfo {
   audioGen?: number;
 }
 
-export class ManageImagesModel {
+export class ManageImagesModel extends BaseModel {
   /**
    * Get all active images
    */
@@ -32,7 +32,7 @@ export class ManageImagesModel {
     }
 
     // Get total count
-    const [countRows] = await db.query<RowDataPacket[]>(
+    const countRows = await this.query<RowDataPacket>(
       `SELECT COUNT(*) as total FROM photo_data ${whereClause}`,
       countParams
     );
@@ -55,7 +55,7 @@ export class ManageImagesModel {
     finalParams.push(limit, offset);
 
     // Get paginated data
-    const [rows] = await db.query<RowDataPacket[]>(
+    const rows = await this.query<RowDataPacket>(
       `SELECT photo_id as id, photo_title as title, photo_name as imageUrl, audio_name as audioUrl, audio_title as audioTitle, audio_gen as audioGen
        FROM photo_data 
        ${whereClause} 
@@ -82,7 +82,7 @@ export class ManageImagesModel {
    */
   static async createImage(data: { title: string, imageUrl: string, audioUrl?: string, audioTitle?: string, audioGen?: number }): Promise<number | { isDuplicateDeleted: boolean, duplicateId: number }> {
     // Check if the title already exists (including deleted ones)
-    const [existingRows] = await db.query<RowDataPacket[]>(
+    const existingRows = await this.query<RowDataPacket>(
       `SELECT photo_id as id, remove FROM photo_data WHERE photo_title COLLATE utf8mb4_bin = ?`,
       [data.title]
     );
@@ -98,7 +98,7 @@ export class ManageImagesModel {
     }
 
     // Insert into database
-    const [result] = await db.query<ResultSetHeader>(
+    const result = await this.execute(
       `INSERT INTO photo_data (photo_name, photo_title, audio_name, audio_title, audio_gen, remove) 
        VALUES (?, ?, ?, ?, ?, 0)`,
       [
@@ -119,7 +119,7 @@ export class ManageImagesModel {
    */
   static async updateImage(id: number, data: { title: string, imageUrl: string, audioUrl?: string, audioTitle?: string, audioGen?: number }): Promise<void | { isDuplicateDeleted: boolean, duplicateId: number }> {
     // Check if title is duplicated by another image
-    const [existingRows] = await db.query<RowDataPacket[]>(
+    const existingRows = await this.query<RowDataPacket>(
       `SELECT photo_id as id, remove FROM photo_data WHERE photo_title COLLATE utf8mb4_bin = ? AND photo_id != ?`,
       [data.title, id]
     );
@@ -133,7 +133,7 @@ export class ManageImagesModel {
       }
     }
 
-    await db.execute(
+    await this.execute(
       `UPDATE photo_data 
        SET 
          photo_name = IF(? LIKE '/api/files/%', photo_name, ?), 
@@ -158,7 +158,7 @@ export class ManageImagesModel {
    * Soft delete an image
    */
   static async deleteImage(id: number): Promise<void> {
-    await db.execute(
+    await this.execute(
       `UPDATE photo_data SET remove = 1 WHERE photo_id = ?`,
       [id]
     );
@@ -168,7 +168,7 @@ export class ManageImagesModel {
    * Get file data (image/audio) by id for API file serving
    */
   static async getFileDataById(id: number): Promise<{ photo_name: string, audio_name: string } | null> {
-    const [rows] = await db.query<RowDataPacket[]>(
+    const rows = await this.query<RowDataPacket>(
       `SELECT photo_name, audio_name FROM photo_data WHERE photo_id = ? AND remove = 0`,
       [id]
     );

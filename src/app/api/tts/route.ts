@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { transcodeAudioBuffer } from "@/lib/ffmpeg";
+import { AudioProcessor } from "@/services/media/AudioProcessor";
 import crypto from "crypto";
 import { promises as fs } from "fs";
 import path from "path";
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
   try {
     // 1. Try to serve from disk cache
     const cachedBuffer = await fs.readFile(cachedFilePath);
-    return new NextResponse(cachedBuffer, {
+    return new NextResponse(cachedBuffer as unknown as BodyInit, {
       headers: {
         "Content-Type": "audio/mpeg",
         "Cache-Control": "public, max-age=31536000, immutable",
@@ -50,7 +50,8 @@ export async function GET(req: NextRequest) {
 
     if (validBitrate) {
       try {
-        buffer = await transcodeAudioBuffer(buffer, validBitrate);
+        const audioProcessor = new AudioProcessor();
+        buffer = await audioProcessor.processAudio(buffer, validBitrate);
       } catch (err) {
         console.error("Transcoding failed:", err);
         // Fallback to original buffer if transcoding fails
@@ -62,7 +63,7 @@ export async function GET(req: NextRequest) {
       .then(() => fs.writeFile(cachedFilePath, buffer))
       .catch((err) => console.error("Failed to write TTS cache:", err));
 
-    return new NextResponse(buffer, {
+    return new NextResponse(buffer as unknown as BodyInit, {
       headers: {
         "Content-Type": "audio/mpeg",
         "Cache-Control": "public, max-age=31536000, immutable",
