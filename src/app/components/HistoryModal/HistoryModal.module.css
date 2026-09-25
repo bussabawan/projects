@@ -81,25 +81,33 @@
 
 .filters {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
-  padding: 15px 20px 5px;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.filters::-webkit-scrollbar {
-  display: none;
+  padding: 10px 20px;
 }
 
 .filterPill {
   background: white;
   border: 1px solid #ddd;
-  padding: 6px 16px;
-  border-radius: 20px;
-  font-size: 0.85rem;
+  padding: 0 15px;
+  height: 64px;
+  min-width: 80px;
+  flex-shrink: 0;
+  border-radius: 24px;
+  font-size: 0.95rem;
   cursor: pointer;
   color: #777;
   white-space: nowrap;
   transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  line-height: 1;
+}
+.filterIcon {
+  font-size: 1.25rem;
 }
 
 .filterPill.active {
@@ -109,7 +117,7 @@
 }
 
 .body {
-  padding: 15px 20px;
+  padding: 10px 20px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;

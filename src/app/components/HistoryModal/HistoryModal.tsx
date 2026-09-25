@@ -89,7 +89,21 @@ export default function HistoryModal({ isOpen, onClose, data }: HistoryModalProp
                 className={`${styles.filterPill} ${activeFilter === filter ? styles.active : ''}`}
                 onClick={() => setActiveFilter(filter)}
               >
-                {filter === 'ทั้งหมด' ? 'ทั้งหมด' : (filter === 'ความจำ' ? '🧠 ความจำ' : (filter === 'จับคู่' ? '🧩 จับคู่' : filter))}
+                {filter === 'ทั้งหมด' ? (
+                  <span>ทั้งหมด</span>
+                ) : filter === 'ความจำ' ? (
+                  <>
+                    <span className={styles.filterIcon}>🧠</span>
+                    <span>ความจำ</span>
+                  </>
+                ) : filter === 'จับคู่' ? (
+                  <>
+                    <span className={styles.filterIcon}>🧩</span>
+                    <span>จับคู่</span>
+                  </>
+                ) : (
+                  <span>{filter}</span>
+                )}
               </div>
             ))}
           </div>

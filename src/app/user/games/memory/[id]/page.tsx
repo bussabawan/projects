@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import styles from './memorySettings.module.css';
 import { getExerciseImageCount, getGameData } from '@/app/actions/matchingActions';
+import { getExerciseMaxAudioTime } from '@/app/actions/memoryActions';
 import { useClickSound } from '@/app/hooks/useClickSound';
 import Image from 'next/image';
 
@@ -81,6 +82,7 @@ export default function MemorySettingsPage() {
   const [numTargets, setNumTargets] = useState(1);
   const [answers, setAnswers] = useState(2);
   const [showTime, setShowTime] = useState(5);
+  const [maxAudioTime, setMaxAudioTime] = useState(2.5);
   
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -98,6 +100,9 @@ export default function MemorySettingsPage() {
       getExerciseImageCount(Number(params.id)).then(count => {
         setMaxQuestions(count);
         setQuestions(prev => Math.min(prev, count));
+      });
+      getExerciseMaxAudioTime(Number(params.id)).then(max => {
+        setMaxAudioTime(max);
       });
       // Fetch some images for preview
       getGameData(Number(params.id), 5, 2).then(res => {
@@ -118,16 +123,25 @@ export default function MemorySettingsPage() {
     return () => clearTimeout(timer);
   }, [numTargets, answers]);
 
-  // Ensure showTime is sufficient to play audio for all targets (approx 2.5s per audio + delay)
+  const calculatedMinTime = Math.max(1, Math.ceil(numTargets * maxAudioTime));
+  const maxAllowedTime = calculatedMinTime <= 30 ? 30 : calculatedMinTime + 60;
+
+  // Ensure showTime is sufficient and within bounds
   useEffect(() => {
     const timer = setTimeout(() => {
-      const minTime = Math.ceil(numTargets * 2.5);
-      if (showTime < minTime) {
-        setShowTime(minTime);
+      let newTime = showTime;
+      if (newTime < calculatedMinTime) {
+        newTime = calculatedMinTime;
+      }
+      if (newTime > maxAllowedTime) {
+        newTime = maxAllowedTime;
+      }
+      if (newTime !== showTime) {
+        setShowTime(newTime);
       }
     }, 0);
     return () => clearTimeout(timer);
-  }, [numTargets, showTime]);
+  }, [numTargets, showTime, calculatedMinTime, maxAllowedTime]);
 
   useEffect(() => {
     if (previewImages.length === 0) return;
@@ -327,8 +341,8 @@ export default function MemorySettingsPage() {
             <div className={styles.controlGroup}>
               <button 
                 className={styles.controlBtn} 
-                onClick={() => updateValue(setShowTime, showTime, -1, Math.max(1, Math.ceil(numTargets * 2.5)), 30)}
-                disabled={showTime <= Math.max(1, Math.ceil(numTargets * 2.5))}
+                onClick={() => updateValue(setShowTime, showTime, -1, calculatedMinTime, maxAllowedTime)}
+                disabled={showTime <= calculatedMinTime}
               >
                 -
               </button>
@@ -340,8 +354,8 @@ export default function MemorySettingsPage() {
               />
               <button 
                 className={styles.controlBtn} 
-                onClick={() => updateValue(setShowTime, showTime, 1, 1, 30)}
-                disabled={showTime >= 30}
+                onClick={() => updateValue(setShowTime, showTime, 1, calculatedMinTime, maxAllowedTime)}
+                disabled={showTime >= maxAllowedTime}
               >
                 +
               </button>

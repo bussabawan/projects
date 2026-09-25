@@ -3,6 +3,25 @@
 import { auth } from "@/auth";
 import { GameMemoryModel } from '@/lib/models/gameMemory';
 
+import { db } from '@/lib/db';
+import { RowDataPacket } from 'mysql2';
+
+export async function getExerciseMaxAudioTime(exerciseId: number): Promise<number> {
+  try {
+    const [rows] = await db.query<RowDataPacket[]>(
+      `SELECT MAX(pd.audio_time) as maxTime 
+       FROM photo_in_exercises pie
+       JOIN photo_data pd ON pie.photo_id = pd.photo_id
+       WHERE pie.exercises_id = ? AND pie.remove = 0 AND pd.remove = 0`,
+      [exerciseId]
+    );
+    return rows[0]?.maxTime || 2.5;
+  } catch (error) {
+    console.error("Failed to fetch max audio time:", error);
+    return 2.5; // fallback
+  }
+}
+
 export async function getMemoryGameData(exerciseId: number, numQuestions: number, numAnswers: number, numTargets: number = 1) {
   try {
     // 1. Get all target images for the exercise
@@ -21,14 +40,30 @@ export async function getMemoryGameData(exerciseId: number, numQuestions: number
       return `/api/uploads/${filename}`;
     };
 
+    // Helper: Fisher-Yates Shuffle
+    const shuffleArray = <T>(array: T[]): T[] => {
+      const newArray = [...array];
+      for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+      }
+      return newArray;
+    };
+
     const questions = [];
+    
+    // สร้างถุงสุ่ม (Draw Pile)
+    let drawPile = shuffleArray(allTargetImages);
 
     // Loop for numQuestions
     for (let i = 0; i < numQuestions; i++) {
-      // Shuffle to pick random targets for this question
-      const shuffledTargetsForQ = allTargetImages.sort(() => 0.5 - Math.random());
-      const selectedTargets = shuffledTargetsForQ.slice(0, numTargets);
+      // ถ้ารูปในถุงเหลือน้อยกว่าจำนวนโจทย์ที่ต้องจำ ให้เอาภาพทั้งหมดมาสับใหม่
+      if (drawPile.length < numTargets) {
+        drawPile = shuffleArray(allTargetImages);
+      }
       
+      // ดึงภาพออกจากถุงตามจำนวน numTargets
+      const selectedTargets = drawPile.splice(0, numTargets);
       const targetIds = selectedTargets.map(t => t.id);
 
       // Get distractors (excluding all targets)
@@ -39,11 +74,11 @@ export async function getMemoryGameData(exerciseId: number, numQuestions: number
       const rawChoices = [...selectedTargets, ...distractors];
       
       // Format choices and shuffle them
-      const choices = rawChoices.map(c => ({
+      const choices = shuffleArray(rawChoices.map(c => ({
         ...c,
         imageUrl: formatMediaUrl(c.imageUrl) || '/placeholder-image.png',
         audioUrl: formatMediaUrl(c.audioUrl)
-      })).sort(() => 0.5 - Math.random());
+      })));
 
       // Format targets
       const formattedTargets = selectedTargets.map(t => ({
