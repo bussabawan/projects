@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
-
 import Loader from "@/app/components/Loader/Loader";
 import styles from "./images.module.css";
 import ImageFormModal from "./components/ImageFormModal";
@@ -54,14 +53,13 @@ export default function ManageImagesPage() {
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const itemsPerPage = 12;
+  const itemsPerPage = 15;
   const isLoadMoreRef = useRef(false);
   const audioCache = useRef<Record<string, HTMLAudioElement>>({});
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const fetchImages = useCallback(async () => {
-    await Promise.resolve(); // Make asynchronous to satisfy set-state-in-effect
     const isLoadMore = isLoadMoreRef.current;
     if (isLoadMore) {
       setLoadingMore(true);
@@ -142,19 +140,18 @@ export default function ManageImagesPage() {
           setIsLoading(false);
         }
       }
+      isLoadMoreRef.current = false;
     }
   }, [currentPage, itemsPerPage, debouncedSearchQuery]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchImages();
-      isLoadMoreRef.current = false;
     }, 0);
     return () => clearTimeout(timer);
   }, [fetchImages]);
 
   // Debounce search query handled by hook
-
   // Reset to page 1 when the debounced search term changes
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -162,8 +159,6 @@ export default function ManageImagesPage() {
     }, 0);
     return () => clearTimeout(timer);
   }, [debouncedSearchQuery]);
-
-
 
   // Infinite Scroll Observer
   const observer = useRef<IntersectionObserver | null>(null);

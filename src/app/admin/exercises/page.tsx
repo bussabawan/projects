@@ -70,7 +70,6 @@ export default function ManageExercisesPage() {
   const latestSelectedIdsRef = useRef<number[]>([]);
 
   const fetchExercises = useCallback(async () => {
-    await Promise.resolve(); // Make asynchronous to satisfy set-state-in-effect
     const isLoadMore = isLoadMoreRef.current;
     if (isLoadMore) {
       setLoadingMore(true);
@@ -101,6 +100,7 @@ export default function ManageExercisesPage() {
       } else {
         setIsLoading(false);
       }
+      isLoadMoreRef.current = false;
     }
   }, [currentPage, itemsPerPage, debouncedSearchQuery]);
 
@@ -295,7 +295,6 @@ export default function ManageExercisesPage() {
   };
 
   const fetchFilteredImages = useCallback(async () => {
-    await Promise.resolve(); // Make asynchronous to satisfy set-state-in-effect
     const isLoadMore = isImageLoadMoreRef.current;
     if (isLoadMore) {
       setIsLoadingMoreImages(true);
@@ -348,7 +347,6 @@ export default function ManageExercisesPage() {
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchExercises();
-      isLoadMoreRef.current = false;
     }, 0);
     return () => clearTimeout(timer);
   }, [fetchExercises]);

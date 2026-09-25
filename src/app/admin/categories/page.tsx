@@ -66,7 +66,6 @@ export default function ManageCategoriesPage() {
   const latestSelectedIdsRef = useRef<number[]>([]);
 
   const fetchCategories = useCallback(async () => {
-    await Promise.resolve(); // Make asynchronous to satisfy set-state-in-effect
     const isLoadMore = isLoadMoreRef.current;
     if (isLoadMore) {
       setLoadingMore(true);
@@ -97,6 +96,7 @@ export default function ManageCategoriesPage() {
       } else {
         setIsLoading(false);
       }
+      isLoadMoreRef.current = false;
     }
   }, [currentPage, itemsPerPage, debouncedSearchQuery]);
 
@@ -272,7 +272,6 @@ export default function ManageCategoriesPage() {
   };
 
   const fetchFilteredImages = useCallback(async () => {
-    await Promise.resolve(); // Make asynchronous to satisfy set-state-in-effect
     const isLoadMore = isImageLoadMoreRef.current;
     if (isLoadMore) {
       setIsLoadingMoreImages(true);
@@ -325,7 +324,6 @@ export default function ManageCategoriesPage() {
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchCategories();
-      isLoadMoreRef.current = false;
     }, 0);
     return () => clearTimeout(timer);
   }, [fetchCategories]);

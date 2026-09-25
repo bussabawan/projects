@@ -42,7 +42,6 @@ export default function ManageUsersPage() {
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   const fetchUsers = useCallback(async () => {
-    await Promise.resolve(); // Make asynchronous to satisfy set-state-in-effect
     const isLoadMore = isLoadMoreRef.current;
     if (isLoadMore) {
       setLoadingMore(true);
@@ -71,6 +70,7 @@ export default function ManageUsersPage() {
       } else {
         setLoading(false);
       }
+      isLoadMoreRef.current = false;
     }
   }, [activeTab, currentPage, itemsPerPage, debouncedSearchQuery]);
 
