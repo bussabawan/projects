@@ -21,8 +21,10 @@ export default function AdminLayout({
   const pathname = usePathname();
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsPageLoading(false);
+    const timer = setTimeout(() => {
+      setIsPageLoading(false);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [pathname]);
 
   const handleLinkClick = (href: string) => {

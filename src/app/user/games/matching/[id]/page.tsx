@@ -85,8 +85,9 @@ export default function MatchingSettingsPage() {
   useEffect(() => {
     if (previewData.length === 0) return;
     
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setFade(true); // Ensure it's visible initially
+    const initialTimer = setTimeout(() => {
+      setFade(true); // Ensure it's visible initially
+    }, 0);
     
     const interval = setInterval(() => {
       setFade(false); // start fade out
@@ -97,7 +98,10 @@ export default function MatchingSettingsPage() {
       }, 300); // 300ms transition time
     }, 8000); // Change every 8 seconds
     
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(initialTimer);
+      clearInterval(interval);
+    };
   }, [previewData.length]);
 
   useEffect(() => {

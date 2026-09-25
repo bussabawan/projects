@@ -94,7 +94,7 @@ export default function PatientStatsPage() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch(`/api/patient-stats?t=${Date.now()}`);
+        const response = await fetch(`/api/patient-stats`, { cache: 'no-store' });
         if (!response.ok) {
           throw new Error('Failed to fetch patient statistics');
         }
@@ -113,9 +113,13 @@ export default function PatientStatsPage() {
 
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
-  useEffect(() => {
+  const [prevQuery, setPrevQuery] = useState(debouncedSearchQuery);
+  const [prevPatients, setPrevPatients] = useState(patients);
+  if (debouncedSearchQuery !== prevQuery || patients !== prevPatients) {
+    setPrevQuery(debouncedSearchQuery);
+    setPrevPatients(patients);
+    
     let result = patients;
-
     if (debouncedSearchQuery.trim() !== '') {
       const lowerQuery = debouncedSearchQuery.toLowerCase();
       result = result.filter(patient => 
@@ -124,11 +128,10 @@ export default function PatientStatsPage() {
       );
     }
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setFilteredPatients(result);
     setCurrentPage(1);
     setMobileVisibleCount(10);
-  }, [debouncedSearchQuery, patients]);
+  }
 
   const totalPages = Math.ceil(filteredPatients.length / itemsPerPage);
   const currentPatients = filteredPatients.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);

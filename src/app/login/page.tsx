@@ -21,11 +21,13 @@ function LoginContent() {
   const router = useRouter();
 
   useEffect(() => {
-    const errParam = searchParams.get('error');
-    if (errParam === 'AccessDenied') {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setError('คุณไม่มีสิทธิ์เข้าใช้งาน หรือบัญชีนี้ไม่ใช่สำหรับเจ้าหน้าที่');
-    }
+    const timer = setTimeout(() => {
+      const errParam = searchParams.get('error');
+      if (errParam === 'AccessDenied') {
+        setError('คุณไม่มีสิทธิ์เข้าใช้งาน หรือบัญชีนี้ไม่ใช่สำหรับเจ้าหน้าที่');
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [searchParams]);
 
   const handleLogin = async (e: React.FormEvent) => {

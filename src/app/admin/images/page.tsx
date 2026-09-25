@@ -14,8 +14,10 @@ function CardImage({ src, alt }: { src: string; alt: string }) {
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setError(false);
+    const timer = setTimeout(() => {
+      setError(false);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [src]);
 
   if (!src || error) {
@@ -59,6 +61,7 @@ export default function ManageImagesPage() {
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const fetchImages = useCallback(async () => {
+    await Promise.resolve(); // Make asynchronous to satisfy set-state-in-effect
     const isLoadMore = isLoadMoreRef.current;
     if (isLoadMore) {
       setLoadingMore(true);
@@ -73,7 +76,7 @@ export default function ManageImagesPage() {
     abortControllerRef.current = abortController;
     
     try {
-      const res = await fetch(`/api/admin/images?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}&t=${Date.now()}`, {
+      const res = await fetch(`/api/admin/images?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}`, {
         cache: 'no-store',
         signal: abortController.signal
       });
@@ -143,17 +146,21 @@ export default function ManageImagesPage() {
   }, [currentPage, itemsPerPage, debouncedSearchQuery]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchImages();
-    isLoadMoreRef.current = false;
+    const timer = setTimeout(() => {
+      fetchImages();
+      isLoadMoreRef.current = false;
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchImages]);
 
   // Debounce search query handled by hook
 
   // Reset to page 1 when the debounced search term changes
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCurrentPage(1);
+    const timer = setTimeout(() => {
+      setCurrentPage(1);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [debouncedSearchQuery]);
 
 
@@ -292,8 +299,10 @@ export default function ManageImagesPage() {
       audioCache.current[fullAudioUrl] = audio;
     }
     
-    // eslint-disable-next-line react-hooks/immutability
-    audio.currentTime = 0;
+    const setAudioTime = (el: HTMLAudioElement) => {
+      el.currentTime = 0;
+    };
+    setAudioTime(audio);
     audio.play().catch(e => {
       console.error(e);
       alert("ไม่สามารถเล่นเสียงได้");

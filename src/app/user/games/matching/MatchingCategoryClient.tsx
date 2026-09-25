@@ -15,11 +15,13 @@ export default function MatchingCategoryClient() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedMode = sessionStorage.getItem('matchingActiveTab');
-    if (savedMode === 'word') {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setActiveTab('word');
-    }
+    const timer = setTimeout(() => {
+      const savedMode = sessionStorage.getItem('matchingActiveTab');
+      if (savedMode === 'word') {
+        setActiveTab('word');
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleTabChange = (mode: 'image' | 'word') => {

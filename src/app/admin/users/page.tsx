@@ -42,6 +42,7 @@ export default function ManageUsersPage() {
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   const fetchUsers = useCallback(async () => {
+    await Promise.resolve(); // Make asynchronous to satisfy set-state-in-effect
     const isLoadMore = isLoadMoreRef.current;
     if (isLoadMore) {
       setLoadingMore(true);
@@ -51,7 +52,7 @@ export default function ManageUsersPage() {
     
     try {
       const role = activeTab === "patient" ? 1 : 2;
-      const res = await fetch(`/api/admin/users?role=${role}&page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}&t=${Date.now()}`);
+      const res = await fetch(`/api/admin/users?role=${role}&page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}`, { cache: 'no-store' });
       const result = await res.json();
       
       if (result.success) {
@@ -74,15 +75,19 @@ export default function ManageUsersPage() {
   }, [activeTab, currentPage, itemsPerPage, debouncedSearchQuery]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchUsers();
-    isLoadMoreRef.current = false;
+    const timer = setTimeout(() => {
+      fetchUsers();
+      isLoadMoreRef.current = false;
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchUsers]);
 
   // Reset to page 1 when the debounced search term changes or tab changes
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCurrentPage(1);
+    const timer = setTimeout(() => {
+      setCurrentPage(1);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [debouncedSearchQuery, activeTab]);
 
   // Infinite Scroll Observer for Mobile

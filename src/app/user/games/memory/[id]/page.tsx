@@ -110,19 +110,23 @@ export default function MemorySettingsPage() {
 
   // Ensure answers is always strictly greater than numTargets
   useEffect(() => {
-    if (answers <= numTargets) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setAnswers(numTargets + 1);
-    }
+    const timer = setTimeout(() => {
+      if (answers <= numTargets) {
+        setAnswers(numTargets + 1);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [numTargets, answers]);
 
   // Ensure showTime is sufficient to play audio for all targets (approx 2.5s per audio + delay)
   useEffect(() => {
-    const minTime = Math.ceil(numTargets * 2.5);
-    if (showTime < minTime) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setShowTime(minTime);
-    }
+    const timer = setTimeout(() => {
+      const minTime = Math.ceil(numTargets * 2.5);
+      if (showTime < minTime) {
+        setShowTime(minTime);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [numTargets, showTime]);
 
   useEffect(() => {

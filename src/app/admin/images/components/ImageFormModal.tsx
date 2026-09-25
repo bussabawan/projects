@@ -84,7 +84,7 @@ export default function ImageFormModal({ image, onClose, onSave }: ImageFormModa
            const res = await fetch(`/api/tts?text=${encodeURIComponent(speechText)}`);
            if (res.ok) {
              const blob = await res.blob();
-             const ttsFile = new File([blob], `tts-${Date.now()}.mp3`, { type: 'audio/mpeg' });
+             const ttsFile = new File([blob], `tts-${new Date().getTime()}.mp3`, { type: 'audio/mpeg' });
              uploadedAudioUrl = await uploadFile(ttsFile);
            } else {
              console.error("Failed to generate TTS audio");

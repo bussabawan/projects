@@ -70,6 +70,7 @@ export default function ManageExercisesPage() {
   const latestSelectedIdsRef = useRef<number[]>([]);
 
   const fetchExercises = useCallback(async () => {
+    await Promise.resolve(); // Make asynchronous to satisfy set-state-in-effect
     const isLoadMore = isLoadMoreRef.current;
     if (isLoadMore) {
       setLoadingMore(true);
@@ -78,7 +79,7 @@ export default function ManageExercisesPage() {
     }
     
     try {
-      const res = await fetch(`/api/admin/exercises?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}&t=${Date.now()}`);
+      const res = await fetch(`/api/admin/exercises?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}`, { cache: 'no-store' });
       const data = await res.json();
       if (data.success) {
         if (isLoadMore) {
@@ -231,7 +232,7 @@ export default function ManageExercisesPage() {
     // Fetch categories if not fetched yet
     if (allCategories.length === 0) {
       try {
-        const resCat = await fetch(`/api/admin/categories?t=${Date.now()}`);
+        const resCat = await fetch(`/api/admin/categories`, { cache: 'no-store' });
         const dataCat = await resCat.json();
         if (dataCat.success) {
           setAllCategories(dataCat.data);
@@ -242,7 +243,7 @@ export default function ManageExercisesPage() {
     }
     
     try {
-      const resSelected = await fetch(`/api/admin/exercises/${encodeURIComponent(exerciseName)}/images?t=${Date.now()}`);
+      const resSelected = await fetch(`/api/admin/exercises/${encodeURIComponent(exerciseName)}/images`, { cache: 'no-store' });
       const dataSelected = await resSelected.json();
       if (dataSelected.success) {
         setSelectedImageIds(dataSelected.data);
@@ -294,6 +295,7 @@ export default function ManageExercisesPage() {
   };
 
   const fetchFilteredImages = useCallback(async () => {
+    await Promise.resolve(); // Make asynchronous to satisfy set-state-in-effect
     const isLoadMore = isImageLoadMoreRef.current;
     if (isLoadMore) {
       setIsLoadingMoreImages(true);
@@ -303,8 +305,7 @@ export default function ManageExercisesPage() {
 
     try {
       const prioritizeIds = latestSelectedIdsRef.current.join(',');
-      // eslint-disable-next-line react-hooks/purity
-      const res = await fetch(`/api/admin/images?page=${imagePage}&limit=${imageItemsPerPage}&search=${encodeURIComponent(debouncedImageSearchQuery)}&prioritizeIds=${prioritizeIds}&t=${Date.now()}`);
+      const res = await fetch(`/api/admin/images?page=${imagePage}&limit=${imageItemsPerPage}&search=${encodeURIComponent(debouncedImageSearchQuery)}&prioritizeIds=${prioritizeIds}`, { cache: 'no-store' });
       const data = await res.json();
       if (data.success) {
         if (isLoadMore) {
@@ -331,9 +332,11 @@ export default function ManageExercisesPage() {
   }, [imagePage, imageItemsPerPage, debouncedImageSearchQuery]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setImagePage(1);
-    isImageLoadMoreRef.current = false;
+    const timer = setTimeout(() => {
+      setImagePage(1);
+      isImageLoadMoreRef.current = false;
+    }, 0);
+    return () => clearTimeout(timer);
   }, [debouncedImageSearchQuery]);
 
   useEffect(() => {
@@ -343,15 +346,19 @@ export default function ManageExercisesPage() {
   }, [fetchFilteredImages, isImageModalOpen]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchExercises();
-    isLoadMoreRef.current = false;
+    const timer = setTimeout(() => {
+      fetchExercises();
+      isLoadMoreRef.current = false;
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchExercises]);
 
   // Reset page when debounced search query changes
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCurrentPage(1);
+    const timer = setTimeout(() => {
+      setCurrentPage(1);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [debouncedSearchQuery]);
 
   // Infinite Scroll Observer

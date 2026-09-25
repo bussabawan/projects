@@ -16,8 +16,7 @@ export function transcodeAudioBuffer(inputBuffer: Buffer, bitrate: number): Prom
       chunks.push(Buffer.from(chunk));
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    ffmpeg.stderr.on('data', (_) => {
+    ffmpeg.stderr.on('data', () => {
       // You can uncomment for debugging ffmpeg issues
       // console.error(`ffmpeg stderr: ${data}`);
     });

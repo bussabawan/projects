@@ -1,5 +1,5 @@
 "use client";
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 
 import { useState, useEffect } from "react";
 
@@ -27,9 +27,9 @@ export default function DashboardCharts({
   imageCategoryStats, 
   exerciseCategoryStats 
 }: { 
-  usageStats: any[], 
-  imageCategoryStats: any[], 
-  exerciseCategoryStats: any[] 
+  usageStats: Record<string, unknown>[], 
+  imageCategoryStats: Record<string, unknown>[], 
+  exerciseCategoryStats: Record<string, unknown>[] 
 }) {
   const [isMobile, setIsMobile] = useState(false);
 
@@ -40,8 +40,8 @@ export default function DashboardCharts({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const renderCustomLabel = (props: any) => {
-    const { x, y, name, percent, textAnchor, fill } = props;
+  const renderCustomLabel = (props: Record<string, unknown>) => {
+    const { x, y, name, percent, textAnchor, fill } = props as { x: number, y: number, name: string, percent: number, textAnchor: string, fill: string };
     const isLong = name.length > 12;
     
     let line1 = name;
@@ -125,7 +125,7 @@ export default function DashboardCharts({
                 </Pie>
                 <Tooltip 
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                  formatter={(value: any, name: any) => [`${value} รูป`, name]}
+                  formatter={(value: number, name: string) => [`${value} รูป`, name]}
                 />
                 {isMobile && (
                   <Legend 

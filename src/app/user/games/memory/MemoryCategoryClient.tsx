@@ -20,11 +20,13 @@ export default function MemoryCategoryClient() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const savedTab = sessionStorage.getItem('memoryActiveTab');
-    if (savedTab === 'picture' || savedTab === 'word') {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setActiveTab(savedTab as 'picture' | 'word');
-    }
+    const timer = setTimeout(() => {
+      const savedTab = sessionStorage.getItem('memoryActiveTab');
+      if (savedTab === 'picture' || savedTab === 'word') {
+        setActiveTab(savedTab as 'picture' | 'word');
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleTabChange = (tab: 'picture' | 'word') => {

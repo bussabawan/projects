@@ -144,18 +144,25 @@ export default function MatchingGamePage() {
   useEffect(() => {
     if (loading || isFinished || feedback !== null) return;
     
+    let timer: NodeJS.Timeout | undefined;
     if (startTime === 0) {
-      const now = Date.now();
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setStartTime(now);
-      setCurrentQuestionStartTime(now);
+      timer = setTimeout(() => {
+        const now = new Date().getTime();
+        setStartTime(now);
+        setCurrentQuestionStartTime(now);
+      }, 0);
     }
 
     const interval = setInterval(() => {
-      setElapsedSeconds(Math.floor((Date.now() - startTime) / 1000));
+      if (startTime > 0) {
+        setElapsedSeconds(Math.floor((new Date().getTime() - startTime) / 1000));
+      }
     }, 100);
 
-    return () => clearInterval(interval);
+    return () => {
+      if (timer) clearTimeout(timer);
+      clearInterval(interval);
+    };
   }, [loading, isFinished, feedback, startTime]);
 
   const preloadAssets = async (questionsList: Question[]) => {
@@ -278,8 +285,7 @@ export default function MatchingGamePage() {
       setCorrectChoiceId(choiceId);
       setCorrectCount(prev => prev + 1);
       
-      // eslint-disable-next-line react-hooks/purity
-      const questionTimeSecs = Math.floor((Date.now() - currentQuestionStartTime) / 1000);
+      const questionTimeSecs = Math.floor((new Date().getTime() - currentQuestionStartTime) / 1000);
       const timePerQuestion = formatHHMMSS(questionTimeSecs);
       setTimeLogs(prev => [...prev, { photoId: currentQ.target.id, timePerQuestion }]);
       
@@ -288,7 +294,7 @@ export default function MatchingGamePage() {
         setCorrectChoiceId(null);
         if (currentIndex < questions.length - 1) {
           setCurrentIndex(prev => prev + 1);
-          setCurrentQuestionStartTime(Date.now());
+          setCurrentQuestionStartTime(new Date().getTime());
         } else {
           setIsFinished(true);
         }

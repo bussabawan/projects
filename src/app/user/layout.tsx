@@ -27,16 +27,18 @@ export default function UserLayout({
   const [activeTab, setActiveTab] = useState<string>('');
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsPageLoading(false);
-    
-    if (pathname.startsWith("/user/history")) {
-      setActiveTab('history');
-    } else if (pathname.startsWith("/user/games") && !pathname.startsWith("/user/games/summary")) {
-      setActiveTab('games');
-    } else {
-      setActiveTab('');
-    }
+    const timer = setTimeout(() => {
+      setIsPageLoading(false);
+      
+      if (pathname.startsWith("/user/history")) {
+        setActiveTab('history');
+      } else if (pathname.startsWith("/user/games") && !pathname.startsWith("/user/games/summary")) {
+        setActiveTab('games');
+      } else {
+        setActiveTab('');
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [pathname]);
 
   const handleLinkClick = (href: string) => {
@@ -65,22 +67,23 @@ export default function UserLayout({
     fetchUser();
   }, []);
 
-  const handleLogout = async () => {
+  const handleLogout = React.useCallback(async () => {
     await signOut({ redirect: false });
     router.push("/login");
-  };
+  }, [router]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLastActivity(Date.now());
+    const initialTimer = setTimeout(() => {
+      setLastActivity(new Date().getTime());
+    }, 0);
 
     let throttleTimer: NodeJS.Timeout | null = null;
     const handleActivity = () => {
       if (!throttleTimer) {
         throttleTimer = setTimeout(() => {
-          setLastActivity(Date.now());
+          setLastActivity(new Date().getTime());
           throttleTimer = null;
         }, 1000);
       }
@@ -99,6 +102,7 @@ export default function UserLayout({
       window.removeEventListener('click', handleActivity);
       window.removeEventListener('scroll', handleActivity);
       if (throttleTimer) clearTimeout(throttleTimer);
+      clearTimeout(initialTimer);
     };
   }, []);
 
@@ -117,8 +121,7 @@ export default function UserLayout({
     }, 60000); // Check every minute
 
     return () => clearInterval(interval);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastActivity]);
+  }, [lastActivity, handleLogout]);
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);

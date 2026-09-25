@@ -65,6 +65,7 @@ export default function MemoryGamePlayPage() {
   const [countdown, setCountdown] = useState(showTimeSetting);
   const [stopwatch, setStopwatch] = useState(0);
   const [totalElapsedSeconds, setTotalElapsedSeconds] = useState(0);
+  const totalElapsedBaseRef = useRef(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const stopwatchRef = useRef<NodeJS.Timeout | null>(null);
   
@@ -146,6 +147,7 @@ export default function MemoryGamePlayPage() {
 
   // Handle Question Phase Timer
   useEffect(() => {
+    let setCountdownTimer: NodeJS.Timeout | undefined;
     if (gameState === 'question') {
       const q = questions[currentQuestionIndex];
       let totalAudioDuration = 0;
@@ -169,8 +171,9 @@ export default function MemoryGamePlayPage() {
       // The countdown is whichever is longer: the setting or the calculated audio duration
       const initialTime = Math.max(showTimeSetting, Math.ceil(totalAudioDuration));
       
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setCountdown(initialTime);
+      setCountdownTimer = setTimeout(() => {
+        setCountdown(initialTime);
+      }, 0);
       
       timerRef.current = setInterval(() => {
         setCountdown((prev) => {
@@ -185,29 +188,35 @@ export default function MemoryGamePlayPage() {
     }
     
     return () => {
+      if (setCountdownTimer) clearTimeout(setCountdownTimer);
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [gameState, currentQuestionIndex, showTimeSetting, questions]);
 
   // Handle Options Phase Stopwatch and Total Timer
   useEffect(() => {
+    let setStopwatchTimer: NodeJS.Timeout | undefined;
     if (gameState === 'options') {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setStopwatch(0);
-      const startTime = Date.now();
-      const lastTotal = totalElapsedSeconds;
+      setStopwatchTimer = setTimeout(() => {
+        setStopwatch(0);
+      }, 0);
+      const startTime = new Date().getTime();
+      const baseTotal = totalElapsedBaseRef.current;
 
       stopwatchRef.current = setInterval(() => {
-        const elapsedMs = Date.now() - startTime;
+        const elapsedMs = new Date().getTime() - startTime;
         setStopwatch(elapsedMs / 1000);
-        setTotalElapsedSeconds(lastTotal + Math.floor(elapsedMs / 1000));
+        
+        const newTotal = baseTotal + Math.floor(elapsedMs / 1000);
+        setTotalElapsedSeconds(newTotal);
+        totalElapsedBaseRef.current = newTotal;
       }, 100);
     }
     
     return () => {
+      if (setStopwatchTimer) clearTimeout(setStopwatchTimer);
       if (stopwatchRef.current) clearInterval(stopwatchRef.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState, currentQuestionIndex]);
 
   const playAudio = useCallback((url?: string): Promise<void> => {

@@ -70,9 +70,11 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
     : baseExerciseSets;
 
   useEffect(() => {
+    let timer: NodeJS.Timeout;
     if (isOpen && patientId) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLoading(true);
+      timer = setTimeout(() => {
+        setLoading(true);
+      }, 0);
       let url = `/api/patient-stats/${patientId}?category=${encodeURIComponent(categoryFilter)}&period=${periodFilter}&exerciseSet=${encodeURIComponent(exerciseSetFilter)}`;
       if (periodFilter === 'custom') {
         url += `&startDate=${startDate}&endDate=${endDate}`;
@@ -88,6 +90,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
           setLoading(false);
         });
     }
+    return () => clearTimeout(timer);
   }, [isOpen, patientId, categoryFilter, periodFilter, exerciseSetFilter, startDate, endDate]);
 
   if (!isOpen) return null;
