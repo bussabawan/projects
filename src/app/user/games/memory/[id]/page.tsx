@@ -133,7 +133,7 @@ export default function MemorySettingsPage() {
   const [maxQuestions, setMaxQuestions] = useState(30);
   const [numTargets, setNumTargets] = useState(1);
   const [answers, setAnswers] = useState(2);
-  const [showTime, setShowTime] = useState(5);
+  const [showTime, setShowTime] = useState(3);
   const [maxAudioTime, setMaxAudioTime] = useState(2.5);
   
   const [isPlaying, setIsPlaying] = useState(false);
@@ -145,7 +145,7 @@ export default function MemorySettingsPage() {
   const [previewImages, setPreviewImages] = useState<GameTarget[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [fade, setFade] = useState(true);
-  const [timeLeft, setTimeLeft] = useState(5);
+  const [timeLeft, setTimeLeft] = useState(3);
   const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
