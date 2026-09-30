@@ -31,7 +31,7 @@ interface HistoryModalProps {
 export default function HistoryModal({ isOpen, onClose, data }: HistoryModalProps) {
   const [activeFilter, setActiveFilter] = useState<string>('ทั้งหมด');
 
-  if (!isOpen || !data) return null;
+  if (!data) return null;
 
   const filters = ['ทั้งหมด', ...Array.from(new Set(data.details.map(d => d.game)))];
 

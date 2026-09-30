@@ -13,7 +13,7 @@ interface AboutModalProps {
 }
 
 export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
-  useScrollLock(isOpen);
+
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -34,7 +34,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
     };
   }, [isOpen]);
 
-  if (!isOpen || !mounted) return null;
+  if (!mounted) return null;
 
   const title = (
     <>

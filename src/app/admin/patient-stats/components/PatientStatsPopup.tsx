@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Loader from "@/app/components/Loader/Loader";
 import DatePicker from "@/app/components/DatePicker/DatePicker";
 import styles from './PatientStatsPopup.module.css';
+import { useScrollLock } from '@/app/hooks/useScrollLock';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -55,7 +56,13 @@ interface PatientStatsData {
 
 
 
+function ScrollLockEffect() {
+  useScrollLock(true);
+  return null;
+}
+
 const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, patientId, exerciseSets = [] }) => {
+  // Scroll lock moved to ScrollLockEffect inside AnimatePresence
   const [data, setData] = useState<PatientStatsData | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -144,6 +151,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
         >
+          <ScrollLockEffect />
         <motion.div 
           className={styles.popup} 
           onClick={(e) => e.stopPropagation()}

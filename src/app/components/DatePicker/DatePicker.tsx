@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import styles from './DatePicker.module.css';
+import { useScrollLock } from '@/app/hooks/useScrollLock';
 
 interface DatePickerProps {
   isOpen: boolean;
@@ -22,6 +23,8 @@ const DAYS_OF_WEEK = ['จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส', 'อา'];
 export default function DatePicker({ isOpen, onClose, onSelect, initialDate, title }: DatePickerProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDateStr, setSelectedDateStr] = useState('');
+  
+  useScrollLock(isOpen);
 
   useEffect(() => {
     if (isOpen) {

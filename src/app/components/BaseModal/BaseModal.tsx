@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useScrollLock } from '@/app/hooks/useScrollLock';
 import styles from './BaseModal.module.css';
 
 interface BaseModalProps {
@@ -13,6 +15,11 @@ interface BaseModalProps {
   headerRight?: React.ReactNode;
 }
 
+function ScrollLockEffect() {
+  useScrollLock(true);
+  return null;
+}
+
 export default function BaseModal({ 
   isOpen, 
   onClose, 
@@ -23,6 +30,8 @@ export default function BaseModal({
   headerRight 
 }: BaseModalProps) {
   
+  // Removed direct useScrollLock here, moved to ScrollLockEffect inside AnimatePresence
+
   // Close on Escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -34,16 +43,28 @@ export default function BaseModal({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
-
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div 
-        className={styles.modal} 
-        style={{ maxWidth }} 
-        onClick={(e) => e.stopPropagation()} // Prevent clicks inside modal from closing it
-      >
-        <div className={styles.header}>
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div 
+          className={styles.overlay} 
+          onClick={onClose}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <ScrollLockEffect />
+          <motion.div 
+            className={styles.modal} 
+            style={{ maxWidth }} 
+            onClick={(e) => e.stopPropagation()} // Prevent clicks inside modal from closing it
+            initial={{ scale: 0.95, opacity: 0, y: 10 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.95, opacity: 0, y: 10 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          >
+            <div className={styles.header}>
           <div className={styles.titleContainer}>
             <h2 className={styles.title}>{title}</h2>
             {subtitle && <div className={styles.subtitle}>{subtitle}</div>}
@@ -60,7 +81,9 @@ export default function BaseModal({
         <div className={styles.content}>
           {children}
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import styles from "./AlertModal.module.css";
+import { useScrollLock } from "@/app/hooks/useScrollLock";
 
 interface AlertModalProps {
   onConfirm: () => void;
@@ -11,6 +12,7 @@ export default function AlertModal({
   onConfirm, 
   title 
 }: AlertModalProps) {
+  useScrollLock(true);
   return (
     <div className={styles.overlay} onClick={onConfirm}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>

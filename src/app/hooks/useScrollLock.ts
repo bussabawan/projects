@@ -9,6 +9,9 @@ export function useScrollLock(isLocked: boolean = true) {
       scrollLockCount++;
       if (scrollLockCount === 1) {
         document.body.style.overflow = 'hidden';
+        document.documentElement.style.overflow = 'hidden';
+        document.body.style.overscrollBehavior = 'none';
+        document.documentElement.style.overscrollBehavior = 'none';
       }
     }
 
@@ -17,6 +20,9 @@ export function useScrollLock(isLocked: boolean = true) {
         scrollLockCount--;
         if (scrollLockCount === 0) {
           document.body.style.overflow = '';
+          document.documentElement.style.overflow = '';
+          document.body.style.overscrollBehavior = '';
+          document.documentElement.style.overscrollBehavior = '';
         }
       }
     };
