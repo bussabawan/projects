@@ -285,7 +285,7 @@ export default function MemoryGamePlayPage() {
         resolve();
       });
     });
-  }, [isMuted]);
+  }, []);
 
   // Play audio when entering question state
   useEffect(() => {

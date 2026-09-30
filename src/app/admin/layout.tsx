@@ -23,8 +23,8 @@ export default function AdminLayout({
   const [activePath, setActivePath] = useState(pathname);
 
   useEffect(() => {
-    setActivePath(pathname);
     const timer = setTimeout(() => {
+      setActivePath(pathname);
       setIsPageLoading(false);
     }, 0);
     return () => clearTimeout(timer);

@@ -30,7 +30,7 @@ function CardImage({ src, alt, cacheBuster }: { src: string; alt: string; cacheB
   }
 
   const baseUrl = src.startsWith('/') || src.startsWith('blob:') ? src : `/api/uploads/${src}`;
-  const finalSrc = cacheBuster && !src.startsWith('blob:') ? `${baseUrl}?t=${cacheBuster}` : baseUrl;
+  const finalSrc = cacheBuster && !src.startsWith('blob:') ? `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}t=${cacheBuster}` : baseUrl;
 
   return <Image src={finalSrc} alt={alt} width={400} height={400} style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={() => setError(true)} unoptimized />;
 }
@@ -49,7 +49,7 @@ export default function ManageImagesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [cacheBuster, setCacheBuster] = useState(Date.now());
+  const [cacheBuster, setCacheBuster] = useState(() => Date.now());
 
   const [images, setImages] = useState<ImageData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -157,7 +157,7 @@ export default function ManageImagesPage() {
       }
       isLoadMoreRef.current = false;
     }
-  }, [currentPage, itemsPerPage, debouncedSearchQuery]);
+  }, [currentPage, itemsPerPage, debouncedSearchQuery, cacheBuster]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -193,7 +193,7 @@ export default function ManageImagesPage() {
 
   const [editingImage, setEditingImage] = useState<ImageData | null>(null);
   const [deletingImageId, setDeletingImageId] = useState<number | null>(null);
-  const [duplicateToRestore, setDuplicateToRestore] = useState<{ id: number; data: Record<string, unknown> } | null>(null);
+  const [duplicateToRestore, setDuplicateToRestore] = useState<{ id: number; data: Record<string, unknown>; originalEditId?: number } | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleAdd = () => {
@@ -350,7 +350,7 @@ export default function ManageImagesPage() {
       return;
     }
     const baseAudioUrl = audioUrl.startsWith('/') || audioUrl.startsWith('blob:') ? audioUrl : `/api/uploads/${audioUrl}`;
-    const fullAudioUrl = !audioUrl.startsWith('blob:') ? `${baseAudioUrl}?t=${cacheBuster}` : baseAudioUrl;
+    const fullAudioUrl = !audioUrl.startsWith('blob:') ? `${baseAudioUrl}${baseAudioUrl.includes('?') ? '&' : '?'}t=${cacheBuster}` : baseAudioUrl;
     
     let audio = audioCache.current[fullAudioUrl];
     if (!audio) {

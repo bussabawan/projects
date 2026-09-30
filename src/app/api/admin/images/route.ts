@@ -1,4 +1,4 @@
-export const dynamic = 'force-dynamic';
+Ôªøexport const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from "next/server";
 import { revalidateTag } from 'next/cache';
 import { ManageImagesModel } from "@/lib/models/manageImages";
@@ -41,14 +41,14 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      revalidateTag('images');
+      revalidateTag('images', 'max');
       return NextResponse.json({ success: true, id: result });
     } catch (modelError: unknown) {
       const mErr = modelError as Error;
-      if (mErr.message === "¡’™◊ËÕ√Ÿª¿“æπ’ÈÕ¬ŸË„π√–∫∫·≈È«") {
+      if (mErr.message && mErr.message.includes("Image title already exists")) {
         return NextResponse.json({ 
           success: false, 
-          error: mErr.message 
+          error: "‡∏°‡∏µ‡∏ä‡∏∑‡πà‡∏≠‡∏£‡∏π‡∏õ‡∏†‡∏≤‡∏û‡∏ô‡∏µ‡πâ‡∏≠‡∏¢‡∏π‡πà‡πÉ‡∏ô‡∏£‡∏∞‡∏ö‡∏ö‡πÅ‡∏•‡πâ‡∏ß (Image title already exists)"
         }, { status: 400 });
       }
       throw mErr;
@@ -59,5 +59,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }
-
-

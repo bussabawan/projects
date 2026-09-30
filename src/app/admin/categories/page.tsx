@@ -166,7 +166,7 @@ export default function ManageCategoriesPage() {
       const data = await res.json();
       if (data.success) {
         setIsEditModalOpen(false);
-        setCategories(prev => prev.map(cat => cat.name === editCategoryOldName ? { ...cat, name: editCategoryNewName.trim() } : cat));
+        setCategories(prev => prev.map(cat => cat.category_name === editCategoryOldName ? { ...cat, category_name: editCategoryNewName.trim() } : cat));
       } else if (data.isDuplicateDeleted) {
         setIsEditModalOpen(false);
         setCategoryToRestore(data.name);
@@ -231,7 +231,7 @@ export default function ManageCategoriesPage() {
         setIsRestoreModalOpen(false);
         setCategories(prev => {
           if (editCategoryOldName) {
-            return prev.map(cat => cat.name === editCategoryOldName ? { ...cat, name: categoryToRestore } : cat);
+            return prev.map(cat => cat.category_name === editCategoryOldName ? { ...cat, category_name: categoryToRestore } : cat);
           }
           // If it was a create, we might need to fetch page 1 or just add it
           fetchCategories(true);
@@ -313,8 +313,7 @@ export default function ManageCategoriesPage() {
 
     try {
       const prioritizeIds = latestSelectedIdsRef.current.join(',');
-      const timestamp = Date.now();
-      const res = await fetch(`/api/admin/images?page=${imagePage}&limit=${imageItemsPerPage}&search=${encodeURIComponent(debouncedImageSearchQuery)}&prioritizeIds=${prioritizeIds}&t=${timestamp}`, { cache: 'no-store' });
+      const res = await fetch(`/api/admin/images?page=${imagePage}&limit=${imageItemsPerPage}&search=${encodeURIComponent(debouncedImageSearchQuery)}&prioritizeIds=${prioritizeIds}`, { cache: 'no-store' });
       const data = await res.json();
       if (data.success) {
         if (isLoadMore) {
@@ -695,7 +694,7 @@ export default function ManageCategoriesPage() {
                           <div className={styles.imageIconPlaceholder}>
                             {img.imageUrl ? (
                               <Image 
-                                src={`${img.imageUrl.startsWith('/') ? img.imageUrl : `/api/uploads/${img.imageUrl}`}?v=${Date.now()}`} 
+                                src={`${img.imageUrl.startsWith('/') ? img.imageUrl : `/api/uploads/${img.imageUrl}`}`} 
                                 alt={img.title}
                                 width={40}
                                 height={40}

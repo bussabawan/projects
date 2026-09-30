@@ -159,7 +159,7 @@ export default function ManageUsersPage() {
     }
   };
 
-  const handleModalSave = (savedUser?: User, originalUserId?: number) => {
+  const handleModalSave = () => {
     setIsModalOpen(false);
     fetchUsers(true);
   };

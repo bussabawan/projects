@@ -33,8 +33,8 @@ export async function PUT(
 
     await ManageUsersModel.updateUser(userId, body);
 
-    revalidateTag('users');
-    revalidateTag('patient-stats');
+    revalidateTag('users', 'max');
+    revalidateTag('patient-stats', 'max');
 
     return NextResponse.json({
       success: true,
@@ -74,8 +74,8 @@ export async function DELETE(
 
     await ManageUsersModel.deleteUser(userId);
 
-    revalidateTag('users');
-    revalidateTag('patient-stats');
+    revalidateTag('users', 'max');
+    revalidateTag('patient-stats', 'max');
 
     return NextResponse.json({
       success: true,
@@ -106,8 +106,8 @@ export async function PATCH(
     if (body.action === 'restore') {
       await ManageUsersModel.restoreUser(userId);
       
-      revalidateTag('users');
-      revalidateTag('patient-stats');
+      revalidateTag('users', 'max');
+      revalidateTag('patient-stats', 'max');
       
       return NextResponse.json({
         success: true,

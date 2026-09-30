@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     const { name } = await request.json();
     
     if (!name || name.trim() === '') {
-      return NextResponse.json({ success: false, error: '��سҡ�͡���ͪشẺ�֡�Ѵ' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'กรุณากรอกชื่อแบบฝึกหัด (Exercise name is required)' }, { status: 400 });
     }
 
     const result = await ManageExercisesModel.addExercise(name.trim());
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
       });
     }
 
-    revalidateTag('exercises');
+    revalidateTag('exercises', 'max');
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
     const err = error as Error;
@@ -65,4 +65,3 @@ export async function POST(request: Request) {
     );
   }
 }
-

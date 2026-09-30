@@ -70,8 +70,8 @@ export async function POST(request: Request) {
       exercises_id: parsedExercisesId
     });
 
-    revalidateTag('users');
-    revalidateTag('patient-stats');
+    revalidateTag('users', 'max');
+    revalidateTag('patient-stats', 'max');
     
     return NextResponse.json({
       success: true,

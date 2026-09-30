@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import Link from 'next/link';
+
 import BaseModal from '../BaseModal/BaseModal';
 import styles from './HistoryModal.module.css';
 

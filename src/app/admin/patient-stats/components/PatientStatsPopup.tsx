@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Loader from "@/app/components/Loader/Loader";
 import DatePicker from "@/app/components/DatePicker/DatePicker";
 import styles from './PatientStatsPopup.module.css';
-import { useScrollLock } from "@/app/hooks/useScrollLock";
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer,

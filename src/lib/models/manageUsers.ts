@@ -166,7 +166,7 @@ export class ManageUsersModel extends BaseModel {
       }
 
       // Check for soft-deleted duplicates
-      const checkParams: any[] = [];
+      const checkParams: (string | number)[] = [];
       const checkConditions: string[] = [];
       if (userData.user_name) {
         checkConditions.push('user_name = ?');
