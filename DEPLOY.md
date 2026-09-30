@@ -131,6 +131,9 @@ docker compose -f compose.prod.yaml logs -f nginx
 
 # ดูเฉพาะ MySQL
 docker compose -f compose.prod.yaml logs -f mysql
+
+# ดู Deployment log
+tail -f deploy.log
 ```
 
 ### หยุดและเริ่มระบบใหม่

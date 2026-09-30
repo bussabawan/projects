@@ -3,16 +3,21 @@
 # ==============================================================================
 # Deployment Script for OT Project 2026 (Ubuntu Server)
 # ==============================================================================
-# สคริปต์นี้ใช้สำหรับ Deploy และ Update ระบบ Next.js + MySQL + Nginx บน Ubuntu Server
-# วิธีการใช้งาน:
+# This script deploys and updates Next.js + MySQL + Nginx on an Ubuntu Server.
+# Usage:
 #   chmod +x deploy.sh
-#   ./deploy.sh          (ดึงโค้ดจาก branch ปัจจุบัน หรือ main)
-#   ./deploy.sh [branch] (ระบุ branch ที่ต้องการ เช่น ./deploy.sh main)
+#   ./deploy.sh          (Deploy using current branch or default: main)
+#   ./deploy.sh [branch] (Specify target branch, e.g., ./deploy.sh main)
 # ==============================================================================
 
 set -eo pipefail
 
-# สีสำหรับแสดงผลใน Terminal
+LOG_FILE="deploy.log"
+
+# Redirect stdout and stderr to both the console and deploy.log
+exec > >(tee -a "$LOG_FILE") 2>&1
+
+# Terminal Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -20,7 +25,7 @@ BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-# ฟังก์ชันแสดงข้อความพร้อมเวลา
+# Logging Functions
 log_info() {
     echo -e "${BLUE}[INFO]${NC} $(date '+%Y-%m-%d %H:%M:%S') - $1"
 }
@@ -37,52 +42,81 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $(date '+%Y-%m-%d %H:%M:%S') - $1"
 }
 
+echo -e "\n${CYAN}====================================================================${NC}"
+echo -e "${CYAN}       🚀 STARTING DEPLOYMENT PROCESS: OT PROJECT 2026              ${NC}"
 echo -e "${CYAN}====================================================================${NC}"
-echo -e "${CYAN}       🚀 เริ่มต้นกระบวนการ Deploy: OT Project 2026                 ${NC}"
-echo -e "${CYAN}====================================================================${NC}"
+log_info "Deployment log will be recorded to: ${LOG_FILE}"
 
 # ------------------------------------------------------------------------------
-# 1. ตรวจสอบ Prerequisite Tools
+# 1. Check Prerequisites
 # ------------------------------------------------------------------------------
-log_info "ขั้นตอนที่ 1/7: ตรวจสอบเครื่องมือที่จำเป็น (Prerequisites)..."
+log_info "Step 1/7: Checking required prerequisites..."
 
 if ! command -v git &> /dev/null; then
-    log_error "ไม่พบ Git ในระบบ กรุณาติดตั้งด้วย: sudo apt update && sudo apt install -y git"
+    log_error "Git is not installed. Install it with: sudo apt update && sudo apt install -y git"
     exit 1
 fi
 
 if ! command -v docker &> /dev/null; then
-    log_error "ไม่พบ Docker ในระบบ กรุณาติดตั้ง Docker Engine ก่อนดำเนินการต่อ"
+    log_error "Docker is not installed. Please install Docker Engine before proceeding."
     exit 1
 fi
 
 if ! docker compose version &> /dev/null; then
-    log_error "ไม่พบ Docker Compose (V2) ในระบบ กรุณาติดตั้ง docker-compose-plugin"
+    log_error "Docker Compose (V2) is not installed. Please install docker-compose-plugin."
     exit 1
 fi
 
-log_success "เครื่องมือ Git, Docker และ Docker Compose พร้อมใช้งาน"
+log_success "Prerequisites verified: Git, Docker, and Docker Compose are available."
 
 # ------------------------------------------------------------------------------
-# 2. จัดการดึงโค้ดล่าสุดจาก GitHub (Git Pull)
+# 2. Fix Host Permissions Before Git Operations
+# ------------------------------------------------------------------------------
+# Ensure the current host user has ownership and write access to all files
+# in the repository (especially uploads/) to prevent "Permission denied" during git pull/stash.
+log_info "Preparing repository permissions for Git operations..."
+CURRENT_UID=$(id -u)
+CURRENT_GID=$(id -g)
+
+if [ -d "uploads" ]; then
+    if [ "$EUID" -eq 0 ]; then
+        chown -R "$CURRENT_UID:$CURRENT_GID" uploads
+        chmod -R 777 uploads
+    elif command -v sudo &> /dev/null; then
+        sudo chown -R "$CURRENT_UID:$CURRENT_GID" uploads 2>/dev/null || true
+        sudo chmod -R 777 uploads 2>/dev/null || true
+    else
+        chmod -R 777 uploads 2>/dev/null || true
+    fi
+fi
+
+# ------------------------------------------------------------------------------
+# 3. Pull Latest Code from GitHub
 # ------------------------------------------------------------------------------
 TARGET_BRANCH="${1:-}"
 
 if [ -d .git ]; then
-    log_info "ขั้นตอนที่ 2/7: กำลังดึงโค้ดล่าสุดจาก GitHub..."
-    
-    # หากไม่ได้ระบุ branch ใน argument ให้ใช้ branch ปัจจุบัน หรือค่าเริ่มต้น main
+    log_info "Step 2/7: Synchronizing latest code from GitHub..."
+
+    # Ignore index changes on gitkeep files inside uploads if they exist
+    for keepfile in uploads/.gitkeep uploads/audio/.gitkeep uploads/images/.gitkeep; do
+        if [ -f "$keepfile" ]; then
+            git update-index --assume-unchanged "$keepfile" 2>/dev/null || true
+        fi
+    done
+
+    # If branch argument not provided, resolve current branch or fallback to 'main'
     if [ -z "$TARGET_BRANCH" ]; then
         CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "main")
         TARGET_BRANCH="$CURRENT_BRANCH"
     fi
 
-    log_info "กำลังทำงานบน Branch: ${TARGET_BRANCH}"
+    log_info "Working on Git branch: ${TARGET_BRANCH}"
 
-    # ตรวจสอบการเปลี่ยนแปลงที่ยังไม่ได้ commit
+    # Handle local uncommitted changes
     if ! git diff-index --quiet HEAD -- 2>/dev/null; then
-        log_warn "พบการแก้ไขไฟล์ใน Local Server ที่ยังไม่ได้ commit กำลังทำการ stash เก็บไว้ชั่วคราว..."
-        git stash
+        log_warn "Uncommitted changes detected in local repository. Stashing them..."
+        git stash --include-untracked 2>/dev/null || git stash 2>/dev/null || true
     fi
 
     git fetch origin "$TARGET_BRANCH"
@@ -90,124 +124,121 @@ if [ -d .git ]; then
     git pull origin "$TARGET_BRANCH"
 
     LATEST_COMMIT=$(git log -1 --pretty=format:"%h - %s (%cr)")
-    log_success "อัปเดตโค้ดสำเร็จ! Commit ล่าสุด: $LATEST_COMMIT"
+    log_success "Code updated successfully! Latest commit: $LATEST_COMMIT"
 else
-    log_warn "โฟลเดอร์นี้ไม่ได้เป็น Git Repository (ข้ามขั้นตอน Git Pull)"
+    log_warn "Current directory is not a Git repository. Skipping git pull step."
 fi
 
 # ------------------------------------------------------------------------------
-# 3. ตรวจสอบไฟล์ Environment (.env)
+# 4. Verify Environment Configuration (.env)
 # ------------------------------------------------------------------------------
-log_info "ขั้นตอนที่ 3/7: ตรวจสอบความถูกต้องของไฟล์ Environment (.env)..."
+log_info "Step 3/7: Verifying environment configuration (.env)..."
 
 if [ ! -f .env ]; then
-    log_warn "ไม่พบไฟล์ .env ในระบบ!"
+    log_warn "File .env not found in project root!"
     if [ -f .env.example ]; then
         cp .env.example .env
-        log_warn "ระบบได้ทำการคัดลอกไฟล์ต้นแบบจาก .env.example เป็น .env ให้แล้ว"
+        log_warn "Created .env from .env.example template."
         echo -e "${YELLOW}--------------------------------------------------------------------${NC}"
-        echo -e "${YELLOW}กรุณาเปิดไฟล์ .env เพื่อแก้ไขค่า Configuration สำคัญก่อนเริ่มรัน:${NC}"
-        echo -e "  - รหัสผ่าน MySQL (MYSQL_ROOT_PASSWORD, MYSQL_PASSWORD)"
-        echo -e "  - ค่า AUTH_SECRET สำหรับระบบ Auth.js"
-        echo -e "  - GOOGLE_CLIENT_ID และ GOOGLE_CLIENT_SECRET"
-        echo -e "  - AUTH_URL สำหรับโดเมนจริงของเว็บไซต์"
-        echo -e "${YELLOW}คำสั่งแก้ไข: nano .env${NC}"
-        echo -e "${YELLOW}เมื่อแก้ไขเสร็จแล้ว ให้รัน ./deploy.sh ใหม่อีกครั้ง${NC}"
+        echo -e "${YELLOW}IMPORTANT: Please update critical secrets in .env before deploying:${NC}"
+        echo -e "  - MySQL passwords (MYSQL_ROOT_PASSWORD, MYSQL_PASSWORD)"
+        echo -e "  - AUTH_SECRET (e.g. run 'openssl rand -base64 32')"
+        echo -e "  - GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET"
+        echo -e "  - AUTH_URL (e.g., http://your-server-ip or domain)"
+        echo -e "${YELLOW}Edit file using: nano .env${NC}"
+        echo -e "${YELLOW}After editing, run ./deploy.sh again.${NC}"
         echo -e "${YELLOW}--------------------------------------------------------------------${NC}"
         exit 1
     else
-        log_error "ไม่พบทั้ง .env และ .env.example กรุณาสร้างไฟล์ .env ก่อนรันสคริปต์"
+        log_error "Neither .env nor .env.example found. Please create .env first."
         exit 1
     fi
 else
-    log_success "พบไฟล์ .env เรียบร้อยแล้ว"
+    log_success "Environment file .env found."
 fi
 
 # ------------------------------------------------------------------------------
-# 4. จัดการโฟลเดอร์ Uploads และกำหนดสิทธิ์ (Permissions)
+# 5. Manage Uploads Directory and Permissions
 # ------------------------------------------------------------------------------
-log_info "ขั้นตอนที่ 4/7: จัดการไดเรกทอรีและสิทธิ์ไฟล์อัปโหลด (Uploads Directory)..."
+log_info "Step 4/7: Managing uploads directory structure and permissions..."
 
-# โครงสร้างโฟลเดอร์ uploads ที่ระบบต้องใช้งาน
 mkdir -p uploads/audio
 mkdir -p uploads/images
 mkdir -p uploads/cache/tts
 
-# ใน Dockerfile ของ Next.js กำหนดรันด้วย user 'nextjs' (UID: 1001, GID: 1001)
-# จำเป็นต้องปรับเจ้าของไฟล์บน Host ให้ container เขียนไฟล์ได้
-log_info "กำลังตั้งค่า Permission ของโฟลเดอร์ uploads ให้ UID 1001 (nextjs container user)..."
+# In Next.js runner Dockerfile, the application runs under user 'nextjs' (UID: 1001, GID: 1001).
+# We grant UID 1001 ownership and 777 permissions so both host and container can read/write without conflict.
+log_info "Setting permissions for uploads directory (UID: 1001 / nextjs container user)..."
 if [ "$EUID" -eq 0 ]; then
     chown -R 1001:1001 uploads
-    chmod -R 775 uploads
+    chmod -R 777 uploads
+elif command -v sudo &> /dev/null; then
+    sudo chown -R 1001:1001 uploads 2>/dev/null || true
+    sudo chmod -R 777 uploads 2>/dev/null || true
 else
-    if command -v sudo &> /dev/null; then
-        sudo chown -R 1001:1001 uploads
-        sudo chmod -R 775 uploads
-    else
-        log_warn "ไม่สามารถรัน sudo ได้ กรุณาตรวจสอบให้แน่ใจว่าโฟลเดอร์ uploads มีสิทธิ์ให้ UID 1001 เขียนได้"
-        chmod -R 777 uploads 2>/dev/null || true
-    fi
+    chmod -R 777 uploads 2>/dev/null || true
 fi
 
-log_success "โฟลเดอร์ uploads และสิทธิ์ไฟล์พร้อมใช้งานเรียบร้อย"
+log_success "Uploads directory structure and permissions configured."
 
 # ------------------------------------------------------------------------------
-# 5. สั่งรัน Docker Compose (Build & Up)
+# 6. Execute Docker Compose (Build & Up)
 # ------------------------------------------------------------------------------
-log_info "ขั้นตอนที่ 5/7: สั่ง Build และ Start Docker Containers (compose.prod.yaml)..."
+log_info "Step 5/7: Building and starting Docker containers (compose.prod.yaml)..."
 
 COMPOSE_FILE="compose.prod.yaml"
 
 if [ ! -f "$COMPOSE_FILE" ]; then
-    log_error "ไม่พบไฟล์ $COMPOSE_FILE ในโฟลเดอร์ปัจจุบัน"
+    log_error "Docker Compose file $COMPOSE_FILE not found."
     exit 1
 fi
 
 docker compose -f "$COMPOSE_FILE" up -d --build
 
-log_success "สั่งรัน Docker Compose สำเร็จ!"
+log_success "Docker Compose command executed successfully."
 
 # ------------------------------------------------------------------------------
-# 6. ตรวจสอบสถานะการทำงานของ Container (Health Check)
+# 7. Health Check and Container Validation
 # ------------------------------------------------------------------------------
-log_info "ขั้นตอนที่ 6/7: รอตรวจสอบสถานะ Container (กำลังรอ 5 วินาที)..."
+log_info "Step 6/7: Checking container status (waiting 5 seconds)..."
 sleep 5
 
 docker compose -f "$COMPOSE_FILE" ps
 
-# ตรวจสอบว่า container หลักกำลังรันอยู่หรือไม่
 if docker compose -f "$COMPOSE_FILE" ps | grep -q "ot_web_app"; then
-    log_success "คอนเทนเนอร์ ot_web_app กำลังทำงาน"
+    log_success "Container 'ot_web_app' is running."
 else
-    log_warn "คอนเทนเนอร์ ot_web_app อาจกำลังเริ่มต้น หรือพบข้อผิดพลาด โปรดตรวจสอบ log"
+    log_warn "Container 'ot_web_app' is not detected as running. Check logs for details."
 fi
 
 if docker compose -f "$COMPOSE_FILE" ps | grep -q "ot_nginx"; then
-    log_success "คอนเทนเนอร์ ot_nginx กำลังทำงาน"
+    log_success "Container 'ot_nginx' is running."
 else
-    log_warn "คอนเทนเนอร์ ot_nginx อาจกำลังเริ่มต้น หรือพบข้อผิดพลาด โปรดตรวจสอบ log"
+    log_warn "Container 'ot_nginx' is not detected as running. Check logs for details."
 fi
 
 # ------------------------------------------------------------------------------
-# 7. ล้าง Docker Images ขยะที่ไม่ใช้งาน (Prune Dangling Images)
+# 8. Clean Up Unused Docker Images (Prune)
 # ------------------------------------------------------------------------------
-log_info "ขั้นตอนที่ 7/7: ทำความสะอาด Docker Images เก่าที่ไม่ใช้งาน..."
+log_info "Step 7/7: Cleaning up dangling Docker images..."
 docker image prune -f > /dev/null 2>&1 || true
-log_success "ล้างข้อมูลขยะเสร็จสิ้น"
+log_success "Dangling images cleaned up."
 
 # ------------------------------------------------------------------------------
-# สรุปผลการ Deploy
+# Deployment Summary
 # ------------------------------------------------------------------------------
-echo -e "${GREEN}====================================================================${NC}"
+echo -e "\n${GREEN}====================================================================${NC}"
 echo -e "${GREEN}       🎉 DEPLOYMENT COMPLETED SUCCESSFULLY!                       ${NC}"
 echo -e "${GREEN}====================================================================${NC}"
-echo -e "🌐 เว็บไซต์พร้อมให้บริการที่: ${CYAN}http://localhost${NC} หรือ IP/Domain ของ Server"
-echo -e "📁 โฟลเดอร์ Uploads ถูก Mount ไว้ที่: ${CYAN}$(pwd)/uploads${NC}"
-echo -e "📜 คำสั่งสำหรับดู Logs ระบบ:"
-echo -e "   - ดูทั้งหมด: ${YELLOW}docker compose -f compose.prod.yaml logs -f${NC}"
-echo -e "   - ดู Web App: ${YELLOW}docker compose -f compose.prod.yaml logs -f server${NC}"
-echo -e "   - ดู Nginx:   ${YELLOW}docker compose -f compose.prod.yaml logs -f nginx${NC}"
-echo -e "   - ดู MySQL:   ${YELLOW}docker compose -f compose.prod.yaml logs -f mysql${NC}"
-echo -e "🛑 คำสั่งหยุดการทำงาน:"
-echo -e "   - ${YELLOW}docker compose -f compose.prod.yaml down${NC}"
-echo -e "${GREEN}====================================================================${NC}"
+echo -e "🌐 Web Application URL : ${CYAN}http://localhost${NC} or http://<server-ip>"
+echo -e "📁 Uploads Directory    : ${CYAN}$(pwd)/uploads${NC}"
+echo -e "📝 Deployment Log File  : ${CYAN}$(pwd)/${LOG_FILE}${NC}"
+echo -e ""
+echo -e "📜 Useful Maintenance Commands:"
+echo -e "   - View all logs      : ${YELLOW}docker compose -f compose.prod.yaml logs -f${NC}"
+echo -e "   - View Next.js logs  : ${YELLOW}docker compose -f compose.prod.yaml logs -f server${NC}"
+echo -e "   - View Nginx logs    : ${YELLOW}docker compose -f compose.prod.yaml logs -f nginx${NC}"
+echo -e "   - View MySQL logs    : ${YELLOW}docker compose -f compose.prod.yaml logs -f mysql${NC}"
+echo -e "   - View deploy log    : ${YELLOW}tail -f ${LOG_FILE}${NC}"
+echo -e "   - Stop all services  : ${YELLOW}docker compose -f compose.prod.yaml down${NC}"
+echo -e "${GREEN}====================================================================${NC}\n"
