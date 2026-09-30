@@ -63,16 +63,9 @@ export default function HistoryModal({ isOpen, onClose, data }: HistoryModalProp
     );
   };
 
-  const getGameLink = (gameName: string) => {
-    // Determine link based on game type
-    if (gameName === 'จับคู่') return '/user/games/matching';
-    if (gameName === 'ความจำ') return '/user/games/memory';
-    return '/user/games';
-  }
-
   const title = data.dateStr;
   const subtitle = (
-    <div style={{ display: 'flex', gap: '15px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
       <span>🎮 {data.plays}</span>
       <span>⏱️ {data.totalTime}</span>
     </div>
@@ -130,9 +123,6 @@ export default function HistoryModal({ isOpen, onClose, data }: HistoryModalProp
                 {detail.score.split(' ')[0]}
                 <span className={styles.scoreUnit}>{detail.score.split(' ')[1] || 'คะแนน'}</span>
               </div>
-              <Link href={getGameLink(detail.game)} className={styles.playAgainBtn} title="เล่นอีกครั้ง">
-                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-              </Link>
             </div>
           ))}
         </div>

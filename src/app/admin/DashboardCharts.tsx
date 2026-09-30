@@ -88,10 +88,22 @@ export default function DashboardCharts({
         <h2 className={styles.chartTitle}>สถิติการเข้าใช้งานระบบ (14 วันล่าสุด)</h2>
         <div style={{ width: '100%', height: 300 }}>
           <ResponsiveContainer>
-            <LineChart data={usageStats} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+            <LineChart data={usageStats} margin={{ top: 5, right: 20, bottom: 20, left: 20 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="name" tick={{ fill: '#6b7280' }} axisLine={false} tickLine={false} />
-              <YAxis allowDecimals={false} tick={{ fill: '#6b7280' }} axisLine={false} tickLine={false} />
+              <XAxis 
+                dataKey="name" 
+                tick={{ fill: '#6b7280' }} 
+                axisLine={false} 
+                tickLine={false} 
+                label={{ value: 'วันที่', position: 'insideBottom', offset: -15, fill: '#6b7280', fontSize: 14 }}
+              />
+              <YAxis 
+                allowDecimals={false} 
+                tick={{ fill: '#6b7280' }} 
+                axisLine={false} 
+                tickLine={false} 
+                label={{ value: 'จำนวนครั้ง', angle: -90, position: 'insideLeft', offset: 10, fill: '#6b7280', fontSize: 14 }}
+              />
               <Tooltip 
                 contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
               />
@@ -146,7 +158,7 @@ export default function DashboardCharts({
           <h2 className={styles.chartTitle}>จำนวนชุดแบบฝึกหัดในแต่ละหมวดหมู่</h2>
           <div style={{ width: '100%', height: 350 }}>
             <ResponsiveContainer>
-              <BarChart data={exerciseCategoryStats} margin={{ top: 20, right: 30, left: 20, bottom: 0 }}>
+              <BarChart data={exerciseCategoryStats} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis 
                   dataKey="name" 
@@ -157,8 +169,15 @@ export default function DashboardCharts({
                   angle={-45}
                   textAnchor="end"
                   height={100}
+                  label={{ value: 'หมวดหมู่', position: 'insideBottom', offset: -15, fill: '#6b7280', fontSize: 14 }}
                 />
-                <YAxis allowDecimals={false} tick={{ fill: '#6b7280' }} axisLine={false} tickLine={false} />
+                <YAxis 
+                  allowDecimals={false} 
+                  tick={{ fill: '#6b7280' }} 
+                  axisLine={false} 
+                  tickLine={false} 
+                  label={{ value: 'จำนวนชุด', angle: -90, position: 'insideLeft', offset: 10, fill: '#6b7280', fontSize: 14 }}
+                />
                 <Tooltip 
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                   cursor={{ fill: 'rgba(0,0,0,0.04)' }}

@@ -10,6 +10,7 @@ interface ImageData {
   imageUrl: string;
   audioUrl?: string;
   audioTitle?: string;
+  audioTime?: number;
   audioGen?: number;
 }
 
@@ -31,6 +32,19 @@ export default function ImageFormModal({ image, onClose, onSave }: ImageFormModa
   const [isPlaying, setIsPlaying] = useState(false);
   const [ttsError, setTtsError] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
+
+  const getAudioDuration = (file: File | string): Promise<number> => {
+    return new Promise((resolve) => {
+      const src = typeof file === 'string' ? file : URL.createObjectURL(file);
+      const audio = new Audio(src);
+      audio.onloadedmetadata = () => {
+        resolve(audio.duration);
+      };
+      audio.onerror = () => {
+        resolve(0);
+      };
+    });
+  };
 
   const uploadFile = async (file: File) => {
     const formData = new FormData();
@@ -54,6 +68,7 @@ export default function ImageFormModal({ image, onClose, onSave }: ImageFormModa
   const handleSave = async () => {
     let uploadedImageUrl = image?.imageUrl || null;
     let uploadedAudioUrl = image?.audioUrl || null;
+    let audioTime = image?.audioTime;
 
     if (!imageFile && !uploadedImageUrl) {
       setValidationError("กรุณาเลือกรูปภาพก่อนบันทึก");
@@ -85,6 +100,7 @@ export default function ImageFormModal({ image, onClose, onSave }: ImageFormModa
            if (res.ok) {
              const blob = await res.blob();
              const ttsFile = new File([blob], `tts-${new Date().getTime()}.mp3`, { type: 'audio/mpeg' });
+             audioTime = await getAudioDuration(ttsFile);
              uploadedAudioUrl = await uploadFile(ttsFile);
            } else {
              console.error("Failed to generate TTS audio");
@@ -92,6 +108,7 @@ export default function ImageFormModal({ image, onClose, onSave }: ImageFormModa
            }
         }
       } else if (!useAutoSpeech && audioFile) {
+        audioTime = await getAudioDuration(audioFile);
         uploadedAudioUrl = await uploadFile(audioFile);
       }
 
@@ -101,7 +118,8 @@ export default function ImageFormModal({ image, onClose, onSave }: ImageFormModa
           useAutoSpeech,
           speechText: useAutoSpeech ? speechText : "",
           imageUrl: uploadedImageUrl,
-          audioUrl: uploadedAudioUrl
+          audioUrl: uploadedAudioUrl,
+          audioTime
         });
       }
       // onClose will be handled by the parent component after successful save

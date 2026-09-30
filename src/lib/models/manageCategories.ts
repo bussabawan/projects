@@ -158,13 +158,23 @@ export class ManageCategoriesModel extends BaseModel {
   /**
    * Update category name
    */
-  static async updateCategoryName(oldName: string, newName: string): Promise<void> {
+  static async updateCategoryName(oldName: string, newName: string): Promise<void | { isDuplicateDeleted: boolean; name: string }> {
+    // Check if new name exists and is active
     const existing = await this.query<RowDataPacket>(
       'SELECT category_id FROM category_data WHERE category_name = ? AND remove = 0',
       [newName]
     );
     if (existing.length > 0 && oldName !== newName) {
       throw new Error("มีหมวดหมู่ชื่อนี้อยู่ในระบบแล้ว");
+    }
+
+    // Check if new name exists and is soft-deleted
+    const removed = await this.query<RowDataPacket>(
+      'SELECT category_name FROM category_data WHERE category_name = ? AND remove = 1 LIMIT 1',
+      [newName]
+    );
+    if (removed.length > 0 && oldName !== newName) {
+      return { isDuplicateDeleted: true, name: newName };
     }
 
     await this.execute(

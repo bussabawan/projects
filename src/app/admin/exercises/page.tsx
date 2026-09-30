@@ -69,16 +69,25 @@ export default function ManageExercisesPage() {
   const isLoadMoreRef = useRef(false);
   const latestSelectedIdsRef = useRef<number[]>([]);
 
-  const fetchExercises = useCallback(async () => {
-    const isLoadMore = isLoadMoreRef.current;
-    if (isLoadMore) {
-      setLoadingMore(true);
-    } else {
+  const fetchExercises = useCallback(async (reset = false) => {
+    const pageToFetch = reset ? 1 : currentPage;
+    const isLoadMore = reset ? false : isLoadMoreRef.current;
+    
+    if (reset) {
+      setCurrentPage(1);
+      isLoadMoreRef.current = false;
       setIsLoading(true);
+    } else {
+      if (isLoadMore) {
+        setLoadingMore(true);
+      } else {
+        setIsLoading(true);
+      }
     }
     
     try {
-      const res = await fetch(`/api/admin/exercises?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}`, { cache: 'no-store' });
+      const timestamp = Date.now();
+      const res = await fetch(`/api/admin/exercises?page=${pageToFetch}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}&t=${timestamp}`, { cache: 'no-store' });
       const data = await res.json();
       if (data.success) {
         if (isLoadMore) {
@@ -118,7 +127,7 @@ export default function ManageExercisesPage() {
       if (data.success) {
         setIsAddModalOpen(false);
         setNewExerciseName("");
-        window.location.reload();
+        fetchExercises(true);
       } else if (data.isDuplicateDeleted) {
         setIsAddModalOpen(false);
         setNewExerciseName("");
@@ -158,7 +167,11 @@ export default function ManageExercisesPage() {
       const data = await res.json();
       if (data.success) {
         setIsEditModalOpen(false);
-        window.location.reload();
+        setExercises(prev => prev.map(ex => ex.name === editExerciseOldName ? { ...ex, name: editExerciseNewName.trim() } : ex));
+      } else if (data.isDuplicateDeleted) {
+        setIsEditModalOpen(false);
+        setDuplicateExerciseName(data.name);
+        setIsRestoreModalOpen(true);
       } else {
         setEditError(data.error || 'เกิดข้อผิดพลาดในการแก้ไขชุดแบบฝึกหัด');
       }
@@ -184,7 +197,7 @@ export default function ManageExercisesPage() {
       });
       const data = await res.json();
       if (data.success) {
-        window.location.reload();
+        fetchExercises(true);
       } else {
         setAlertMessage(data.error || 'เกิดข้อผิดพลาดในการลบชุดแบบฝึกหัด');
         setIsDeleteModalOpen(false);
@@ -198,18 +211,35 @@ export default function ManageExercisesPage() {
   };
 
   const confirmRestoreExercise = async () => {
-    if (!exerciseToRestore) return;
+    // Determine the name to restore
+    const nameToRestore = exerciseToRestore || duplicateExerciseName;
+    if (!nameToRestore) return;
     setIsProcessing(true);
     
     try {
-      const res = await fetch(`/api/admin/exercises/${encodeURIComponent(exerciseToRestore)}`, {
+      const res = await fetch(`/api/admin/exercises/${encodeURIComponent(nameToRestore)}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'restore' })
       });
       const data = await res.json();
       if (data.success) {
-        window.location.reload();
+        if (editExerciseOldName && editExerciseOldName !== nameToRestore) {
+          // If this restore was triggered from an edit, delete the old item
+          await fetch(`/api/admin/exercises/${encodeURIComponent(editExerciseOldName)}`, {
+            method: 'DELETE',
+          });
+        }
+        
+        setIsRestoreModalOpen(false);
+        setExercises(prev => {
+          if (editExerciseOldName) {
+            return prev.map(ex => ex.name === editExerciseOldName ? { ...ex, name: nameToRestore } : ex);
+          }
+          // If it was a create, we might need to fetch page 1 or just add it
+          fetchExercises(true);
+          return prev;
+        });
       } else {
         setAlertMessage(data.error || 'เกิดข้อผิดพลาดในการกู้คืน');
         setIsRestoreModalOpen(false);
@@ -219,6 +249,8 @@ export default function ManageExercisesPage() {
       setIsRestoreModalOpen(false);
     } finally {
       setIsProcessing(false);
+      setExerciseToRestore('');
+      setDuplicateExerciseName('');
     }
   };
 
@@ -232,7 +264,8 @@ export default function ManageExercisesPage() {
     // Fetch categories if not fetched yet
     if (allCategories.length === 0) {
       try {
-        const resCat = await fetch(`/api/admin/categories`, { cache: 'no-store' });
+        const timestamp = Date.now();
+        const resCat = await fetch(`/api/admin/categories?t=${timestamp}`, { cache: 'no-store' });
         const dataCat = await resCat.json();
         if (dataCat.success) {
           setAllCategories(dataCat.data);
@@ -243,7 +276,8 @@ export default function ManageExercisesPage() {
     }
     
     try {
-      const resSelected = await fetch(`/api/admin/exercises/${encodeURIComponent(exerciseName)}/images`, { cache: 'no-store' });
+      const timestamp = Date.now();
+      const resSelected = await fetch(`/api/admin/exercises/${encodeURIComponent(exerciseName)}/images?t=${timestamp}`, { cache: 'no-store' });
       const dataSelected = await resSelected.json();
       if (dataSelected.success) {
         setSelectedImageIds(dataSelected.data);
@@ -271,7 +305,7 @@ export default function ManageExercisesPage() {
       const data = await res.json();
       if (data.success) {
         setIsImageModalOpen(false);
-        window.location.reload();
+        fetchExercises(true);
       } else {
         setAlertMessage(data.error || 'เกิดข้อผิดพลาดในการบันทึกรูปภาพ');
       }
@@ -304,7 +338,8 @@ export default function ManageExercisesPage() {
 
     try {
       const prioritizeIds = latestSelectedIdsRef.current.join(',');
-      const res = await fetch(`/api/admin/images?page=${imagePage}&limit=${imageItemsPerPage}&search=${encodeURIComponent(debouncedImageSearchQuery)}&prioritizeIds=${prioritizeIds}`, { cache: 'no-store' });
+      const timestamp = Date.now();
+      const res = await fetch(`/api/admin/images?page=${imagePage}&limit=${imageItemsPerPage}&search=${encodeURIComponent(debouncedImageSearchQuery)}&prioritizeIds=${prioritizeIds}&t=${timestamp}`, { cache: 'no-store' });
       const data = await res.json();
       if (data.success) {
         if (isLoadMore) {
@@ -346,7 +381,7 @@ export default function ManageExercisesPage() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      fetchExercises();
+      fetchExercises(true);
     }, 0);
     return () => clearTimeout(timer);
   }, [fetchExercises]);

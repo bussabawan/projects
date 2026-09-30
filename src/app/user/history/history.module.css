@@ -21,10 +21,16 @@
 .filterSection {
   display: flex;
   align-items: center;
-  gap: 5rem;
+  gap: 2rem;
   margin-bottom: 2rem;
   font-size: 1.1rem;
   justify-content: center;
+}
+
+.dateFilters {
+  display: flex;
+  align-items: center;
+  gap: 5rem;
 }
 
 .filterGroup {
@@ -73,6 +79,41 @@
   margin-left: 0.5rem;
 }
 
+.clearDateBtn {
+  background-color: #fce8e8;
+  color: #e53e3e;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.clearBtnText {
+  display: inline;
+}
+
+.clearBtnIcon {
+  display: none;
+}
+
+.clearDateBtn:hover:not(:disabled) {
+  background-color: #fad4d4;
+}
+
+.clearDateBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #f5f5f5;
+  color: #999;
+}
+
 .tableContainer {
   background-color: #fff;
   border-radius: 24px;
@@ -81,6 +122,7 @@
   display: flex;
   flex-direction: column;
   flex: 1;
+  margin-bottom: 40px;
 }
 
 .tableHeader {
@@ -321,10 +363,34 @@
     }
 
     .filterSection {
-      flex-direction: column;
-      align-items: flex-start;
+      flex-direction: row;
+      align-items: stretch;
       gap: 0.5rem;
       margin-bottom: 1rem;
+      justify-content: center;
+    }
+    
+    .dateFilters {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .clearDateBtn {
+      height: auto;
+      padding: 0 1rem;
+      border-radius: 12px;
+    }
+
+    .clearBtnText {
+      display: none;
+    }
+
+    .clearBtnIcon {
+      display: block;
+    }
+
+    .datePicker {
+      min-width: 140px;
     }
     
     .tableHeader {

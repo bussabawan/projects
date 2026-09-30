@@ -129,42 +129,61 @@ export default function HistoryPage() {
       <h1 className={styles.title}>ประวัติการฝึก</h1>
 
       <div className={styles.filterSection}>
-        <div className={styles.filterGroup}>
-          <span>เริ่ม</span>
-          <div className={styles.datePickerWrapper}>
-            <button className={styles.datePicker} onClick={() => setIsStartPickerOpen(true)}>
-              {startDate ? formatThaiDate(startDate) : "เลือกวันที่"}
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
-            </button>
-            <DatePicker 
-              isOpen={isStartPickerOpen} 
-              onClose={() => setIsStartPickerOpen(false)} 
-              onSelect={(date) => { setStartDate(date); setCurrentPage(1); }} 
-              initialDate={startDate} 
-              title="เลือกวันที่เริ่มต้น" 
-            />
+        <div className={styles.dateFilters}>
+          <div className={styles.filterGroup}>
+            <span>เริ่ม</span>
+            <div className={styles.datePickerWrapper}>
+              <button className={styles.datePicker} onClick={() => setIsStartPickerOpen(true)}>
+                {startDate ? formatThaiDate(startDate) : "เลือกวันที่"}
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+              <DatePicker 
+                isOpen={isStartPickerOpen} 
+                onClose={() => setIsStartPickerOpen(false)} 
+                onSelect={(date) => { setStartDate(date); setCurrentPage(1); }} 
+                initialDate={startDate} 
+                title="เลือกวันที่เริ่มต้น" 
+              />
+            </div>
+          </div>
+          <div className={styles.filterGroup}>
+            <span>สิ้นสุด</span>
+            <div className={styles.datePickerWrapper}>
+              <button className={styles.datePicker} onClick={() => setIsEndPickerOpen(true)}>
+                {endDate ? formatThaiDate(endDate) : "เลือกวันที่"}
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+              <DatePicker 
+                isOpen={isEndPickerOpen} 
+                onClose={() => setIsEndPickerOpen(false)} 
+                onSelect={(date) => { setEndDate(date); setCurrentPage(1); }} 
+                initialDate={endDate} 
+                title="เลือกวันที่สิ้นสุด" 
+              />
+            </div>
           </div>
         </div>
-        <div className={styles.filterGroup}>
-          <span>สิ้นสุด</span>
-          <div className={styles.datePickerWrapper}>
-            <button className={styles.datePicker} onClick={() => setIsEndPickerOpen(true)}>
-              {endDate ? formatThaiDate(endDate) : "เลือกวันที่"}
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
-            </button>
-            <DatePicker 
-              isOpen={isEndPickerOpen} 
-              onClose={() => setIsEndPickerOpen(false)} 
-              onSelect={(date) => { setEndDate(date); setCurrentPage(1); }} 
-              initialDate={endDate} 
-              title="เลือกวันที่สิ้นสุด" 
-            />
-          </div>
-        </div>
+        <button 
+          className={styles.clearDateBtn}
+          onClick={() => {
+            setStartDate('');
+            setEndDate('');
+            setCurrentPage(1);
+          }}
+          disabled={!startDate && !endDate}
+          title="ล้างวันที่"
+        >
+          <span className={styles.clearBtnText}>ล้างวันที่</span>
+          <svg className={styles.clearBtnIcon} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 6h18"></path>
+            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+          </svg>
+        </button>
       </div>
 
       <div className={styles.tableContainer}>

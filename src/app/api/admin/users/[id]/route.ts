@@ -43,6 +43,13 @@ export async function PUT(
   } catch (error: unknown) {
     const err = error as Error;
     console.error('Error in PUT /api/admin/users/[id]:', err);
+    if (err.message && err.message.startsWith('RESTORE_REQUIRED:')) {
+      const existingUserId = err.message.split(':')[1];
+      return NextResponse.json(
+        { success: false, requireRestore: true, existingUserId: parseInt(existingUserId, 10) },
+        { status: 409 }
+      );
+    }
     const status = err.message === 'Username already exists' ? 409 : 500;
     const errorMessage = err.message === 'Username already exists' 
       ? 'รหัสผู้ป่วยหรืออีเมลนี้มีอยู่ในระบบแล้ว' 
@@ -98,20 +105,6 @@ export async function PATCH(
     const body = await request.json();
     if (body.action === 'restore') {
       await ManageUsersModel.restoreUser(userId);
-      if (body.data) {
-        // Convert string fields if needed
-        if (body.data.role !== undefined) {
-          body.data.role = parseInt(body.data.role, 10);
-        }
-        if (body.data.exercises_id !== undefined && body.data.exercises_id !== null) {
-          if (Array.isArray(body.data.exercises_id)) {
-            body.data.exercises_id = body.data.exercises_id.map((exId: string | number) => typeof exId === 'string' ? parseInt(exId, 10) : exId);
-          } else {
-            body.data.exercises_id = parseInt(body.data.exercises_id, 10);
-          }
-        }
-        await ManageUsersModel.updateUser(userId, body.data);
-      }
       
       revalidateTag('users', 'max');
       revalidateTag('patient-stats', 'max');

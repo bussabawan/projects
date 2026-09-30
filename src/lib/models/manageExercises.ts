@@ -13,7 +13,18 @@ export class ManageExercisesModel extends BaseModel {
    */
   static getExercises = async (): Promise<ExerciseInfo[]> => {
     const rows = await this.query<RowDataPacket>(
-      'SELECT exercises_id, exercises_name FROM exercises_data WHERE remove = 0 ORDER BY exercises_id ASC'
+      `SELECT ed.exercises_id, ed.exercises_name 
+       FROM exercises_data ed 
+       WHERE ed.remove = 0 
+         AND EXISTS (
+           SELECT 1
+           FROM photo_in_exercises pie
+           JOIN photo_data pd ON pie.photo_id = pd.photo_id
+           WHERE pie.exercises_id = ed.exercises_id
+             AND pie.remove = 0
+             AND pd.remove = 0
+         )
+       ORDER BY ed.exercises_id ASC`
     );
     return rows as ExerciseInfo[];
   };
@@ -241,13 +252,21 @@ export class ManageExercisesModel extends BaseModel {
   /**
    * Update exercise name
    */
-  static async updateExerciseName(oldName: string, newName: string): Promise<void> {
+  static async updateExerciseName(oldName: string, newName: string): Promise<void | { isDuplicateDeleted: boolean; name: string }> {
     const existing = await this.query<RowDataPacket>(
       'SELECT exercises_id FROM exercises_data WHERE exercises_name = ? AND remove = 0',
       [newName]
     );
     if (existing.length > 0 && oldName !== newName) {
       throw new Error("มีชุดแบบฝึกหัดชื่อนี้อยู่ในระบบแล้ว");
+    }
+
+    const removed = await this.query<RowDataPacket>(
+      'SELECT exercises_name FROM exercises_data WHERE exercises_name = ? AND remove = 1 LIMIT 1',
+      [newName]
+    );
+    if (removed.length > 0 && oldName !== newName) {
+      return { isDuplicateDeleted: true, name: newName };
     }
 
     await this.execute(

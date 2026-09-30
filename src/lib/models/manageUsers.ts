@@ -38,7 +38,7 @@ export class ManageUsersModel extends BaseModel {
           GROUP_CONCAT(ex.exercises_name SEPARATOR '||') as exercises_name
         FROM users_data u
         LEFT JOIN patient_data p ON u.user_id = p.user_id AND p.remove = 0
-        LEFT JOIN exercises_data ex ON p.exercises_id = ex.exercises_id
+        LEFT JOIN exercises_data ex ON p.exercises_id = ex.exercises_id AND ex.remove = 0
         WHERE u.role = ? AND u.remove = 0
       `;
       countQuery = `
@@ -153,7 +153,7 @@ export class ManageUsersModel extends BaseModel {
       const updateValues: (string | number | boolean | null)[] = [];
 
       if (userData.user_name) {
-        // Check for duplicates
+        // Check for active duplicates
         const [existing] = await connection.execute<RowDataPacket[]>(
           'SELECT user_id FROM users_data WHERE user_name = ? AND user_id != ? AND remove = 0',
           [userData.user_name, userId]
@@ -164,6 +164,30 @@ export class ManageUsersModel extends BaseModel {
         updateFields.push('user_name = ?');
         updateValues.push(userData.user_name);
       }
+
+      // Check for soft-deleted duplicates
+      const checkParams: any[] = [];
+      const checkConditions: string[] = [];
+      if (userData.user_name) {
+        checkConditions.push('user_name = ?');
+        checkParams.push(userData.user_name);
+      }
+      if (userData.full_name) {
+        checkConditions.push('full_name = ?');
+        checkParams.push(userData.full_name);
+      }
+      
+      if (checkConditions.length > 0) {
+        checkParams.push(userId);
+        const [removed] = await connection.execute<RowDataPacket[]>(
+          `SELECT user_id FROM users_data WHERE (${checkConditions.join(' OR ')}) AND user_id != ? AND remove = 1 LIMIT 1`,
+          checkParams
+        );
+        if (removed.length > 0) {
+          throw new Error(`RESTORE_REQUIRED:${removed[0].user_id}`);
+        }
+      }
+
       if (userData.full_name) {
         updateFields.push('full_name = ?');
         updateValues.push(userData.full_name);

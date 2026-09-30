@@ -41,7 +41,7 @@ export default async function SummaryPage(props: {
     const dateString = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
     
     return {
-      name: `ครั้งที่ ${index + 1}`,
+      name: `${index + 1}`,
       date: dateString,
       score: score,
     };

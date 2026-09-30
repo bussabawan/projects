@@ -258,12 +258,14 @@ export default function UserLayout({
       {!isGameInnerPage && (
       <div className={styles.mobileHeader}>
         <div className={styles.mobileUserPill}>{userName}</div>
-        <Link href="/user/games" onClick={() => handleLinkClick('/user/games')} className={styles.mobileHomeBtn} aria-label="Home">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-            <polyline points="9 22 9 12 15 12 15 22"></polyline>
-          </svg>
-        </Link>
+        {pathname !== '/user/games' && (
+          <Link href="/user/games" onClick={() => handleLinkClick('/user/games')} className={styles.mobileHomeBtn} aria-label="Home">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+          </Link>
+        )}
         <button className={styles.mobileLogoutBtn} aria-label="Logout" title="Logout" onClick={handleLogout}>
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>

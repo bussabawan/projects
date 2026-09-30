@@ -9,7 +9,7 @@ interface SummaryChartProps {
 export default function SummaryChart({ data }: SummaryChartProps) {
   return (
     <ResponsiveContainer width="100%" height={250}>
-      <LineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
+      <LineChart data={data} margin={{ top: 20, right: 20, left: 20, bottom: 40 }}>
         <XAxis 
           dataKey="name" 
           tick={{ fontSize: 12, fill: '#6b7280' }} 
@@ -18,9 +18,17 @@ export default function SummaryChart({ data }: SummaryChartProps) {
           interval={0}
           angle={-45}
           textAnchor="end"
-          height={50}
+          height={60}
+          label={{ value: 'ครั้งที่เล่น', position: 'bottom', offset: 20, fontSize: 12, fill: '#6b7280' }}
         />
-        <YAxis domain={[0, 100]} tick={{ fontSize: 12, fill: '#6b7280' }} axisLine={false} tickLine={false} width={30} />
+        <YAxis 
+          domain={[0, 100]} 
+          tick={{ fontSize: 12, fill: '#6b7280' }} 
+          axisLine={false} 
+          tickLine={false} 
+          width={40} 
+          label={{ value: 'คะแนน', angle: -90, position: 'insideLeft', offset: -10, fontSize: 12, fill: '#6b7280' }}
+        />
         <Tooltip 
           cursor={{stroke: '#ccc', strokeWidth: 1, strokeDasharray: '3 3'}} 
           content={({ active, payload }) => {

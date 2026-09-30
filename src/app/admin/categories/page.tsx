@@ -65,16 +65,25 @@ export default function ManageCategoriesPage() {
   const isLoadMoreRef = useRef(false);
   const latestSelectedIdsRef = useRef<number[]>([]);
 
-  const fetchCategories = useCallback(async () => {
-    const isLoadMore = isLoadMoreRef.current;
-    if (isLoadMore) {
-      setLoadingMore(true);
-    } else {
+  const fetchCategories = useCallback(async (reset = false) => {
+    const pageToFetch = reset ? 1 : currentPage;
+    const isLoadMore = reset ? false : isLoadMoreRef.current;
+    
+    if (reset) {
+      setCurrentPage(1);
+      isLoadMoreRef.current = false;
       setIsLoading(true);
+    } else {
+      if (isLoadMore) {
+        setLoadingMore(true);
+      } else {
+        setIsLoading(true);
+      }
     }
     
     try {
-      const res = await fetch(`/api/admin/categories?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}`, { cache: 'no-store' });
+      const timestamp = Date.now();
+      const res = await fetch(`/api/admin/categories?page=${pageToFetch}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}&t=${timestamp}`, { cache: 'no-store' });
       const data = await res.json();
       if (data.success) {
         if (isLoadMore) {
@@ -114,7 +123,7 @@ export default function ManageCategoriesPage() {
       if (data.success) {
         setIsAddModalOpen(false);
         setNewCategoryName("");
-        window.location.reload();
+        fetchCategories(true);
       } else if (data.isDuplicateDeleted) {
         setIsAddModalOpen(false);
         setNewCategoryName("");
@@ -154,7 +163,11 @@ export default function ManageCategoriesPage() {
       const data = await res.json();
       if (data.success) {
         setIsEditModalOpen(false);
-        window.location.reload();
+        setCategories(prev => prev.map(cat => cat.name === editCategoryOldName ? { ...cat, name: editCategoryNewName.trim() } : cat));
+      } else if (data.isDuplicateDeleted) {
+        setIsEditModalOpen(false);
+        setDuplicateCategoryName(data.name);
+        setIsRestoreModalOpen(true);
       } else {
         setEditError(data.error || 'เกิดข้อผิดพลาดในการแก้ไขหมวดหมู่');
       }
@@ -180,7 +193,7 @@ export default function ManageCategoriesPage() {
       });
       const data = await res.json();
       if (data.success) {
-        window.location.reload();
+        fetchCategories(true);
       } else {
         setAlertMessage(data.error || 'เกิดข้อผิดพลาดในการลบหมวดหมู่');
         setIsDeleteModalOpen(false);
@@ -205,7 +218,22 @@ export default function ManageCategoriesPage() {
       });
       const data = await res.json();
       if (data.success) {
-        window.location.reload();
+        if (editCategoryOldName && editCategoryOldName !== categoryToRestore) {
+          // If this restore was triggered from an edit, delete the old item
+          await fetch(`/api/admin/categories/${encodeURIComponent(editCategoryOldName)}`, {
+            method: 'DELETE',
+          });
+        }
+        
+        setIsRestoreModalOpen(false);
+        setCategories(prev => {
+          if (editCategoryOldName) {
+            return prev.map(cat => cat.name === editCategoryOldName ? { ...cat, name: categoryToRestore } : cat);
+          }
+          // If it was a create, we might need to fetch page 1 or just add it
+          fetchCategories(true);
+          return prev;
+        });
       } else {
         setAlertMessage(data.error || 'เกิดข้อผิดพลาดในการกู้คืน');
         setIsRestoreModalOpen(false);
@@ -225,7 +253,8 @@ export default function ManageCategoriesPage() {
     isImageLoadMoreRef.current = false;
     
     try {
-      const resSelected = await fetch(`/api/admin/categories/${encodeURIComponent(categoryName)}/images`, { cache: 'no-store' });
+      const timestamp = Date.now();
+      const resSelected = await fetch(`/api/admin/categories/${encodeURIComponent(categoryName)}/images?t=${timestamp}`, { cache: 'no-store' });
       const dataSelected = await resSelected.json();
       if (dataSelected.success) {
         setSelectedImageIds(dataSelected.data);
@@ -251,7 +280,7 @@ export default function ManageCategoriesPage() {
       const data = await res.json();
       if (data.success) {
         setIsImageModalOpen(false);
-        window.location.reload();
+        fetchCategories(true);
       } else {
         setAlertMessage(data.error || 'เกิดข้อผิดพลาดในการบันทึกรูปภาพ');
       }
@@ -281,7 +310,8 @@ export default function ManageCategoriesPage() {
 
     try {
       const prioritizeIds = latestSelectedIdsRef.current.join(',');
-      const res = await fetch(`/api/admin/images?page=${imagePage}&limit=${imageItemsPerPage}&search=${encodeURIComponent(debouncedImageSearchQuery)}&prioritizeIds=${prioritizeIds}`, { cache: 'no-store' });
+      const timestamp = Date.now();
+      const res = await fetch(`/api/admin/images?page=${imagePage}&limit=${imageItemsPerPage}&search=${encodeURIComponent(debouncedImageSearchQuery)}&prioritizeIds=${prioritizeIds}&t=${timestamp}`, { cache: 'no-store' });
       const data = await res.json();
       if (data.success) {
         if (isLoadMore) {
@@ -323,7 +353,7 @@ export default function ManageCategoriesPage() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      fetchCategories();
+      fetchCategories(true);
     }, 0);
     return () => clearTimeout(timer);
   }, [fetchCategories]);

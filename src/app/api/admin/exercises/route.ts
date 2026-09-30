@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     const { name } = await request.json();
     
     if (!name || name.trim() === '') {
-      return NextResponse.json({ success: false, error: 'เธเธฃเธธเธ“เธฒเธเธฃเธญเธเธเธทเนเธญเธเธธเธ”เนเธเธเธเธถเธเธซเธฑเธ”' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'กรุณากรอกชื่อชุดแบบฝึกหัด' }, { status: 400 });
     }
 
     const result = await ManageExercisesModel.addExercise(name.trim());
@@ -65,3 +65,4 @@ export async function POST(request: Request) {
     );
   }
 }
+

@@ -41,17 +41,20 @@ export default function ManageUsersPage() {
 
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
-  const fetchUsers = useCallback(async () => {
+  const fetchUsers = useCallback(async (silent = false) => {
     const isLoadMore = isLoadMoreRef.current;
-    if (isLoadMore) {
-      setLoadingMore(true);
-    } else {
-      setLoading(true);
+    if (!silent) {
+      if (isLoadMore) {
+        setLoadingMore(true);
+      } else {
+        setLoading(true);
+      }
     }
     
     try {
       const role = activeTab === "patient" ? 1 : 2;
-      const res = await fetch(`/api/admin/users?role=${role}&page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}`, { cache: 'no-store' });
+      const timestamp = Date.now();
+      const res = await fetch(`/api/admin/users?role=${role}&page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}&t=${timestamp}`, { cache: 'no-store' });
       const result = await res.json();
       
       if (result.success) {
@@ -76,7 +79,7 @@ export default function ManageUsersPage() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      fetchUsers();
+      fetchUsers(true);
       isLoadMoreRef.current = false;
     }, 0);
     return () => clearTimeout(timer);
@@ -143,7 +146,9 @@ export default function ManageUsersPage() {
       const res = await fetch(`/api/admin/users/${deleteUserId}`, { method: 'DELETE' });
       const result = await res.json();
       if (result.success) {
-        window.location.reload();
+        setDeleteUserId(null);
+        fetchUsers(true);
+        setIsProcessing(false);
       } else {
         alert("ลบข้อมูลไม่สำเร็จ: " + result.error);
         setIsProcessing(false);
@@ -154,9 +159,18 @@ export default function ManageUsersPage() {
     }
   };
 
-  const handleModalSave = () => {
+  const handleModalSave = (savedUser?: User, originalUserId?: number) => {
     setIsModalOpen(false);
-    window.location.reload();
+    if (savedUser) {
+      setUsers(prev => {
+        if (originalUserId) {
+          return prev.map(u => u.user_id === originalUserId ? savedUser : u);
+        }
+        return [savedUser, ...prev];
+      });
+    } else {
+      fetchUsers(true);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -265,7 +279,25 @@ export default function ManageUsersPage() {
               <Loader text={searchQuery.trim() ? "กำลังค้นหาข้อมูล..." : "กำลังโหลดข้อมูลผู้ใช้งาน..."} />
             </div>
           ) : users.length === 0 ? (
-            <div className={styles.emptyState}>ไม่พบข้อมูล</div>
+            <div style={{
+              padding: '6rem 2rem',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#8a8a9a',
+              gap: '0.5rem',
+              textAlign: 'center'
+            }}>
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5, marginBottom: '1rem' }}>
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                <line x1="9" y1="9" x2="13" y2="13"></line>
+                <line x1="13" y1="9" x2="9" y2="13"></line>
+              </svg>
+              <div style={{ fontSize: '1.25rem', fontWeight: 600, color: '#6b6b7b' }}>ไม่พบข้อมูลผู้ใช้งานที่คุณค้นหา</div>
+              <div style={{ fontSize: '0.95rem', opacity: 0.8 }}>ลองเปลี่ยนคำค้นหาใหม่ หรือกดเพิ่มผู้ใช้เข้าระบบ</div>
+            </div>
           ) : (
             users.map((user) => (
               activeTab === "patient" ? (

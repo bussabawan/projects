@@ -37,6 +37,7 @@ interface ImageData {
   title: string;
   imageUrl: string;
   audioUrl?: string;
+  audioTime?: number;
   audioTitle?: string;
   audioGen?: number;
 }
@@ -59,12 +60,20 @@ export default function ManageImagesPage() {
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  const fetchImages = useCallback(async () => {
-    const isLoadMore = isLoadMoreRef.current;
-    if (isLoadMore) {
-      setLoadingMore(true);
-    } else {
+  const fetchImages = useCallback(async (reset = false) => {
+    const pageToFetch = reset ? 1 : currentPage;
+    const isLoadMore = reset ? false : isLoadMoreRef.current;
+    
+    if (reset) {
+      setCurrentPage(1);
+      isLoadMoreRef.current = false;
       setIsLoading(true);
+    } else {
+      if (isLoadMore) {
+        setLoadingMore(true);
+      } else {
+        setIsLoading(true);
+      }
     }
 
     if (abortControllerRef.current) {
@@ -74,7 +83,8 @@ export default function ManageImagesPage() {
     abortControllerRef.current = abortController;
     
     try {
-      const res = await fetch(`/api/admin/images?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}`, {
+      const timestamp = Date.now();
+      const res = await fetch(`/api/admin/images?page=${pageToFetch}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}&t=${timestamp}`, {
         cache: 'no-store',
         signal: abortController.signal
       });
@@ -202,7 +212,8 @@ export default function ManageImagesPage() {
       const res = await fetch(`/api/admin/images/${deletingImageId}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
-        window.location.reload();
+        fetchImages(true);
+        setIsProcessing(false);
       } else {
         alert("ลบข้อมูลไม่สำเร็จ");
         setIsProcessing(false);
@@ -226,6 +237,7 @@ export default function ManageImagesPage() {
         title: data.imageName,
         imageUrl: data.imageUrl,
         audioUrl: data.audioUrl,
+        audioTime: data.audioTime,
         audioTitle: data.speechText || "",
         audioGen: data.useAutoSpeech ? 1 : 0
       };
@@ -238,9 +250,22 @@ export default function ManageImagesPage() {
       const result = await res.json();
       if (result.success) {
         setIsModalOpen(false);
-        window.location.reload();
+        if (isEdit && editingImage) {
+          setImages(prev => prev.map(img => img.id === editingImage.id ? {
+            ...img,
+            title: payload.title as string,
+            imageUrl: payload.imageUrl as string,
+            audioUrl: (payload.audioUrl as string) || "",
+            audioTime: payload.audioTime as number | undefined,
+            audioTitle: (payload.audioTitle as string) || "",
+            audioGen: payload.audioGen as number
+          } : img));
+        } else {
+          fetchImages(true);
+        }
+        setIsProcessing(false);
       } else if (result.isDuplicateDeleted) {
-        setDuplicateToRestore({ id: result.duplicateId, data: payload });
+        setDuplicateToRestore({ id: result.duplicateId, data: payload, originalEditId: isEdit ? editingImage?.id : undefined });
         setIsProcessing(false);
       } else {
         alert(result.error || "บันทึกข้อมูลไม่สำเร็จ");
@@ -258,15 +283,46 @@ export default function ManageImagesPage() {
     setIsProcessing(true);
     try {
       const res = await fetch(`/api/admin/images/${duplicateToRestore.id}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(duplicateToRestore.data)
+        body: JSON.stringify({ action: 'restore' })
       });
       const result = await res.json();
       if (result.success) {
+        // Update the restored item with the new payload
+        await fetch(`/api/admin/images/${duplicateToRestore.id}`, {
+          method: 'PUT',
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(duplicateToRestore.data)
+        });
+
+        // Delete the original item if it was an edit
+        if (duplicateToRestore.originalEditId && duplicateToRestore.originalEditId !== duplicateToRestore.id) {
+          await fetch(`/api/admin/images/${duplicateToRestore.originalEditId}`, {
+            method: 'DELETE',
+          });
+        }
+
+        const updatedImg = {
+          id: duplicateToRestore.id,
+          title: duplicateToRestore.data.title as string,
+          imageUrl: duplicateToRestore.data.imageUrl as string,
+          audioUrl: (duplicateToRestore.data.audioUrl as string) || "",
+          audioTime: duplicateToRestore.data.audioTime as number | undefined,
+          audioTitle: (duplicateToRestore.data.audioTitle as string) || "",
+          audioGen: duplicateToRestore.data.audioGen as number
+        };
+
+        setImages(prev => {
+          if (duplicateToRestore.originalEditId) {
+            return prev.map(img => img.id === duplicateToRestore.originalEditId ? updatedImg : img);
+          }
+          return [updatedImg, ...prev];
+        });
+
         setIsModalOpen(false);
         setEditingImage(null);
-        window.location.reload();
+        setIsProcessing(false);
       } else {
         alert(result.error || "กู้คืนข้อมูลไม่สำเร็จ");
         setIsProcessing(false);

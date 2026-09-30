@@ -6,6 +6,7 @@ export interface ImageInfo {
   title: string;
   imageUrl: string;
   audioUrl?: string;
+  audioTime?: number;
   audioTitle?: string;
   audioGen?: number;
 }
@@ -56,7 +57,7 @@ export class ManageImagesModel extends BaseModel {
 
     // Get paginated data
     const rows = await this.query<RowDataPacket>(
-      `SELECT photo_id as id, photo_title as title, photo_name as imageUrl, audio_name as audioUrl, audio_title as audioTitle, audio_gen as audioGen
+      `SELECT photo_id as id, photo_title as title, photo_name as imageUrl, audio_name as audioUrl, audio_time as audioTime, audio_title as audioTitle, audio_gen as audioGen
        FROM photo_data 
        ${whereClause} 
        ${orderClause} 
@@ -80,7 +81,7 @@ export class ManageImagesModel extends BaseModel {
    * Create a new image
    * @throws Error if title already exists (or returns a special object if deleted)
    */
-  static async createImage(data: { title: string, imageUrl: string, audioUrl?: string, audioTitle?: string, audioGen?: number }): Promise<number | { isDuplicateDeleted: boolean, duplicateId: number }> {
+  static async createImage(data: { title: string, imageUrl: string, audioUrl?: string, audioTime?: number, audioTitle?: string, audioGen?: number }): Promise<number | { isDuplicateDeleted: boolean, duplicateId: number }> {
     // Check if the title already exists (including deleted ones)
     const existingRows = await this.query<RowDataPacket>(
       `SELECT photo_id as id, remove FROM photo_data WHERE photo_title COLLATE utf8mb4_bin = ?`,
@@ -99,12 +100,13 @@ export class ManageImagesModel extends BaseModel {
 
     // Insert into database
     const result = await this.execute(
-      `INSERT INTO photo_data (photo_name, photo_title, audio_name, audio_title, audio_gen, remove) 
-       VALUES (?, ?, ?, ?, ?, 0)`,
+      `INSERT INTO photo_data (photo_name, photo_title, audio_name, audio_time, audio_title, audio_gen, remove) 
+       VALUES (?, ?, ?, ?, ?, ?, 0)`,
       [
         data.imageUrl, 
         data.title, 
         data.audioUrl || "", 
+        data.audioTime !== undefined ? data.audioTime : null,
         data.audioTitle || "", 
         data.audioGen ? 1 : 0
       ]
@@ -117,7 +119,7 @@ export class ManageImagesModel extends BaseModel {
    * Update an existing image
    * @throws Error if new title already exists for another image
    */
-  static async updateImage(id: number, data: { title: string, imageUrl: string, audioUrl?: string, audioTitle?: string, audioGen?: number }): Promise<void | { isDuplicateDeleted: boolean, duplicateId: number }> {
+  static async updateImage(id: number, data: { title: string, imageUrl: string, audioUrl?: string, audioTime?: number, audioTitle?: string, audioGen?: number }): Promise<void | { isDuplicateDeleted: boolean, duplicateId: number }> {
     // Check if title is duplicated by another image
     const existingRows = await this.query<RowDataPacket>(
       `SELECT photo_id as id, remove FROM photo_data WHERE photo_title COLLATE utf8mb4_bin = ? AND photo_id != ?`,
@@ -139,6 +141,7 @@ export class ManageImagesModel extends BaseModel {
          photo_name = IF(? LIKE '/api/files/%', photo_name, ?), 
          photo_title = ?, 
          audio_name = IF(? LIKE '/api/files/%', audio_name, ?), 
+         audio_time = COALESCE(?, audio_time),
          audio_title = ?, 
          audio_gen = ?, 
          remove = 0 
@@ -147,10 +150,21 @@ export class ManageImagesModel extends BaseModel {
         data.imageUrl, data.imageUrl,
         data.title, 
         data.audioUrl || "", data.audioUrl || "",
+        data.audioTime !== undefined ? data.audioTime : null,
         data.audioTitle || "", 
         data.audioGen ? 1 : 0,
         id
       ]
+    );
+  }
+
+  /**
+   * Restore a soft deleted image
+   */
+  static async restoreImage(id: number): Promise<void> {
+    await this.execute(
+      `UPDATE photo_data SET remove = 0 WHERE photo_id = ?`,
+      [id]
     );
   }
 
