@@ -1,6 +1,7 @@
 "use client";
 
 import styles from "./DeleteConfirmModal.module.css";
+import { useScrollLock } from "@/app/hooks/useScrollLock";
 
 interface DeleteConfirmModalProps {
   onConfirm: () => void;
@@ -13,6 +14,7 @@ export default function DeleteConfirmModal({
   onCancel, 
   title = "ยืนยันการลบข้อมูลรูปภาพ" 
 }: DeleteConfirmModalProps) {
+  useScrollLock(true);
   return (
     <div className={styles.overlay} onClick={onCancel}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -33,3 +35,4 @@ export default function DeleteConfirmModal({
     </div>
   );
 }
+

@@ -60,6 +60,7 @@ export default function MemoryGamePlayPage() {
   const [showExitPopup, setShowExitPopup] = useState(false);
   const [correctChoiceIds, setCorrectChoiceIds] = useState<number[]>([]);
   const [, setIsAudioPlaying] = useState(false);
+  const [playingAudioUrl, setPlayingAudioUrl] = useState<string | null>(null);
   
   // Timers
   const [countdown, setCountdown] = useState(showTimeSetting);
@@ -73,6 +74,20 @@ export default function MemoryGamePlayPage() {
   const [isMuted, setIsMuted] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playClick = useClickSound();
+  
+  const correctAudioRef = useRef<HTMLAudioElement | null>(null);
+  const incorrectAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      correctAudioRef.current = new window.Audio('/audio/Correct.mp3');
+      incorrectAudioRef.current = new window.Audio('/audio/incorrect.mp3');
+    }
+  }, []);
+
+  const handlePlayClick = useCallback(() => {
+    if (!isMuted) playClick();
+  }, [isMuted, playClick]);
 
   const preloadAssets = async (questionsList: GameData[]) => {
     const assets: Promise<void>[] = [];
@@ -89,7 +104,7 @@ export default function MemoryGamePlayPage() {
         audioCache.set(audioUrlWithBitrate, audio);
         audio.src = audioUrlWithBitrate;
         audio.oncanplaythrough = () => resolve();
-        audio.onerror = () => resolve();
+        audio.onerror = () => { setPlayingAudioUrl(null); resolve(); };
         setTimeout(resolve, 3000); // timeout for audio
       }));
     };
@@ -226,11 +241,14 @@ export default function MemoryGamePlayPage() {
         audioRef.current.pause();
       }
 
-      // 2. ถ้าไม่มีเสียงใหม่ให้เล่น หรือปิดเสียงอยู่ ให้จบการทำงาน
-      if (!url || isMuted) {
+      // 2. ถ้าไม่มีเสียงใหม่ให้เล่น ให้จบการทำงาน
+      if (!url) {
+        setPlayingAudioUrl(null);
         resolve();
         return;
       }
+      
+      setPlayingAudioUrl(url);
       
       // Determine bitrate based on screen size (Mobile L: 425px)
       const bitrate = window.innerWidth <= 425 ? 32 : 64;
@@ -251,12 +269,19 @@ export default function MemoryGamePlayPage() {
       
       audioRef.current = audio;
       
-      audio.onended = () => resolve();
-      audio.onerror = () => resolve();
+      audio.onended = () => {
+        setPlayingAudioUrl(null);
+        resolve();
+      };
+      audio.onerror = () => {
+        setPlayingAudioUrl(null);
+        resolve();
+      };
       
       // 4. เล่นเสียง
       audio.play().catch(e => {
         console.log("Audio play failed:", e);
+        setPlayingAudioUrl(null);
         resolve();
       });
     });
@@ -308,7 +333,7 @@ export default function MemoryGamePlayPage() {
 
 
   const handleOptionClick = async (selectedChoice: ImageInfo) => {
-    playClick();
+    handlePlayClick();
     const audioPromise = playAudio(selectedChoice.audioUrl);
     
     if (gameState !== 'options' || isTransitioning) return;
@@ -317,6 +342,10 @@ export default function MemoryGamePlayPage() {
     setClickCount(prev => prev + 1);
     
     if (wrongGuesses.includes(selectedChoice.id)) {
+      if (!isMuted && incorrectAudioRef.current) {
+        const clone = incorrectAudioRef.current.cloneNode(true) as HTMLAudioElement;
+        clone.play().catch(() => {});
+      }
       setIncorrectCount(prev => prev + 1);
       setFeedback('wrong');
       setTimeout(() => {
@@ -330,6 +359,10 @@ export default function MemoryGamePlayPage() {
     const isCorrect = currentQ.targets.some(t => t.id === selectedChoice.id);
     
     if (isCorrect) {
+      if (!isMuted && correctAudioRef.current) {
+        const clone = correctAudioRef.current.cloneNode(true) as HTMLAudioElement;
+        clone.play().catch(() => {});
+      }
       const newCorrectChoiceIds = [...correctChoiceIds, selectedChoice.id];
       setCorrectChoiceIds(newCorrectChoiceIds);
       setCorrectCount(prev => prev + 1);
@@ -370,6 +403,10 @@ export default function MemoryGamePlayPage() {
         setTimeout(() => setFeedback(null), 1000);
       }
     } else {
+      if (!isMuted && incorrectAudioRef.current) {
+        const clone = incorrectAudioRef.current.cloneNode(true) as HTMLAudioElement;
+        clone.play().catch(() => {});
+      }
       setIncorrectCount(prev => prev + 1);
       setWrongGuesses(prev => [...prev, selectedChoice.id]);
       setFeedback('wrong');
@@ -409,26 +446,23 @@ export default function MemoryGamePlayPage() {
   }, [gameState, questions.length, numAnswersSetting, showTimeSetting, clickCount, correctCount, incorrectCount, timeLogs, totalElapsedSeconds, router, params.id, mode]);
 
   const handleEndGame = () => {
-    playClick();
+    handlePlayClick();
     setShowExitPopup(true);
   };
 
   const confirmEndGame = () => {
-    playClick();
+    handlePlayClick();
     router.push(`/user/games/memory/${params.id}?mode=${mode}`);
   };
 
   const cancelEndGame = () => {
-    playClick();
+    handlePlayClick();
     setShowExitPopup(false);
   };
 
   const toggleMute = () => {
-    playClick();
+    handlePlayClick();
     setIsMuted(!isMuted);
-    if (audioRef.current && !isMuted) {
-      audioRef.current.pause();
-    }
   };
 
   if (gameState === 'loading') {
@@ -479,23 +513,24 @@ export default function MemoryGamePlayPage() {
       <div className={styles.progressSection}>
         <div className={styles.progressInfo}>
           ข้อ {currentQuestionIndex + 1} จาก {questions.length}
-          <button className={styles.audioBtn} onClick={toggleMute}>
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              {isMuted ? (
-                <>
-                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                  <line x1="23" y1="9" x2="17" y2="15"></line>
-                  <line x1="17" y1="9" x2="23" y2="15"></line>
-                </>
-              ) : (
-                <>
-                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
-                </>
-              )}
-            </svg>
-          </button>
+          <div className={styles.audioSwitchWrapper} onClick={toggleMute}>
+            <span className={styles.audioSwitchLabel}>เปิด/ปิดเสียงเอฟเฟค</span>
+            <button className={`${styles.audioSwitch} ${!isMuted ? styles.switchOn : styles.switchOff}`}>
+              <div className={styles.switchThumb}>
+                {!isMuted ? (
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                  </svg>
+                ) : (
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                )}
+              </div>
+            </button>
+          </div>
         </div>
         <div className={styles.progressBarWrapper}>
           <div 
@@ -529,6 +564,16 @@ export default function MemoryGamePlayPage() {
                   <h1 className={styles.targetWord} style={{ fontSize: currentQ.targets.length > 4 ? '3rem' : '5rem' }}>{target.title}</h1>
                 ) : (
                   <Image src={target.imageUrl} alt={`Target ${idx}`} width={300} height={300} priority unoptimized={true} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                )}
+                
+                {playingAudioUrl === target.audioUrl && (
+                  <div className={styles.playingOverlay}>
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'white' }}>
+                      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                      <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                      <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                    </svg>
+                  </div>
                 )}
               </motion.div>
             ))}
@@ -590,3 +635,4 @@ export default function MemoryGamePlayPage() {
     </div>
   );
 }
+

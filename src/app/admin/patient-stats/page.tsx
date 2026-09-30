@@ -169,6 +169,7 @@ export default function PatientStatsPage() {
               placeholder="ค้นหา" 
               value={searchQuery}
               onChange={handleSearch}
+              maxLength={200}
             />
             <svg className={styles.searchIcon} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="11" cy="11" r="8"></circle>
@@ -230,7 +231,7 @@ export default function PatientStatsPage() {
                 </div>
               )}
             </div>
-            {totalPages > 1 && (
+            {totalPages > 0 && (
               <div className={styles.pagination}>
                 <button 
                   className={styles.pageBtn} 

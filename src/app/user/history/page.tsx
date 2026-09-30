@@ -42,7 +42,7 @@ export default function HistoryPage() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const rowsPerPage = isMobile ? 5 : 10;
+  const rowsPerPage = isMobile ? 5 : 8;
 
   const formatThaiDate = (dateString: string) => {
     if (!dateString) return "";
@@ -178,10 +178,8 @@ export default function HistoryPage() {
           title="ล้างวันที่"
         >
           <span className={styles.clearBtnText}>ล้างวันที่</span>
-          <svg className={styles.clearBtnIcon} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 6h18"></path>
-            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+          <svg className={styles.clearBtnIcon} width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            <path d="M19.36 2.73L20.73 4.1L19.3 5.5L17.93 4.13L19.36 2.73M17.27 4.82L18.64 6.2L13.78 11.06L12.41 9.69L17.27 4.82M12 21.05C12 21.58 11.58 22 11.05 22H9.95C9.42 22 9 21.58 9 21.05V17.05H12V21.05M15 17.05H18V21.05C18 21.58 17.58 22 17.05 22H15.95C15.42 22 15 21.58 15 21.05V17.05M6 17.05H9V21.05C9 21.58 8.58 22 8.05 22H6.95C6.42 22 6 21.58 6 21.05V17.05M3 17.05H5V21.05C5 21.58 4.58 22 4.05 22H2.95C2.42 22 2 21.58 2 21.05V17.05M21 15.05H2C1.45 15.05 1 14.6 1 14.05V13.05C1 12.5 1.45 12.05 2 12.05H21C21.55 12.05 22 12.5 22 13.05V14.05C22 14.6 21.55 15.05 21 15.05Z"/>
           </svg>
         </button>
       </div>

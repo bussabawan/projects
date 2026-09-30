@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import styles from "../users.module.css";
 import RestoreConfirmModal from "@/app/components/Admin/RestoreConfirmModal";
 import Loader from "@/app/components/Loader/Loader";
+import { useScrollLock } from "@/app/hooks/useScrollLock";
 
 interface User {
   user_id: number;
@@ -26,6 +27,7 @@ interface UserFormModalProps {
 }
 
 export default function UserFormModal({ user, role, onClose, onSave }: UserFormModalProps) {
+  useScrollLock(true);
   const isEditing = !!user;
   const [loading, setLoading] = useState(false);
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -250,6 +252,7 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
                   onChange={handleChange}
                   required
                   placeholder="กรอกชื่อ - นามสกุล"
+                  maxLength={200}
                 />
               </div>
 
@@ -263,6 +266,7 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
                   onChange={handleChange}
                   required
                   placeholder="example@gmail.com"
+                  maxLength={200}
                 />
               </div>
 
@@ -311,6 +315,7 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
                 value={formData.full_name}
                 onChange={handleChange}
                 required
+                maxLength={200}
               />
             </div>
 
@@ -324,6 +329,7 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
                   value={formData.user_name}
                   onChange={handleChange}
                   required
+                  maxLength={20}
                 />
               </div>
 
@@ -340,6 +346,8 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
                     onChange={handleChange}
                     placeholder={isEditing ? "(เว้นว่างถ้าไม่เปลี่ยน)" : ""}
                     style={{ paddingRight: '2.5rem' }}
+                    minLength={isEditing ? undefined : 6}
+                    maxLength={200}
                   />
                   <button 
                     type="button"
@@ -392,6 +400,7 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
                     setDropdownOpen(true);
                   }}
                   onClick={() => setDropdownOpen(true)}
+                  maxLength={200}
                 />
                 <span className={styles.multiSelectArrow}>▼</span>
                 
@@ -442,3 +451,4 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
     </div>
   );
 }
+

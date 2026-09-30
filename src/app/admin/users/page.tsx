@@ -237,6 +237,7 @@ export default function ManageUsersPage() {
             className={styles.searchInput}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            maxLength={200}
           />
           <svg className={styles.searchIcon} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="11" cy="11" r="8"></circle>
@@ -373,54 +374,54 @@ export default function ManageUsersPage() {
               )
             ))
           )}
-
-          {/* Desktop Pagination */}
-          {!loading && totalPages > 1 && (
-            <div className={styles.pagination}>
-              <button 
-                className={styles.pageBtn} 
-                disabled={currentPage === 1}
-                onClick={() => handlePageChange(1)}
-              >
-                &laquo;
-              </button>
-              <button 
-                className={styles.pageBtn} 
-                disabled={currentPage === 1}
-                onClick={() => handlePageChange(currentPage - 1)}
-              >
-                &lsaquo;
-              </button>
-              
-              {getPageNumbers().map((page, index) => (
-                <button 
-                  key={index}
-                  className={`${styles.pageBtn} ${currentPage === page ? styles.activePage : ""} ${page === "..." ? styles.dots : ""}`}
-                  onClick={() => page !== "..." && handlePageChange(page as number)}
-                  disabled={page === "..."}
-                >
-                  {page}
-                </button>
-              ))}
-              
-              <button 
-                className={styles.pageBtn} 
-                disabled={currentPage === totalPages}
-                onClick={() => handlePageChange(currentPage + 1)}
-              >
-                &rsaquo;
-              </button>
-              <button 
-                className={styles.pageBtn} 
-                disabled={currentPage === totalPages}
-                onClick={() => handlePageChange(totalPages)}
-              >
-                &raquo;
-              </button>
-            </div>
-          )}
         </div>
         
+        {/* Desktop Pagination */}
+        {!loading && totalPages > 0 && (
+          <div className={styles.pagination}>
+            <button 
+              className={styles.pageBtn} 
+              disabled={currentPage === 1}
+              onClick={() => handlePageChange(1)}
+            >
+              &laquo;
+            </button>
+            <button 
+              className={styles.pageBtn} 
+              disabled={currentPage === 1}
+              onClick={() => handlePageChange(currentPage - 1)}
+            >
+              &lsaquo;
+            </button>
+            
+            {getPageNumbers().map((page, index) => (
+              <button 
+                key={index}
+                className={`${styles.pageBtn} ${currentPage === page ? styles.activePage : ""} ${page === "..." ? styles.dots : ""}`}
+                onClick={() => page !== "..." && handlePageChange(page as number)}
+                disabled={page === "..."}
+              >
+                {page}
+              </button>
+            ))}
+            
+            <button 
+              className={styles.pageBtn} 
+              disabled={currentPage === totalPages}
+              onClick={() => handlePageChange(currentPage + 1)}
+            >
+              &rsaquo;
+            </button>
+            <button 
+              className={styles.pageBtn} 
+              disabled={currentPage === totalPages}
+              onClick={() => handlePageChange(totalPages)}
+            >
+              &raquo;
+            </button>
+          </div>
+        )}
+
         {/* Mobile observer target */}
         {!loading && currentPage < totalPages && (
           <div ref={lastElementRef} className={styles.loadMoreTarget} style={{ padding: '1.5rem 0', textAlign: 'center', gridColumn: '1/-1' }}>

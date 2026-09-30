@@ -134,7 +134,7 @@
 }
 
 .menuItem.active {
-  background-color: #F3E8FF;
+  background-color: transparent;
   color: #6B21A8;
   font-weight: 600;
 }
@@ -473,7 +473,7 @@
     }
   
     .menuItem.active, .collapsed .menuItem.active {
-      background-color: #F3E8FF;
+      background-color: transparent;
       box-shadow: none;
       color: #6B21A8;
     }

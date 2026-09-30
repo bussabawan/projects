@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import styles from "./ImageFormModal.module.css";
+import { useScrollLock } from "@/app/hooks/useScrollLock";
 
 interface ImageData {
   id: number;
@@ -21,6 +22,7 @@ interface ImageFormModalProps {
 }
 
 export default function ImageFormModal({ image, onClose, onSave }: ImageFormModalProps) {
+  useScrollLock(true);
   const [imageName, setImageName] = useState(image?.title || "");
   const [useAutoSpeech, setUseAutoSpeech] = useState(image ? image.audioGen === 1 : true);
   const [speechText, setSpeechText] = useState(image?.audioTitle || "");
@@ -139,15 +141,26 @@ export default function ImageFormModal({ image, onClose, onSave }: ImageFormModa
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      if (file.size > 10 * 1024 * 1024) {
+        setValidationError("ขนาดรูปภาพต้องไม่เกิน 10MB");
+        return;
+      }
       setImageFile(file);
       setImagePreviewUrl(URL.createObjectURL(file));
       setImageError(false);
+      if (validationError === "ขนาดรูปภาพต้องไม่เกิน 10MB" || validationError === "กรุณาเลือกรูปภาพก่อนบันทึก") setValidationError(null);
     }
   };
 
   const handleAudioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setAudioFile(e.target.files[0]);
+      const file = e.target.files[0];
+      if (file.size > 50 * 1024 * 1024) {
+        setValidationError("ขนาดไฟล์เสียงต้องไม่เกิน 50MB");
+        return;
+      }
+      setAudioFile(file);
+      if (validationError === "ขนาดไฟล์เสียงต้องไม่เกิน 50MB" || validationError === "กรุณาเลือกไฟล์เสียงก่อนบันทึก") setValidationError(null);
     }
   };
 
@@ -192,6 +205,7 @@ export default function ImageFormModal({ image, onClose, onSave }: ImageFormModa
                   className={styles.inputField} 
                   value={imageName}
                   onChange={(e) => setImageName(e.target.value)}
+                  maxLength={200}
                 />
               </div>
 
@@ -220,6 +234,7 @@ export default function ImageFormModal({ image, onClose, onSave }: ImageFormModa
                           setSpeechText(e.target.value);
                           setTtsError(null);
                         }}
+                        maxLength={200}
                       />
                     <div 
                       className={styles.iconInside} 
@@ -300,3 +315,4 @@ export default function ImageFormModal({ image, onClose, onSave }: ImageFormModa
     </div>
   );
 }
+

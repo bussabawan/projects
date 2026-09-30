@@ -56,7 +56,7 @@ export default function UserLayout({
         if (session && session.user) {
           const user = session.user as Record<string, unknown>;
           const nameToDisplay = user.fullName || user.name || user.id || "";
-          setUserName(`คุณ ${nameToDisplay}`);
+          setUserName(`${nameToDisplay}`);
           return;
         }
       } catch (e) {

@@ -2,13 +2,13 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
-
 import Loader from "@/app/components/Loader/Loader";
 import DeleteConfirmModal from "@/app/components/Admin/DeleteConfirmModal";
 import RestoreConfirmModal from "@/app/components/Admin/RestoreConfirmModal";
 import AlertModal from "@/app/components/Admin/AlertModal";
 import styles from "./categories.module.css";
 import { useDebounce } from '@/app/hooks/useDebounce';
+import { useScrollLock } from "@/app/hooks/useScrollLock";
 
 interface Category {
   category_id: number;
@@ -16,6 +16,7 @@ interface Category {
 }
 
 export default function ManageCategoriesPage() {
+  useScrollLock(isAddModalOpen || isEditModalOpen || isDeleteModalOpen || isRestoreModalOpen || isImageModalOpen);
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -430,6 +431,7 @@ export default function ManageCategoriesPage() {
             className={styles.searchInput}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            maxLength={200}
           />
           <svg className={styles.searchIcon} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="11" cy="11" r="8"></circle>
@@ -528,6 +530,7 @@ export default function ManageCategoriesPage() {
                     setNewCategoryName(e.target.value);
                     if (addError) setAddError(null);
                   }}
+                  maxLength={200}
                 />
                 {addError && <p style={{ color: 'red', fontSize: '0.875rem', marginTop: '0.5rem' }}>{addError}</p>}
               </div>
@@ -572,6 +575,7 @@ export default function ManageCategoriesPage() {
                     setEditCategoryNewName(e.target.value);
                     if (editError) setEditError(null);
                   }}
+                  maxLength={200}
                 />
                 {editError && <p style={{ color: 'red', fontSize: '0.875rem', marginTop: '0.5rem' }}>{editError}</p>}
               </div>
@@ -631,6 +635,7 @@ export default function ManageCategoriesPage() {
                     className={styles.imageSearchInput}
                     value={imageSearchQuery}
                     onChange={(e) => setImageSearchQuery(e.target.value)}
+                    maxLength={200}
                   />
                   <svg className={styles.searchIcon} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#888', pointerEvents: 'none' }}>
                     <circle cx="11" cy="11" r="8"></circle>
@@ -754,3 +759,5 @@ export default function ManageCategoriesPage() {
     </div>
   );
 }
+
+

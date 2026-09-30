@@ -204,7 +204,81 @@
   font-size: 1.25rem;
   font-weight: 500;
   color: #333;
-  align-self: flex-end;
+  align-self: flex-start;
+}
+
+.playingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 24px; /* match optionCard/targetCard */
+  pointer-events: none;
+}
+
+.audioSwitchWrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 15px;
+  cursor: pointer;
+}
+
+.audioSwitchLabel {
+  font-size: 1rem;
+  color: #333;
+}
+
+.audioSwitch {
+  position: relative;
+  width: 50px;
+  height: 28px;
+  border-radius: 14px;
+  border: none;
+  background-color: #cbd5e1;
+  transition: background-color 0.3s;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.audioSwitch.switchOn {
+  background-color: #10b981; /* Green for ON */
+}
+
+.audioSwitch.switchOff {
+  background-color: #94a3b8; /* Gray for OFF */
+}
+
+.switchThumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.audioSwitch.switchOn .switchThumb {
+  transform: translateX(22px);
+  color: #10b981;
+}
+
+.audioSwitch.switchOff .switchThumb {
+  transform: translateX(0);
+  color: #94a3b8;
 }
 
 /* Options Phase Styles */
@@ -537,7 +611,9 @@
 
 /* 5. Mobile Portrait (max-width: 480px) */
 @media (max-width: 480px) {
-
+  .audioSwitchLabel {
+    display: none;
+  }
 }
 
 /* Custom Breakpoint */
@@ -593,17 +669,8 @@
       font-size: 1rem;
     }
   
-    .audioBtn {
-      grid-area: audio;
-      justify-self: start;
-      width: 40px;
-      height: 40px;
-      padding: 0;
-    }
-  
-    .audioBtn svg {
-      width: 20px;
-      height: 20px;
+    .audioSwitchLabel {
+      display: none;
     }
   
     .targetCard {
