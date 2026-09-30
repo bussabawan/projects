@@ -19,7 +19,7 @@ export async function DELETE(
     }
 
     await ManageImagesModel.deleteImage(imageId);
-    revalidateTag('images', 'max');
+    revalidateTag('images');
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
     const err = error as Error;
@@ -62,7 +62,7 @@ export async function PUT(
         });
       }
 
-      revalidateTag('images', 'max');
+      revalidateTag('images');
       return NextResponse.json({ success: true });
     } catch (modelError: unknown) {
       const mErr = modelError as Error;
@@ -100,7 +100,7 @@ export async function PATCH(
     
     if (data.action === 'restore') {
       await ManageImagesModel.restoreImage(imageId);
-      revalidateTag('images', 'max');
+      revalidateTag('images');
       return NextResponse.json({ success: true, message: "Image restored successfully" });
     }
 

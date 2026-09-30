@@ -18,23 +18,23 @@ export async function PUT(
     
     // Convert string fields if needed
     if (body.role !== undefined) {
-      body.role = parseInt(body.role, 10);
+      body.role = Number(body.role);
       if (body.role === 2) {
         body.password = 'API Login google';
       }
     }
     if (body.exercises_id !== undefined && body.exercises_id !== null) {
       if (Array.isArray(body.exercises_id)) {
-        body.exercises_id = body.exercises_id.map((id: string | number) => typeof id === 'string' ? parseInt(id, 10) : id);
+        body.exercises_id = body.exercises_id.map(Number);
       } else {
-        body.exercises_id = parseInt(body.exercises_id, 10);
+        body.exercises_id = Number(body.exercises_id);
       }
     }
 
     await ManageUsersModel.updateUser(userId, body);
 
-    revalidateTag('users', 'max');
-    revalidateTag('patient-stats', 'max');
+    revalidateTag('users');
+    revalidateTag('patient-stats');
 
     return NextResponse.json({
       success: true,
@@ -74,8 +74,8 @@ export async function DELETE(
 
     await ManageUsersModel.deleteUser(userId);
 
-    revalidateTag('users', 'max');
-    revalidateTag('patient-stats', 'max');
+    revalidateTag('users');
+    revalidateTag('patient-stats');
 
     return NextResponse.json({
       success: true,
@@ -106,8 +106,8 @@ export async function PATCH(
     if (body.action === 'restore') {
       await ManageUsersModel.restoreUser(userId);
       
-      revalidateTag('users', 'max');
-      revalidateTag('patient-stats', 'max');
+      revalidateTag('users');
+      revalidateTag('patient-stats');
       
       return NextResponse.json({
         success: true,

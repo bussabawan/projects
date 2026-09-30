@@ -9,7 +9,7 @@ import DeleteConfirmModal from "@/app/components/Admin/DeleteConfirmModal";
 import RestoreConfirmModal from "@/app/components/Admin/RestoreConfirmModal";
 import { useDebounce } from '@/app/hooks/useDebounce';
 
-function CardImage({ src, alt }: { src: string; alt: string }) {
+function CardImage({ src, alt, cacheBuster }: { src: string; alt: string; cacheBuster?: number }) {
   const [error, setError] = useState(false);
 
   useEffect(() => {
@@ -29,7 +29,10 @@ function CardImage({ src, alt }: { src: string; alt: string }) {
     );
   }
 
-  return <Image src={src.startsWith('/') || src.startsWith('blob:') ? src : `/api/uploads/${src}`} alt={alt} width={400} height={400} style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={() => setError(true)} unoptimized />;
+  const baseUrl = src.startsWith('/') || src.startsWith('blob:') ? src : `/api/uploads/${src}`;
+  const finalSrc = cacheBuster && !src.startsWith('blob:') ? `${baseUrl}?t=${cacheBuster}` : baseUrl;
+
+  return <Image src={finalSrc} alt={alt} width={400} height={400} style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={() => setError(true)} unoptimized />;
 }
 
 interface ImageData {
@@ -46,6 +49,7 @@ export default function ManageImagesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [cacheBuster, setCacheBuster] = useState(Date.now());
 
   const [images, setImages] = useState<ImageData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -105,7 +109,8 @@ export default function ManageImagesPage() {
           }
           if (img.audioUrl) {
             preloadPromises.push(new Promise((resolve) => {
-              const fullAudioUrl = img.audioUrl!.startsWith('/') || img.audioUrl!.startsWith('blob:') ? img.audioUrl! : `/api/uploads/${img.audioUrl}`;
+              const baseAudioUrl = img.audioUrl!.startsWith('/') || img.audioUrl!.startsWith('blob:') ? img.audioUrl! : `/api/uploads/${img.audioUrl}`;
+              const fullAudioUrl = !img.audioUrl!.startsWith('blob:') ? `${baseAudioUrl}?t=${cacheBuster}` : baseAudioUrl;
               if (!audioCache.current[fullAudioUrl]) {
                 const audio = new window.Audio(fullAudioUrl);
                 audio.preload = 'auto';
@@ -260,7 +265,9 @@ export default function ManageImagesPage() {
             audioTitle: (payload.audioTitle as string) || "",
             audioGen: payload.audioGen as number
           } : img));
+          setCacheBuster(Date.now()); // Update cache when editing image/audio
         } else {
+          setCacheBuster(Date.now()); // Refresh cache for new adds too just in case
           fetchImages(true);
         }
         setIsProcessing(false);
@@ -320,6 +327,7 @@ export default function ManageImagesPage() {
           return [updatedImg, ...prev];
         });
 
+        setCacheBuster(Date.now()); // Reload cache when restoring image/audio
         setIsModalOpen(false);
         setEditingImage(null);
         setIsProcessing(false);
@@ -341,7 +349,8 @@ export default function ManageImagesPage() {
       alert("ไม่มีไฟล์เสียง");
       return;
     }
-    const fullAudioUrl = audioUrl.startsWith('/') || audioUrl.startsWith('blob:') ? audioUrl : `/api/uploads/${audioUrl}`;
+    const baseAudioUrl = audioUrl.startsWith('/') || audioUrl.startsWith('blob:') ? audioUrl : `/api/uploads/${audioUrl}`;
+    const fullAudioUrl = !audioUrl.startsWith('blob:') ? `${baseAudioUrl}?t=${cacheBuster}` : baseAudioUrl;
     
     let audio = audioCache.current[fullAudioUrl];
     if (!audio) {
@@ -426,7 +435,7 @@ export default function ManageImagesPage() {
           images.map((img) => (
             <div key={img.id} className={styles.card}>
               <div className={styles.imageContainer}>
-                <CardImage src={img.imageUrl} alt={img.title} />
+                <CardImage src={img.imageUrl} alt={img.title} cacheBuster={cacheBuster} />
               </div>
               <div className={styles.cardContent}>
                 <div className={styles.cardTitle}>{img.title}</div>

@@ -3,6 +3,7 @@ import Loader from "@/app/components/Loader/Loader";
 import DatePicker from "@/app/components/DatePicker/DatePicker";
 import styles from './PatientStatsPopup.module.css';
 import { useScrollLock } from "@/app/hooks/useScrollLock";
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, Legend
@@ -56,6 +57,14 @@ interface PatientStatsData {
 
 const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, patientId, exerciseSets = [] }) => {
   const [data, setData] = useState<PatientStatsData | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   const [loading, setLoading] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [periodFilter, setPeriodFilter] = useState('all');
@@ -108,7 +117,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
     return () => clearTimeout(timer);
   }, [isOpen, patientId, categoryFilter, periodFilter, exerciseSetFilter, startDate, endDate]);
 
-  if (!isOpen) return null;
+  // Removed early return for AnimatePresence
 
   const PIE_COLORS = ['#10B981', '#EF4444']; // Green (Correct), Red (Incorrect)
   const pieTotalData = data ? [
@@ -125,8 +134,24 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
   const SEP_COLORS = ['#3B82F6', '#93C5FD', '#8B5CF6', '#C4B5FD'];
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.popup} onClick={(e) => e.stopPropagation()}>
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div 
+          className={styles.overlay} 
+          onClick={onClose}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+        <motion.div 
+          className={styles.popup} 
+          onClick={(e) => e.stopPropagation()}
+          initial={{ scale: 0.95, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.95, opacity: 0, y: 20 }}
+          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+        >
         <div className={styles.header}>
           <h2 className={styles.title}>รายละเอียดสถิติ</h2>
           <button className={styles.closeButton} onClick={onClose} aria-label="Close popup">
@@ -290,13 +315,13 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                           angle={-45}
                           textAnchor="end"
                           height={60}
-                          label={{ value: 'วันที่', position: 'bottom', offset: 20, fontSize: 12, fill: '#6b7280' }}
+                          label={isMobile ? undefined : { value: 'วันที่', position: 'bottom', offset: 20, fontSize: 12, fill: '#6b7280' }}
                         />
                         <YAxis 
                           tick={{ fill: '#6b7280', fontSize: 12 }} 
                           axisLine={false} 
                           tickLine={false} 
-                          label={{ value: 'จำนวน (ครั้ง)', angle: -90, position: 'insideLeft', offset: 15, fontSize: 12, fill: '#6b7280' }}
+                          label={isMobile ? undefined : { value: 'จำนวน (ครั้ง)', angle: -90, position: 'insideLeft', offset: 15, fontSize: 12, fill: '#6b7280' }}
                         />
                         <RechartsTooltip 
                           content={({ active, payload, label }) => {
@@ -346,13 +371,13 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                           angle={-45}
                           textAnchor="end"
                           height={60}
-                          label={{ value: 'วันที่', position: 'bottom', offset: 20, fontSize: 12, fill: '#6b7280' }}
+                          label={isMobile ? undefined : { value: 'วันที่', position: 'bottom', offset: 20, fontSize: 12, fill: '#6b7280' }}
                         />
                         <YAxis 
                           tick={{ fill: '#6b7280', fontSize: 12 }} 
                           axisLine={false}
                           tickLine={false}
-                          label={{ value: 'เวลา (วินาที)', angle: -90, position: 'insideLeft', offset: 15, fontSize: 12, fill: '#6b7280' }}
+                          label={isMobile ? undefined : { value: 'เวลา (วินาที)', angle: -90, position: 'insideLeft', offset: 15, fontSize: 12, fill: '#6b7280' }}
                         />
                         <RechartsTooltip 
                           content={({ active, payload, label }) => {
@@ -392,7 +417,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                           angle={-45}
                           textAnchor="end"
                           height={60}
-                          label={{ value: 'วันที่', position: 'bottom', offset: 20, fontSize: 12, fill: '#6b7280' }}
+                          label={isMobile ? undefined : { value: 'วันที่', position: 'bottom', offset: 20, fontSize: 12, fill: '#6b7280' }}
                         />
                         <YAxis 
                           type="number" 
@@ -405,7 +430,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                           tickLine={false}
                           width={60}
                           padding={{ top: 20, bottom: 20 }}
-                          label={{ value: 'เวลา (น.)', angle: -90, position: 'insideLeft', offset: -5, fontSize: 12, fill: '#6b7280' }}
+                          label={isMobile ? undefined : { value: 'เวลา (น.)', angle: -90, position: 'insideLeft', offset: -5, fontSize: 12, fill: '#6b7280' }}
                         />
                         <RechartsTooltip 
                           cursor={{ strokeDasharray: '3 3' }} 
@@ -446,7 +471,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                           angle={-45}
                           textAnchor="end"
                           height={60}
-                          label={{ value: 'วันที่', position: 'bottom', offset: 20, fontSize: 12, fill: '#6b7280' }}
+                          label={isMobile ? undefined : { value: 'วันที่', position: 'bottom', offset: 20, fontSize: 12, fill: '#6b7280' }}
                         />
                         <YAxis 
                           type="number" 
@@ -456,7 +481,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                           axisLine={false}
                           tickLine={false}
                           padding={{ top: 30, bottom: 20 }}
-                          label={{ value: 'เวลารวม (นาที)', angle: -90, position: 'insideLeft', offset: 15, fontSize: 12, fill: '#6b7280' }}
+                          label={isMobile ? undefined : { value: 'เวลารวม (นาที)', angle: -90, position: 'insideLeft', offset: 15, fontSize: 12, fill: '#6b7280' }}
                         />
                         <RechartsTooltip 
                           cursor={{ strokeDasharray: '3 3' }} 
@@ -489,8 +514,10 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
             )}
           </div>
         </div>
-      </div>
-    </div>
+        </motion.div>
+      </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 

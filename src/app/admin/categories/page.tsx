@@ -16,7 +16,7 @@ interface Category {
 }
 
 export default function ManageCategoriesPage() {
-  useScrollLock(isAddModalOpen || isEditModalOpen || isDeleteModalOpen || isRestoreModalOpen || isImageModalOpen);
+
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -58,6 +58,8 @@ export default function ManageCategoriesPage() {
   const [imageTotalPages, setImageTotalPages] = useState(1);
   const imageItemsPerPage = 20;
   const isImageLoadMoreRef = useRef(false);
+
+  useScrollLock(isAddModalOpen || isEditModalOpen || isDeleteModalOpen || isRestoreModalOpen || isImageModalOpen);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -167,7 +169,7 @@ export default function ManageCategoriesPage() {
         setCategories(prev => prev.map(cat => cat.name === editCategoryOldName ? { ...cat, name: editCategoryNewName.trim() } : cat));
       } else if (data.isDuplicateDeleted) {
         setIsEditModalOpen(false);
-        setDuplicateCategoryName(data.name);
+        setCategoryToRestore(data.name);
         setIsRestoreModalOpen(true);
       } else {
         setEditError(data.error || 'เกิดข้อผิดพลาดในการแก้ไขหมวดหมู่');
@@ -693,7 +695,7 @@ export default function ManageCategoriesPage() {
                           <div className={styles.imageIconPlaceholder}>
                             {img.imageUrl ? (
                               <Image 
-                                src={img.imageUrl.startsWith('/') ? img.imageUrl : `/api/uploads/${img.imageUrl}`} 
+                                src={`${img.imageUrl.startsWith('/') ? img.imageUrl : `/api/uploads/${img.imageUrl}`}?v=${Date.now()}`} 
                                 alt={img.title}
                                 width={40}
                                 height={40}
@@ -759,5 +761,3 @@ export default function ManageCategoriesPage() {
     </div>
   );
 }
-
-

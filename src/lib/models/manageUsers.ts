@@ -192,6 +192,10 @@ export class ManageUsersModel extends BaseModel {
         updateFields.push('full_name = ?');
         updateValues.push(userData.full_name);
       }
+      if (userData.role !== undefined) {
+        updateFields.push('role = ?');
+        updateValues.push(userData.role);
+      }
       if (userData.password) {
         let finalPassword = userData.password;
         if (finalPassword !== 'API Login google') {

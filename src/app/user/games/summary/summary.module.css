@@ -191,11 +191,11 @@
     }
   
     .chartContainer {
-      align-self: stretch;
-      width: auto;
-      margin: 0 -10px;
-      border-radius: 10;
-      transform: none;
+      align-self: flex-start;
+      width: 100vw;
+      margin-left: 50%;
+      transform: translateX(-50%);
+      border-radius: 0;
     }
   
     .statsList {

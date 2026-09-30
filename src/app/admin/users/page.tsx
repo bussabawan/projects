@@ -79,7 +79,7 @@ export default function ManageUsersPage() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      fetchUsers(true);
+      fetchUsers(false);
       isLoadMoreRef.current = false;
     }, 0);
     return () => clearTimeout(timer);
@@ -161,16 +161,7 @@ export default function ManageUsersPage() {
 
   const handleModalSave = (savedUser?: User, originalUserId?: number) => {
     setIsModalOpen(false);
-    if (savedUser) {
-      setUsers(prev => {
-        if (originalUserId) {
-          return prev.map(u => u.user_id === originalUserId ? savedUser : u);
-        }
-        return [savedUser, ...prev];
-      });
-    } else {
-      fetchUsers(true);
-    }
+    fetchUsers(true);
   };
 
   const formatDate = (dateString: string) => {

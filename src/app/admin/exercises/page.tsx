@@ -16,7 +16,7 @@ interface Exercise {
 }
 
 export default function ManageExercisesPage() {
-  useScrollLock(isAddModalOpen || isEditModalOpen || isDeleteModalOpen || isRestoreModalOpen || isImageModalOpen);
+
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -62,6 +62,8 @@ export default function ManageExercisesPage() {
   const [imageTotalPages, setImageTotalPages] = useState(1);
   const imageItemsPerPage = 20;
   const isImageLoadMoreRef = useRef(false);
+
+  useScrollLock(isAddModalOpen || isEditModalOpen || isDeleteModalOpen || isRestoreModalOpen || isImageModalOpen);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -171,7 +173,7 @@ export default function ManageExercisesPage() {
         setExercises(prev => prev.map(ex => ex.name === editExerciseOldName ? { ...ex, name: editExerciseNewName.trim() } : ex));
       } else if (data.isDuplicateDeleted) {
         setIsEditModalOpen(false);
-        setDuplicateExerciseName(data.name);
+        setExerciseToRestore(data.name);
         setIsRestoreModalOpen(true);
       } else {
         setEditError(data.error || 'เกิดข้อผิดพลาดในการแก้ไขชุดแบบฝึกหัด');
@@ -251,7 +253,7 @@ export default function ManageExercisesPage() {
     } finally {
       setIsProcessing(false);
       setExerciseToRestore('');
-      setDuplicateExerciseName('');
+
     }
   };
 
@@ -760,7 +762,7 @@ export default function ManageExercisesPage() {
                           <div className={styles.imageIconPlaceholder}>
                             {img.imageUrl ? (
                               <Image 
-                                src={img.imageUrl.startsWith('/') ? img.imageUrl : `/api/uploads/${img.imageUrl}`} 
+                                src={`${img.imageUrl.startsWith('/') ? img.imageUrl : `/api/uploads/${img.imageUrl}`}?v=${Date.now()}`} 
                                 alt={img.title}
                                 width={40}
                                 height={40}

@@ -103,6 +103,15 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
       return;
     }
 
+    if (role === 2) {
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!emailRegex.test(formData.user_name)) {
+        setError("รูปแบบอีเมลไม่ถูกต้อง");
+        setLoading(false);
+        return;
+      }
+    }
+
     try {
       const payload: Record<string, unknown> = {
         user_name: formData.user_name,

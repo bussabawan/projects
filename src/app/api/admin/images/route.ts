@@ -1,4 +1,4 @@
-Ôªøexport const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from "next/server";
 import { revalidateTag } from 'next/cache';
 import { ManageImagesModel } from "@/lib/models/manageImages";
@@ -41,11 +41,11 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      revalidateTag('images', 'max');
+      revalidateTag('images');
       return NextResponse.json({ success: true, id: result });
     } catch (modelError: unknown) {
       const mErr = modelError as Error;
-      if (mErr.message === "‡∏°‡∏µ‡∏ä‡∏∑‡πà‡∏≠‡∏£‡∏π‡∏õ‡∏†‡∏≤‡∏û‡∏ô‡∏µ‡πâ‡∏≠‡∏¢‡∏π‡πà‡πÉ‡∏ô‡∏£‡∏∞‡∏ö‡∏ö‡πÅ‡∏•‡πâ‡∏ß") {
+      if (mErr.message === "¡’™◊ËÕ√Ÿª¿“æπ’ÈÕ¬ŸË„π√–∫∫·≈È«") {
         return NextResponse.json({ 
           success: false, 
           error: mErr.message 

@@ -15,7 +15,7 @@ export async function PUT(
 
     if (action === 'restore') {
       await ManageCategoriesModel.restoreCategory(oldName);
-      revalidateTag('categories', 'max');
+      revalidateTag('categories');
       return NextResponse.json({ success: true });
     }
 
@@ -35,7 +35,7 @@ export async function PUT(
       });
     }
 
-    revalidateTag('categories', 'max');
+    revalidateTag('categories');
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
     const err = error as Error;
@@ -56,7 +56,7 @@ export async function DELETE(
     const name = decodeURIComponent(resolvedParams.name);
     
     await ManageCategoriesModel.deleteCategory(name);
-    revalidateTag('categories', 'max');
+    revalidateTag('categories');
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
     const err = error as Error;

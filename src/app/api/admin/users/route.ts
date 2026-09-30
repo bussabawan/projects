@@ -43,7 +43,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const roleId = parseInt(body.role, 10);
+    const roleId = Number(body.role);
     const password = roleId === 2 ? 'API Login google' : body.password;
 
     if (roleId === 1 && (!body.exercises_id || (Array.isArray(body.exercises_id) && body.exercises_id.length === 0))) {
@@ -56,9 +56,9 @@ export async function POST(request: Request) {
       let parsedExercisesId: number | number[] | undefined = undefined;
       if (body.exercises_id !== undefined && body.exercises_id !== null) {
         if (Array.isArray(body.exercises_id)) {
-          parsedExercisesId = body.exercises_id.map((id: string | number) => typeof id === 'string' ? parseInt(id, 10) : id);
+          parsedExercisesId = body.exercises_id.map(Number);
         } else {
-          parsedExercisesId = parseInt(body.exercises_id, 10);
+          parsedExercisesId = Number(body.exercises_id);
         }
       }
 
@@ -70,8 +70,8 @@ export async function POST(request: Request) {
       exercises_id: parsedExercisesId
     });
 
-    revalidateTag('users', 'max');
-    revalidateTag('patient-stats', 'max');
+    revalidateTag('users');
+    revalidateTag('patient-stats');
     
     return NextResponse.json({
       success: true,
