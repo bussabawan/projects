@@ -8,7 +8,6 @@
   min-height: 100%;
   padding: 2rem;
   background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
-  border-radius: 20px;
   position: relative;
   box-shadow: 0 4px 20px rgba(0,0,0,0.02);
 }
@@ -398,7 +397,7 @@
     .subtitle {
       font-size: 1.5rem;
       line-height: 1.4;
-      margin-bottom: 1rem;
+      margin-bottom: 2rem;
     }
   
     .contentRow {

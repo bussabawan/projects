@@ -56,31 +56,35 @@
 ```text
 ot-project-2026/
 ├── src/
-│   ├── app/                  # (View & Controller) โฟลเดอร์หลักของแอป
-│   │   ├── actions/          # (Controller) สำหรับเก็บไฟล์ Server Actions ("use server")
-│   │   ├── api/              # (Controller) สำหรับสร้าง API Endpoint รับส่งข้อมูล
-│   │   │   └── upload/
-│   │   │       └── route.ts  # API สำหรับจัดการการอัปโหลดไฟล์
-│   │   ├── admin/            # (View & Controller) ส่วนของผู้ดูแลระบบ
-│   │   ├── user/             # (View & Controller) ส่วนของผู้ใช้งานทั่วไป (ผู้ป่วย)
-│   │   ├── login/            # (View & Controller) ส่วนของการเข้าสู่ระบบ
-│   │   ├── hooks/            # React Hooks ที่ใช้ซ้ำได้
-│   │   ├── components/       # (View) React Components ที่ใช้ร่วมกัน
-│   │   ├── globals.css       # สไตล์ CSS หลักของเว็บไซต์
-│   │   ├── layout.tsx        # (View) โครงสร้าง Layout หลัก
-│   │   └── page.tsx          # (View) หน้าจอ UI หลัก
-│   ├── lib/                  # (Model) สำหรับเก็บโค้ดที่เกี่ยวกับฐานข้อมูลหรือลอจิกส่วนกลาง
-│   │   ├── db.ts             # โค้ดเชื่อมต่อฐานข้อมูล MySQL
-│   │   ├── ffmpeg.ts         # โค้ดจัดการและแปลงไฟล์เสียง/วิดีโอ
-│   │   └── models/           # (Model) โค้ดจัดการข้อมูลแต่ละส่วน (เช่น user.ts, patientStats.ts)
-│   ├── auth.config.ts        # การตั้งค่าสำหรับ Auth.js
-│   ├── auth.ts               # โค้ดจัดการการเข้าสู่ระบบ (Auth.js)
-│   └── proxy.ts              # (Middleware) สำหรับจัดการ Request ก่อนเข้าถึงแอป
-├── uploads/                  # โฟลเดอร์เก็บไฟล์ภาพและเสียงที่ผู้ใช้อัปโหลด
-├── .env                      # ไฟล์ตั้งค่าตัวแปรระบบ (รหัสผ่านฐานข้อมูล, พอร์ต)
-├── compose.dev.yaml          # ไฟล์ตั้งค่า Docker สำหรับ Development
-├── compose.yaml              # ไฟล์ตั้งค่า Docker สำหรับ Production
-└── Dockerfile                # ไฟล์สำหรับ Build โปรเจกต์ขึ้น Docker
+│   ├── app/                  # (View & Route) ทำหน้าที่แสดงผลและรับ Request (Next.js App Router)
+│   │   ├── actions/          # (Controller) Server Actions สำหรับรับ Input จาก View ไปเรียกใช้ Service
+│   │   ├── api/              # (Controller) API Endpoints รับส่ง HTTP Request
+│   │   ├── admin/            # (View) ระบบจัดการสำหรับแอดมิน
+│   │   ├── user/             # (View) ระบบสำหรับผู้ป่วย/ผู้ใช้งาน
+│   │   ├── login/            # (View) หน้าต่างเข้าสู่ระบบ
+│   │   ├── hooks/            # Custom React Hooks
+│   │   ├── globals.css       # (Design System) ตัวแปร Design Tokens และ CSS รวมของแอป
+│   │   ├── layout.tsx        # (View) โครงสร้างหน้าเว็บหลัก
+│   │   └── page.tsx          # (View) หน้าจอเริ่มต้น (Landing)
+│   ├── components/           # (View) Global Components ที่ถูกดึงมาใช้ซ้ำทั่วโปรเจกต์
+│   │   ├── ui/               # Base Components (เช่น BaseButton, BaseModal)
+│   │   ├── games/            # Components เฉพาะสำหรับการเล่นเกม
+│   │   └── ...
+│   ├── services/             # (Business Logic Layer) หัวใจของระบบ! ทำหน้าที่คำนวณและประมวลผลต่างๆ
+│   │   ├── games/            # ระบบกติกาและการสุ่มของเกม (เช่น MatchingGameService, MemoryGameService)
+│   │   ├── media/            # ระบบประมวลผลไฟล์เสียง (เช่น AudioProcessor ด้วย FFmpeg)
+│   │   └── storage/          # ระบบการจัดเก็บไฟล์ (เช่น LocalStorageService)
+│   ├── lib/                  # (Data Access Layer) จัดการการเข้าถึงข้อมูล
+│   │   ├── db.ts             # ระบบ Database Connection Pool สำหรับ MySQL
+│   │   └── models/           # (Model / Repository) คลาสสืบทอด BaseModel ที่จัดการคำสั่ง SQL เท่านั้น
+│   ├── auth.config.ts        # การตั้งค่าพื้นฐานสำหรับ Auth.js
+│   ├── auth.ts               # ระบบ Login / Authentication Session
+│   └── proxy.ts              # (Middleware) Next.js Middleware ช่วยดักจับและกรอง Request
+├── uploads/                  # โฟลเดอร์สำหรับจัดเก็บไฟล์สื่อและระบบ Cache
+├── .env                      # ไฟล์ตั้งค่าตัวแปรระบบและรหัสผ่านต่างๆ (ต้องสร้างเองตอนใช้งาน)
+├── compose.dev.yaml          # ไฟล์ตั้งค่า Docker สำหรับโหมด Development
+├── compose.yaml              # ไฟล์ตั้งค่า Docker สำหรับโหมด Production
+└── Dockerfile                # สคริปต์สำหรับ Build แอปพลิเคชันขึ้น Docker Image
 ```
 
 ---
@@ -98,40 +102,46 @@ ot-project-2026/
 - **API Endpoints:** หากต้องการสร้าง API ใหม่ (เช่น จัดการข้อมูล User ที่สื่อสารผ่าน HTTP) ให้สร้างโฟลเดอร์ `app/api/users/route.ts` 
 - ในไฟล์ `route.ts` คุณสามารถประกาศฟังก์ชัน `GET`, `POST`, `PUT`, `DELETE` เพื่อรองรับ HTTP Methods ต่างๆ
 
-## 🗄️ 3. Model & ฐานข้อมูล (การเชื่อมต่อและ CRUD)
-**เก็บที่ไหน:** โฟลเดอร์ `lib/` (เช่น `lib/db.ts`)
-**การเชื่อมต่อ:** โปรเจกต์นี้ใช้ไลบรารี `mysql2` โดยการตั้งค่าทั้งหมดถูกดึงมาจากไฟล์ `.env`
+## 🗄️ 3. Model & ฐานข้อมูล (Data Access & Repository)
+**เก็บที่ไหน:** โฟลเดอร์ `src/lib/models/` และ Service ที่เรียกใช้งานใน `src/services/`
+**การเชื่อมต่อ:** โปรเจกต์นี้ใช้ไลบรารี `mysql2` ผ่านคลาส `BaseModel` ที่คอยจัดการ Connection Pool
 
 **วิธีจัดการข้อมูล (CRUD):** 
-คุณสามารถเรียกใช้ `db.query()` ภายใน Controller (`app/api/.../route.ts`) เพื่อจัดการข้อมูลได้เลย ตัวอย่างเช่น:
+เพื่อรักษาโครงสร้าง MVC ที่ดี ห้ามเรียกใช้ `db.query()` โดยตรงใน Controller ให้เรียกใช้ผ่านคลาส Model หรือ Service แทน ตัวอย่างเช่น:
 
-*ตัวอย่างการนำเข้า Database:*
 ```typescript
-import { db } from "@/lib/db";
-```
+// ในฝั่ง Controller (app/actions/ หรือ app/api/)
+import { ManageExercisesModel } from '@/lib/models/manageExercises';
 
-* **C - Create (เพิ่มข้อมูล):**
-  ```typescript
-  const [result] = await db.query(
-    "INSERT INTO users (name, email) VALUES (?, ?)", 
-    ["John Doe", "john@example.com"]
-  );
-  ```
-* **R - Read (ดึงข้อมูล):**
-  ```typescript
-  const [rows] = await db.query("SELECT * FROM users");
-  ```
-* **U - Update (แก้ไขข้อมูล):**
-  ```typescript
-  await db.query(
-    "UPDATE users SET name = ? WHERE id = ?", 
-    ["Jane Doe", 1]
-  );
-  ```
-* **D - Delete (ลบข้อมูล):**
-  ```typescript
-  await db.query("DELETE FROM users WHERE id = ?", [1]);
-  ```
+// ...
+const data = await ManageExercisesModel.getExercises();
+```
+*ตัวอย่างการสร้าง Model:*
+```typescript
+import { BaseModel } from "./BaseModel";
+
+export class UserModel extends BaseModel {
+  // C - Create (เพิ่มข้อมูล)
+  static async addUser(name: string, email: string) {
+    return await this.insert('users', { name, email });
+  }
+
+  // R - Read (ดึงข้อมูล)
+  static async getUsers() {
+    return await this.query("SELECT * FROM users");
+  }
+
+  // U - Update (แก้ไขข้อมูล)
+  static async updateUser(id: number, name: string) {
+    return await this.execute("UPDATE users SET name = ? WHERE id = ?", [name, id]);
+  }
+
+  // D - Delete (ลบข้อมูล)
+  static async deleteUser(id: number) {
+    return await this.execute("DELETE FROM users WHERE id = ?", [id]);
+  }
+}
+```
 
 ---
 

@@ -1,4 +1,43 @@
 /* ==========================================================================
+   Design Tokens (CSS Variables)
+   ========================================================================== */
+:root {
+  /* Primary Colors */
+  --color-primary: #e76f51;
+  --color-primary-light: #f4a261;
+  --color-primary-dark: #d65a3d;
+  
+  /* Secondary / Accent */
+  --color-accent: #2a9d8f;
+  --color-accent-dark: #21867a;
+  
+  /* Backgrounds */
+  --color-bg-page: #fdfbfb;
+  --color-bg-panel: #ffffff;
+  --color-bg-hover: #f1f5f9;
+  
+  /* Text Colors */
+  --color-text-main: #111111;
+  --color-text-muted: #777777;
+  
+  /* Borders & Dividers */
+  --color-border: #cbd5e1;
+  --color-border-light: #e2e8f0;
+  
+  /* Spacing */
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+}
+
+/* ==========================================================================
    Base Styles & Components
    ========================================================================== */
 /* Hide scrollbar for Chrome, Safari and Opera */

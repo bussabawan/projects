@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
     const page = parseInt(url.searchParams.get("page") || "1");
-    const limit = parseInt(url.searchParams.get("limit") || "12");
+    const limit = parseInt(url.searchParams.get("limit") || "15");
     const search = url.searchParams.get("search") || "";
     const prioritizeIdsStr = url.searchParams.get("prioritizeIds") || "";
     const prioritizeIds = prioritizeIdsStr ? prioritizeIdsStr.split(',').map(Number).filter(n => !isNaN(n)) : [];
@@ -24,14 +24,14 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
-    const { title, imageUrl, audioUrl, audioTitle, audioGen } = data;
+    const { title, imageUrl, audioUrl, audioTime, audioTitle, audioGen } = data;
 
     if (!title || !imageUrl) {
       return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
     }
 
     try {
-      const result = await ManageImagesModel.createImage({ title, imageUrl, audioUrl, audioTitle, audioGen });
+      const result = await ManageImagesModel.createImage({ title, imageUrl, audioUrl, audioTime, audioTitle, audioGen });
       
       if (typeof result === 'object' && result.isDuplicateDeleted) {
         return NextResponse.json({ 
@@ -45,10 +45,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, id: result });
     } catch (modelError: unknown) {
       const mErr = modelError as Error;
-      if (mErr.message === "เธกเธตเธเธทเนเธญเธฃเธนเธเธ เธฒเธเธเธตเนเธญเธขเธนเนเนเธเธฃเธฐเธเธเนเธฅเนเธง (Image title already exists)") {
+      if (mErr.message && mErr.message.includes("Image title already exists")) {
         return NextResponse.json({ 
           success: false, 
-          error: mErr.message 
+          error: "มีชื่อรูปภาพนี้อยู่ในระบบแล้ว (Image title already exists)"
         }, { status: 400 });
       }
       throw mErr;

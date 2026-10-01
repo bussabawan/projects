@@ -1,7 +1,7 @@
-import { db } from '@/lib/db';
-import { RowDataPacket } from 'mysql2';
+import { RowDataPacket } from 'mysql2/promise';
+import { BaseModel } from './BaseModel';
 
-export class PatientHistoryModel {
+export class PatientHistoryModel extends BaseModel {
   /**
    * Get training history for a specific patient
    */
@@ -25,7 +25,7 @@ export class PatientHistoryModel {
         SELECT DATE_FORMAT(test_date, '%Y-%m-%d') as dateStr FROM memory_exercises_log WHERE user_id = ? AND remove = 0 ${dateFilter}
       ) as combined
     `;
-    const [countResult] = await db.query<RowDataPacket[]>(countQuery, [...params, ...params]);
+    const countResult = await this.query<RowDataPacket>(countQuery, [...params, ...params]);
     const totalDates = countResult[0].totalDates || 0;
     const totalPages = Math.ceil(totalDates / limit) || 1;
 
@@ -42,7 +42,7 @@ export class PatientHistoryModel {
       LIMIT ? OFFSET ?
     `;
 
-    const [datesResult] = await db.query<RowDataPacket[]>(datesQuery, [...params, ...params, limit, offset]);
+    const datesResult = await this.query<RowDataPacket>(datesQuery, [...params, ...params, limit, offset]);
     
     if (datesResult.length === 0) {
       return { dailyStats: [], totalPages, currentPage: page };
@@ -91,7 +91,7 @@ export class PatientHistoryModel {
       ORDER BY dateStr DESC, timeStr DESC
     `;
     
-    const [historyRows] = await db.query<RowDataPacket[]>(historyQuery, [...detailParams, ...detailParams]);
+    const historyRows = await this.query<RowDataPacket>(historyQuery, [...detailParams, ...detailParams]);
     
     const dailyStatsMap = new Map<string, {
       dateStr: string;

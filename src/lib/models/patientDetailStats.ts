@@ -1,7 +1,7 @@
-import { db } from '@/lib/db';
-import { RowDataPacket } from 'mysql2';
+import { RowDataPacket } from 'mysql2/promise';
+import { BaseModel } from './BaseModel';
 
-export class PatientDetailStatsModel {
+export class PatientDetailStatsModel extends BaseModel {
   /**
    * Get detailed statistics for a specific patient
    */
@@ -82,7 +82,7 @@ export class PatientDetailStatsModel {
       WHERE m.user_id = ? AND m.remove = 0 AND ed.remove = 0
       ${dateFilter.replace(/test_date/g, 'm.test_date')}
     `;
-    const [availableFiltersRows] = await db.execute<RowDataPacket[]>(availableFiltersQuery, [...matchingParams.slice(0, dateFilter ? 3 : 1), ...memoryParams.slice(0, dateFilter ? 3 : 1)]);
+    const availableFiltersRows = await this.query<RowDataPacket>(availableFiltersQuery, [...matchingParams.slice(0, dateFilter ? 3 : 1), ...memoryParams.slice(0, dateFilter ? 3 : 1)]);
     const availableExerciseSets = availableFiltersRows.map(r => r.exercises_name);
 
     // Get available categories for the given period
@@ -101,7 +101,7 @@ export class PatientDetailStatsModel {
       WHERE m.user_id = ? AND m.remove = 0 AND cie.remove = 0 AND cd.remove = 0
       ${dateFilter.replace(/test_date/g, 'm.test_date')}
     `;
-    const [availableCatRows] = await db.execute<RowDataPacket[]>(availableCategoriesQuery, [...matchingParams.slice(0, dateFilter ? 3 : 1), ...memoryParams.slice(0, dateFilter ? 3 : 1)]);
+    const availableCatRows = await this.query<RowDataPacket>(availableCategoriesQuery, [...matchingParams.slice(0, dateFilter ? 3 : 1), ...memoryParams.slice(0, dateFilter ? 3 : 1)]);
     const availableCategories = availableCatRows.map(r => r.category_name);
 
     // Get exercise-category mapping for UI filtering
@@ -112,7 +112,7 @@ export class PatientDetailStatsModel {
       JOIN category_data cd ON cie.category_id = cd.category_id
       WHERE ed.remove = 0 AND cie.remove = 0 AND cd.remove = 0
     `;
-    const [mapRows] = await db.execute<RowDataPacket[]>(exerciseCategoryMapQuery);
+    const mapRows = await this.query<RowDataPacket>(exerciseCategoryMapQuery);
     const exerciseCategoryMap: Record<string, string[]> = {};
     mapRows.forEach(row => {
       if (!exerciseCategoryMap[row.exercises_name]) {
@@ -152,8 +152,8 @@ export class PatientDetailStatsModel {
       ORDER BY dateStr ASC
     `;
 
-    const [matchingRows] = await db.execute<RowDataPacket[]>(matchingQuery, matchingParams);
-    const [memoryRows] = await db.execute<RowDataPacket[]>(memoryQuery, memoryParams);
+    const matchingRows = await this.query<RowDataPacket>(matchingQuery, matchingParams);
+    const memoryRows = await this.query<RowDataPacket>(memoryQuery, memoryParams);
 
     const loginQuery = `
       SELECT 
@@ -169,7 +169,7 @@ export class PatientDetailStatsModel {
     if (filters?.period === 'custom' && filters.startDate && filters.endDate) {
       loginParams.push(filters.startDate, filters.endDate);
     }
-    const [loginRows] = await db.execute<RowDataPacket[]>(loginQuery, loginParams);
+    const loginRows = await this.query<RowDataPacket>(loginQuery, loginParams);
 
     // 2. Aggregate data for the charts
     let totalCorrect = 0;
@@ -295,7 +295,7 @@ export class PatientDetailStatsModel {
     `;
     
     const timeParams = [...matchingParams, ...memoryParams];
-    const [timeRows] = await db.execute<RowDataPacket[]>(timeQuery, timeParams);
+    const timeRows = await this.query<RowDataPacket>(timeQuery, timeParams);
     
     const timeMap = new Map<string, { totalSeconds: number; count: number; matchingSeconds: number; matchingCount: number; memorySeconds: number; memoryCount: number }>();
     
@@ -375,7 +375,7 @@ export class PatientDetailStatsModel {
       ORDER BY dateStr DESC, timeStr DESC
     `;
 
-    const [scatterRows] = await db.execute<RowDataPacket[]>(scatterQuery, timeParams);
+    const scatterRows = await this.query<RowDataPacket>(scatterQuery, timeParams);
     
     const scatterStats = scatterRows.map((row, index) => ({
       id: index + 1,

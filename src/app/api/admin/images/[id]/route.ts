@@ -44,14 +44,14 @@ export async function PUT(
     }
 
     const data = await req.json();
-    const { title, imageUrl, audioUrl, audioTitle, audioGen } = data;
+    const { title, imageUrl, audioUrl, audioTime, audioTitle, audioGen } = data;
 
     if (!title || !imageUrl) {
       return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
     }
 
     try {
-      const result = await ManageImagesModel.updateImage(imageId, { title, imageUrl, audioUrl, audioTitle, audioGen });
+      const result = await ManageImagesModel.updateImage(imageId, { title, imageUrl, audioUrl, audioTime, audioTitle, audioGen });
       
       if (typeof result === 'object' && result.isDuplicateDeleted) {
         return NextResponse.json({ 
@@ -66,7 +66,7 @@ export async function PUT(
       return NextResponse.json({ success: true });
     } catch (modelError: unknown) {
       const mErr = modelError as Error;
-      if (mErr.message === "มีชื่อรูปภาพนี้อยู่ในระบบแล้ว (Image title already exists)") {
+      if (mErr.message === "มีชื่อรูปภาพนี้อยู่ในระบบแล้ว") {
         return NextResponse.json({ 
           success: false, 
           error: mErr.message 
@@ -77,6 +77,37 @@ export async function PUT(
   } catch (error: unknown) {
     const err = error as Error;
     console.error("PUT image error:", err);
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+  }
+}
+
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const id = (await params).id;
+    if (!id) {
+      return NextResponse.json({ success: false, error: "Missing ID" }, { status: 400 });
+    }
+
+    const imageId = parseInt(id, 10);
+    if (isNaN(imageId)) {
+      return NextResponse.json({ success: false, error: "Invalid ID" }, { status: 400 });
+    }
+
+    const data = await req.json();
+    
+    if (data.action === 'restore') {
+      await ManageImagesModel.restoreImage(imageId);
+      revalidateTag('images', 'max');
+      return NextResponse.json({ success: true, message: "Image restored successfully" });
+    }
+
+    return NextResponse.json({ success: false, error: "Invalid action" }, { status: 400 });
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error("PATCH image error:", err);
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }

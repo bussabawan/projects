@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface SummaryChartProps {
@@ -7,20 +8,37 @@ interface SummaryChartProps {
 }
 
 export default function SummaryChart({ data }: SummaryChartProps) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    handleResize(); // Initial check
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
     <ResponsiveContainer width="100%" height={250}>
-      <LineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
+      <LineChart data={data} margin={{ top: 20, right: 20, left: isMobile ? 0 : 20, bottom: isMobile ? 20 : 40 }}>
         <XAxis 
           dataKey="name" 
           tick={{ fontSize: 12, fill: '#6b7280' }} 
-          axisLine={false} 
-          tickLine={false} 
+          axisLine={{ stroke: '#e5e7eb', strokeWidth: 1.5 }} 
+          tickLine={{ stroke: '#e5e7eb' }} 
           interval={0}
           angle={-45}
           textAnchor="end"
-          height={50}
+          height={isMobile ? 40 : 60}
+          label={isMobile ? undefined : { value: 'ครั้งที่เล่น', position: 'bottom', offset: 20, fontSize: 12, fill: '#6b7280' }}
         />
-        <YAxis domain={[0, 100]} tick={{ fontSize: 12, fill: '#6b7280' }} axisLine={false} tickLine={false} width={30} />
+        <YAxis 
+          domain={[0, 100]} 
+          tick={{ fontSize: 12, fill: '#6b7280' }} 
+          axisLine={{ stroke: '#e5e7eb', strokeWidth: 1.5 }} 
+          tickLine={{ stroke: '#e5e7eb' }} 
+          width={isMobile ? 30 : 40} 
+          label={isMobile ? undefined : { value: 'คะแนน', angle: -90, position: 'insideLeft', offset: -10, fontSize: 12, fill: '#6b7280' }}
+        />
         <Tooltip 
           cursor={{stroke: '#ccc', strokeWidth: 1, strokeDasharray: '3 3'}} 
           content={({ active, payload }) => {

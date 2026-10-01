@@ -1,5 +1,5 @@
-import { db } from '@/lib/db';
-import { RowDataPacket } from 'mysql2';
+import { RowDataPacket } from 'mysql2/promise';
+import { BaseModel } from './BaseModel';
 
 export interface AdminStats {
   totalPatients: number;
@@ -8,19 +8,19 @@ export interface AdminStats {
   totalExercises: number;
 }
 
-export class AdminStatsModel {
+export class AdminStatsModel extends BaseModel {
   /**
    * Get overview statistics for the admin dashboard
    */
   static async getOverviewStats(): Promise<AdminStats> {
     try {
       // Query counts from each table ignoring removed items if applicable
-      const [patientRows] = await db.execute<RowDataPacket[]>('SELECT COUNT(*) as count FROM users_data WHERE role = 1 AND remove = 0');
-      const [exerciseRows] = await db.execute<RowDataPacket[]>('SELECT COUNT(*) as count FROM exercises_data WHERE remove = 0');
-      const [photoRows] = await db.execute<RowDataPacket[]>('SELECT COUNT(*) as count FROM photo_data WHERE remove = 0');
+      const patientRows = await this.query<RowDataPacket>('SELECT COUNT(*) as count FROM users_data WHERE role = 1 AND remove = 0');
+      const exerciseRows = await this.query<RowDataPacket>('SELECT COUNT(*) as count FROM exercises_data WHERE remove = 0');
+      const photoRows = await this.query<RowDataPacket>('SELECT COUNT(*) as count FROM photo_data WHERE remove = 0');
 
       
-      const [categoryRows] = await db.execute<RowDataPacket[]>('SELECT COUNT(*) as count FROM category_data WHERE remove = 0');
+      const categoryRows = await this.query<RowDataPacket>('SELECT COUNT(*) as count FROM category_data WHERE remove = 0');
 
       return {
         totalPatients: patientRows[0].count || 0,
@@ -58,8 +58,8 @@ export class AdminStatsModel {
         GROUP BY dateStr
         ORDER BY dateStr ASC
       `;
-      const [rows] = await db.execute<RowDataPacket[]>(query);
-      return rows as { name: string; เข้าใช้งาน: number }[];
+      const rows = await this.query<{ name: string; เข้าใช้งาน: number } & RowDataPacket>(query);
+      return rows;
     } catch (error) {
       console.error('Error fetching usage stats:', error);
       return [];
@@ -83,8 +83,8 @@ export class AdminStatsModel {
         HAVING value > 0
         ORDER BY value DESC
       `;
-      const [rows] = await db.execute<RowDataPacket[]>(query);
-      return rows as { name: string; value: number }[];
+      const rows = await this.query<{ name: string; value: number } & RowDataPacket>(query);
+      return rows;
     } catch (error) {
       console.error('Error fetching image category stats:', error);
       return [];
@@ -108,8 +108,8 @@ export class AdminStatsModel {
         HAVING จำนวนชุด > 0
         ORDER BY จำนวนชุด DESC
       `;
-      const [rows] = await db.execute<RowDataPacket[]>(query);
-      return rows as { name: string; จำนวนชุด: number }[];
+      const rows = await this.query<{ name: string; จำนวนชุด: number } & RowDataPacket>(query);
+      return rows;
     } catch (error) {
       console.error('Error fetching exercise category stats:', error);
       return [];

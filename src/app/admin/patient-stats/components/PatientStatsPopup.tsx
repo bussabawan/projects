@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import Loader from "@/app/components/Loader/Loader";
+import DatePicker from "@/app/components/DatePicker/DatePicker";
 import styles from './PatientStatsPopup.module.css';
+import { useScrollLock } from '@/app/hooks/useScrollLock';
+
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, Legend
@@ -52,14 +56,40 @@ interface PatientStatsData {
 
 
 
+function ScrollLockEffect() {
+  useScrollLock(true);
+  return null;
+}
+
 const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, patientId, exerciseSets = [] }) => {
+  // Scroll lock moved to ScrollLockEffect inside AnimatePresence
   const [data, setData] = useState<PatientStatsData | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   const [loading, setLoading] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [periodFilter, setPeriodFilter] = useState('all');
   const [exerciseSetFilter, setExerciseSetFilter] = useState('all');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [isStartPickerOpen, setIsStartPickerOpen] = useState(false);
+  const [isEndPickerOpen, setIsEndPickerOpen] = useState(false);
+
+  const formatThaiDate = (dateString: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString('th-TH', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
 
   const baseExerciseSets = (data?.availableExerciseSets || exerciseSets) as string[];
   const dynamicCategories = (data?.availableCategories || []) as string[];
@@ -70,14 +100,17 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
     : baseExerciseSets;
 
   useEffect(() => {
+    let timer: NodeJS.Timeout;
     if (isOpen && patientId) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLoading(true);
+      timer = setTimeout(() => {
+        setLoading(true);
+      }, 0);
       let url = `/api/patient-stats/${patientId}?category=${encodeURIComponent(categoryFilter)}&period=${periodFilter}&exerciseSet=${encodeURIComponent(exerciseSetFilter)}`;
       if (periodFilter === 'custom') {
         url += `&startDate=${startDate}&endDate=${endDate}`;
       }
-      fetch(url)
+      const timestamp = Date.now();
+      fetch(`${url}&t=${timestamp}`, { cache: 'no-store' })
         .then(res => res.json())
         .then(resData => {
           setData(resData);
@@ -88,9 +121,10 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
           setLoading(false);
         });
     }
+    return () => clearTimeout(timer);
   }, [isOpen, patientId, categoryFilter, periodFilter, exerciseSetFilter, startDate, endDate]);
 
-  if (!isOpen) return null;
+  // Removed early return for AnimatePresence
 
   const PIE_COLORS = ['#10B981', '#EF4444']; // Green (Correct), Red (Incorrect)
   const pieTotalData = data ? [
@@ -107,8 +141,25 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
   const SEP_COLORS = ['#3B82F6', '#93C5FD', '#8B5CF6', '#C4B5FD'];
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.popup} onClick={(e) => e.stopPropagation()}>
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div 
+          className={styles.overlay} 
+          onClick={onClose}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <ScrollLockEffect />
+        <motion.div 
+          className={styles.popup} 
+          onClick={(e) => e.stopPropagation()}
+          initial={{ scale: 0.95, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.95, opacity: 0, y: 20 }}
+          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+        >
         <div className={styles.header}>
           <h2 className={styles.title}>รายละเอียดสถิติ</h2>
           <button className={styles.closeButton} onClick={onClose} aria-label="Close popup">
@@ -180,19 +231,43 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
             
             {periodFilter === 'custom' && (
               <div className={styles.customDateWrapper}>
-                <input 
-                  type="date" 
-                  className={styles.dateInput} 
-                  value={startDate}
-                  onChange={e => setStartDate(e.target.value)}
-                />
+                <div style={{ position: 'relative' }}>
+                  <button 
+                    className={styles.datePickerBtn} 
+                    onClick={() => setIsStartPickerOpen(true)}
+                  >
+                    {startDate ? formatThaiDate(startDate) : "เลือกวันที่"}
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '4px' }}>
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  <DatePicker 
+                    isOpen={isStartPickerOpen} 
+                    onClose={() => setIsStartPickerOpen(false)} 
+                    onSelect={(date) => { setStartDate(date); }} 
+                    initialDate={startDate} 
+                    title="เลือกวันที่เริ่มต้น" 
+                  />
+                </div>
                 <span>ถึง</span>
-                <input 
-                  type="date" 
-                  className={styles.dateInput} 
-                  value={endDate}
-                  onChange={e => setEndDate(e.target.value)}
-                />
+                <div style={{ position: 'relative' }}>
+                  <button 
+                    className={styles.datePickerBtn} 
+                    onClick={() => setIsEndPickerOpen(true)}
+                  >
+                    {endDate ? formatThaiDate(endDate) : "เลือกวันที่"}
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '4px' }}>
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  <DatePicker 
+                    isOpen={isEndPickerOpen} 
+                    onClose={() => setIsEndPickerOpen(false)} 
+                    onSelect={(date) => { setEndDate(date); }} 
+                    initialDate={endDate} 
+                    title="เลือกวันที่สิ้นสุด" 
+                  />
+                </div>
               </div>
             )}
           </div>
@@ -238,10 +313,24 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                 <div className={styles.statItem}>
                   <div className={styles.statIcon}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={data.dailyStats} maxBarSize={40}>
+                      <BarChart data={data.dailyStats} margin={{ top: 20, right: 20, bottom: 70, left: 20 }} maxBarSize={40}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                        <XAxis dataKey="dateStr" tick={{ fill: '#6b7280', fontSize: 12 }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fill: '#6b7280', fontSize: 12 }} axisLine={false} tickLine={false} />
+                        <XAxis 
+                          dataKey="dateStr" 
+                          tick={{ fill: '#6b7280', fontSize: 12 }} 
+                          axisLine={false} 
+                          tickLine={false} 
+                          angle={-45}
+                          textAnchor="end"
+                          height={60}
+                          label={isMobile ? undefined : { value: 'วันที่', position: 'bottom', offset: 20, fontSize: 12, fill: '#6b7280' }}
+                        />
+                        <YAxis 
+                          tick={{ fill: '#6b7280', fontSize: 12 }} 
+                          axisLine={false} 
+                          tickLine={false} 
+                          label={isMobile ? undefined : { value: 'จำนวน (ครั้ง)', angle: -90, position: 'insideLeft', offset: 15, fontSize: 12, fill: '#6b7280' }}
+                        />
                         <RechartsTooltip 
                           content={({ active, payload, label }) => {
                             if (active && payload && payload.length) {
@@ -266,7 +355,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                             return null;
                           }}
                         />
-                        <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: '12px' }} />
+                        <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: '12px', paddingTop: '30px' }} />
                         <Bar dataKey="matchingCorrect" stackId="matching" fill="#3B82F6" name="จับคู่-ถูก" />
                         <Bar dataKey="matchingIncorrect" stackId="matching" fill="#93C5FD" name="จับคู่-ผิด" radius={[4, 4, 0, 0]} />
                         <Bar dataKey="memoryCorrect" stackId="memory" fill="#8B5CF6" name="ความจำ-ถูก" />
@@ -280,20 +369,23 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                 <div className={styles.statItem}>
                   <div className={styles.statIcon}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={data.dailyStats} margin={{ top: 20, right: 20, bottom: 30, left: 20 }} maxBarSize={40}>
+                      <BarChart data={data.dailyStats} margin={{ top: 20, right: 20, bottom: 60, left: 20 }} maxBarSize={40}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis 
                           dataKey="dateStr" 
                           tick={{ fill: '#6b7280', fontSize: 12 }} 
                           axisLine={false}
                           tickLine={false}
-                          label={{ value: 'วันที่', position: 'bottom', offset: 5, fontSize: 12, fill: '#6b7280' }}
+                          angle={-45}
+                          textAnchor="end"
+                          height={60}
+                          label={isMobile ? undefined : { value: 'วันที่', position: 'bottom', offset: 20, fontSize: 12, fill: '#6b7280' }}
                         />
                         <YAxis 
                           tick={{ fill: '#6b7280', fontSize: 12 }} 
                           axisLine={false}
                           tickLine={false}
-                          label={{ value: 'เวลา (วินาที)', angle: -90, position: 'insideLeft', offset: 15, fontSize: 12, fill: '#6b7280' }}
+                          label={isMobile ? undefined : { value: 'เวลา (วินาที)', angle: -90, position: 'insideLeft', offset: 15, fontSize: 12, fill: '#6b7280' }}
                         />
                         <RechartsTooltip 
                           content={({ active, payload, label }) => {
@@ -321,7 +413,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                 <div className={styles.statItem}>
                   <div className={styles.statIcon}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={data.scatterStats} margin={{ top: 20, right: 20, bottom: 30, left: 20 }}>
+                      <LineChart data={data.scatterStats} margin={{ top: 20, right: 20, bottom: 60, left: 20 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis 
                           dataKey="dateStr" 
@@ -330,7 +422,10 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                           axisLine={false}
                           tickLine={false}
                           padding={{ left: 15, right: 15 }}
-                          label={{ value: 'วันที่', position: 'bottom', offset: 5, fontSize: 12, fill: '#6b7280' }}
+                          angle={-45}
+                          textAnchor="end"
+                          height={60}
+                          label={isMobile ? undefined : { value: 'วันที่', position: 'bottom', offset: 20, fontSize: 12, fill: '#6b7280' }}
                         />
                         <YAxis 
                           type="number" 
@@ -343,7 +438,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                           tickLine={false}
                           width={60}
                           padding={{ top: 20, bottom: 20 }}
-                          label={{ value: 'เวลา (น.)', angle: -90, position: 'insideLeft', offset: -5, fontSize: 12, fill: '#6b7280' }}
+                          label={isMobile ? undefined : { value: 'เวลา (น.)', angle: -90, position: 'insideLeft', offset: -5, fontSize: 12, fill: '#6b7280' }}
                         />
                         <RechartsTooltip 
                           cursor={{ strokeDasharray: '3 3' }} 
@@ -372,7 +467,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                 <div className={styles.statItem}>
                   <div className={styles.statIcon}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={data.dailyStats} margin={{ top: 20, right: 20, bottom: 30, left: 20 }}>
+                      <LineChart data={data.dailyStats} margin={{ top: 20, right: 20, bottom: 60, left: 20 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis 
                           dataKey="dateStr" 
@@ -381,7 +476,10 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                           axisLine={false}
                           tickLine={false}
                           padding={{ left: 15, right: 15 }}
-                          label={{ value: 'วันที่', position: 'bottom', offset: 5, fontSize: 12, fill: '#6b7280' }}
+                          angle={-45}
+                          textAnchor="end"
+                          height={60}
+                          label={isMobile ? undefined : { value: 'วันที่', position: 'bottom', offset: 20, fontSize: 12, fill: '#6b7280' }}
                         />
                         <YAxis 
                           type="number" 
@@ -391,7 +489,7 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                           axisLine={false}
                           tickLine={false}
                           padding={{ top: 30, bottom: 20 }}
-                          label={{ value: 'เวลารวม (นาที)', angle: -90, position: 'insideLeft', offset: 15, fontSize: 12, fill: '#6b7280' }}
+                          label={isMobile ? undefined : { value: 'เวลารวม (นาที)', angle: -90, position: 'insideLeft', offset: 15, fontSize: 12, fill: '#6b7280' }}
                         />
                         <RechartsTooltip 
                           cursor={{ strokeDasharray: '3 3' }} 
@@ -424,9 +522,13 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
             )}
           </div>
         </div>
-      </div>
-    </div>
+        </motion.div>
+      </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 
 export default PatientStatsPopup;
+
+

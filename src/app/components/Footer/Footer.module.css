@@ -59,6 +59,14 @@
   display: none;
 }
 
+.mobileBreak {
+  display: none;
+}
+
+.desktopOnly {
+  display: inline;
+}
+
 @media (max-width: 768px), (max-width: 950px) and (max-height: 500px) {
   .footerContainer {
     position: relative;
@@ -124,6 +132,15 @@
   }
   
   .hiddenOnMobile {
+    display: none !important;
+  }
+
+  .mobileBreak {
+    display: block;
+    margin-top: 2px;
+  }
+
+  .desktopOnly {
     display: none !important;
   }
 }

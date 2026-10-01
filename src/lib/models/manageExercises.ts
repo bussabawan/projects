@@ -1,18 +1,30 @@
-﻿import { db } from '@/lib/db';
-import { RowDataPacket } from 'mysql2';
+import { RowDataPacket } from 'mysql2/promise';
+import { BaseModel } from './BaseModel';
 
 export interface ExerciseInfo {
   exercises_id: number;
   exercises_name: string;
+  thumbnail_id?: number;
 }
 
-export class ManageExercisesModel {
+export class ManageExercisesModel extends BaseModel {
   /**
    * Get all exercises for dropdown selection
    */
   static getExercises = async (): Promise<ExerciseInfo[]> => {
-    const [rows] = await db.execute<RowDataPacket[]>(
-      'SELECT exercises_id, exercises_name FROM exercises_data WHERE remove = 0 ORDER BY exercises_id ASC'
+    const rows = await this.query<RowDataPacket>(
+      `SELECT ed.exercises_id, ed.exercises_name 
+       FROM exercises_data ed 
+       WHERE ed.remove = 0 
+         AND EXISTS (
+           SELECT 1
+           FROM photo_in_exercises pie
+           JOIN photo_data pd ON pie.photo_id = pd.photo_id
+           WHERE pie.exercises_id = ed.exercises_id
+             AND pie.remove = 0
+             AND pd.remove = 0
+         )
+       ORDER BY ed.exercises_id ASC`
     );
     return rows as ExerciseInfo[];
   };
@@ -21,11 +33,26 @@ export class ManageExercisesModel {
    * Get exercises assigned to a specific patient
    */
   static async getExercisesByPatientId(userId: number): Promise<ExerciseInfo[]> {
-    const [rows] = await db.execute<RowDataPacket[]>(
-      `SELECT ed.exercises_id, ed.exercises_name 
+    const rows = await this.query<RowDataPacket>(
+      `SELECT 
+         ed.exercises_id, 
+         ed.exercises_name,
+         (
+           SELECT pd.photo_id
+           FROM category_in_exercises cie
+           JOIN photo_in_category pic ON cie.category_id = pic.category_id
+           JOIN photo_data pd ON pic.photo_id = pd.photo_id
+           WHERE cie.exercises_id = ed.exercises_id
+             AND cie.remove = 0 
+             AND pic.remove = 0 
+             AND pd.remove = 0
+           ORDER BY RAND()
+           LIMIT 1
+         ) as thumbnail_id
        FROM exercises_data ed
        JOIN patient_data pd ON ed.exercises_id = pd.exercises_id
        WHERE pd.user_id = ? AND pd.remove = 0 AND ed.remove = 0
+       GROUP BY ed.exercises_id, ed.exercises_name
        ORDER BY ed.exercises_id ASC`,
       [userId]
     );
@@ -50,8 +77,8 @@ export class ManageExercisesModel {
     
     baseQuery += ' ORDER BY exercises_id DESC LIMIT ? OFFSET ?';
     
-    const [rows] = await db.query<RowDataPacket[]>(baseQuery, [...queryParams, limit, offset]);
-    const [countRows] = await db.query<RowDataPacket[]>(countQuery, queryParams);
+    const rows = await this.query<RowDataPacket>(baseQuery, [...queryParams, limit, offset]);
+    const countRows = await this.query<RowDataPacket>(countQuery, queryParams);
     
     return {
       data: rows as ExerciseInfo[],
@@ -63,7 +90,7 @@ export class ManageExercisesModel {
    * Add a new exercise set (empty)
    */
   static async addExercise(name: string): Promise<{ success?: boolean; isDuplicateDeleted?: boolean; name?: string }> {
-    const [existing] = await db.query<RowDataPacket[]>(
+    const existing = await this.query<RowDataPacket>(
       'SELECT exercises_id FROM exercises_data WHERE exercises_name = ? AND remove = 0',
       [name]
     );
@@ -71,7 +98,7 @@ export class ManageExercisesModel {
       throw new Error("มีชุดแบบฝึกหัดชื่อนี้อยู่ในระบบแล้ว");
     }
 
-    const [removed] = await db.query<RowDataPacket[]>(
+    const removed = await this.query<RowDataPacket>(
       'SELECT exercises_name FROM exercises_data WHERE exercises_name = ? AND remove = 1 LIMIT 1',
       [name]
     );
@@ -79,7 +106,7 @@ export class ManageExercisesModel {
       return { isDuplicateDeleted: true, name: name };
     }
 
-    await db.execute(
+    await this.execute(
       'INSERT INTO exercises_data (exercises_name, remove) VALUES (?, 0)',
       [name]
     );
@@ -90,10 +117,7 @@ export class ManageExercisesModel {
    * Restore exercise
    */
   static async restoreExercise(name: string): Promise<void> {
-    const connection = await db.getConnection();
-    try {
-      await connection.beginTransaction();
-
+    return this.transaction(async (connection) => {
       await connection.execute(
         'UPDATE exercises_data SET remove = 0 WHERE exercises_name = ?',
         [name]
@@ -119,21 +143,14 @@ export class ManageExercisesModel {
           ids
         );
       }
-
-      await connection.commit();
-    } catch (error) {
-      await connection.rollback();
-      throw error;
-    } finally {
-      connection.release();
-    }
+    });
   }
 
   /**
    * Get selected photos for an exercise
    */
   static async getExerciseImages(name: string): Promise<number[]> {
-    const [rows] = await db.query<RowDataPacket[]>(
+    const rows = await this.query<RowDataPacket>(
       `SELECT pie.photo_id 
        FROM photo_in_exercises pie
        JOIN exercises_data ed ON pie.exercises_id = ed.exercises_id
@@ -148,7 +165,7 @@ export class ManageExercisesModel {
    * Get selected categories for an exercise
    */
   static async getExerciseCategories(name: string): Promise<number[]> {
-    const [rows] = await db.query<RowDataPacket[]>(
+    const rows = await this.query<RowDataPacket>(
       `SELECT cie.category_id 
        FROM category_in_exercises cie
        JOIN exercises_data ed ON cie.exercises_id = ed.exercises_id
@@ -163,7 +180,7 @@ export class ManageExercisesModel {
    * Get image count for an exercise
    */
   static async getExerciseImageCount(exerciseId: number): Promise<number> {
-    const [rows] = await db.query<RowDataPacket[]>(
+    const rows = await this.query<RowDataPacket>(
       `SELECT COUNT(pie.photo_id) as count 
        FROM photo_in_exercises pie
        JOIN exercises_data ed ON pie.exercises_id = ed.exercises_id
@@ -178,7 +195,7 @@ export class ManageExercisesModel {
    * Update selected photos for an exercise
    */
   static async updateExerciseImages(name: string, newPhotoIds: number[]): Promise<void> {
-    const [existingRows] = await db.query<RowDataPacket[]>(
+    const existingRows = await this.query<RowDataPacket>(
       'SELECT exercises_id FROM exercises_data WHERE exercises_name = ? AND remove = 0',
       [name]
     );
@@ -189,23 +206,25 @@ export class ManageExercisesModel {
 
     const exercisesId = existingRows[0].exercises_id;
     
-    // Delete existing photos for this exercise in photo_in_exercises
-    await db.execute('DELETE FROM photo_in_exercises WHERE exercises_id = ?', [exercisesId]);
-    
-    // Insert new photos
-    for (const photoId of newPhotoIds) {
-      await db.execute(
-        'INSERT INTO photo_in_exercises (exercises_id, photo_id, remove) VALUES (?, ?, 0)',
-        [exercisesId, photoId]
-      );
-    }
+    return this.transaction(async (connection) => {
+      // Delete existing photos for this exercise in photo_in_exercises
+      await connection.execute('DELETE FROM photo_in_exercises WHERE exercises_id = ?', [exercisesId]);
+      
+      // Insert new photos
+      for (const photoId of newPhotoIds) {
+        await connection.execute(
+          'INSERT INTO photo_in_exercises (exercises_id, photo_id, remove) VALUES (?, ?, 0)',
+          [exercisesId, photoId]
+        );
+      }
+    });
   }
 
   /**
    * Update selected categories for an exercise
    */
   static async updateExerciseCategories(name: string, newCategoryIds: number[]): Promise<void> {
-    const [existingRows] = await db.query<RowDataPacket[]>(
+    const existingRows = await this.query<RowDataPacket>(
       'SELECT exercises_id FROM exercises_data WHERE exercises_name = ? AND remove = 0',
       [name]
     );
@@ -216,23 +235,25 @@ export class ManageExercisesModel {
 
     const exercisesId = existingRows[0].exercises_id;
     
-    // Delete existing categories for this exercise
-    await db.execute('DELETE FROM category_in_exercises WHERE exercises_id = ?', [exercisesId]);
-    
-    // Insert new categories
-    for (const categoryId of newCategoryIds) {
-      await db.execute(
-        'INSERT INTO category_in_exercises (exercises_id, category_id, remove) VALUES (?, ?, 0)',
-        [exercisesId, categoryId]
-      );
-    }
+    return this.transaction(async (connection) => {
+      // Delete existing categories for this exercise
+      await connection.execute('DELETE FROM category_in_exercises WHERE exercises_id = ?', [exercisesId]);
+      
+      // Insert new categories
+      for (const categoryId of newCategoryIds) {
+        await connection.execute(
+          'INSERT INTO category_in_exercises (exercises_id, category_id, remove) VALUES (?, ?, 0)',
+          [exercisesId, categoryId]
+        );
+      }
+    });
   }
 
   /**
    * Update exercise name
    */
-  static async updateExerciseName(oldName: string, newName: string): Promise<void> {
-    const [existing] = await db.query<RowDataPacket[]>(
+  static async updateExerciseName(oldName: string, newName: string): Promise<void | { isDuplicateDeleted: boolean; name: string }> {
+    const existing = await this.query<RowDataPacket>(
       'SELECT exercises_id FROM exercises_data WHERE exercises_name = ? AND remove = 0',
       [newName]
     );
@@ -240,7 +261,15 @@ export class ManageExercisesModel {
       throw new Error("มีชุดแบบฝึกหัดชื่อนี้อยู่ในระบบแล้ว");
     }
 
-    await db.execute(
+    const removed = await this.query<RowDataPacket>(
+      'SELECT exercises_name FROM exercises_data WHERE exercises_name = ? AND remove = 1 LIMIT 1',
+      [newName]
+    );
+    if (removed.length > 0 && oldName !== newName) {
+      return { isDuplicateDeleted: true, name: newName };
+    }
+
+    await this.execute(
       'UPDATE exercises_data SET exercises_name = ? WHERE exercises_name = ?',
       [newName, oldName]
     );
@@ -250,10 +279,7 @@ export class ManageExercisesModel {
    * Delete exercise (Soft delete)
    */
   static async deleteExercise(name: string): Promise<void> {
-    const connection = await db.getConnection();
-    try {
-      await connection.beginTransaction();
-
+    return this.transaction(async (connection) => {
       await connection.execute(
         'UPDATE exercises_data SET remove = 1 WHERE exercises_name = ?',
         [name]
@@ -279,13 +305,6 @@ export class ManageExercisesModel {
           ids
         );
       }
-
-      await connection.commit();
-    } catch (error) {
-      await connection.rollback();
-      throw error;
-    } finally {
-      connection.release();
-    }
+    });
   }
 }

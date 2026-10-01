@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import styles from "../users.module.css";
 import RestoreConfirmModal from "@/app/components/Admin/RestoreConfirmModal";
 import Loader from "@/app/components/Loader/Loader";
+import { useScrollLock } from "@/app/hooks/useScrollLock";
 
 interface User {
   user_id: number;
@@ -22,10 +23,11 @@ interface UserFormModalProps {
   user: User | null;
   role: number; // 1 for patient, 2 for staff
   onClose: () => void;
-  onSave: () => void;
+  onSave: (savedUser?: User, originalUserId?: number) => void;
 }
 
 export default function UserFormModal({ user, role, onClose, onSave }: UserFormModalProps) {
+  useScrollLock(true);
   const isEditing = !!user;
   const [loading, setLoading] = useState(false);
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -73,7 +75,8 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
   useEffect(() => {
     if (role === 1) {
       // Fetch exercises for patient dropdown
-      fetch('/api/admin/exercises')
+      const timestamp = Date.now();
+      fetch(`/api/admin/exercises?t=${timestamp}`, { cache: 'no-store' })
         .then(res => res.json())
         .then(data => {
           if (data.success) {
@@ -98,6 +101,15 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
       setError("กรุณาเลือกชุดแบบฝึกหัดเริ่มต้นอย่างน้อย 1 ชุด");
       setLoading(false);
       return;
+    }
+
+    if (role === 2) {
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!emailRegex.test(formData.user_name)) {
+        setError("รูปแบบอีเมลไม่ถูกต้อง");
+        setLoading(false);
+        return;
+      }
     }
 
     try {
@@ -132,7 +144,15 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
 
       const result = await res.json();
       if (result.success) {
-        onSave();
+        const savedUser: User = {
+          user_id: isEditing ? user.user_id : result.data?.user_id || 0,
+          user_name: formData.user_name,
+          full_name: formData.full_name,
+          role: role,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          exercises_id: role === 1 && formData.exercises_id.length > 0 ? (formData.exercises_id.join(',') as any) : null
+        };
+        onSave(savedUser, isEditing ? user.user_id : undefined);
       } else if (result.requireRestore) {
         setRestoreUserId(result.existingUserId);
       } else {
@@ -151,28 +171,43 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
     setLoading(true);
     setError("");
     try {
-      const payload: Record<string, unknown> = {
-        user_name: formData.user_name,
-        full_name: formData.full_name,
-        role: role
-      };
-
-      if (formData.password) {
-        payload.password = formData.password;
-      }
-      
-      if (role === 1 && formData.exercises_id) {
-        payload.exercises_id = formData.exercises_id;
-      }
-
       const res = await fetch(`/api/admin/users/${restoreUserId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'restore', data: payload })
+        body: JSON.stringify({ action: 'restore' })
       });
       const result = await res.json();
       if (result.success) {
-        onSave(); // Close modal and refresh users list
+        // Apply new payload
+        const payload: Record<string, unknown> = {
+          user_name: formData.user_name,
+          full_name: formData.full_name,
+          role: role
+        };
+        if (formData.password) payload.password = formData.password;
+        if (role === 1 && formData.exercises_id) payload.exercises_id = formData.exercises_id;
+
+        await fetch(`/api/admin/users/${restoreUserId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        // Delete old user if edit
+        if (isEditing && user?.user_id && user.user_id !== restoreUserId) {
+          await fetch(`/api/admin/users/${user.user_id}`, { method: 'DELETE' });
+        }
+
+        const savedUser: User = {
+          user_id: restoreUserId,
+          user_name: formData.user_name,
+          full_name: formData.full_name,
+          role: role,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          exercises_id: role === 1 && formData.exercises_id.length > 0 ? (formData.exercises_id.join(',') as any) : null
+        };
+        
+        onSave(savedUser, isEditing ? user.user_id : undefined);
       } else {
         setError(result.error || "เกิดข้อผิดพลาดในการกู้คืนข้อมูล");
         setRestoreUserId(null);
@@ -226,6 +261,7 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
                   onChange={handleChange}
                   required
                   placeholder="กรอกชื่อ - นามสกุล"
+                  maxLength={200}
                 />
               </div>
 
@@ -239,6 +275,7 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
                   onChange={handleChange}
                   required
                   placeholder="example@gmail.com"
+                  maxLength={200}
                 />
               </div>
 
@@ -287,6 +324,7 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
                 value={formData.full_name}
                 onChange={handleChange}
                 required
+                maxLength={200}
               />
             </div>
 
@@ -300,6 +338,7 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
                   value={formData.user_name}
                   onChange={handleChange}
                   required
+                  maxLength={20}
                 />
               </div>
 
@@ -316,6 +355,8 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
                     onChange={handleChange}
                     placeholder={isEditing ? "(เว้นว่างถ้าไม่เปลี่ยน)" : ""}
                     style={{ paddingRight: '2.5rem' }}
+                    minLength={isEditing ? undefined : 6}
+                    maxLength={200}
                   />
                   <button 
                     type="button"
@@ -368,6 +409,7 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
                     setDropdownOpen(true);
                   }}
                   onClick={() => setDropdownOpen(true)}
+                  maxLength={200}
                 />
                 <span className={styles.multiSelectArrow}>▼</span>
                 
@@ -418,3 +460,4 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
     </div>
   );
 }
+

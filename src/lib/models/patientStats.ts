@@ -1,5 +1,5 @@
-﻿import { db } from '@/lib/db';
-import { RowDataPacket } from 'mysql2';
+import { RowDataPacket } from 'mysql2/promise';
+import { BaseModel } from './BaseModel';
 
 export interface PatientStatInfo {
   id: number;
@@ -10,7 +10,7 @@ export interface PatientStatInfo {
   playedSets: string[];
 }
 
-export class PatientStatsModel {
+export class PatientStatsModel extends BaseModel {
   /**
    * Get patient statistics list
    */
@@ -43,9 +43,9 @@ export class PatientStatsModel {
           WHERE m.remove = 0 AND ed.remove = 0
         `;
         
-        const [rows] = await db.execute<RowDataPacket[]>(query);
-        const [matchingRows] = await db.execute<RowDataPacket[]>(playedMatchingQuery);
-        const [memoryRows] = await db.execute<RowDataPacket[]>(playedMemoryQuery);
+        const rows = await this.query<RowDataPacket>(query);
+        const matchingRows = await this.query<RowDataPacket>(playedMatchingQuery);
+        const memoryRows = await this.query<RowDataPacket>(playedMemoryQuery);
         
         const patientMap = new Map<number, PatientStatInfo>();
         

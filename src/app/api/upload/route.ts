@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { promises as fs } from "fs";
-import path from "path";
-import sharp from "sharp";
+import { LocalStorageService } from "@/services/storage/LocalStorageService";
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,32 +13,11 @@ export async function POST(req: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Determine content type and folder based on extension
     const ext = file.name.split('.').pop()?.toLowerCase();
     const isAudio = ['mp3', 'wav', 'ogg'].includes(ext || '');
-    const folder = isAudio ? 'audio' : 'images';
     
-    // Save to uploads/[folder]
-    const uploadDir = path.join(process.cwd(), "uploads", folder);
-    await fs.mkdir(uploadDir, { recursive: true });
-
-    // Generate unique filename
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    let filename = "";
-
-    if (isAudio) {
-      filename = `${uniqueSuffix}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
-      const filePath = path.join(uploadDir, filename);
-      await fs.writeFile(filePath, buffer);
-    } else {
-      const originalNameWithoutExt = file.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9.-]/g, "_");
-      filename = `${uniqueSuffix}-${originalNameWithoutExt}.webp`;
-      const filePath = path.join(uploadDir, filename);
-      
-      await sharp(buffer)
-        .webp({ quality: 80 })
-        .toFile(filePath);
-    }
+    const storageService = new LocalStorageService();
+    const filename = await storageService.uploadFile(buffer, file.name, isAudio);
     
     // File is saved successfully
 

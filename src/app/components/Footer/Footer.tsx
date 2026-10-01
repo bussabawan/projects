@@ -36,14 +36,18 @@ export default function Footer() {
       </div>
       <hr className={styles.mobileDivider} />
       <div className={styles.footerText}>
-        © 2026 Cog-kit : ระบบฝึกการรับรู้ด้านสมาธิและความจำ
+        © 2026 Cog-kit<span className={styles.desktopOnly}> : </span><span className={styles.mobileBreak}></span>ระบบฝึกการรับรู้ด้านสมาธิและความจำ
       </div>
       <div className={styles.footerText}>
-        ความร่วมมือระหว่าง โรงพยาบาลเวชชารักษ์ ลำปาง มหาวิทยาลัยราชภัฏลำปาง และ วิทยาลัยเทคนิคนครลำปาง
+        ความร่วมมือระหว่าง<span className={styles.desktopOnly}> </span><span className={styles.mobileBreak}></span>
+        โรงพยาบาลเวชชารักษ์ ลำปาง<span className={styles.desktopOnly}> </span><span className={styles.mobileBreak}></span>
+        มหาวิทยาลัยราชภัฏลำปาง<span className={styles.desktopOnly}> </span><span className={styles.mobileBreak}></span>
+        และ วิทยาลัยเทคนิคนครลำปาง
       </div>
       <div className={styles.footerLinks}>
-        <Link href="https://www.vjlh.go.th/about/structureIT" target="_blank" rel="noopener noreferrer">
-          เงื่อนไขการให้บริการ | นโยบายความเป็นส่วนตัว
+        <Link href="https://www.vjlh.go.th/about/structureIT" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block' }}>
+          เงื่อนไขการให้บริการ<span className={styles.desktopOnly}> | </span><span className={styles.mobileBreak}></span>
+          นโยบายความเป็นส่วนตัว
         </Link>
       </div>
       <AboutModal isOpen={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)} />

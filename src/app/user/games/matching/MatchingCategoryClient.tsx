@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import Loader from '@/app/components/Loader/Loader';
 import styles from './matching.module.css';
 import { useDebounce } from '@/app/hooks/useDebounce';
@@ -10,15 +11,17 @@ export default function MatchingCategoryClient() {
   const [activeTab, setActiveTab] = useState<'image' | 'word'>('image');
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
-  const [exercises, setExercises] = useState<{exercises_id: number, exercises_name: string}[]>([]);
+  const [exercises, setExercises] = useState<{exercises_id: number, exercises_name: string, thumbnail_id?: number}[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedMode = sessionStorage.getItem('matchingActiveTab');
-    if (savedMode === 'word') {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setActiveTab('word');
-    }
+    const timer = setTimeout(() => {
+      const savedMode = sessionStorage.getItem('matchingActiveTab');
+      if (savedMode === 'word') {
+        setActiveTab('word');
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleTabChange = (mode: 'image' | 'word') => {
@@ -27,22 +30,28 @@ export default function MatchingCategoryClient() {
   };
 
   useEffect(() => {
+    let isMounted = true;
     const fetchExercises = async () => {
       try {
         const res = await fetch('/api/user/exercises');
         const json = await res.json();
-        if (json.success) {
-          setExercises(json.data);
-        } else {
+        if (json.success && isMounted) {
+          setExercises(prev => prev.length === 0 ? json.data : prev);
+        } else if (!json.success) {
           console.error(json.error);
         }
       } catch (error) {
         console.error('Failed to fetch exercises:', error);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
+    
     fetchExercises();
+    
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const filteredExercises = exercises.filter(ex => 
@@ -55,15 +64,7 @@ export default function MatchingCategoryClient() {
         <div className={styles.titleRow}>
           <div className={styles.titleWithIcon}>
             <div className={styles.titleIcon}>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#f4a261" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" fill="#fff" strokeWidth="1.5"></circle>
-                <path d="M14.5 12h-5a2.5 2.5 0 0 1-2.5-2.5v-5"></path>
-                <path d="M9.5 12h5a2.5 2.5 0 0 1 2.5 2.5v5"></path>
-                <rect x="5.5" y="4.5" width="4" height="4" rx="1"></rect>
-                <rect x="14.5" y="15.5" width="4" height="4" rx="1"></rect>
-                <circle cx="9.5" cy="15.5" r="1.5" fill="#e76f51" stroke="none"></circle>
-                <circle cx="14.5" cy="8.5" r="1.5" fill="#e76f51" stroke="none"></circle>
-              </svg>
+              <span style={{ fontSize: '2rem', lineHeight: 1 }}>🧩</span>
             </div>
             <h1 className={styles.title}>จับคู่</h1>
           </div>
@@ -95,6 +96,7 @@ export default function MatchingCategoryClient() {
               className={styles.searchInput}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              maxLength={200}
             />
             <svg xmlns="http://www.w3.org/2000/svg" className={styles.searchIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="11" cy="11" r="8"></circle>
@@ -112,12 +114,39 @@ export default function MatchingCategoryClient() {
         ) : filteredExercises.length > 0 ? (
           filteredExercises.map((ex) => (
             <Link key={ex.exercises_id} href={`/user/games/matching/${ex.exercises_id}?type=${activeTab}`} className={styles.categoryBtn}>
-              {ex.exercises_name}
+              {ex.thumbnail_id && (
+                <Image 
+                  src={`/api/files/${ex.thumbnail_id}?type=image`} 
+                  alt="" 
+                  width={200}
+                  height={200}
+                  className={styles.categoryImage} 
+                  loading="lazy"
+                />
+              )}
+              <span className={styles.categoryText}>{ex.exercises_name}</span>
             </Link>
           ))
         ) : (
-          <div style={{ padding: '2rem', fontSize: '1.2rem', color: '#666', gridColumn: '1 / -1', textAlign: 'center' }}>
-            {searchQuery ? 'ไม่พบแบบฝึกหัดที่ค้นหา' : 'ไม่มีแบบฝึกหัดที่ได้รับมอบหมาย'}
+          <div style={{ padding: '4rem 2rem', fontSize: '1.2rem', color: '#94a3b8', gridColumn: '1 / -1', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+            {searchQuery ? (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  <path d="m14 14-6-6"></path>
+                  <path d="m8 14 6-6"></path>
+                </svg>
+                <span>ไม่พบแบบฝึกหัดที่ค้นหา</span>
+              </>
+            ) : (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span>ไม่มีแบบฝึกหัดที่ได้รับมอบหมาย</span>
+              </>
+            )}
           </div>
         )}
       </div>

@@ -8,6 +8,7 @@ import styles from "./admin.module.css";
 import { usePathname } from "next/navigation";
 import Loader from "@/app/components/Loader/Loader";
 import AboutModal from "@/app/components/AboutModal/AboutModal";
+import { motion } from "framer-motion";
 
 export default function AdminLayout({
   children,
@@ -19,14 +20,19 @@ export default function AdminLayout({
   const [isPageLoading, setIsPageLoading] = useState(false);
   const [userName, setUserName] = useState("กำลังโหลด...");
   const pathname = usePathname();
+  const [activePath, setActivePath] = useState(pathname);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsPageLoading(false);
+    const timer = setTimeout(() => {
+      setActivePath(pathname);
+      setIsPageLoading(false);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [pathname]);
 
   const handleLinkClick = (href: string) => {
     if (pathname !== href) {
+      setActivePath(href);
       setIsPageLoading(true);
     }
   };
@@ -119,7 +125,7 @@ export default function AdminLayout({
               priority
             />
             <Image 
-              src="/Logo OT.jpg" 
+              src="/logo-ot.webp" 
               alt="OT Logo" 
               width={150} 
               height={77} 
@@ -129,42 +135,69 @@ export default function AdminLayout({
         </div>
 
         <nav className={styles.menu}>
-          <Link href="/admin" onClick={() => handleLinkClick('/admin')} className={`${styles.menuItem} ${pathname === '/admin' ? styles.active : ''}`}>
-            <span className={styles.menuIcon}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
-            </span>
-            <span className={styles.menuText}>ภาพรวมสถิติ</span>
-          </Link>
-          <Link href="/admin/patient-stats" onClick={() => handleLinkClick('/admin/patient-stats')} className={`${styles.menuItem} ${pathname === '/admin/patient-stats' ? styles.active : ''}`}>
-            <span className={styles.menuIcon}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-            </span>
-            <span className={styles.menuText}>สถิติผู้ป่วยรายบุคคล</span>
-          </Link>
-          <Link href="/admin/users" onClick={() => handleLinkClick('/admin/users')} className={`${styles.menuItem} ${pathname === '/admin/users' ? styles.active : ''}`}>
-            <span className={styles.menuIcon}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-            </span>
-            <span className={styles.menuText}>จัดการผู้ใช้</span>
-          </Link>
-          <Link href="/admin/images" onClick={() => handleLinkClick('/admin/images')} className={`${styles.menuItem} ${pathname === '/admin/images' ? styles.active : ''}`}>
-            <span className={styles.menuIcon}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-            </span>
-            <span className={styles.menuText}>จัดการรูปภาพ</span>
-          </Link>
-          <Link href="/admin/categories" onClick={() => handleLinkClick('/admin/categories')} className={`${styles.menuItem} ${pathname === '/admin/categories' ? styles.active : ''}`}>
-            <span className={styles.menuIcon}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-            </span>
-            <span className={styles.menuText}>จัดการหมวดหมู่</span>
-          </Link>
-          <Link href="/admin/exercises" onClick={() => handleLinkClick('/admin/exercises')} className={`${styles.menuItem} ${pathname === '/admin/exercises' ? styles.active : ''}`}>
-            <span className={styles.menuIcon}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
-            </span>
-            <span className={styles.menuText}>จัดการแบบฝึก</span>
-          </Link>
+          {[
+            {
+              href: '/admin',
+              text: 'ภาพรวมสถิติ',
+              icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+            },
+            {
+              href: '/admin/patient-stats',
+              text: 'สถิติผู้ป่วยรายบุคคล',
+              icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+            },
+            {
+              href: '/admin/users',
+              text: 'จัดการผู้ใช้',
+              icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            },
+            {
+              href: '/admin/images',
+              text: 'จัดการรูปภาพ',
+              icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            },
+            {
+              href: '/admin/categories',
+              text: 'จัดการหมวดหมู่',
+              icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            },
+            {
+              href: '/admin/exercises',
+              text: 'จัดการแบบฝึก',
+              icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+            }
+          ].map((item) => (
+            <Link 
+              key={item.href} 
+              href={item.href} 
+              onClick={() => handleLinkClick(item.href)} 
+              className={`${styles.menuItem} ${activePath === item.href ? styles.active : ''}`}
+              style={{ position: 'relative' }}
+            >
+              {activePath === item.href && (
+                <motion.div
+                  layoutId="admin-nav-indicator"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    backgroundColor: '#F3E8FF',
+                    borderRadius: 'inherit',
+                    zIndex: -1
+                  }}
+                />
+              )}
+              <span className={styles.menuIcon} style={{ position: 'relative', zIndex: 1 }}>
+                {item.icon}
+              </span>
+              <span className={styles.menuText} style={{ position: 'relative', zIndex: 1 }}>
+                {item.text}
+              </span>
+            </Link>
+          ))}
         </nav>
 
         <div className={styles.sidebarBottom}>

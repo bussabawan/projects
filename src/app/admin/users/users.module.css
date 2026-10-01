@@ -178,8 +178,6 @@
 
 .tableBody {
   background: #fafafa;
-  border-bottom-left-radius: 19px;
-  border-bottom-right-radius: 19px;
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -268,49 +266,63 @@
 .pagination {
   display: flex;
   justify-content: center;
-  gap: 0.5rem;
-  margin-top: auto;
-  margin-left: -1.5rem;
-  margin-right: -1.5rem;
-  position: sticky;
-  bottom: -1.5rem;
-  background-color: #fafafa;
+  align-items: center;
+  gap: 1rem;
+  background-color: #fff;
   padding: 1.5rem;
-  z-index: 10;
-  border-top: 1px solid #eaeaea;
-  border-bottom-left-radius: 19px;
-  border-bottom-right-radius: 19px;
+  border-top: 1px solid #f0f0f0;
 }
 
 .pageBtn {
-  background: #fff;
-  border: none;
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+  background: #f7f3f7;
+  border: 1px solid #f2ecf2;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 500;
   cursor: pointer;
-  color: #555;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-  transition: all 0.2s ease;
+  color: #6d5b6d;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-.pageBtn:hover:not(:disabled) {
-  background: #6A95F1;
-  color: white;
+.pageBtn:hover:not(:disabled):not(.dots) {
+  background: #ecdced;
+  color: #4a3b4a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
 }
 
 .pageBtn.activePage {
-  background: #3b82f6;
-  color: #fff;
+  background: linear-gradient(135deg, #c9a5c9, #af87af);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(175, 135, 175, 0.4);
+}
+
+.pageBtn.activePage:hover:not(:disabled) {
+  background: linear-gradient(135deg, #b894b8, #9e769e);
+  transform: translateY(-1px);
+}
+
+.pageBtn.dots {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: #888;
+  cursor: default;
 }
 
 .pageBtn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  background: #fdfcfd;
+  color: #c5c0c5;
+  border: 1px solid #f8f5f8;
+  box-shadow: none;
 }
 
 /* Loading and Empty States */

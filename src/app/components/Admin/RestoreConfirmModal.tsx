@@ -1,6 +1,7 @@
 "use client";
 
 import styles from "./RestoreConfirmModal.module.css";
+import { useScrollLock } from "@/app/hooks/useScrollLock";
 
 interface RestoreConfirmModalProps {
   onConfirm: () => void;
@@ -11,6 +12,7 @@ export default function RestoreConfirmModal({
   onConfirm, 
   onCancel 
 }: RestoreConfirmModalProps) {
+  useScrollLock(true);
   return (
     <div className={styles.overlay} onClick={onCancel}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -31,3 +33,4 @@ export default function RestoreConfirmModal({
     </div>
   );
 }
+

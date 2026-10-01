@@ -21,10 +21,16 @@
 .filterSection {
   display: flex;
   align-items: center;
-  gap: 5rem;
+  gap: 2rem;
   margin-bottom: 2rem;
   font-size: 1.1rem;
   justify-content: center;
+}
+
+.dateFilters {
+  display: flex;
+  align-items: center;
+  gap: 5rem;
 }
 
 .filterGroup {
@@ -73,6 +79,41 @@
   margin-left: 0.5rem;
 }
 
+.clearDateBtn {
+  background-color: #fce8e8;
+  color: #e53e3e;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.clearBtnText {
+  display: inline;
+}
+
+.clearBtnIcon {
+  display: none;
+}
+
+.clearDateBtn:hover:not(:disabled) {
+  background-color: #fad4d4;
+}
+
+.clearDateBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #f5f5f5;
+  color: #999;
+}
+
 .tableContainer {
   background-color: #fff;
   border-radius: 24px;
@@ -81,6 +122,7 @@
   display: flex;
   flex-direction: column;
   flex: 1;
+  margin-bottom: 40px;
 }
 
 .tableHeader {
@@ -224,60 +266,72 @@
   padding: 4px 12px;
   border-radius: 6px;
   font-weight: 500;
-  display: inline-block;
+  display: inline-flex;
+  gap: 0.3rem;
+  align-items: center;
+  justify-content: center;
   text-align: center;
 }
 
 .detailDuration {
   text-align: right;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
-.pagination {
+.splitTextLeft {
+  display: inline-flex;
+  gap: 0.2rem;
+  align-items: center;
+}
+
+.splitTextCenter {
+  display: inline-flex;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+.paginationSimple {
   display: flex;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 1.5rem;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
   background-color: #fff;
   border-top: 1px solid #f0f0f0;
 }
 
-.pageBtn {
-  background: #fff;
+.pageBtnSimple {
+  background: #ece5f0;
   border: none;
-  min-width: 44px;
-  height: 44px;
-  padding: 0 0.5rem;
-  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 500;
   cursor: pointer;
-  color: #333;
-  font-size: 1.1rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  color: #3a1c58;
   transition: all 0.2s ease;
 }
 
-.pageBtn:hover:not(:disabled):not(.dotsBtn) {
-  background: #6A95F1;
+.pageBtnSimple:hover:not(:disabled) {
+  background: #3a1c58;
   color: white;
 }
 
-.pageBtn.active {
-  background: #3b82f6;
-  color: #fff;
-}
-
-.pageBtn:disabled {
+.pageBtnSimple:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
-.dotsBtn {
-  box-shadow: none;
-  background-color: transparent;
-  cursor: default;
+.pageTextSimple {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #333;
+  min-width: 30px;
+  text-align: center;
 }
 
 /* ==========================================================================
@@ -309,10 +363,34 @@
     }
 
     .filterSection {
-      flex-direction: column;
-      align-items: flex-start;
+      flex-direction: row;
+      align-items: stretch;
       gap: 0.5rem;
       margin-bottom: 1rem;
+      justify-content: center;
+    }
+    
+    .dateFilters {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .clearDateBtn {
+      height: auto;
+      padding: 0 1rem;
+      border-radius: 12px;
+    }
+
+    .clearBtnText {
+      display: none;
+    }
+
+    .clearBtnIcon {
+      display: block;
+    }
+
+    .datePicker {
+      min-width: 140px;
     }
     
     .tableHeader {
@@ -346,7 +424,10 @@
     }
     
     .gameInfo {
-      gap: 0.3rem;
+      flex-direction: column;
+      justify-content: center;
+      gap: 0.2rem;
+      line-height: 1.2;
     }
     
     .gameIcon {
@@ -359,14 +440,30 @@
     }
     
     .detailScore, .detailDuration {
-      text-align: right;
+      justify-content: center;
     }
     
-    .pageBtn {
-      min-width: 36px;
+    .splitTextLeft, .splitTextCenter, .scoreBadge {
+      flex-direction: column;
+      gap: 0;
+      line-height: 1.2;
+    }
+
+    .splitTextLeft {
+      align-items: flex-start;
+    }
+    
+    .splitTextCenter, .scoreBadge {
+      align-items: center;
+    }
+    
+    .pageBtnSimple {
+      width: 36px;
       height: 36px;
-      font-size: 0.95rem;
-      padding: 0 0.3rem;
+    }
+    
+    .pageTextSimple {
+      font-size: 1rem;
     }
 }
 

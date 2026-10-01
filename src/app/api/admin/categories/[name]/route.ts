@@ -25,7 +25,16 @@ export async function PUT(
       return NextResponse.json({ success: false, error: 'กรุณากรอกชื่อหมวดหมู่' }, { status: 400 });
     }
 
-    await ManageCategoriesModel.updateCategoryName(oldName, newName.trim());
+    const result = await ManageCategoriesModel.updateCategoryName(oldName, newName.trim());
+    
+    if (result && result.isDuplicateDeleted) {
+      return NextResponse.json({ 
+        success: false, 
+        isDuplicateDeleted: true,
+        name: result.name
+      });
+    }
+
     revalidateTag('categories', 'max');
     return NextResponse.json({ success: true });
   } catch (error: unknown) {

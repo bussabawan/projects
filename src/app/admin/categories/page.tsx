@@ -2,13 +2,13 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
-
 import Loader from "@/app/components/Loader/Loader";
 import DeleteConfirmModal from "@/app/components/Admin/DeleteConfirmModal";
 import RestoreConfirmModal from "@/app/components/Admin/RestoreConfirmModal";
 import AlertModal from "@/app/components/Admin/AlertModal";
 import styles from "./categories.module.css";
 import { useDebounce } from '@/app/hooks/useDebounce';
+import { useScrollLock } from "@/app/hooks/useScrollLock";
 
 interface Category {
   category_id: number;
@@ -16,6 +16,7 @@ interface Category {
 }
 
 export default function ManageCategoriesPage() {
+
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -58,6 +59,8 @@ export default function ManageCategoriesPage() {
   const imageItemsPerPage = 20;
   const isImageLoadMoreRef = useRef(false);
 
+  useScrollLock(isAddModalOpen || isEditModalOpen || isDeleteModalOpen || isRestoreModalOpen || isImageModalOpen);
+
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -65,16 +68,25 @@ export default function ManageCategoriesPage() {
   const isLoadMoreRef = useRef(false);
   const latestSelectedIdsRef = useRef<number[]>([]);
 
-  const fetchCategories = useCallback(async () => {
-    const isLoadMore = isLoadMoreRef.current;
-    if (isLoadMore) {
-      setLoadingMore(true);
-    } else {
+  const fetchCategories = useCallback(async (reset = false) => {
+    const pageToFetch = reset ? 1 : currentPage;
+    const isLoadMore = reset ? false : isLoadMoreRef.current;
+    
+    if (reset) {
+      setCurrentPage(1);
+      isLoadMoreRef.current = false;
       setIsLoading(true);
+    } else {
+      if (isLoadMore) {
+        setLoadingMore(true);
+      } else {
+        setIsLoading(true);
+      }
     }
     
     try {
-      const res = await fetch(`/api/admin/categories?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}&t=${Date.now()}`);
+      const timestamp = Date.now();
+      const res = await fetch(`/api/admin/categories?page=${pageToFetch}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}&t=${timestamp}`, { cache: 'no-store' });
       const data = await res.json();
       if (data.success) {
         if (isLoadMore) {
@@ -96,6 +108,7 @@ export default function ManageCategoriesPage() {
       } else {
         setIsLoading(false);
       }
+      isLoadMoreRef.current = false;
     }
   }, [currentPage, itemsPerPage, debouncedSearchQuery]);
 
@@ -113,7 +126,7 @@ export default function ManageCategoriesPage() {
       if (data.success) {
         setIsAddModalOpen(false);
         setNewCategoryName("");
-        window.location.reload();
+        fetchCategories(true);
       } else if (data.isDuplicateDeleted) {
         setIsAddModalOpen(false);
         setNewCategoryName("");
@@ -153,7 +166,11 @@ export default function ManageCategoriesPage() {
       const data = await res.json();
       if (data.success) {
         setIsEditModalOpen(false);
-        window.location.reload();
+        setCategories(prev => prev.map(cat => cat.category_name === editCategoryOldName ? { ...cat, category_name: editCategoryNewName.trim() } : cat));
+      } else if (data.isDuplicateDeleted) {
+        setIsEditModalOpen(false);
+        setCategoryToRestore(data.name);
+        setIsRestoreModalOpen(true);
       } else {
         setEditError(data.error || 'เกิดข้อผิดพลาดในการแก้ไขหมวดหมู่');
       }
@@ -179,7 +196,7 @@ export default function ManageCategoriesPage() {
       });
       const data = await res.json();
       if (data.success) {
-        window.location.reload();
+        fetchCategories(true);
       } else {
         setAlertMessage(data.error || 'เกิดข้อผิดพลาดในการลบหมวดหมู่');
         setIsDeleteModalOpen(false);
@@ -204,7 +221,22 @@ export default function ManageCategoriesPage() {
       });
       const data = await res.json();
       if (data.success) {
-        window.location.reload();
+        if (editCategoryOldName && editCategoryOldName !== categoryToRestore) {
+          // If this restore was triggered from an edit, delete the old item
+          await fetch(`/api/admin/categories/${encodeURIComponent(editCategoryOldName)}`, {
+            method: 'DELETE',
+          });
+        }
+        
+        setIsRestoreModalOpen(false);
+        setCategories(prev => {
+          if (editCategoryOldName) {
+            return prev.map(cat => cat.category_name === editCategoryOldName ? { ...cat, category_name: categoryToRestore } : cat);
+          }
+          // If it was a create, we might need to fetch page 1 or just add it
+          fetchCategories(true);
+          return prev;
+        });
       } else {
         setAlertMessage(data.error || 'เกิดข้อผิดพลาดในการกู้คืน');
         setIsRestoreModalOpen(false);
@@ -224,7 +256,8 @@ export default function ManageCategoriesPage() {
     isImageLoadMoreRef.current = false;
     
     try {
-      const resSelected = await fetch(`/api/admin/categories/${encodeURIComponent(categoryName)}/images?t=${Date.now()}`);
+      const timestamp = Date.now();
+      const resSelected = await fetch(`/api/admin/categories/${encodeURIComponent(categoryName)}/images?t=${timestamp}`, { cache: 'no-store' });
       const dataSelected = await resSelected.json();
       if (dataSelected.success) {
         setSelectedImageIds(dataSelected.data);
@@ -250,7 +283,7 @@ export default function ManageCategoriesPage() {
       const data = await res.json();
       if (data.success) {
         setIsImageModalOpen(false);
-        window.location.reload();
+        fetchCategories(true);
       } else {
         setAlertMessage(data.error || 'เกิดข้อผิดพลาดในการบันทึกรูปภาพ');
       }
@@ -280,8 +313,7 @@ export default function ManageCategoriesPage() {
 
     try {
       const prioritizeIds = latestSelectedIdsRef.current.join(',');
-      // eslint-disable-next-line react-hooks/purity
-      const res = await fetch(`/api/admin/images?page=${imagePage}&limit=${imageItemsPerPage}&search=${encodeURIComponent(debouncedImageSearchQuery)}&prioritizeIds=${prioritizeIds}&t=${Date.now()}`);
+      const res = await fetch(`/api/admin/images?page=${imagePage}&limit=${imageItemsPerPage}&search=${encodeURIComponent(debouncedImageSearchQuery)}&prioritizeIds=${prioritizeIds}`, { cache: 'no-store' });
       const data = await res.json();
       if (data.success) {
         if (isLoadMore) {
@@ -308,9 +340,11 @@ export default function ManageCategoriesPage() {
   }, [imagePage, imageItemsPerPage, debouncedImageSearchQuery]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setImagePage(1);
-    isImageLoadMoreRef.current = false;
+    const timer = setTimeout(() => {
+      setImagePage(1);
+      isImageLoadMoreRef.current = false;
+    }, 0);
+    return () => clearTimeout(timer);
   }, [debouncedImageSearchQuery]);
 
   useEffect(() => {
@@ -320,15 +354,18 @@ export default function ManageCategoriesPage() {
   }, [fetchFilteredImages, isImageModalOpen]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchCategories();
-    isLoadMoreRef.current = false;
+    const timer = setTimeout(() => {
+      fetchCategories(true);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchCategories]);
 
   // Reset page when debounced search query changes
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCurrentPage(1);
+    const timer = setTimeout(() => {
+      setCurrentPage(1);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [debouncedSearchQuery]);
 
   // Infinite Scroll Observer
@@ -395,6 +432,7 @@ export default function ManageCategoriesPage() {
             className={styles.searchInput}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            maxLength={200}
           />
           <svg className={styles.searchIcon} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="11" cy="11" r="8"></circle>
@@ -411,7 +449,26 @@ export default function ManageCategoriesPage() {
         ) : error ? (
           <p style={{ color: 'red', gridColumn: '1 / -1', textAlign: 'center' }}>{error}</p>
         ) : categories.length === 0 ? (
-          <p style={{ gridColumn: '1 / -1', textAlign: 'center' }}>ไม่พบข้อมูลหมวดหมู่</p>
+          <div style={{ 
+            gridColumn: '1 / -1', 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            padding: '5rem 0',
+            color: '#8a8a9a',
+            gap: '0.5rem',
+            textAlign: 'center'
+          }}>
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5, marginBottom: '1rem' }}>
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              <line x1="9" y1="9" x2="13" y2="13"></line>
+              <line x1="13" y1="9" x2="9" y2="13"></line>
+            </svg>
+            <div style={{ fontSize: '1.25rem', fontWeight: 600, color: '#6b6b7b' }}>ไม่พบข้อมูลหมวดหมู่ที่คุณค้นหา</div>
+            <div style={{ fontSize: '0.95rem', opacity: 0.8 }}>ลองเปลี่ยนคำค้นหาใหม่ หรือกดเพิ่มหมวดหมู่เข้าระบบ</div>
+          </div>
         ) : (
           <>
             {categories.map((category, index) => {
@@ -474,6 +531,7 @@ export default function ManageCategoriesPage() {
                     setNewCategoryName(e.target.value);
                     if (addError) setAddError(null);
                   }}
+                  maxLength={200}
                 />
                 {addError && <p style={{ color: 'red', fontSize: '0.875rem', marginTop: '0.5rem' }}>{addError}</p>}
               </div>
@@ -518,6 +576,7 @@ export default function ManageCategoriesPage() {
                     setEditCategoryNewName(e.target.value);
                     if (editError) setEditError(null);
                   }}
+                  maxLength={200}
                 />
                 {editError && <p style={{ color: 'red', fontSize: '0.875rem', marginTop: '0.5rem' }}>{editError}</p>}
               </div>
@@ -577,6 +636,7 @@ export default function ManageCategoriesPage() {
                     className={styles.imageSearchInput}
                     value={imageSearchQuery}
                     onChange={(e) => setImageSearchQuery(e.target.value)}
+                    maxLength={200}
                   />
                   <svg className={styles.searchIcon} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#888', pointerEvents: 'none' }}>
                     <circle cx="11" cy="11" r="8"></circle>
@@ -589,7 +649,26 @@ export default function ManageCategoriesPage() {
                 {isLoadingImages ? (
                   <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '2rem' }}>กำลังโหลดรูปภาพ...</p>
                 ) : allImages.length === 0 ? (
-                  <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '2rem' }}>ไม่พบรูปภาพ</p>
+                  <div style={{ 
+                    gridColumn: '1 / -1', 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    padding: '3rem 0',
+                    color: '#8a8a9a',
+                    gap: '0.5rem',
+                    textAlign: 'center'
+                  }}>
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5, marginBottom: '0.5rem' }}>
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                      <line x1="9" y1="9" x2="13" y2="13"></line>
+                      <line x1="13" y1="9" x2="9" y2="13"></line>
+                    </svg>
+                    <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#6b6b7b' }}>ไม่พบรูปภาพที่คุณค้นหา</div>
+                    <div style={{ fontSize: '0.85rem', opacity: 0.8 }}>ลองเปลี่ยนคำค้นหาใหม่</div>
+                  </div>
                 ) : (
                   <>
                     {[...allImages].sort((a, b) => {
@@ -615,7 +694,7 @@ export default function ManageCategoriesPage() {
                           <div className={styles.imageIconPlaceholder}>
                             {img.imageUrl ? (
                               <Image 
-                                src={img.imageUrl.startsWith('/') ? img.imageUrl : `/api/uploads/${img.imageUrl}`} 
+                                src={`${img.imageUrl.startsWith('/') ? img.imageUrl : `/api/uploads/${img.imageUrl}`}`} 
                                 alt={img.title}
                                 width={40}
                                 height={40}

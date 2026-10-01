@@ -1,0 +1,155 @@
+
+.filters {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 10px;
+  padding: 10px 10px;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.filters::-webkit-scrollbar {
+  display: none;
+}
+
+.filterPill {
+  background: white;
+  border: 1px solid #ddd;
+  padding: 0 15px;
+  height: 64px;
+  min-width: 80px;
+  flex-shrink: 0;
+  border-radius: 24px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  color: #777;
+  white-space: nowrap;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  line-height: 1;
+}
+.filterIcon {
+  font-size: 1.25rem;
+}
+
+.filterPill.active {
+  background: #3a1c58;
+  color: white;
+  border-color: #3a1c58;
+}
+
+.body {
+  padding: 10px 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.body::-webkit-scrollbar {
+  width: 5px;
+}
+.body::-webkit-scrollbar-thumb {
+  background: #dcdcdc;
+  border-radius: 10px;
+}
+
+.card {
+  background: #f8f9fa;
+  border: 1px solid #f1f1f1;
+  border-radius: 16px;
+  padding: 12px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.timeText {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #3a1c58;
+  min-width: 45px;
+}
+
+.gameInfo {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.gameTitle {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.gameIcon {
+  padding: 0.2rem 0.3rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gameIconMatching {
+  background-color: #3b82f6;
+  color: #fff;
+}
+
+.gameIconMemory {
+  background-color: #ec4899;
+  color: #fff;
+}
+
+.gameIconDefault {
+  background-color: #777;
+  color: #fff;
+}
+
+.gameIcon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.durationText {
+  font-size: 0.75rem;
+  color: #777;
+  margin-top: 2px;
+  white-space: nowrap;
+}
+
+.scoreBadge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  min-width: 45px;
+  line-height: 1.2;
+}
+
+.scoreGood { background: #e8f5e9; color: #2e7d32; }
+.scoreBad { background: #ffebee; color: #c62828; }
+.scoreNeutral { background: #fff3e0; color: #e65100; }
+
+.scoreUnit {
+  font-size: 0.65rem;
+  font-weight: 400;
+  display: block;
+}
+

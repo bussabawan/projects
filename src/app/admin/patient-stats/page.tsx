@@ -94,7 +94,8 @@ export default function PatientStatsPage() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch(`/api/patient-stats?t=${Date.now()}`);
+        const timestamp = Date.now();
+        const response = await fetch(`/api/patient-stats?t=${timestamp}`, { cache: 'no-store' });
         if (!response.ok) {
           throw new Error('Failed to fetch patient statistics');
         }
@@ -113,9 +114,13 @@ export default function PatientStatsPage() {
 
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
-  useEffect(() => {
+  const [prevQuery, setPrevQuery] = useState(debouncedSearchQuery);
+  const [prevPatients, setPrevPatients] = useState(patients);
+  if (debouncedSearchQuery !== prevQuery || patients !== prevPatients) {
+    setPrevQuery(debouncedSearchQuery);
+    setPrevPatients(patients);
+    
     let result = patients;
-
     if (debouncedSearchQuery.trim() !== '') {
       const lowerQuery = debouncedSearchQuery.toLowerCase();
       result = result.filter(patient => 
@@ -124,11 +129,10 @@ export default function PatientStatsPage() {
       );
     }
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setFilteredPatients(result);
     setCurrentPage(1);
     setMobileVisibleCount(10);
-  }, [debouncedSearchQuery, patients]);
+  }
 
   const totalPages = Math.ceil(filteredPatients.length / itemsPerPage);
   const currentPatients = filteredPatients.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -165,6 +169,7 @@ export default function PatientStatsPage() {
               placeholder="ค้นหา" 
               value={searchQuery}
               onChange={handleSearch}
+              maxLength={200}
             />
             <svg className={styles.searchIcon} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="11" cy="11" r="8"></circle>
@@ -205,10 +210,28 @@ export default function PatientStatsPage() {
                   </div>
                 </div>
               )) : (
-                <div style={{ padding: '2rem', textAlign: 'center' }}>ไม่พบข้อมูลผู้ป่วย</div>
+                <div style={{
+                  padding: '6rem 2rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#8a8a9a',
+                  gap: '0.5rem',
+                  textAlign: 'center'
+                }}>
+                  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5, marginBottom: '1rem' }}>
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    <line x1="9" y1="9" x2="13" y2="13"></line>
+                    <line x1="13" y1="9" x2="9" y2="13"></line>
+                  </svg>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 600, color: '#6b6b7b' }}>ไม่พบข้อมูลผู้ป่วยที่คุณค้นหา</div>
+                  <div style={{ fontSize: '0.95rem', opacity: 0.8 }}>ลองเปลี่ยนคำค้นหาใหม่</div>
+                </div>
               )}
             </div>
-            {totalPages > 1 && (
+            {totalPages > 0 && (
               <div className={styles.pagination}>
                 <button 
                   className={styles.pageBtn} 
@@ -273,7 +296,26 @@ export default function PatientStatsPage() {
                 </button>
               </div>
             )) : (
-              <div style={{ padding: '2rem', textAlign: 'center', gridColumn: '1 / -1' }}>ไม่พบข้อมูลผู้ป่วย</div>
+              <div style={{
+                gridColumn: '1 / -1',
+                padding: '6rem 2rem',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#8a8a9a',
+                gap: '0.5rem',
+                textAlign: 'center'
+              }}>
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5, marginBottom: '1rem' }}>
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  <line x1="9" y1="9" x2="13" y2="13"></line>
+                  <line x1="13" y1="9" x2="9" y2="13"></line>
+                </svg>
+                <div style={{ fontSize: '1.25rem', fontWeight: 600, color: '#6b6b7b' }}>ไม่พบข้อมูลผู้ป่วยที่คุณค้นหา</div>
+                <div style={{ fontSize: '0.95rem', opacity: 0.8 }}>ลองเปลี่ยนคำค้นหาใหม่</div>
+              </div>
             )}
 
             {mobileVisibleCount < filteredPatients.length && (

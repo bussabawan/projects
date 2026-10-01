@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
-
 import Loader from "@/app/components/Loader/Loader";
 import styles from "./images.module.css";
 import ImageFormModal from "./components/ImageFormModal";
@@ -10,12 +9,14 @@ import DeleteConfirmModal from "@/app/components/Admin/DeleteConfirmModal";
 import RestoreConfirmModal from "@/app/components/Admin/RestoreConfirmModal";
 import { useDebounce } from '@/app/hooks/useDebounce';
 
-function CardImage({ src, alt }: { src: string; alt: string }) {
+function CardImage({ src, alt, cacheBuster }: { src: string; alt: string; cacheBuster?: number }) {
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setError(false);
+    const timer = setTimeout(() => {
+      setError(false);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [src]);
 
   if (!src || error) {
@@ -28,7 +29,10 @@ function CardImage({ src, alt }: { src: string; alt: string }) {
     );
   }
 
-  return <Image src={src.startsWith('/') || src.startsWith('blob:') ? src : `/api/uploads/${src}`} alt={alt} width={400} height={400} style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={() => setError(true)} unoptimized />;
+  const baseUrl = src.startsWith('/') || src.startsWith('blob:') ? src : `/api/uploads/${src}`;
+  const finalSrc = cacheBuster && !src.startsWith('blob:') ? `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}t=${cacheBuster}` : baseUrl;
+
+  return <Image src={finalSrc} alt={alt} width={400} height={400} style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={() => setError(true)} unoptimized />;
 }
 
 interface ImageData {
@@ -36,6 +40,7 @@ interface ImageData {
   title: string;
   imageUrl: string;
   audioUrl?: string;
+  audioTime?: number;
   audioTitle?: string;
   audioGen?: number;
 }
@@ -44,6 +49,7 @@ export default function ManageImagesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [cacheBuster, setCacheBuster] = useState(() => Date.now());
 
   const [images, setImages] = useState<ImageData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -52,21 +58,39 @@ export default function ManageImagesPage() {
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const itemsPerPage = 12;
+  const itemsPerPage = 15;
   const isLoadMoreRef = useRef(false);
   const audioCache = useRef<Record<string, HTMLAudioElement>>({});
 
-  const fetchImages = useCallback(async () => {
-    const isLoadMore = isLoadMoreRef.current;
-    if (isLoadMore) {
-      setLoadingMore(true);
-    } else {
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const fetchImages = useCallback(async (reset = false) => {
+    const pageToFetch = reset ? 1 : currentPage;
+    const isLoadMore = reset ? false : isLoadMoreRef.current;
+    
+    if (reset) {
+      setCurrentPage(1);
+      isLoadMoreRef.current = false;
       setIsLoading(true);
+    } else {
+      if (isLoadMore) {
+        setLoadingMore(true);
+      } else {
+        setIsLoading(true);
+      }
     }
+
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
     
     try {
-      const res = await fetch(`/api/admin/images?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}&t=${Date.now()}`, {
-        cache: 'no-store'
+      const timestamp = Date.now();
+      const res = await fetch(`/api/admin/images?page=${pageToFetch}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}&t=${timestamp}`, {
+        cache: 'no-store',
+        signal: abortController.signal
       });
       const json = await res.json();
       if (json.success) {
@@ -85,7 +109,8 @@ export default function ManageImagesPage() {
           }
           if (img.audioUrl) {
             preloadPromises.push(new Promise((resolve) => {
-              const fullAudioUrl = img.audioUrl!.startsWith('/') || img.audioUrl!.startsWith('blob:') ? img.audioUrl! : `/api/uploads/${img.audioUrl}`;
+              const baseAudioUrl = img.audioUrl!.startsWith('/') || img.audioUrl!.startsWith('blob:') ? img.audioUrl! : `/api/uploads/${img.audioUrl}`;
+              const fullAudioUrl = !img.audioUrl!.startsWith('blob:') ? `${baseAudioUrl}?t=${cacheBuster}` : baseAudioUrl;
               if (!audioCache.current[fullAudioUrl]) {
                 const audio = new window.Audio(fullAudioUrl);
                 audio.preload = 'auto';
@@ -104,39 +129,51 @@ export default function ManageImagesPage() {
         const timeoutPromise = new Promise<void>((resolve) => setTimeout(resolve, 8000));
         await Promise.race([Promise.all(preloadPromises), timeoutPromise]);
 
+        if (abortController.signal.aborted) return;
+
         if (isLoadMore) {
-          setImages(prev => [...prev, ...json.data]);
+          setImages(prev => {
+            // Prevent duplicates when appending
+            const existingIds = new Set(prev.map(p => p.id));
+            const filteredNew = json.data.filter((img: ImageData) => !existingIds.has(img.id));
+            return [...prev, ...filteredNew];
+          });
         } else {
           setImages(json.data);
         }
         setTotalPages(json.totalPages || 1);
       }
-    } catch (err) {
+    } catch (err: unknown) {
+      const error = err as Error;
+      if (error.name === 'AbortError') return;
       console.error("Failed to fetch images", err);
     } finally {
-      if (isLoadMore) {
-        setLoadingMore(false);
-      } else {
-        setIsLoading(false);
+      if (!abortController.signal.aborted) {
+        if (isLoadMore) {
+          setLoadingMore(false);
+        } else {
+          setIsLoading(false);
+        }
       }
+      isLoadMoreRef.current = false;
     }
-  }, [currentPage, itemsPerPage, debouncedSearchQuery]);
+  }, [currentPage, itemsPerPage, debouncedSearchQuery, cacheBuster]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchImages();
-    isLoadMoreRef.current = false;
+    const timer = setTimeout(() => {
+      fetchImages();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchImages]);
 
   // Debounce search query handled by hook
-
   // Reset to page 1 when the debounced search term changes
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCurrentPage(1);
+    const timer = setTimeout(() => {
+      setCurrentPage(1);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [debouncedSearchQuery]);
-
-
 
   // Infinite Scroll Observer
   const observer = useRef<IntersectionObserver | null>(null);
@@ -156,7 +193,7 @@ export default function ManageImagesPage() {
 
   const [editingImage, setEditingImage] = useState<ImageData | null>(null);
   const [deletingImageId, setDeletingImageId] = useState<number | null>(null);
-  const [duplicateToRestore, setDuplicateToRestore] = useState<{ id: number; data: Record<string, unknown> } | null>(null);
+  const [duplicateToRestore, setDuplicateToRestore] = useState<{ id: number; data: Record<string, unknown>; originalEditId?: number } | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleAdd = () => {
@@ -180,7 +217,8 @@ export default function ManageImagesPage() {
       const res = await fetch(`/api/admin/images/${deletingImageId}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
-        window.location.reload();
+        fetchImages(true);
+        setIsProcessing(false);
       } else {
         alert("ลบข้อมูลไม่สำเร็จ");
         setIsProcessing(false);
@@ -204,6 +242,7 @@ export default function ManageImagesPage() {
         title: data.imageName,
         imageUrl: data.imageUrl,
         audioUrl: data.audioUrl,
+        audioTime: data.audioTime,
         audioTitle: data.speechText || "",
         audioGen: data.useAutoSpeech ? 1 : 0
       };
@@ -216,9 +255,24 @@ export default function ManageImagesPage() {
       const result = await res.json();
       if (result.success) {
         setIsModalOpen(false);
-        window.location.reload();
+        if (isEdit && editingImage) {
+          setImages(prev => prev.map(img => img.id === editingImage.id ? {
+            ...img,
+            title: payload.title as string,
+            imageUrl: payload.imageUrl as string,
+            audioUrl: (payload.audioUrl as string) || "",
+            audioTime: payload.audioTime as number | undefined,
+            audioTitle: (payload.audioTitle as string) || "",
+            audioGen: payload.audioGen as number
+          } : img));
+          setCacheBuster(Date.now()); // Update cache when editing image/audio
+        } else {
+          setCacheBuster(Date.now()); // Refresh cache for new adds too just in case
+          fetchImages(true);
+        }
+        setIsProcessing(false);
       } else if (result.isDuplicateDeleted) {
-        setDuplicateToRestore({ id: result.duplicateId, data: payload });
+        setDuplicateToRestore({ id: result.duplicateId, data: payload, originalEditId: isEdit ? editingImage?.id : undefined });
         setIsProcessing(false);
       } else {
         alert(result.error || "บันทึกข้อมูลไม่สำเร็จ");
@@ -236,15 +290,47 @@ export default function ManageImagesPage() {
     setIsProcessing(true);
     try {
       const res = await fetch(`/api/admin/images/${duplicateToRestore.id}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(duplicateToRestore.data)
+        body: JSON.stringify({ action: 'restore' })
       });
       const result = await res.json();
       if (result.success) {
+        // Update the restored item with the new payload
+        await fetch(`/api/admin/images/${duplicateToRestore.id}`, {
+          method: 'PUT',
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(duplicateToRestore.data)
+        });
+
+        // Delete the original item if it was an edit
+        if (duplicateToRestore.originalEditId && duplicateToRestore.originalEditId !== duplicateToRestore.id) {
+          await fetch(`/api/admin/images/${duplicateToRestore.originalEditId}`, {
+            method: 'DELETE',
+          });
+        }
+
+        const updatedImg = {
+          id: duplicateToRestore.id,
+          title: duplicateToRestore.data.title as string,
+          imageUrl: duplicateToRestore.data.imageUrl as string,
+          audioUrl: (duplicateToRestore.data.audioUrl as string) || "",
+          audioTime: duplicateToRestore.data.audioTime as number | undefined,
+          audioTitle: (duplicateToRestore.data.audioTitle as string) || "",
+          audioGen: duplicateToRestore.data.audioGen as number
+        };
+
+        setImages(prev => {
+          if (duplicateToRestore.originalEditId) {
+            return prev.map(img => img.id === duplicateToRestore.originalEditId ? updatedImg : img);
+          }
+          return [updatedImg, ...prev];
+        });
+
+        setCacheBuster(Date.now()); // Reload cache when restoring image/audio
         setIsModalOpen(false);
         setEditingImage(null);
-        window.location.reload();
+        setIsProcessing(false);
       } else {
         alert(result.error || "กู้คืนข้อมูลไม่สำเร็จ");
         setIsProcessing(false);
@@ -263,7 +349,8 @@ export default function ManageImagesPage() {
       alert("ไม่มีไฟล์เสียง");
       return;
     }
-    const fullAudioUrl = audioUrl.startsWith('/') || audioUrl.startsWith('blob:') ? audioUrl : `/api/uploads/${audioUrl}`;
+    const baseAudioUrl = audioUrl.startsWith('/') || audioUrl.startsWith('blob:') ? audioUrl : `/api/uploads/${audioUrl}`;
+    const fullAudioUrl = !audioUrl.startsWith('blob:') ? `${baseAudioUrl}${baseAudioUrl.includes('?') ? '&' : '?'}t=${cacheBuster}` : baseAudioUrl;
     
     let audio = audioCache.current[fullAudioUrl];
     if (!audio) {
@@ -272,8 +359,10 @@ export default function ManageImagesPage() {
       audioCache.current[fullAudioUrl] = audio;
     }
     
-    // eslint-disable-next-line react-hooks/immutability
-    audio.currentTime = 0;
+    const setAudioTime = (el: HTMLAudioElement) => {
+      el.currentTime = 0;
+    };
+    setAudioTime(audio);
     audio.play().catch(e => {
       console.error(e);
       alert("ไม่สามารถเล่นเสียงได้");
@@ -307,6 +396,7 @@ export default function ManageImagesPage() {
             className={styles.searchInput}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            maxLength={200}
           />
           <svg className={styles.searchIcon} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="11" cy="11" r="8"></circle>
@@ -321,12 +411,31 @@ export default function ManageImagesPage() {
             <Loader text={searchQuery.trim() ? "กำลังค้นหารูปภาพ..." : "กำลังโหลดรูปภาพ..."} />
           </div>
         ) : images.length === 0 ? (
-          <div>ไม่พบรูปภาพ</div>
+          <div style={{ 
+            gridColumn: '1 / -1', 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            padding: '5rem 0',
+            color: '#8a8a9a',
+            gap: '0.5rem',
+            textAlign: 'center'
+          }}>
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5, marginBottom: '1rem' }}>
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              <line x1="9" y1="9" x2="13" y2="13"></line>
+              <line x1="13" y1="9" x2="9" y2="13"></line>
+            </svg>
+            <div style={{ fontSize: '1.25rem', fontWeight: 600, color: '#6b6b7b' }}>ไม่พบรูปภาพที่คุณค้นหา</div>
+            <div style={{ fontSize: '0.95rem', opacity: 0.8 }}>ลองเปลี่ยนคำค้นหาใหม่ หรือกดเพิ่มรูปภาพเข้าระบบ</div>
+          </div>
         ) : (
           images.map((img) => (
             <div key={img.id} className={styles.card}>
               <div className={styles.imageContainer}>
-                <CardImage src={img.imageUrl} alt={img.title} />
+                <CardImage src={img.imageUrl} alt={img.title} cacheBuster={cacheBuster} />
               </div>
               <div className={styles.cardContent}>
                 <div className={styles.cardTitle}>{img.title}</div>
@@ -367,7 +476,7 @@ export default function ManageImagesPage() {
       </div>
 
       {/* Intersection Observer Target */}
-      {!isLoading && currentPage < totalPages && (
+      {!isLoading && searchQuery === debouncedSearchQuery && currentPage < totalPages && (
         <div ref={lastElementRef} className={styles.loadMoreTarget}>
           {loadingMore && (
             <div style={{ width: '100%', padding: '1rem 0' }}>

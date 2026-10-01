@@ -2,13 +2,13 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
-
 import Loader from "@/app/components/Loader/Loader";
 import DeleteConfirmModal from "@/app/components/Admin/DeleteConfirmModal";
 import RestoreConfirmModal from "@/app/components/Admin/RestoreConfirmModal";
 import AlertModal from "@/app/components/Admin/AlertModal";
 import styles from "./exercises.module.css";
 import { useDebounce } from '@/app/hooks/useDebounce';
+import { useScrollLock } from "@/app/hooks/useScrollLock";
 
 interface Exercise {
   exercises_id: number;
@@ -16,6 +16,7 @@ interface Exercise {
 }
 
 export default function ManageExercisesPage() {
+
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -62,6 +63,8 @@ export default function ManageExercisesPage() {
   const imageItemsPerPage = 20;
   const isImageLoadMoreRef = useRef(false);
 
+  useScrollLock(isAddModalOpen || isEditModalOpen || isDeleteModalOpen || isRestoreModalOpen || isImageModalOpen);
+
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -69,16 +72,25 @@ export default function ManageExercisesPage() {
   const isLoadMoreRef = useRef(false);
   const latestSelectedIdsRef = useRef<number[]>([]);
 
-  const fetchExercises = useCallback(async () => {
-    const isLoadMore = isLoadMoreRef.current;
-    if (isLoadMore) {
-      setLoadingMore(true);
-    } else {
+  const fetchExercises = useCallback(async (reset = false) => {
+    const pageToFetch = reset ? 1 : currentPage;
+    const isLoadMore = reset ? false : isLoadMoreRef.current;
+    
+    if (reset) {
+      setCurrentPage(1);
+      isLoadMoreRef.current = false;
       setIsLoading(true);
+    } else {
+      if (isLoadMore) {
+        setLoadingMore(true);
+      } else {
+        setIsLoading(true);
+      }
     }
     
     try {
-      const res = await fetch(`/api/admin/exercises?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}&t=${Date.now()}`);
+      const timestamp = Date.now();
+      const res = await fetch(`/api/admin/exercises?page=${pageToFetch}&limit=${itemsPerPage}&search=${encodeURIComponent(debouncedSearchQuery)}&t=${timestamp}`, { cache: 'no-store' });
       const data = await res.json();
       if (data.success) {
         if (isLoadMore) {
@@ -100,6 +112,7 @@ export default function ManageExercisesPage() {
       } else {
         setIsLoading(false);
       }
+      isLoadMoreRef.current = false;
     }
   }, [currentPage, itemsPerPage, debouncedSearchQuery]);
 
@@ -117,7 +130,7 @@ export default function ManageExercisesPage() {
       if (data.success) {
         setIsAddModalOpen(false);
         setNewExerciseName("");
-        window.location.reload();
+        fetchExercises(true);
       } else if (data.isDuplicateDeleted) {
         setIsAddModalOpen(false);
         setNewExerciseName("");
@@ -157,7 +170,11 @@ export default function ManageExercisesPage() {
       const data = await res.json();
       if (data.success) {
         setIsEditModalOpen(false);
-        window.location.reload();
+        setExercises(prev => prev.map(ex => ex.name === editExerciseOldName ? { ...ex, name: editExerciseNewName.trim() } : ex));
+      } else if (data.isDuplicateDeleted) {
+        setIsEditModalOpen(false);
+        setExerciseToRestore(data.name);
+        setIsRestoreModalOpen(true);
       } else {
         setEditError(data.error || 'เกิดข้อผิดพลาดในการแก้ไขชุดแบบฝึกหัด');
       }
@@ -183,7 +200,7 @@ export default function ManageExercisesPage() {
       });
       const data = await res.json();
       if (data.success) {
-        window.location.reload();
+        fetchExercises(true);
       } else {
         setAlertMessage(data.error || 'เกิดข้อผิดพลาดในการลบชุดแบบฝึกหัด');
         setIsDeleteModalOpen(false);
@@ -197,18 +214,35 @@ export default function ManageExercisesPage() {
   };
 
   const confirmRestoreExercise = async () => {
-    if (!exerciseToRestore) return;
+    // Determine the name to restore
+    const nameToRestore = exerciseToRestore || duplicateExerciseName;
+    if (!nameToRestore) return;
     setIsProcessing(true);
     
     try {
-      const res = await fetch(`/api/admin/exercises/${encodeURIComponent(exerciseToRestore)}`, {
+      const res = await fetch(`/api/admin/exercises/${encodeURIComponent(nameToRestore)}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'restore' })
       });
       const data = await res.json();
       if (data.success) {
-        window.location.reload();
+        if (editExerciseOldName && editExerciseOldName !== nameToRestore) {
+          // If this restore was triggered from an edit, delete the old item
+          await fetch(`/api/admin/exercises/${encodeURIComponent(editExerciseOldName)}`, {
+            method: 'DELETE',
+          });
+        }
+        
+        setIsRestoreModalOpen(false);
+        setExercises(prev => {
+          if (editExerciseOldName) {
+            return prev.map(ex => ex.name === editExerciseOldName ? { ...ex, name: nameToRestore } : ex);
+          }
+          // If it was a create, we might need to fetch page 1 or just add it
+          fetchExercises(true);
+          return prev;
+        });
       } else {
         setAlertMessage(data.error || 'เกิดข้อผิดพลาดในการกู้คืน');
         setIsRestoreModalOpen(false);
@@ -218,6 +252,8 @@ export default function ManageExercisesPage() {
       setIsRestoreModalOpen(false);
     } finally {
       setIsProcessing(false);
+      setExerciseToRestore('');
+
     }
   };
 
@@ -231,7 +267,8 @@ export default function ManageExercisesPage() {
     // Fetch categories if not fetched yet
     if (allCategories.length === 0) {
       try {
-        const resCat = await fetch(`/api/admin/categories?t=${Date.now()}`);
+        const timestamp = Date.now();
+        const resCat = await fetch(`/api/admin/categories?t=${timestamp}`, { cache: 'no-store' });
         const dataCat = await resCat.json();
         if (dataCat.success) {
           setAllCategories(dataCat.data);
@@ -242,7 +279,8 @@ export default function ManageExercisesPage() {
     }
     
     try {
-      const resSelected = await fetch(`/api/admin/exercises/${encodeURIComponent(exerciseName)}/images?t=${Date.now()}`);
+      const timestamp = Date.now();
+      const resSelected = await fetch(`/api/admin/exercises/${encodeURIComponent(exerciseName)}/images?t=${timestamp}`, { cache: 'no-store' });
       const dataSelected = await resSelected.json();
       if (dataSelected.success) {
         setSelectedImageIds(dataSelected.data);
@@ -270,7 +308,7 @@ export default function ManageExercisesPage() {
       const data = await res.json();
       if (data.success) {
         setIsImageModalOpen(false);
-        window.location.reload();
+        fetchExercises(true);
       } else {
         setAlertMessage(data.error || 'เกิดข้อผิดพลาดในการบันทึกรูปภาพ');
       }
@@ -303,8 +341,8 @@ export default function ManageExercisesPage() {
 
     try {
       const prioritizeIds = latestSelectedIdsRef.current.join(',');
-      // eslint-disable-next-line react-hooks/purity
-      const res = await fetch(`/api/admin/images?page=${imagePage}&limit=${imageItemsPerPage}&search=${encodeURIComponent(debouncedImageSearchQuery)}&prioritizeIds=${prioritizeIds}&t=${Date.now()}`);
+
+      const res = await fetch(`/api/admin/images?page=${imagePage}&limit=${imageItemsPerPage}&search=${encodeURIComponent(debouncedImageSearchQuery)}&prioritizeIds=${prioritizeIds}`, { cache: 'no-store' });
       const data = await res.json();
       if (data.success) {
         if (isLoadMore) {
@@ -331,9 +369,11 @@ export default function ManageExercisesPage() {
   }, [imagePage, imageItemsPerPage, debouncedImageSearchQuery]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setImagePage(1);
-    isImageLoadMoreRef.current = false;
+    const timer = setTimeout(() => {
+      setImagePage(1);
+      isImageLoadMoreRef.current = false;
+    }, 0);
+    return () => clearTimeout(timer);
   }, [debouncedImageSearchQuery]);
 
   useEffect(() => {
@@ -343,15 +383,18 @@ export default function ManageExercisesPage() {
   }, [fetchFilteredImages, isImageModalOpen]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchExercises();
-    isLoadMoreRef.current = false;
+    const timer = setTimeout(() => {
+      fetchExercises(true);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchExercises]);
 
   // Reset page when debounced search query changes
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCurrentPage(1);
+    const timer = setTimeout(() => {
+      setCurrentPage(1);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [debouncedSearchQuery]);
 
   // Infinite Scroll Observer
@@ -418,6 +461,7 @@ export default function ManageExercisesPage() {
             className={styles.searchInput}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            maxLength={200}
           />
           <svg className={styles.searchIcon} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="11" cy="11" r="8"></circle>
@@ -434,7 +478,26 @@ export default function ManageExercisesPage() {
         ) : error ? (
           <p style={{ color: 'red', gridColumn: '1 / -1', textAlign: 'center' }}>{error}</p>
         ) : exercises.length === 0 ? (
-          <p style={{ gridColumn: '1 / -1', textAlign: 'center' }}>ไม่พบข้อมูลแบบฝึกหัด</p>
+          <div style={{ 
+            gridColumn: '1 / -1', 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            padding: '5rem 0',
+            color: '#8a8a9a',
+            gap: '0.5rem',
+            textAlign: 'center'
+          }}>
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5, marginBottom: '1rem' }}>
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              <line x1="9" y1="9" x2="13" y2="13"></line>
+              <line x1="13" y1="9" x2="9" y2="13"></line>
+            </svg>
+            <div style={{ fontSize: '1.25rem', fontWeight: 600, color: '#6b6b7b' }}>ไม่พบข้อมูลแบบฝึกหัดที่คุณค้นหา</div>
+            <div style={{ fontSize: '0.95rem', opacity: 0.8 }}>ลองเปลี่ยนคำค้นหาใหม่ หรือกดเพิ่มแบบฝึกหัดเข้าระบบ</div>
+          </div>
         ) : (
           <>
             {exercises.map((exercise, index) => {
@@ -497,6 +560,7 @@ export default function ManageExercisesPage() {
                     setNewExerciseName(e.target.value);
                     if (addError) setAddError(null);
                   }}
+                  maxLength={200}
                 />
                 {addError && <p style={{ color: 'red', fontSize: '0.875rem', marginTop: '0.5rem' }}>{addError}</p>}
               </div>
@@ -541,6 +605,7 @@ export default function ManageExercisesPage() {
                     setEditExerciseNewName(e.target.value);
                     if (editError) setEditError(null);
                   }}
+                  maxLength={200}
                 />
                 {editError && <p style={{ color: 'red', fontSize: '0.875rem', marginTop: '0.5rem' }}>{editError}</p>}
               </div>
@@ -637,6 +702,7 @@ export default function ManageExercisesPage() {
                     className={styles.imageSearchInput}
                     value={imageSearchQuery}
                     onChange={(e) => setImageSearchQuery(e.target.value)}
+                    maxLength={200}
                   />
                   <svg className={styles.searchIcon} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#888', pointerEvents: 'none' }}>
                     <circle cx="11" cy="11" r="8"></circle>
@@ -651,7 +717,26 @@ export default function ManageExercisesPage() {
                     <Loader text={imageSearchQuery.trim() ? "กำลังค้นหารูปภาพ..." : "กำลังโหลดรูปภาพ..."} />
                   </div>
                 ) : allImages.length === 0 ? (
-                  <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '2rem' }}>ไม่พบรูปภาพ</p>
+                  <div style={{ 
+                    gridColumn: '1 / -1', 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    padding: '3rem 0',
+                    color: '#8a8a9a',
+                    gap: '0.5rem',
+                    textAlign: 'center'
+                  }}>
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5, marginBottom: '0.5rem' }}>
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                      <line x1="9" y1="9" x2="13" y2="13"></line>
+                      <line x1="13" y1="9" x2="9" y2="13"></line>
+                    </svg>
+                    <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#6b6b7b' }}>ไม่พบรูปภาพที่คุณค้นหา</div>
+                    <div style={{ fontSize: '0.85rem', opacity: 0.8 }}>ลองเปลี่ยนคำค้นหาใหม่</div>
+                  </div>
                 ) : (
                   <>
                     {[...allImages].sort((a, b) => {
@@ -677,7 +762,7 @@ export default function ManageExercisesPage() {
                           <div className={styles.imageIconPlaceholder}>
                             {img.imageUrl ? (
                               <Image 
-                                src={img.imageUrl.startsWith('/') ? img.imageUrl : `/api/uploads/${img.imageUrl}`} 
+                                src={`${img.imageUrl.startsWith('/') ? img.imageUrl : `/api/uploads/${img.imageUrl}`}`} 
                                 alt={img.title}
                                 width={40}
                                 height={40}
@@ -743,3 +828,5 @@ export default function ManageExercisesPage() {
     </div>
   );
 }
+
+

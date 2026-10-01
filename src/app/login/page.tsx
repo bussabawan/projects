@@ -14,22 +14,38 @@ function LoginContent() {
   const [password, setPassword] = useState('');
   const [usernameEmpty, setUsernameEmpty] = useState(false);
   const [passwordEmpty, setPasswordEmpty] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | React.ReactNode>('');
   const [loading, setLoading] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState(0);
 
   const searchParams = useSearchParams();
   const router = useRouter();
 
   useEffect(() => {
-    const errParam = searchParams.get('error');
-    if (errParam === 'AccessDenied') {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setError('คุณไม่มีสิทธิ์เข้าใช้งาน หรือบัญชีนี้ไม่ใช่สำหรับเจ้าหน้าที่');
-    }
+    const timer = setTimeout(() => {
+      const errParam = searchParams.get('error');
+      if (errParam === 'AccessDenied') {
+        setError('คุณไม่มีสิทธิ์เข้าใช้งาน หรือบัญชีนี้ไม่ใช่สำหรับเจ้าหน้าที่');
+      }
+      const storedAttempts = localStorage.getItem('login_failed_attempts');
+      if (storedAttempts) {
+        setFailedAttempts(parseInt(storedAttempts, 10));
+        if (parseInt(storedAttempts, 10) >= 10) {
+          setError('คุณใส่รหัสผิดเกิน 10 ครั้ง กรุณาติดต่อผู้ดูแลระบบ');
+        }
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [searchParams]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (failedAttempts >= 10) {
+      setError('คุณใส่รหัสผิดเกิน 10 ครั้ง กรุณาติดต่อผู้ดูแลระบบ');
+      return;
+    }
+    
     setError('');
 
     let hasError = false;
@@ -55,13 +71,27 @@ function LoginContent() {
 
       if (res?.error) {
         if (res.error === 'CredentialsSignin') {
-          setError("Username หรือ Password ไม่ถูกต้อง หากเป็นเจ้าหน้าที่กรุณาเข้าสู่ระบบผ่านบัญชี Google");
+          const newCount = failedAttempts + 1;
+          setFailedAttempts(newCount);
+          localStorage.setItem('login_failed_attempts', newCount.toString());
+          
+          if (newCount >= 10) {
+            setError("คุณใส่รหัสผิดเกิน 10 ครั้ง กรุณาติดต่อผู้ดูแลระบบ");
+          } else {
+            setError(
+              <>
+                Username หรือ Password ไม่ถูกต้อง หากเป็นเจ้าหน้าที่กรุณาเข้าสู่ระบบผ่านบัญชี Google <br />
+                (เหลือโอกาสอีก {10 - newCount} ครั้ง)
+              </>
+            );
+          }
         } else {
           setError("เกิดข้อผิดพลาด: " + res.error);
         }
         setLoading(false);
       } else if (res?.ok) {
         // Successful login
+        localStorage.removeItem('login_failed_attempts');
         router.push('/');
         router.refresh(); // Force refresh to update layout session state
       }
@@ -102,7 +132,16 @@ function LoginContent() {
             <h1 className={styles.title}>เข้าสู่ระบบ</h1>
             <h3 className={styles.subtitle}>Cog-kit : ระบบฝึกการรับรู้ด้านสมาธิและความจำ</h3>
             <form className={styles.form} onSubmit={handleLogin} noValidate>
-              {error && <div key={error} className={styles.errorAlert}>{error}</div>}
+              {error && (
+                <div key={failedAttempts} className={styles.errorAlert}>
+                  <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                  </svg>
+                  <span>{error}</span>
+                </div>
+              )}
               <div className={styles.inputGroup}>
                 <label htmlFor="username" className={styles.label}>Username</label>
                 <input 
@@ -114,7 +153,7 @@ function LoginContent() {
                     setUsername(e.target.value);
                     setUsernameEmpty(false);
                   }}
-                  placeholder={usernameEmpty ? 'โปรดกรอกฟิลด์นี้' : ''}
+                  placeholder={usernameEmpty ? 'โปรดกรอก Username' : ''}
                 />
               </div>
               
@@ -129,12 +168,12 @@ function LoginContent() {
                     setPassword(e.target.value);
                     setPasswordEmpty(false);
                   }}
-                  placeholder={passwordEmpty ? 'โปรดกรอกฟิลด์นี้' : ''}
+                  placeholder={passwordEmpty ? 'โปรดกรอก Password' : ''}
                 />
               </div>
 
               <div className={styles.actions}>
-                <button type="submit" className={styles.loginBtn} disabled={loading}>
+                <button type="submit" className={styles.loginBtn} disabled={loading || failedAttempts >= 10}>
                   {loading ? 'Logging in...' : 'Log in'}
                 </button>
                 <button 

@@ -25,7 +25,16 @@ export async function PUT(
       return NextResponse.json({ success: false, error: 'กรุณากรอกชื่อชุดแบบฝึกหัด' }, { status: 400 });
     }
 
-    await ManageExercisesModel.updateExerciseName(oldName, newName.trim());
+    const result = await ManageExercisesModel.updateExerciseName(oldName, newName.trim());
+    
+    if (result && result.isDuplicateDeleted) {
+      return NextResponse.json({ 
+        success: false, 
+        isDuplicateDeleted: true,
+        name: result.name
+      });
+    }
+
     revalidateTag('exercises', 'max');
     return NextResponse.json({ success: true });
   } catch (error: unknown) {

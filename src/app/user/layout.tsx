@@ -21,16 +21,30 @@ export default function UserLayout({
 
   const [lastActivity, setLastActivity] = useState<number>(0);
   const [isPageLoading, setIsPageLoading] = useState(false);
-  const pathname = usePathname();
+  const pathname = usePathname() || "";
   const router = useRouter();
 
+  const [activeTab, setActiveTab] = useState<string>('');
+
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsPageLoading(false);
+    const timer = setTimeout(() => {
+      setIsPageLoading(false);
+      
+      if (pathname.startsWith("/user/history")) {
+        setActiveTab('history');
+      } else if (pathname.startsWith("/user/games") && !pathname.startsWith("/user/games/summary")) {
+        setActiveTab('games');
+      } else {
+        setActiveTab('');
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [pathname]);
 
   const handleLinkClick = (href: string) => {
     if (pathname !== href) {
+      if (href.includes('/history')) setActiveTab('history');
+      else if (href.includes('/games')) setActiveTab('games');
       setIsPageLoading(true);
     }
   };
@@ -42,7 +56,7 @@ export default function UserLayout({
         if (session && session.user) {
           const user = session.user as Record<string, unknown>;
           const nameToDisplay = user.fullName || user.name || user.id || "";
-          setUserName(`คุณ ${nameToDisplay}`);
+          setUserName(`${nameToDisplay}`);
           return;
         }
       } catch (e) {
@@ -53,22 +67,23 @@ export default function UserLayout({
     fetchUser();
   }, []);
 
-  const handleLogout = async () => {
+  const handleLogout = React.useCallback(async () => {
     await signOut({ redirect: false });
     router.push("/login");
-  };
+  }, [router]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLastActivity(Date.now());
+    const initialTimer = setTimeout(() => {
+      setLastActivity(new Date().getTime());
+    }, 0);
 
     let throttleTimer: NodeJS.Timeout | null = null;
     const handleActivity = () => {
       if (!throttleTimer) {
         throttleTimer = setTimeout(() => {
-          setLastActivity(Date.now());
+          setLastActivity(new Date().getTime());
           throttleTimer = null;
         }, 1000);
       }
@@ -87,6 +102,7 @@ export default function UserLayout({
       window.removeEventListener('click', handleActivity);
       window.removeEventListener('scroll', handleActivity);
       if (throttleTimer) clearTimeout(throttleTimer);
+      clearTimeout(initialTimer);
     };
   }, []);
 
@@ -105,8 +121,7 @@ export default function UserLayout({
     }, 60000); // Check every minute
 
     return () => clearInterval(interval);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastActivity]);
+  }, [lastActivity, handleLogout]);
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -114,8 +129,8 @@ export default function UserLayout({
 
   const isGameInnerPage = pathname.startsWith("/user/games/") && pathname.split("/").length > 4;
   const isSummaryPage = pathname.startsWith("/user/games/summary");
-  const isHistoryActive = pathname.startsWith("/user/history");
-  const isGamesActive = pathname.startsWith("/user/games") && !isSummaryPage;
+  const isHistoryActive = activeTab === 'history';
+  const isGamesActive = activeTab === 'games';
 
   return (
     <div className={`${styles.layoutContainer} ${isGameInnerPage ? styles.noBottomPadding : ''} ${isSummaryPage ? styles.summaryLayout : ''}`}>
@@ -148,7 +163,7 @@ export default function UserLayout({
               priority
             />
             <Image 
-              src="/Logo OT.jpg" 
+              src="/logo-ot.webp" 
               alt="OT Logo" 
               width={150} 
               height={77} 
@@ -243,12 +258,14 @@ export default function UserLayout({
       {!isGameInnerPage && (
       <div className={styles.mobileHeader}>
         <div className={styles.mobileUserPill}>{userName}</div>
-        <Link href="/user/games" onClick={() => handleLinkClick('/user/games')} className={styles.mobileHomeBtn} aria-label="Home">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-            <polyline points="9 22 9 12 15 12 15 22"></polyline>
-          </svg>
-        </Link>
+        {pathname !== '/user/games' && (
+          <Link href="/user/games" onClick={() => handleLinkClick('/user/games')} className={styles.mobileHomeBtn} aria-label="Home">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+          </Link>
+        )}
         <button className={styles.mobileLogoutBtn} aria-label="Logout" title="Logout" onClick={handleLogout}>
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>

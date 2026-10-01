@@ -6,6 +6,7 @@ import styles from './matchingSettings.module.css';
 import { getExerciseImageCount, getGameData } from '@/app/actions/matchingActions';
 import { useClickSound } from '@/app/hooks/useClickSound';
 import Image from 'next/image';
+import SettingControl from '@/app/components/SettingControl/SettingControl';
 
 interface GameTarget {
   id: number;
@@ -47,6 +48,50 @@ const VolumeIcon = ({ isMuted }: { isMuted: boolean }) => (
   </svg>
 );
 
+const useHoldToIncrement = (playClick: () => void) => {
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const stopHold = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    if (intervalRef.current) clearInterval(intervalRef.current);
+  };
+
+  const startHold = (setter: React.Dispatch<React.SetStateAction<number>>, initialValue: number, delta: number, min: number, max: number) => {
+    stopHold();
+    let currentVal = initialValue;
+
+    const doUpdate = () => {
+      const newVal = currentVal + delta;
+      if (newVal >= min && newVal <= max) {
+        currentVal = newVal;
+        playClick();
+        setter(newVal);
+        return true;
+      }
+      return false;
+    };
+
+    if (doUpdate()) {
+      timeoutRef.current = setTimeout(() => {
+        intervalRef.current = setInterval(() => {
+          if (!doUpdate()) {
+            stopHold();
+          }
+        }, 70);
+      }, 400);
+    }
+  };
+
+  useEffect(() => {
+    return () => stopHold();
+  }, []);
+
+  return { startHold, stopHold };
+};
+
+
+
 export default function MatchingSettingsPage() {
   const router = useRouter();
   const params = useParams();
@@ -60,6 +105,7 @@ export default function MatchingSettingsPage() {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playClick = useClickSound();
+  const { startHold, stopHold } = useHoldToIncrement(playClick);
 
   // For Preview Animation
   const [previewData, setPreviewData] = useState<GameDataPreview[]>([]);
@@ -85,8 +131,9 @@ export default function MatchingSettingsPage() {
   useEffect(() => {
     if (previewData.length === 0) return;
     
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setFade(true); // Ensure it's visible initially
+    const initialTimer = setTimeout(() => {
+      setFade(true); // Ensure it's visible initially
+    }, 0);
     
     const interval = setInterval(() => {
       setFade(false); // start fade out
@@ -97,14 +144,17 @@ export default function MatchingSettingsPage() {
       }, 300); // 300ms transition time
     }, 8000); // Change every 8 seconds
     
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(initialTimer);
+      clearInterval(interval);
+    };
   }, [previewData.length]);
 
   useEffect(() => {
     // Initialize audio
     const audioSrc = type === 'image' 
-      ? '/api/uploads/image_image_matching_instruction.mp3' 
-      : '/api/uploads/word_image_matching_instruction.mp3';
+      ? '/audio/image_image_matching_instruction.mp3' 
+      : '/audio/word_image_matching_instruction.mp3';
       
     audioRef.current = new Audio(audioSrc);
     audioRef.current.onended = () => setIsPlaying(false);
@@ -155,13 +205,6 @@ export default function MatchingSettingsPage() {
     router.push(`/user/games/matching?type=${type}`);
   };
 
-  const updateValue = (setter: React.Dispatch<React.SetStateAction<number>>, current: number, delta: number, min: number, max: number) => {
-    const newValue = current + delta;
-    if (newValue >= min && newValue <= max) {
-      playClick();
-      setter(newValue);
-    }
-  };
 
   const title = type === 'image' ? 'จับคู่ภาพกับภาพ' : 'จับคู่คำกับภาพ';
   const subtitle = type === 'image' 
@@ -285,61 +328,24 @@ export default function MatchingSettingsPage() {
         <div className={styles.settingsContainer}>
           <h2 className={styles.settingsTitle}>ตั้งค่าการฝึก</h2>
           
-          <div className={styles.settingRow}>
-            <span className={styles.settingLabel}>จำนวนคำถาม</span>
-            <div className={styles.controlGroup}>
-              <button 
-                className={styles.controlBtn} 
-                onClick={() => updateValue(setQuestions, questions, -1, 1, maxQuestions)}
-                disabled={questions <= 1}
-                aria-label="Decrease questions"
-              >
-                -
-              </button>
-              <input 
-                type="number" 
-                className={styles.controlValue} 
-                value={questions} 
-                readOnly 
-              />
-              <button 
-                className={styles.controlBtn} 
-                onClick={() => updateValue(setQuestions, questions, 1, 1, maxQuestions)}
-                disabled={questions >= maxQuestions}
-                aria-label="Increase questions"
-              >
-                +
-              </button>
-            </div>
-          </div>
-
-          <div className={styles.settingRow}>
-            <span className={styles.settingLabel}>จำนวนคำตอบ</span>
-            <div className={styles.controlGroup}>
-              <button 
-                className={styles.controlBtn} 
-                onClick={() => updateValue(setAnswers, answers, -1, 2, 6)}
-                disabled={answers <= 2}
-                aria-label="Decrease answers"
-              >
-                -
-              </button>
-              <input 
-                type="number" 
-                className={styles.controlValue} 
-                value={answers} 
-                readOnly 
-              />
-              <button 
-                className={styles.controlBtn} 
-                onClick={() => updateValue(setAnswers, answers, 1, 2, 6)}
-                disabled={answers >= 6}
-                aria-label="Increase answers"
-              >
-                +
-              </button>
-            </div>
-          </div>
+          <SettingControl 
+            label="จำนวนคำถาม" 
+            value={questions} 
+            setter={setQuestions} 
+            min={1} 
+            max={maxQuestions} 
+            startHold={startHold}
+            stopHold={stopHold}
+          />
+          <SettingControl 
+            label="จำนวนคำตอบ" 
+            value={answers} 
+            setter={setAnswers} 
+            min={2} 
+            max={6} 
+            startHold={startHold}
+            stopHold={stopHold}
+          />
         </div>
       </div>
 
