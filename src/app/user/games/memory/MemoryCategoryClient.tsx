@@ -35,20 +35,26 @@ export default function MemoryCategoryClient() {
   };
 
   useEffect(() => {
+    let isMounted = true;
     const fetchExercises = async () => {
       try {
         const res = await fetch('/api/user/games/memory');
         const result = await res.json();
-        if (result.success && result.data) {
-          setExercises(result.data);
+        if (result.success && result.data && isMounted) {
+          setExercises(prev => prev.length === 0 ? result.data : prev);
         }
       } catch (error) {
         console.error('Error fetching exercises:', error);
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
+    
     fetchExercises();
+    
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {

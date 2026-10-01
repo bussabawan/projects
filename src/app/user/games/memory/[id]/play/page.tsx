@@ -59,8 +59,8 @@ export default function MemoryGamePlayPage() {
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
   const [showExitPopup, setShowExitPopup] = useState(false);
   const [correctChoiceIds, setCorrectChoiceIds] = useState<number[]>([]);
-  const [, setIsAudioPlaying] = useState(false);
-  const [playingAudioUrl, setPlayingAudioUrl] = useState<string | null>(null);
+
+  const [playingSource, setPlayingSource] = useState<string | null>(null);
   
   // Timers
   const [countdown, setCountdown] = useState(showTimeSetting);
@@ -104,7 +104,7 @@ export default function MemoryGamePlayPage() {
         audioCache.set(audioUrlWithBitrate, audio);
         audio.src = audioUrlWithBitrate;
         audio.oncanplaythrough = () => resolve();
-        audio.onerror = () => { setPlayingAudioUrl(null); resolve(); };
+        audio.onerror = () => { resolve(); };
         setTimeout(resolve, 3000); // timeout for audio
       }));
     };
@@ -234,7 +234,7 @@ export default function MemoryGamePlayPage() {
     };
   }, [gameState, currentQuestionIndex]);
 
-  const playAudio = useCallback((url?: string): Promise<void> => {
+  const playAudio = useCallback((url?: string, source?: string): Promise<void> => {
     return new Promise((resolve) => {
       // 1. หยุดเสียงเก่าทุกกรณี (จำเป็นสำหรับบางเบราว์เซอร์เพื่อให้เริ่มเล่นใหม่ได้)
       if (audioRef.current) {
@@ -243,12 +243,12 @@ export default function MemoryGamePlayPage() {
 
       // 2. ถ้าไม่มีเสียงใหม่ให้เล่น ให้จบการทำงาน
       if (!url) {
-        setPlayingAudioUrl(null);
+        setPlayingSource(null);
         resolve();
         return;
       }
       
-      setPlayingAudioUrl(url);
+      if (source) setPlayingSource(source);
       
       // Determine bitrate based on screen size (Mobile L: 425px)
       const bitrate = window.innerWidth <= 425 ? 32 : 64;
@@ -270,18 +270,18 @@ export default function MemoryGamePlayPage() {
       audioRef.current = audio;
       
       audio.onended = () => {
-        setPlayingAudioUrl(null);
+        setPlayingSource(null);
         resolve();
       };
       audio.onerror = () => {
-        setPlayingAudioUrl(null);
+        setPlayingSource(null);
         resolve();
       };
       
       // 4. เล่นเสียง
       audio.play().catch(e => {
         console.log("Audio play failed:", e);
-        setPlayingAudioUrl(null);
+        setPlayingSource(null);
         resolve();
       });
     });
@@ -293,19 +293,15 @@ export default function MemoryGamePlayPage() {
 
     const playSequentially = async () => {
       if (gameState === 'question' && questions[currentQuestionIndex]) {
-        setIsAudioPlaying(true);
         const currentQ = questions[currentQuestionIndex];
         for (const target of currentQ.targets) {
           if (!isActive) break;
           if (target.audioUrl) {
-            await playAudio(target.audioUrl);
+            await playAudio(target.audioUrl, `target-${target.id}`);
             if (!isActive) break;
             // Short delay between audios
             await new Promise(resolve => setTimeout(resolve, 150));
           }
-        }
-        if (isActive) {
-          setIsAudioPlaying(false);
         }
       }
     };
@@ -334,7 +330,7 @@ export default function MemoryGamePlayPage() {
 
   const handleOptionClick = async (selectedChoice: ImageInfo) => {
     handlePlayClick();
-    const audioPromise = playAudio(selectedChoice.audioUrl);
+    const audioPromise = playAudio(selectedChoice.audioUrl, `choice-${selectedChoice.id}`);
     
     if (gameState !== 'options' || isTransitioning) return;
     if (correctChoiceIds.includes(selectedChoice.id)) return;
@@ -555,7 +551,7 @@ export default function MemoryGamePlayPage() {
               <motion.div 
                 key={idx}
                 className={styles.targetCard} 
-                onClick={() => playAudio(target.audioUrl)}
+                onClick={() => playAudio(target.audioUrl, `target-${target.id}`)}
                 style={{ cursor: 'pointer' }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -566,7 +562,7 @@ export default function MemoryGamePlayPage() {
                   <Image src={target.imageUrl} alt={`Target ${idx}`} width={300} height={300} priority unoptimized={true} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                 )}
                 
-                {playingAudioUrl === target.audioUrl && (
+                {playingSource === `target-${target.id}` && (
                   <div className={styles.playingOverlay}>
                     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'white' }}>
                       <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
@@ -602,6 +598,16 @@ export default function MemoryGamePlayPage() {
                 transition={{ duration: 0.4 }}
               >
                 <Image src={choice.imageUrl} alt={`Option ${index + 1}`} width={300} height={300} priority unoptimized={true} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                
+                {playingSource === `choice-${choice.id}` && (
+                  <div className={styles.playingOverlay}>
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'white' }}>
+                      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                      <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                      <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                    </svg>
+                  </div>
+                )}
               </motion.div>
             ))}
           </div>

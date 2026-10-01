@@ -47,6 +47,7 @@ export default function BaseModal({
     <AnimatePresence>
       {isOpen && (
         <motion.div 
+          key="modal-overlay"
           className={styles.overlay} 
           onClick={onClose}
           initial={{ opacity: 0 }}

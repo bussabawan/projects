@@ -5,7 +5,6 @@ import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import BaseModal from '../BaseModal/BaseModal';
 import styles from './AboutModal.module.css';
-import { useScrollLock } from "@/app/hooks/useScrollLock";
 
 interface AboutModalProps {
   isOpen: boolean;
@@ -22,17 +21,6 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
     }, 0);
     return () => clearTimeout(timer);
   }, []);
-
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen]);
 
   if (!mounted) return null;
 
@@ -158,4 +146,5 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
     document.body
   );
 }
+
 

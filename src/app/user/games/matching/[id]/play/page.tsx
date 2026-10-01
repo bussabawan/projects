@@ -88,6 +88,7 @@ export default function MatchingGamePage() {
   const [currentQuestionStartTime, setCurrentQuestionStartTime] = useState<number>(0);
   
   const [isMuted, setIsMuted] = useState(false);
+  const [playingSource, setPlayingSource] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playClick = useClickSound();
 
@@ -108,7 +109,7 @@ export default function MatchingGamePage() {
     };
   }, []);
 
-  const playAudio = (url?: string) => {
+  const playAudio = (url?: string, source?: string) => {
     // 1. หยุดเสียงเก่าทุกกรณี (จำเป็นสำหรับบางเบราว์เซอร์เพื่อให้เริ่มเล่นใหม่ได้)
     if (audioRef.current) {
       audioRef.current.pause();
@@ -137,7 +138,19 @@ export default function MatchingGamePage() {
     audioRef.current = audio;
     
     // 4. เล่นเสียง
-    audio.play().catch(() => {});
+    if (source) setPlayingSource(source);
+
+    audio.onended = () => {
+      setPlayingSource(null);
+    };
+
+    audio.onerror = () => {
+      setPlayingSource(null);
+    };
+
+    audio.play().catch(() => {
+      setPlayingSource(null);
+    });
   };
 
   // Timer effect
@@ -256,7 +269,20 @@ export default function MatchingGamePage() {
           } catch {}
           
           audioRef.current = audio;
-          audio.play().catch(() => {});
+          
+          setPlayingSource('target');
+
+          audio.onended = () => {
+            setPlayingSource(null);
+          };
+
+          audio.onerror = () => {
+            setPlayingSource(null);
+          };
+
+          audio.play().catch(() => {
+            setPlayingSource(null);
+          });
         }, 500); // Small delay allows UI to render first and helps with browser autoplay policies
         
         return () => clearTimeout(timer);
@@ -273,7 +299,7 @@ export default function MatchingGamePage() {
 
   const handleChoiceClick = (choiceId: number, audioUrl?: string) => {
     playClick();
-    playAudio(audioUrl);
+    playAudio(audioUrl, `choice-${choiceId}`);
     if (feedback !== null || isFinished) return; // Prevent clicking while showing feedback
 
     setClickCount(prev => prev + 1);
@@ -423,7 +449,7 @@ export default function MatchingGamePage() {
       <div className={styles.gameArea}>
         <motion.div 
           className={styles.targetContainer} 
-          onClick={() => playAudio(currentQ.target.audioUrl)}
+          onClick={() => playAudio(currentQ.target.audioUrl, 'target')}
           style={{ cursor: currentQ.target.audioUrl && !isMuted ? 'pointer' : 'default' }}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -450,6 +476,16 @@ export default function MatchingGamePage() {
                 e.currentTarget.srcset = '';
               }}
             />
+          )}
+          
+          {playingSource === 'target' && (
+            <div className={styles.playingOverlay}>
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'white' }}>
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+              </svg>
+            </div>
           )}
         </motion.div>
 
@@ -483,6 +519,16 @@ export default function MatchingGamePage() {
                   e.currentTarget.srcset = '';
                 }}
               />
+              
+              {playingSource === `choice-${choice.id}` && (
+                <div className={styles.playingOverlay}>
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'white' }}>
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                  </svg>
+                </div>
+              )}
             </motion.div>
           ))}
         </div>

@@ -30,22 +30,28 @@ export default function MatchingCategoryClient() {
   };
 
   useEffect(() => {
+    let isMounted = true;
     const fetchExercises = async () => {
       try {
         const res = await fetch('/api/user/exercises');
         const json = await res.json();
-        if (json.success) {
-          setExercises(json.data);
-        } else {
+        if (json.success && isMounted) {
+          setExercises(prev => prev.length === 0 ? json.data : prev);
+        } else if (!json.success) {
           console.error(json.error);
         }
       } catch (error) {
         console.error('Failed to fetch exercises:', error);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
+    
     fetchExercises();
+    
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const filteredExercises = exercises.filter(ex => 
