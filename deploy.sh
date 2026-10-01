@@ -13,6 +13,8 @@
 set -eo pipefail
 
 LOG_FILE="deploy.log"
+touch "$LOG_FILE" 2>/dev/null || true
+chmod 600 "$LOG_FILE" 2>/dev/null || true
 
 # Redirect stdout and stderr to both the console and deploy.log
 exec > >(tee -a "$LOG_FILE") 2>&1
@@ -81,12 +83,15 @@ CURRENT_GID=$(id -g)
 if [ -d "uploads" ]; then
     if [ "$EUID" -eq 0 ]; then
         chown -R "$CURRENT_UID:$CURRENT_GID" uploads
-        chmod -R 777 uploads
+        find uploads -type d -exec chmod 775 {} + 2>/dev/null || true
+        find uploads -type f -exec chmod 664 {} + 2>/dev/null || true
     elif command -v sudo &> /dev/null; then
         sudo chown -R "$CURRENT_UID:$CURRENT_GID" uploads 2>/dev/null || true
-        sudo chmod -R 777 uploads 2>/dev/null || true
+        sudo find uploads -type d -exec chmod 775 {} + 2>/dev/null || true
+        sudo find uploads -type f -exec chmod 664 {} + 2>/dev/null || true
     else
-        chmod -R 777 uploads 2>/dev/null || true
+        find uploads -type d -exec chmod 775 {} + 2>/dev/null || true
+        find uploads -type f -exec chmod 664 {} + 2>/dev/null || true
     fi
 fi
 
@@ -155,6 +160,9 @@ if [ ! -f .env ]; then
     fi
 else
     log_success "Environment file .env found."
+    # Protect sensitive environment file (credentials & secrets)
+    chmod 600 .env 2>/dev/null || true
+    log_info "Secured .env permissions to 600 (owner read/write only)."
 fi
 
 # ------------------------------------------------------------------------------
@@ -167,19 +175,24 @@ mkdir -p uploads/images
 mkdir -p uploads/cache/tts
 
 # In Next.js runner Dockerfile, the application runs under user 'nextjs' (UID: 1001, GID: 1001).
-# We grant UID 1001 ownership and 777 permissions so both host and container can read/write without conflict.
-log_info "Setting permissions for uploads directory (UID: 1001 / nextjs container user)..."
+# We grant UID 1001 ownership with secure least-privilege permissions:
+# - Directories: 775 (rwxrwxr-x) -> nextjs and host group can write, others read only
+# - Files: 664 (rw-rw-r--) -> no execute permission (+x) to prevent malicious script execution
+log_info "Setting secure permissions for uploads directory (UID: 1001 / nextjs container user)..."
 if [ "$EUID" -eq 0 ]; then
-    chown -R 1001:1001 uploads
-    chmod -R 777 uploads
+    chown -R 1001:"$CURRENT_GID" uploads 2>/dev/null || chown -R 1001:1001 uploads
+    find uploads -type d -exec chmod 775 {} + 2>/dev/null || true
+    find uploads -type f -exec chmod 664 {} + 2>/dev/null || true
 elif command -v sudo &> /dev/null; then
-    sudo chown -R 1001:1001 uploads 2>/dev/null || true
-    sudo chmod -R 777 uploads 2>/dev/null || true
+    sudo chown -R 1001:"$CURRENT_GID" uploads 2>/dev/null || sudo chown -R 1001:1001 uploads 2>/dev/null || true
+    sudo find uploads -type d -exec chmod 775 {} + 2>/dev/null || true
+    sudo find uploads -type f -exec chmod 664 {} + 2>/dev/null || true
 else
-    chmod -R 777 uploads 2>/dev/null || true
+    find uploads -type d -exec chmod 775 {} + 2>/dev/null || true
+    find uploads -type f -exec chmod 664 {} + 2>/dev/null || true
 fi
 
-log_success "Uploads directory structure and permissions configured."
+log_success "Uploads directory structure and permissions configured securely."
 
 # ------------------------------------------------------------------------------
 # 6. Execute Docker Compose (Build & Up)
