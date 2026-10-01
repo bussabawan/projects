@@ -170,7 +170,7 @@ export default function ManageExercisesPage() {
       const data = await res.json();
       if (data.success) {
         setIsEditModalOpen(false);
-        setExercises(prev => prev.map(ex => ex.name === editExerciseOldName ? { ...ex, name: editExerciseNewName.trim() } : ex));
+        setExercises(prev => prev.map(ex => ex.exercises_name === editExerciseOldName ? { ...ex, exercises_name: editExerciseNewName.trim() } : ex));
       } else if (data.isDuplicateDeleted) {
         setIsEditModalOpen(false);
         setExerciseToRestore(data.name);
@@ -215,7 +215,7 @@ export default function ManageExercisesPage() {
 
   const confirmRestoreExercise = async () => {
     // Determine the name to restore
-    const nameToRestore = exerciseToRestore || duplicateExerciseName;
+    const nameToRestore = exerciseToRestore;
     if (!nameToRestore) return;
     setIsProcessing(true);
     
@@ -237,7 +237,7 @@ export default function ManageExercisesPage() {
         setIsRestoreModalOpen(false);
         setExercises(prev => {
           if (editExerciseOldName) {
-            return prev.map(ex => ex.name === editExerciseOldName ? { ...ex, name: nameToRestore } : ex);
+            return prev.map(ex => ex.exercises_name === editExerciseOldName ? { ...ex, exercises_name: nameToRestore } : ex);
           }
           // If it was a create, we might need to fetch page 1 or just add it
           fetchExercises(true);
