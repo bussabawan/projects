@@ -51,6 +51,33 @@
   color: #333;
 }
 
+.manualsContainer {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.manualLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #f1f5f9;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #475569 !important;
+  text-decoration: none !important;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s;
+}
+
+.manualLink:hover {
+  background-color: #e2e8f0;
+  color: #1e293b !important;
+}
+
 .mobileCreatorsContainer {
   display: none;
 }
@@ -114,6 +141,10 @@
   
   .mobileCreatorsLink:hover {
     color: #333;
+  }
+
+  .manualsContainer {
+    justify-content: center;
   }
 
   .footerContainer.cornerFixed {

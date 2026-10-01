@@ -31,7 +31,7 @@ function LoginContent() {
       if (storedAttempts) {
         setFailedAttempts(parseInt(storedAttempts, 10));
         if (parseInt(storedAttempts, 10) >= 10) {
-          setError('คุณใส่รหัสผิดเกิน 10 ครั้ง กรุณาติดต่อผู้ดูแลระบบ');
+          setError('คุณใส่รหัสผิดเกิน 10 ครั้ง กรุณาติดต่อโรงพยาบาลเวชชารักษ์ ลำปาง');
         }
       }
     }, 0);

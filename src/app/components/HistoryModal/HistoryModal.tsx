@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import BaseModal from '../BaseModal/BaseModal';
 import styles from './HistoryModal.module.css';
+import { PuzzleIcon, BrainIcon } from '@/app/components/Icons';
 
 interface HistoryDetail {
   id: number;
@@ -50,12 +51,12 @@ export default function HistoryModal({ isOpen, onClose, data }: HistoryModalProp
   const getGameIcon = (gameName: string) => {
     if (gameName === 'จับคู่') {
       return (
-        <span style={{ fontSize: '1.1rem' }}>🧩</span>
+        <PuzzleIcon size="1.1rem" style={{ color: '#10b981' }} />
       );
     }
     if (gameName === 'ความจำ') {
       return (
-        <span style={{ fontSize: '1.1rem' }}>🧠</span>
+        <BrainIcon size="1.1rem" style={{ color: '#ec4899' }} />
       );
     }
     return (
@@ -92,12 +93,12 @@ export default function HistoryModal({ isOpen, onClose, data }: HistoryModalProp
                   <span>ทั้งหมด</span>
                 ) : filter === 'ความจำ' ? (
                   <>
-                    <span className={styles.filterIcon}>🧠</span>
+                    <span className={styles.filterIcon}><BrainIcon size="1em" style={{ color: '#ec4899' }} /></span>
                     <span>ความจำ</span>
                   </>
                 ) : filter === 'จับคู่' ? (
                   <>
-                    <span className={styles.filterIcon}>🧩</span>
+                    <span className={styles.filterIcon}><PuzzleIcon size="1em" style={{ color: '#10b981' }} /></span>
                     <span>จับคู่</span>
                   </>
                 ) : (
