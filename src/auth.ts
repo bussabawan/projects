@@ -13,6 +13,7 @@ class CustomAuthError extends CredentialsSignin {
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
+  trustHost: true,
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -53,8 +54,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             }
           }
           
-          throw new CustomAuthError('You do not have permission to access the system');
+          throw new CustomAuthError('คุณไม่มีสิทธิ์เข้าใช้งานระบบ');
         } catch (error: unknown) {
+          console.error("[Auth Error] Credentials authorize error:", error);
           if (error instanceof CustomAuthError) {
             throw error;
           }
@@ -78,9 +80,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             return true;
           }
           
+          console.error("[Auth Error] Google Login Failed: Email not found or invalid role ->", user.email);
           return false;
         } catch (error) {
-          console.error("Error during signIn callback:", error);
+          console.error("[Auth Error] Error during signIn callback:", error);
           return false;
         }
       }

@@ -17,7 +17,7 @@ export class UserModel extends BaseModel {
    */
   static async findByUserName(userName: string): Promise<User | null> {
     const userRow = await this.findOne<User & RowDataPacket>(
-      'SELECT user_id, user_name, full_name, role, remove, update_time FROM users_data WHERE user_name = ? AND remove = 0',
+      'SELECT user_id, user_name, full_name, role, remove, update_time FROM users_data WHERE user_name = ? AND (remove = 0 OR remove IS NULL)',
       [userName]
     );
     
@@ -29,7 +29,7 @@ export class UserModel extends BaseModel {
    */
   static async authenticate(userName: string, password: string): Promise<User | null> {
     const userRow = await this.findOne<(User & { stored_password: string }) & RowDataPacket>(
-      'SELECT user_id, user_name, full_name, password as stored_password, role, remove, update_time FROM users_data WHERE user_name = ? AND remove = 0',
+      'SELECT user_id, user_name, full_name, password as stored_password, role, remove, update_time FROM users_data WHERE user_name = ? AND (remove = 0 OR remove IS NULL)',
       [userName]
     );
     
