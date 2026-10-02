@@ -8,6 +8,7 @@ import styles from "./admin.module.css";
 import { usePathname } from "next/navigation";
 import Loader from "@/app/components/Loader/Loader";
 import AboutModal from "@/app/components/AboutModal/AboutModal";
+import Footer from "@/app/components/Footer/Footer";
 import { motion } from "framer-motion";
 
 export default function AdminLayout({
@@ -241,11 +242,14 @@ export default function AdminLayout({
       </aside>
 
       <main className={styles.mainContent}>
-        {isPageLoading ? (
-          <Loader text="กำลังโหลดข้อมูล..." />
-        ) : (
-          children
-        )}
+        <div className={styles.innerContent}>
+          {isPageLoading ? (
+            <Loader text="กำลังโหลดข้อมูล..." />
+          ) : (
+            children
+          )}
+        </div>
+        <Footer />
       </main>
       
       <Link href="/admin/manual" onClick={() => handleLinkClick('/admin/manual')} className={styles.mobileManualBtn} aria-label="คู่มือ">

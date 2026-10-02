@@ -24,7 +24,6 @@ export default function RootLayout({
       <body style={{ margin: 0, padding: 0, backgroundColor: '#f5f5f5' }}>
         {children}
         <CookieBanner />
-        <Footer />
       </body>
     </html>
   )

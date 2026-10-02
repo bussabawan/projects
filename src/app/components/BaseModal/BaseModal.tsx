@@ -49,7 +49,7 @@ export default function BaseModal({
         <motion.div 
           key="modal-overlay"
           className={styles.overlay} 
-          onClick={onClose}
+          onMouseDown={onClose}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -59,7 +59,7 @@ export default function BaseModal({
           <motion.div 
             className={styles.modal} 
             style={{ maxWidth }} 
-            onClick={(e) => e.stopPropagation()} // Prevent clicks inside modal from closing it
+            onMouseDown={(e) => e.stopPropagation()} // Prevent clicks inside modal from closing it
             initial={{ scale: 0.95, opacity: 0, y: 10 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 10 }}

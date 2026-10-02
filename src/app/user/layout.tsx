@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import { getSession, signOut } from "next-auth/react";
 import Loader from "@/app/components/Loader/Loader";
 import AboutModal from "@/app/components/AboutModal/AboutModal";
+import Footer from "@/app/components/Footer/Footer";
 import styles from "./user.module.css";
 
 export default function UserLayout({
@@ -280,11 +281,14 @@ export default function UserLayout({
       )}
 
       <main className={isGameInnerPage ? styles.fullMainContent : styles.mainContent}>
-        {isPageLoading ? (
-          <Loader text="กำลังโหลดข้อมูล..." />
-        ) : (
-          children
-        )}
+        <div className={isGameInnerPage ? '' : styles.innerContent}>
+          {isPageLoading ? (
+            <Loader text="กำลังโหลดข้อมูล..." />
+          ) : (
+            children
+          )}
+        </div>
+        {!isGameInnerPage && <Footer />}
       </main>
 
       {/* Mobile Manual Button */}

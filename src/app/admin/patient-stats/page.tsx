@@ -197,12 +197,12 @@ export default function PatientStatsPage() {
             </div>
             <div className={styles.tableBody}>
               {currentPatients.length > 0 ? currentPatients.map((patient) => (
-                <div key={`desktop-${patient.id}`} className={styles.tableRow}>
+                <div key={`desktop-${patient.id}`} className={styles.tableRow} onClick={() => openPopup(String(patient.id))}>
                   <div className={styles.cell}>{patient.name}</div>
                   <div className={styles.cell}>{patient.patientId}</div>
                   <div className={styles.cell}>{renderTestSetTags(patient)}</div>
                   <div className={styles.cell}>
-                    <button className={styles.playBtn} aria-label="Play" onClick={() => openPopup(String(patient.id))}>
+                    <button className={styles.playBtn} aria-label="Play" onClick={(e) => { e.stopPropagation(); openPopup(String(patient.id)); }}>
                       <svg viewBox="0 0 24 24">
                         <polygon points="5 3 19 12 5 21 5 3"></polygon>
                       </svg>
@@ -284,12 +284,12 @@ export default function PatientStatsPage() {
           {/* Mobile Grid View */}
           <div className={styles.mobileGrid}>
             {filteredPatients.length > 0 ? filteredPatients.slice(0, mobileVisibleCount).map((patient) => (
-              <div key={`mobile-${patient.id}`} className={styles.patientCard}>
+              <div key={`mobile-${patient.id}`} className={styles.patientCard} onClick={() => openPopup(String(patient.id))}>
                 <div className={styles.cardInfo}>
                   <span className={styles.patientName}>{patient.name}</span>
                   <span className={styles.patientId}>{patient.patientId}</span>
                 </div>
-                <button className={styles.cardPlayBtn} aria-label="Play" onClick={() => openPopup(String(patient.id))}>
+                <button className={styles.cardPlayBtn} aria-label="Play" onClick={(e) => { e.stopPropagation(); openPopup(String(patient.id)); }}>
                   <svg viewBox="0 0 24 24">
                     <polygon points="5 3 19 12 5 21 5 3"></polygon>
                   </svg>

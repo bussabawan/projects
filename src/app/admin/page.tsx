@@ -62,8 +62,7 @@ export default async function AdminPage() {
         exerciseCategoryStats={exerciseCategoryStats} 
       />
       
-      {/* Spacer to prevent content from hitting the bottom of the screen on desktop */}
-      <div className={styles.desktopSpacer}></div>
+
     </>
   );
 }

@@ -271,13 +271,20 @@
 /* Main Content */
 .mainContent {
   flex: 1;
-  padding: 3rem 4rem;
+  padding: 0;
   transition: padding 0.3s ease;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
   min-height: 0;
+}
+
+.innerContent {
+  padding: 3rem 4rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Force scrolling to see the footer */
 }
 
 .fullMainContent {
@@ -517,8 +524,12 @@
       border-color: #e0e0e0;
     }
   
+    .innerContent {
+      padding: 1.5rem 1.5rem 6rem 1.5rem; /* added bottom padding for sidebar clearance on mobile */
+    }
+  
     .mainContent {
-      padding: 1.5rem 1.5rem 0 1.5rem;
+      padding: 0;
       width: 100%;
       flex: 1;
       overflow-y: visible;
@@ -629,7 +640,7 @@
     .statValue {
       font-size: 5.5rem;
     }
-    .mainContent {
+    .innerContent {
       padding: 4rem 5rem;
     }
 }

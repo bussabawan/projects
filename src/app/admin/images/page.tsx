@@ -110,7 +110,7 @@ export default function ManageImagesPage() {
           if (img.audioUrl) {
             preloadPromises.push(new Promise((resolve) => {
               const baseAudioUrl = img.audioUrl!.startsWith('/') || img.audioUrl!.startsWith('blob:') ? img.audioUrl! : `/api/uploads/${img.audioUrl}`;
-              const fullAudioUrl = !img.audioUrl!.startsWith('blob:') ? `${baseAudioUrl}?t=${cacheBuster}` : baseAudioUrl;
+              const fullAudioUrl = !img.audioUrl!.startsWith('blob:') ? `${baseAudioUrl}${baseAudioUrl.includes('?') ? '&' : '?'}t=${cacheBuster}` : baseAudioUrl;
               if (!audioCache.current[fullAudioUrl]) {
                 const audio = new window.Audio(fullAudioUrl);
                 audio.preload = 'auto';

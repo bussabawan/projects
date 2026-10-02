@@ -188,8 +188,8 @@ export default function ImageFormModal({ image, onClose, onSave }: ImageFormModa
   };
 
   return (
-    <div className={styles.overlay} onClick={onClose} role="button" tabIndex={-1} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}>
-      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+    <div className={styles.overlay} onMouseDown={onClose} role="button" tabIndex={-1} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}>
+      <div className={styles.modalContent} onMouseDown={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
         <div className={styles.header}>
           {image ? "แก้ไขข้อมูลรูปภาพ" : "เพิ่มข้อมูลรูปภาพ"}
         </div>
@@ -271,15 +271,21 @@ export default function ImageFormModal({ image, onClose, onSave }: ImageFormModa
             <div className={styles.rightCol}>
               <div className={styles.imagePreview}>
                 {imagePreviewUrl && !imageError ? (
-                    <Image 
-                      src={imagePreviewUrl.startsWith('/') || imagePreviewUrl.startsWith('blob:') ? imagePreviewUrl : `/api/uploads/${imagePreviewUrl}`} 
-                      alt="Preview" 
-                      width={400}
-                      height={400}
-                      style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '12px' }} 
-                      onError={() => setImageError(true)}
-                      unoptimized
-                    />
+                  (() => {
+                    const baseUrl = imagePreviewUrl.startsWith('/') || imagePreviewUrl.startsWith('blob:') ? imagePreviewUrl : `/api/uploads/${imagePreviewUrl}`;
+                    const finalUrl = !imagePreviewUrl.startsWith('blob:') ? `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}t=${new Date().getTime()}` : baseUrl;
+                    return (
+                      <Image 
+                        src={finalUrl} 
+                        alt="Preview" 
+                        width={400}
+                        height={400}
+                        style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '12px' }} 
+                        onError={() => setImageError(true)}
+                        unoptimized
+                      />
+                    );
+                  })()
                 ) : (
                   <svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ background: '#fff', borderRadius: '12px' }}>
                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2" strokeWidth="2"></rect>

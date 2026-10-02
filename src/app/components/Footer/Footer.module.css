@@ -1,177 +1,96 @@
 .footerContainer {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  margin: 0;
-  text-align: right;
-  align-items: flex-end;
-  font-size: 14px;
-  color: #777;
-  z-index: 10;
-  background: transparent;
-  padding: 8px 12px;
-  box-sizing: border-box;
-  max-width: 100%;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-}
-
-.footerText {
-  margin-bottom: 4px;
-  word-break: break-word;
-  overflow-wrap: anywhere;
-  line-break: anywhere;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-.dots {
-  word-break: break-all;
-  overflow-wrap: anywhere;
-}
-
-.footerLinks {
-  word-break: break-word;
-  overflow-wrap: anywhere;
-  line-break: anywhere;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-.footerLinks a {
-  color: #777;
-  text-decoration: underline;
-  transition: color 0.2s;
-  word-break: break-word;
-  overflow-wrap: anywhere;
-}
-
-.footerLinks a:hover {
-  color: #333;
-}
-
-.manualsContainer {
-  margin-top: 12px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.manualLink {
-  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background-color: #f1f5f9;
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 13px;
-  color: #475569 !important;
-  text-decoration: none !important;
-  border: 1px solid #e2e8f0;
-  transition: all 0.2s;
+  background-color: #ffffff;
+  padding: 1.5rem 0 2rem 0;
+  margin-top: auto;
+  font-family: inherit;
 }
 
-.manualLink:hover {
-  background-color: #e2e8f0;
-  color: #1e293b !important;
+.divider {
+  width: 95%;
+  max-width: 1400px;
+  height: 1px;
+  background-color: #d1d5db;
+  margin-bottom: 1.5rem;
 }
 
-.mobileCreatorsContainer {
+.footerContent {
+  width: 95%;
+  max-width: 1400px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.left {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.mobileText {
   display: none;
 }
 
-.mobileDivider {
-  display: none;
-}
-
-.mobileBreak {
-  display: none;
-}
-
-.desktopOnly {
+.desktopText {
   display: inline;
 }
 
-@media (max-width: 768px), (max-width: 950px) and (max-height: 500px) {
-  .footerContainer {
-    position: relative;
-    bottom: auto;
-    left: auto;
-    right: auto;
-    margin: 20px auto 80px auto;
-    width: 90%;
-    font-size: 16px;
-    text-align: center;
-    align-items: center;
-    padding: 8px 10px;
-    max-width: 100%;
-    box-sizing: border-box;
-    display: flex;
+.right {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.link, .linkBtn {
+  display: flex;
+  align-items: center;
+  color: #111827;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  transition: color 0.2s ease;
+}
+
+.link:hover, .linkBtn:hover {
+  color: #6B21A8;
+}
+
+.mobileOnlyAbout {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .footerContent {
     flex-direction: column;
     justify-content: center;
-    overflow-x: hidden;
-    z-index: 0;
+    text-align: center;
   }
-
-  .mobileCreatorsContainer {
-    display: flex;
+  .right {
+    flex-direction: column;
     justify-content: center;
-    margin: 4px 0 8px 0;
-  }
-  
-  .mobileDivider {
-    display: block;
-    border: 0;
-    border-top: 1px solid rgba(0,0,0,0.1);
-    margin: 8px auto 12px;
-    width: 60%;
-  }
-  
-  .mobileCreatorsLink {
-    display: flex;
     align-items: center;
-    gap: 4px;
-    color: #777;
-    text-decoration: none;
-    font-size: 16px;
-    transition: color 0.2s;
+    gap: 1rem;
   }
-  
-  .mobileCreatorsLink:hover {
-    color: #333;
+  .mobileOnlyAbout {
+    display: flex;
   }
-
-  .manualsContainer {
-    justify-content: center;
+  .desktopText {
+    display: none;
   }
-
-  .footerContainer.cornerFixed {
-    margin: 20px auto 40px auto;
-    border-radius: 0;
-    pointer-events: auto;
-    overflow-x: hidden;
-  }
-
-  .adminFooterMobile {
-    margin-bottom: 160px !important; /* Push above mobile manual btn and bottom menu */
-  }
-
-  .footerContainer.cornerFixed .footerLinks a {
-    pointer-events: auto;
-  }
-  
-  .hiddenOnMobile {
-    display: none !important;
-  }
-
-  .mobileBreak {
+  .mobileText {
     display: block;
-    margin-top: 2px;
-  }
-
-  .desktopOnly {
-    display: none !important;
+    line-height: 1.6;
   }
 }
