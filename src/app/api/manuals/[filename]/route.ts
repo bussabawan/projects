@@ -6,7 +6,7 @@ import { createReadStream, statSync, existsSync } from 'fs';
 export const dynamic = 'force-dynamic';
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ filename: string }> }
 ) {
   const session = await auth();
@@ -35,14 +35,15 @@ export async function GET(
     // we can use standard Web Streams or just read the file into a buffer if it's small enough.
     // Or we can just use createReadStream and wrap it in a ReadableStream.
     
-    const { Readable } = require('stream');
-    const fs = require('fs');
-    const readStream = fs.createReadStream(filePath);
+    const readStream = createReadStream(filePath);
     
     // Convert Node.js stream to Web Stream
     const webStream = new ReadableStream({
       start(controller) {
-        readStream.on('data', (chunk: Buffer) => controller.enqueue(new Uint8Array(chunk)));
+        readStream.on('data', (chunk: Buffer | string) => {
+          const bytes = typeof chunk === 'string' ? Buffer.from(chunk) : chunk;
+          controller.enqueue(new Uint8Array(bytes));
+        });
         readStream.on('end', () => controller.close());
         readStream.on('error', (error: Error) => controller.error(error));
       },

@@ -3,8 +3,6 @@
    ========================================================================== */
 .container {
   flex: 1;
-  background-color: #ECECEC;
-  /* Default desktop background */
   padding: 20px 40px;
   display: flex;
   flex-direction: column;
@@ -27,18 +25,26 @@
 }
 
 .backBtn {
-  background-color: #f8b4aa;
-  color: #000;
+  background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+  color: #0369a1;
   border: none;
   padding: 10px 30px;
   border-radius: 25px;
   font-size: 1.1rem;
+  font-weight: 500;
   cursor: pointer;
   box-shadow: 0 4px 6px #0000001a;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.backBtn:hover {
+  background: linear-gradient(135deg, #bae6fd 0%, #7dd3fc 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px #00000020;
 }
 
 .mobileBackBtn {
@@ -236,15 +242,21 @@
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
-      background-color: #f8b4aa;
-      color: #000;
+      background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+      color: #0369a1;
       border: none;
       padding: 12px 30px;
       border-radius: 25px;
       font-size: 1.2rem;
+      font-weight: 500;
       cursor: pointer;
       box-shadow: 0 4px 6px #0000001a;
       margin: 25px auto 10px;
+      transition: all 0.2s ease;
+    }
+
+    .mobileBackBtn:hover {
+      background: linear-gradient(135deg, #bae6fd 0%, #7dd3fc 100%);
     }
 }
 

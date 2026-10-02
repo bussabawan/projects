@@ -80,14 +80,84 @@ export default function MemoryGamePlayPage() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      correctAudioRef.current = new window.Audio('/audio/Correct.mp3');
-      incorrectAudioRef.current = new window.Audio('/audio/incorrect.mp3');
+      const correct = new window.Audio('/audio/Correct.mp3');
+      const incorrect = new window.Audio('/audio/incorrect.mp3');
+      correct.preload = 'auto';
+      incorrect.preload = 'auto';
+      correct.load();
+      incorrect.load();
+      correctAudioRef.current = correct;
+      incorrectAudioRef.current = incorrect;
     }
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      if (correctAudioRef.current) {
+        correctAudioRef.current.pause();
+        correctAudioRef.current = null;
+      }
+      if (incorrectAudioRef.current) {
+        incorrectAudioRef.current.pause();
+        incorrectAudioRef.current = null;
+      }
+    };
   }, []);
 
   const handlePlayClick = useCallback(() => {
     if (!isMuted) playClick();
   }, [isMuted, playClick]);
+
+  const playFeedbackSound = useCallback((feedbackType: 'correct' | 'wrong', onEnded?: () => void) => {
+    const sound = feedbackType === 'correct' ? correctAudioRef.current : incorrectAudioRef.current;
+    
+    const durationMs = (sound && sound.duration && !isNaN(sound.duration) && sound.duration > 0)
+      ? Math.round(sound.duration * 1000)
+      : 1500;
+
+    if (isMuted || !sound) {
+      if (onEnded) {
+        setTimeout(onEnded, durationMs);
+      }
+      return;
+    }
+
+    try {
+      sound.pause();
+      sound.currentTime = 0;
+      let hasEnded = false;
+      let timer: NodeJS.Timeout | null = null;
+
+      const handleEnd = () => {
+        if (!hasEnded) {
+          hasEnded = true;
+          if (timer) clearTimeout(timer);
+          sound.onended = null;
+          sound.onerror = null;
+          if (onEnded) onEnded();
+        }
+      };
+
+      sound.onended = handleEnd;
+      sound.onerror = handleEnd;
+
+      const fallbackMs = (sound.duration && !isNaN(sound.duration) && sound.duration > 0)
+        ? Math.round(sound.duration * 1000) + 600
+        : 2500;
+      timer = setTimeout(handleEnd, fallbackMs);
+
+      sound.play().catch((err) => {
+        console.warn('Feedback sound play blocked or failed:', err);
+        handleEnd();
+      });
+    } catch (e) {
+      console.error('Error playing sound effect:', e);
+      if (onEnded) {
+        setTimeout(onEnded, durationMs);
+      }
+    }
+  }, [isMuted]);
 
   const preloadAssets = async (questionsList: GameData[]) => {
     const assets: Promise<void>[] = [];
@@ -339,16 +409,11 @@ export default function MemoryGamePlayPage() {
     setClickCount(prev => prev + 1);
     
     if (wrongGuesses.includes(selectedChoice.id)) {
-      if (!isMuted && incorrectAudioRef.current) {
-        const clone = incorrectAudioRef.current.cloneNode(true) as HTMLAudioElement;
-        clone.play().catch(() => {});
-      }
-      setIncorrectCount(prev => prev + 1);
       setFeedback('wrong');
-      setTimeout(() => {
+      playFeedbackSound('wrong', () => {
         setFeedback(null);
         setWrongGuesses(prev => prev.filter(id => id !== selectedChoice.id));
-      }, 1500);
+      });
       return;
     }
     
@@ -356,10 +421,6 @@ export default function MemoryGamePlayPage() {
     const isCorrect = currentQ.targets.some(t => t.id === selectedChoice.id);
     
     if (isCorrect) {
-      if (!isMuted && correctAudioRef.current) {
-        const clone = correctAudioRef.current.cloneNode(true) as HTMLAudioElement;
-        clone.play().catch(() => {});
-      }
       const newCorrectChoiceIds = [...correctChoiceIds, selectedChoice.id];
       setCorrectChoiceIds(newCorrectChoiceIds);
       setCorrectCount(prev => prev + 1);
@@ -379,9 +440,11 @@ export default function MemoryGamePlayPage() {
         }));
         setTimeLogs(prev => [...prev, ...newLogs]);
 
-        // Play the audio and ensure at least 1.5s delay for feedback
-        const delayPromise = new Promise(resolve => setTimeout(resolve, 1500));
-        await Promise.all([audioPromise, delayPromise]);
+        // Wait for both the feedback sound to finish and choice audio
+        const soundPromise = new Promise<void>(resolve => {
+          playFeedbackSound('correct', resolve);
+        });
+        await Promise.all([audioPromise, soundPromise]);
 
         // Move to next question or end game
         setWrongGuesses([]);
@@ -395,22 +458,20 @@ export default function MemoryGamePlayPage() {
           finishGame();
         }
       } else {
-        // Just show correct feedback briefly
+        // Just show correct feedback for sound duration
         setFeedback('correct');
-        setTimeout(() => setFeedback(null), 1000);
+        playFeedbackSound('correct', () => {
+          setFeedback(null);
+        });
       }
     } else {
-      if (!isMuted && incorrectAudioRef.current) {
-        const clone = incorrectAudioRef.current.cloneNode(true) as HTMLAudioElement;
-        clone.play().catch(() => {});
-      }
       setIncorrectCount(prev => prev + 1);
       setWrongGuesses(prev => [...prev, selectedChoice.id]);
       setFeedback('wrong');
-      setTimeout(() => {
+      playFeedbackSound('wrong', () => {
         setFeedback(null);
         setWrongGuesses(prev => prev.filter(id => id !== selectedChoice.id));
-      }, 1500);
+      });
     }
   };
 

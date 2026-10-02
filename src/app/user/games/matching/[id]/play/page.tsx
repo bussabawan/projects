@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 
 import styles from './matchingGame.module.css';
@@ -73,7 +73,78 @@ export default function MatchingGamePage() {
   const [isMuted, setIsMuted] = useState(false);
   const [playingSource, setPlayingSource] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const correctAudioRef = useRef<HTMLAudioElement | null>(null);
+  const incorrectAudioRef = useRef<HTMLAudioElement | null>(null);
   const playClick = useClickSound();
+
+  const handlePlayClick = useCallback(() => {
+    if (!isMuted) playClick();
+  }, [isMuted, playClick]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const correct = new window.Audio('/audio/Correct.mp3');
+      const incorrect = new window.Audio('/audio/incorrect.mp3');
+      correct.preload = 'auto';
+      incorrect.preload = 'auto';
+      correct.load();
+      incorrect.load();
+      correctAudioRef.current = correct;
+      incorrectAudioRef.current = incorrect;
+    }
+  }, []);
+
+  const playFeedbackSound = useCallback((feedbackType: 'correct' | 'wrong', onEnded?: () => void) => {
+    const sound = feedbackType === 'correct' ? correctAudioRef.current : incorrectAudioRef.current;
+    
+    // Default duration for when muted or when duration isn't available
+    const durationMs = (sound && sound.duration && !isNaN(sound.duration) && sound.duration > 0)
+      ? Math.round(sound.duration * 1000)
+      : 1500;
+
+    if (isMuted || !sound) {
+      if (onEnded) {
+        setTimeout(onEnded, durationMs);
+      }
+      return;
+    }
+
+    try {
+      sound.pause();
+      sound.currentTime = 0;
+      let hasEnded = false;
+      let timer: NodeJS.Timeout | null = null;
+
+      const handleEnd = () => {
+        if (!hasEnded) {
+          hasEnded = true;
+          if (timer) clearTimeout(timer);
+          sound.onended = null;
+          sound.onerror = null;
+          if (onEnded) onEnded();
+        }
+      };
+
+      sound.onended = handleEnd;
+      sound.onerror = handleEnd;
+
+      // Generous fallback only if onended doesn't fire naturally (sound duration + 600ms, at least 2500ms)
+      const fallbackMs = (sound.duration && !isNaN(sound.duration) && sound.duration > 0)
+        ? Math.round(sound.duration * 1000) + 600
+        : 2500;
+      timer = setTimeout(handleEnd, fallbackMs);
+
+      sound.play().catch((err) => {
+        console.warn('Feedback sound play blocked or failed:', err);
+        handleEnd();
+      });
+    } catch (e) {
+      console.error('Error playing sound effect:', e);
+      if (onEnded) {
+        setTimeout(onEnded, durationMs);
+      }
+    }
+  }, [isMuted]);
 
   // Format timer MM.SS
   const formatTime = (totalSeconds: number) => {
@@ -89,6 +160,14 @@ export default function MatchingGamePage() {
         audioRef.current.pause();
         audioRef.current = null;
       }
+      if (correctAudioRef.current) {
+        correctAudioRef.current.pause();
+        correctAudioRef.current = null;
+      }
+      if (incorrectAudioRef.current) {
+        incorrectAudioRef.current.pause();
+        incorrectAudioRef.current = null;
+      }
     };
   }, []);
 
@@ -98,8 +177,8 @@ export default function MatchingGamePage() {
       audioRef.current.pause();
     }
     
-    // 2. ถ้าไม่มีเสียงใหม่ให้เล่น หรือปิดเสียงอยู่ ให้จบการทำงาน
-    if (!url || isMuted) return;
+    // 2. ถ้าไม่มีเสียงใหม่ให้เล่น ให้จบการทำงาน (เสียงโจทย์/เนื้อหาจะเล่นตลอด ไม่ถูกปิดด้วย isMuted)
+    if (!url) return;
     
     // Determine bitrate based on screen size (Mobile L: 425px)
     const bitrate = window.innerWidth <= 425 ? 32 : 64;
@@ -229,7 +308,7 @@ export default function MatchingGamePage() {
 
   // Autoplay audio when question changes or game starts
   useEffect(() => {
-    if (questions.length > 0 && !isMuted && !isFinished) {
+    if (questions.length > 0 && !isFinished) {
       const currentQ = questions[currentIndex];
       if (currentQ?.target?.audioUrl) {
         const timer = setTimeout(() => {
@@ -271,7 +350,7 @@ export default function MatchingGamePage() {
         return () => clearTimeout(timer);
       }
     }
-  }, [currentIndex, questions, isMuted, isFinished]);
+  }, [currentIndex, questions, isFinished]);
 
   const formatHHMMSS = (totalSeconds: number) => {
     const hrs = Math.floor(totalSeconds / 3600);
@@ -280,11 +359,16 @@ export default function MatchingGamePage() {
     return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleChoiceClick = (choiceId: number, audioUrl?: string) => {
-    if (playingSource === `choice-${choiceId}`) return;
-    playClick();
-    playAudio(audioUrl, `choice-${choiceId}`);
+  const handleChoiceClick = (choiceId: number) => {
     if (feedback !== null || isFinished) return; // Prevent clicking while showing feedback
+
+    handlePlayClick();
+
+    // Pause target question audio if playing
+    if (audioRef.current) {
+      audioRef.current.pause();
+      setPlayingSource(null);
+    }
 
     setClickCount(prev => prev + 1);
 
@@ -299,7 +383,7 @@ export default function MatchingGamePage() {
       const timePerQuestion = formatHHMMSS(questionTimeSecs);
       setTimeLogs(prev => [...prev, { photoId: currentQ.target.id, timePerQuestion }]);
       
-      setTimeout(() => {
+      playFeedbackSound('correct', () => {
         setFeedback(null);
         setCorrectChoiceId(null);
         if (currentIndex < questions.length - 1) {
@@ -308,15 +392,16 @@ export default function MatchingGamePage() {
         } else {
           setIsFinished(true);
         }
-      }, 1500);
+      });
     } else {
       setFeedback('wrong');
       setWrongChoiceId(choiceId);
       setIncorrectCount(prev => prev + 1);
-      setTimeout(() => {
+      
+      playFeedbackSound('wrong', () => {
         setFeedback(null);
         setWrongChoiceId(null);
-      }, 1500);
+      });
     }
   };
 
@@ -341,26 +426,23 @@ export default function MatchingGamePage() {
   }, [isFinished, questions.length, currentIndex, clickCount, correctCount, incorrectCount, timeLogs, elapsedSeconds, router, exerciseId, type]);
 
   const handleEndGame = () => {
-    playClick();
+    handlePlayClick();
     setShowExitPopup(true);
   };
 
   const confirmEndGame = () => {
-    playClick();
+    handlePlayClick();
     router.push(`/user/games/matching/${exerciseId}?type=${type}`);
   };
 
   const cancelEndGame = () => {
-    playClick();
+    handlePlayClick();
     setShowExitPopup(false);
   };
 
   const toggleMute = () => {
-    playClick();
-    setIsMuted(!isMuted);
-    if (!isMuted && audioRef.current) {
-      audioRef.current.pause();
-    }
+    handlePlayClick();
+    setIsMuted(prev => !prev);
   };
 
   if (loading) {
@@ -452,7 +534,7 @@ export default function MatchingGamePage() {
             if (playingSource === 'target') return;
             playAudio(currentQ.target.audioUrl, 'target');
           }}
-          style={{ cursor: currentQ.target.audioUrl && !isMuted ? 'pointer' : 'default' }}
+          style={{ cursor: currentQ.target.audioUrl ? 'pointer' : 'default' }}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           initial={{ opacity: 0, y: -20 }}
@@ -491,12 +573,12 @@ export default function MatchingGamePage() {
           )}
         </motion.div>
 
-        <div className={styles.choicesContainer} style={{ gridTemplateColumns: numAnswers > 4 ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)' }}>
+        <div className={`${styles.choicesContainer} ${numAnswers > 4 ? styles.cols3 : styles.cols2}`}>
           {currentQ.choices.map((choice, idx) => (
             <motion.div 
               key={`${choice.id}-${idx}`} 
               className={`${styles.choiceBox} ${correctChoiceId === choice.id ? styles.correctChoice : ''} ${wrongChoiceId === choice.id ? styles.wrongChoice : ''}`}
-              onClick={() => handleChoiceClick(choice.id, choice.audioUrl)}
+              onClick={() => handleChoiceClick(choice.id)}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               initial={{ opacity: 0, scale: 0.8 }}

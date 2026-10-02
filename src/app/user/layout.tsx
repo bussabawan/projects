@@ -281,14 +281,14 @@ export default function UserLayout({
       )}
 
       <main className={isGameInnerPage ? styles.fullMainContent : styles.mainContent}>
-        <div className={isGameInnerPage ? '' : styles.innerContent}>
+        <div className={isGameInnerPage ? styles.gameInnerWrapper : styles.innerContent}>
           {isPageLoading ? (
             <Loader text="กำลังโหลดข้อมูล..." />
           ) : (
             children
           )}
         </div>
-        {!isGameInnerPage && <Footer />}
+        <Footer alwaysShowAbout={isGameInnerPage} />
       </main>
 
       {/* Mobile Manual Button */}

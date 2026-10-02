@@ -2,9 +2,9 @@
    Base Styles & Components
    ========================================================================== */
 .container {
-  height: 100%;
+  min-height: 100%;
+  flex: 1;
   box-sizing: border-box;
-  overflow: hidden;
   padding: 2rem 4rem;
   background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
   position: relative;
@@ -97,7 +97,7 @@
 }
 
 .endGameBtn {
-  background: linear-gradient(135deg, #ffb7b2 0%, #ff9e99 100%);
+  background: linear-gradient(135deg, #ffd5cf 0%, #ff9e99 100%);
   color: #5a2a27;
   border: none;
   border-radius: 30px;
@@ -237,9 +237,16 @@
 .choicesContainer {
   flex: 1.7;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
   gap: 2rem;
   max-width: 600px;
+}
+
+.cols2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.cols3 {
+  grid-template-columns: repeat(3, 1fr);
 }
 
 .choiceBox {
@@ -483,7 +490,10 @@
       flex: none;
     }
   
-    .choicesContainer {
+    .choicesContainer,
+    .cols2,
+    .cols3 {
+      grid-template-columns: repeat(2, 1fr) !important;
       gap: 0.75rem;
       width: 100%;
       max-width: 400px;
@@ -501,10 +511,14 @@
     }
 }
 
-/* 5. Mobile Portrait (max-width: 480px) */
 @media (max-width: 480px) {
   .audioSwitchLabel {
     display: none;
+  }
+  .choicesContainer,
+  .cols2,
+  .cols3 {
+    grid-template-columns: repeat(2, 1fr) !important;
   }
 }
 
@@ -515,8 +529,11 @@
       max-width: 300px;
     }
   
-    .choicesContainer {
+    .choicesContainer,
+    .cols2,
+    .cols3 {
       max-width: 450px;
+      grid-template-columns: repeat(2, 1fr) !important;
     }
 
     .audioSwitchLabel {

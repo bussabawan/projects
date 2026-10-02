@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import styles from "../users.module.css";
 import RestoreConfirmModal from "@/app/components/Admin/RestoreConfirmModal";
 import Loader from "@/app/components/Loader/Loader";
@@ -17,6 +18,7 @@ interface User {
 interface Exercise {
   exercises_id: number;
   exercises_name: string;
+  thumbnail_id?: number;
 }
 
 interface UserFormModalProps {
@@ -45,8 +47,6 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
     exercises_id: initialExercises as number[],
   });
 
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [searchExercise, setSearchExercise] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleCheckboxChange = (exId: number) => {
@@ -59,18 +59,6 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
       }
     });
   };
-
-  const filteredExercises = exercises
-    .filter(ex => 
-      ex.exercises_name.toLowerCase().includes(searchExercise.toLowerCase())
-    )
-    .sort((a, b) => {
-      const aSelected = formData.exercises_id.includes(a.exercises_id);
-      const bSelected = formData.exercises_id.includes(b.exercises_id);
-      if (aSelected && !bSelected) return -1;
-      if (!aSelected && bSelected) return 1;
-      return 0;
-    });
 
   useEffect(() => {
     if (role === 1) {
@@ -298,12 +286,12 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
 
   return (
     <div className={styles.modalOverlay} onMouseDown={onClose}>
-      <div className={styles.modalContentStaff} onMouseDown={e => e.stopPropagation()}>
-        <div className={styles.modalHeaderStaff}>
-          <h2 className={styles.modalTitleStaff}>
+      <div className={styles.modalContentPatient} onMouseDown={e => e.stopPropagation()}>
+        <div className={styles.modalHeaderPatient}>
+          <h2 className={styles.modalTitlePatient}>
             {isEditing ? 'แก้ไขข้อมูลผู้ป่วย' : 'เพิ่มข้อมูลผู้ป่วย'}
           </h2>
-          <button className={styles.closeBtnStaff} onClick={onClose}>
+          <button className={styles.closeBtnPatient} onClick={onClose} title="ปิด">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -311,144 +299,151 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
           </button>
         </div>
 
-        <div className={styles.modalBodyStaff}>
-          {error && <div style={{ color: '#ef4444', marginBottom: '1rem', padding: '0.5rem', background: '#fee2e2', borderRadius: '8px' }}>{error}</div>}
+        <div className={styles.modalBodyPatient}>
+          {error && (
+            <div style={{ color: '#ef4444', marginBottom: '1.2rem', padding: '0.6rem 1rem', background: '#fee2e2', borderRadius: '12px' }}>
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit}>
-            <div className={styles.formGroup}>
-              <label className={styles.labelStaff}>ชื่อ - นามสกุล</label>
-              <input 
-                type="text" 
-                name="full_name"
-                className={styles.inputStaff}
-                value={formData.full_name}
-                onChange={handleChange}
-                required
-                maxLength={200}
-              />
-            </div>
-
-            <div className={styles.formRow2Col}>
-              <div className={styles.formGroup} style={{marginBottom: 0}}>
-                <label className={styles.labelStaff}>รหัสผู้ป่วย</label>
-                <input 
-                  type="text"
-                  name="user_name"
-                  className={styles.inputStaff}
-                  value={formData.user_name}
-                  onChange={handleChange}
-                  required
-                  maxLength={20}
-                />
-              </div>
-
-              <div className={styles.formGroup} style={{marginBottom: 0}}>
-                <label className={styles.labelStaff}>
-                  รหัสผ่าน
-                </label>
-                <div style={{ position: 'relative' }}>
+            <div className={styles.patientFormGrid}>
+              {/* Left Column: Form Inputs */}
+              <div className={styles.patientLeftCol}>
+                <div className={styles.formGroup} style={{ marginBottom: 0 }}>
+                  <label className={styles.patientLabel}>ชื่อ - นามสกุล</label>
                   <input 
-                    type={showPassword ? "text" : "password"} 
-                    name="password"
-                    className={styles.inputStaff}
-                    value={formData.password}
+                    type="text" 
+                    name="full_name"
+                    className={styles.patientInput}
+                    value={formData.full_name}
                     onChange={handleChange}
-                    placeholder={isEditing ? "(เว้นว่างถ้าไม่เปลี่ยน)" : ""}
-                    style={{ paddingRight: '2.5rem' }}
-                    minLength={isEditing ? undefined : 6}
+                    required
                     maxLength={200}
                   />
-                  <button 
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    style={{
-                      position: 'absolute',
-                      right: '0.8rem',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      color: '#666',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: 0
-                    }}
-                  >
-                    {showPassword ? (
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                        <line x1="1" y1="1" x2="23" y2="23"></line>
-                      </svg>
-                    ) : (
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                        <circle cx="12" cy="12" r="3"></circle>
-                      </svg>
-                    )}
-                  </button>
+                </div>
+
+                <div className={styles.formGroup} style={{ marginBottom: 0 }}>
+                  <label className={styles.patientLabel}>รหัสผู้ป่วย</label>
+                  <input 
+                    type="text"
+                    name="user_name"
+                    className={styles.patientInput}
+                    value={formData.user_name}
+                    onChange={handleChange}
+                    required
+                    maxLength={20}
+                  />
+                </div>
+
+                <div className={styles.formGroup} style={{ marginBottom: 0 }}>
+                  <label className={styles.patientLabel}>รหัสผ่าน</label>
+                  <div style={{ position: 'relative' }}>
+                    <input 
+                      type={showPassword ? "text" : "password"} 
+                      name="password"
+                      className={styles.patientInput}
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder={isEditing ? "(เว้นว่างถ้าไม่เปลี่ยน)" : ""}
+                      style={{ paddingRight: '2.5rem' }}
+                      minLength={isEditing ? undefined : 6}
+                      maxLength={200}
+                    />
+                    <button 
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      style={{
+                        position: 'absolute',
+                        right: '0.9rem',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        color: '#555',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: 0
+                      }}
+                      tabIndex={-1}
+                    >
+                      {showPassword ? (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                          <line x1="1" y1="1" x2="23" y2="23"></line>
+                        </svg>
+                      ) : (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                          <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Center Divider Line */}
+              <div className={styles.patientDivider} />
+
+              {/* Right Column: Exercise Sets Grid */}
+              <div className={styles.patientRightCol}>
+                <label className={styles.patientLabel}>ชุดแบบฝึกหัดเริ่มต้น</label>
+                <div className={styles.exercisesGrid}>
+                  {exercises.map((ex) => {
+                    const isSelected = formData.exercises_id.includes(ex.exercises_id);
+                    return (
+                      <div 
+                        key={ex.exercises_id}
+                        className={`${styles.exerciseCard} ${isSelected ? styles.exerciseCardSelected : ''}`}
+                        onClick={() => handleCheckboxChange(ex.exercises_id)}
+                      >
+                        <div className={styles.exerciseCardContent}>
+                          {ex.thumbnail_id ? (
+                            <Image 
+                              src={`/api/files/${ex.thumbnail_id}?type=image`}
+                              alt={ex.exercises_name}
+                              width={50}
+                              height={40}
+                              className={styles.exerciseImage}
+                              unoptimized
+                            />
+                          ) : (
+                            <div style={{ width: 44, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f3f4f6', borderRadius: 8, fontSize: '1.2rem' }}>
+                              🧩
+                            </div>
+                          )}
+                          <span className={styles.exerciseText}>{ex.exercises_name}</span>
+                        </div>
+
+                        {isSelected && (
+                          <div className={styles.exerciseCheckmarkOverlay}>
+                            <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+                              <circle cx="12" cy="12" r="9.5" stroke="#000000" strokeWidth="1.8" fill="#ffffff" />
+                              <path d="M7.5 12L10.5 15L16.5 9" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                  {exercises.length === 0 && (
+                    <div style={{ gridColumn: '1 / -1', textAlign: 'center', color: '#666', padding: '1.5rem' }}>
+                      กำลังโหลดชุดแบบฝึกหัด...
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
-            <div className={styles.formGroup}>
-              <label className={styles.labelStaff}>ชุดแบบฝึกหัดเริ่มต้น</label>
-              <div className={styles.multiSelectContainer}>
-                <input 
-                  type="text"
-                  className={`${styles.multiSelectInput} ${dropdownOpen ? styles.multiSelectInputOpen : ''}`}
-                  placeholder={
-                    formData.exercises_id.length > 0
-                      ? `เลือกแล้ว ${formData.exercises_id.length} ชุด (สามารถกรอกเพื่อค้นหาได้)`
-                      : "สามารถกรอกเพื่อค้นหาได้"
-                  }
-                  value={searchExercise}
-                  onChange={(e) => {
-                    setSearchExercise(e.target.value);
-                    setDropdownOpen(true);
-                  }}
-                  onClick={() => setDropdownOpen(true)}
-                  maxLength={200}
-                />
-                <span className={styles.multiSelectArrow}>▼</span>
-                
-                {dropdownOpen && (
-                  <div className={styles.multiSelectDropdown}>
-                    {filteredExercises.length > 0 ? (
-                      <div className={styles.multiSelectGrid}>
-                        {filteredExercises.map(ex => (
-                          <label key={ex.exercises_id} className={styles.checkboxItem}>
-                            <input 
-                              type="checkbox"
-                              checked={formData.exercises_id.includes(ex.exercises_id)}
-                              onChange={() => handleCheckboxChange(ex.exercises_id)}
-                            />
-                            {ex.exercises_name}
-                          </label>
-                        ))}
-                      </div>
-                    ) : (
-                      <div style={{textAlign: 'center', color: '#666', padding: '0.5rem'}}>ไม่พบแบบฝึกหัด</div>
-                    )}
-                  </div>
-                )}
-              </div>
-              
-              {/* Overlay to close dropdown when clicking outside */}
-              {dropdownOpen && (
-                <div 
-                  style={{position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 99}} 
-                  onClick={() => setDropdownOpen(false)}
-                />
-              )}
-            </div>
-
-            <div className={styles.modalActionsStaff}>
-              <button type="submit" className={styles.saveBtnStaff} disabled={loading}>
+            {/* Modal Bottom Actions */}
+            <div className={styles.patientModalActions}>
+              <button type="submit" className={styles.patientSaveBtn} disabled={loading}>
                 {loading ? 'กำลังบันทึก...' : 'บันทึก'}
               </button>
-              <button type="button" className={styles.cancelBtnStaff} onClick={onClose} disabled={loading}>
+              <button type="button" className={styles.patientCancelBtn} onClick={onClose} disabled={loading}>
                 ยกเลิก
               </button>
             </div>

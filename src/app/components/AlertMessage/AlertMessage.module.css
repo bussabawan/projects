@@ -43,11 +43,11 @@
 }
 
 .success {
-  background-color: #9ffaac;
+  background-color: #bdf7c5;
 }
 
 .error {
-  background-color: #f8b4aa;
+  background-color: #ffd5cf;
 }
 
 .iconContainer {
@@ -123,23 +123,23 @@
 }
 
 .popupBtnConfirm {
-  background-color: #9ffaac;
+  background-color: #bdf7c5;
   color: #1a1a1a;
   border: none;
 }
 
 .popupBtnConfirm:hover {
-  background-color: #8be499;
+  background-color: #a6f0b0;
 }
 
 .popupBtnCancel {
-  background-color: #f8b4aa;
+  background-color: #ffd5cf;
   color: #000000;
   border: none;
 }
 
 .popupBtnCancel:hover {
-  background-color: #f8b4aa;
+  background-color: #ffc4bb;
 }
 
 /* ==========================================================================

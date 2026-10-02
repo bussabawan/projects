@@ -56,15 +56,16 @@
 }
 
 .backBtn {
-  background-color: #f8b4aa;
-  color: #000;
+  background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+  color: #0369a1;
   border: none;
   padding: 10px 30px;
   border-radius: 25px;
   font-size: 1.1rem;
+  font-weight: 500;
   cursor: pointer;
   box-shadow: 0 4px 6px #0000001a;
-  transition: transform 0.2s;
+  transition: all 0.2s ease;
   text-decoration: none;
   display: flex;
   align-items: center;
@@ -73,7 +74,9 @@
 }
 
 .backBtn:hover {
+  background: linear-gradient(135deg, #bae6fd 0%, #7dd3fc 100%);
   transform: translateY(-2px);
+  box-shadow: 0 6px 12px #00000020;
 }
 
 .controlsRow {

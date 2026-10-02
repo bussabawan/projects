@@ -1,6 +1,5 @@
 import './globals.css';
 import { Sarabun } from 'next/font/google';
-import Footer from '@/app/components/Footer/Footer';
 import CookieBanner from '@/app/components/CookieBanner/CookieBanner';
 
 const sarabun = Sarabun({
