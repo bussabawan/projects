@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { join } from 'path';
-import { statSync, existsSync } from 'fs';
+import { statSync, existsSync, createReadStream } from 'fs';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,9 +35,7 @@ export async function GET(
     // we can use standard Web Streams or just read the file into a buffer if it's small enough.
     // Or we can just use createReadStream and wrap it in a ReadableStream.
     
-    const { Readable } = require('stream');
-    const fs = require('fs');
-    const readStream = fs.createReadStream(filePath);
+    const readStream = createReadStream(filePath);
     
     // Convert Node.js stream to Web Stream
     const webStream = new ReadableStream({
