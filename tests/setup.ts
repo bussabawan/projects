@@ -1,3 +1,4 @@
+import '@testing-library/jest-dom/vitest';
 import { vi, afterEach } from 'vitest';
 
 // Global Mocks สำหรับ Next.js 16 App Router

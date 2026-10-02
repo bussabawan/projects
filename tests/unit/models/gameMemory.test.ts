@@ -92,4 +92,37 @@ describe('GameMemoryModel (Unit Tests)', () => {
       expect(mockConnection.release).toHaveBeenCalled();
     });
   });
+
+  describe('getRandomImages', () => {
+    it('ควรสุ่มรูปภาพตัวหลอกของเกมความจำ และรองรับ fallback เมื่อรูปไม่พอ', async () => {
+      // 1. หมวดหมู่
+      vi.mocked(db.query).mockResolvedValueOnce([[{ category_id: 20 }] as RowDataPacket[], []] as unknown as [RowDataPacket[], unknown]);
+      // 2. Query แรกได้ 1 รูป
+      vi.mocked(db.query).mockResolvedValueOnce([[{ id: 1, title: 'ส้ม', imageUrl: 'orange.jpg', audioUrl: 'orange.mp3', audioTitle: 'ส้ม', audioGen: 1 }] as RowDataPacket[], []] as unknown as [RowDataPacket[], unknown]);
+      // 3. Fallback query ได้อีก 1 รูป
+      vi.mocked(db.query).mockResolvedValueOnce([[{ id: 2, title: 'กล้วย', imageUrl: 'banana.jpg', audioUrl: 'banana.mp3', audioTitle: 'กล้วย', audioGen: 1 }] as RowDataPacket[], []] as unknown as [RowDataPacket[], unknown]);
+
+      const images = await GameMemoryModel.getRandomImages(2, [100], 8);
+      expect(images).toHaveLength(2);
+      expect(images[0].id).toBe(1);
+      expect(images[1].id).toBe(2);
+      expect(db.query).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe('getUserGameHistory', () => {
+    it('ควรดึงประวัติการเล่นเกมความจำและ reverse เรียงลำดับ', async () => {
+      const mockRows = [
+        { id: 2, totalQuestions: 4, clickCount: 4, correctCount: 4, testDate: new Date('2026-10-02') },
+        { id: 1, totalQuestions: 4, clickCount: 5, correctCount: 3, testDate: new Date('2026-10-01') }
+      ] as unknown as RowDataPacket[];
+
+      vi.mocked(db.query).mockResolvedValueOnce([mockRows, []] as unknown as [RowDataPacket[], unknown]);
+
+      const history = await GameMemoryModel.getUserGameHistory(5, 7);
+      expect(history).toHaveLength(2);
+      expect(history[0].id).toBe(1);
+      expect(history[1].id).toBe(2);
+    });
+  });
 });

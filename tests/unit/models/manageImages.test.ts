@@ -102,5 +102,66 @@ describe('ManageImagesModel (Unit Tests)', () => {
       const result = await ManageImagesModel.getFileDataById(1);
       expect(result).toEqual({ photo_name: 'dog.webp', audio_name: 'dog.mp3' });
     });
+
+    it('getFileDataById ควรคืนค่า null เมื่อไม่พบรูปภาพ', async () => {
+      vi.mocked(db.query).mockResolvedValueOnce([[], []] as unknown as [RowDataPacket[], unknown]);
+
+      const result = await ManageImagesModel.getFileDataById(999);
+      expect(result).toBeNull();
+    });
+
+    it('restoreImage ควรอัปเดต remove = 0', async () => {
+      vi.mocked(db.execute).mockResolvedValueOnce([{ affectedRows: 1 } as ResultSetHeader, []] as unknown as [ResultSetHeader, unknown]);
+
+      await ManageImagesModel.restoreImage(5);
+      expect(db.execute).toHaveBeenCalledWith(
+        'UPDATE photo_data SET remove = 0 WHERE photo_id = ?',
+        [5]
+      );
+    });
+  });
+
+  describe('getImages (Pagination)', () => {
+    it('ควรดึงรูปภาพแบบแบ่งหน้าพร้อมค้นหาและเรียงลำดับตาม prioritizeIds', async () => {
+      // 1. count query
+      vi.mocked(db.query).mockResolvedValueOnce([[{ total: 15 }] as RowDataPacket[], []] as unknown as [RowDataPacket[], unknown]);
+      // 2. data query
+      const mockImages = [
+        { id: 2, title: 'แมวส้ม', imageUrl: 'cat.jpg', audioUrl: 'cat.mp3' }
+      ] as unknown as RowDataPacket[];
+      vi.mocked(db.query).mockResolvedValueOnce([mockImages, []] as unknown as [RowDataPacket[], unknown]);
+
+      const result = await ManageImagesModel.getImages(1, 10, 'แมว', [2]);
+      expect(result.totalPages).toBe(2);
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0].imageUrl).toContain('/api/files/2?type=image');
+      expect(db.query).toHaveBeenCalledWith(
+        expect.stringContaining('ORDER BY CASE WHEN photo_id IN (?) THEN 0 ELSE 1 END ASC'),
+        expect.arrayContaining(['%แมว%', 2, 10, 0])
+      );
+    });
+  });
+
+  describe('updateImage Duplicate Cases', () => {
+    it('updateImage ควรโยน Error เมื่อชื่อใหม่ไปซ้ำกับรูปภาพที่ยังใช้งานอยู่', async () => {
+      vi.mocked(db.query).mockResolvedValueOnce([
+        [{ id: 9, remove: 0 }] as RowDataPacket[],
+        []
+      ] as unknown as [RowDataPacket[], unknown]);
+
+      await expect(
+        ManageImagesModel.updateImage(1, { title: 'สุนัข' })
+      ).rejects.toThrow('มีชื่อรูปภาพนี้อยู่ในระบบแล้ว');
+    });
+
+    it('updateImage ควรคืนค่า isDuplicateDeleted เมื่อชื่อใหม่ไปซ้ำกับรูปภาพที่ถูกลบ', async () => {
+      vi.mocked(db.query).mockResolvedValueOnce([
+        [{ id: 9, remove: 1 }] as RowDataPacket[],
+        []
+      ] as unknown as [RowDataPacket[], unknown]);
+
+      const result = await ManageImagesModel.updateImage(1, { title: 'สุนัขเก่า' });
+      expect(result).toEqual({ isDuplicateDeleted: true, duplicateId: 9 });
+    });
   });
 });

@@ -95,4 +95,46 @@ describe('GameMatchingModel (Unit Tests)', () => {
       );
     });
   });
+
+  describe('getRandomImages', () => {
+    it('ควรสุ่มรูปภาพโดยไม่มี exerciseId และไม่มี excludeIds สำเร็จ', async () => {
+      const mockRows = [
+        { id: 1, title: 'แมว', imageUrl: 'cat.jpg', audioUrl: 'cat.mp3', audioTitle: 'แมว', audioGen: 1 }
+      ] as unknown as RowDataPacket[];
+
+      vi.mocked(db.query).mockResolvedValueOnce([mockRows, []] as unknown as [RowDataPacket[], unknown]);
+
+      const images = await GameMatchingModel.getRandomImages(1, []);
+      expect(images).toHaveLength(1);
+      expect(images[0].imageUrl).toContain('/api/files/1?type=image');
+      expect(db.query).toHaveBeenCalledWith(
+        expect.stringContaining('ORDER BY RAND() LIMIT ?'),
+        [1]
+      );
+    });
+
+    it('ควรกองตามหมวดหมู่ของ exerciseId และรองรับ fallback เมื่อรูปภาพไม่ครบ limit', async () => {
+      // 1. หมวดหมู่ของ exerciseId
+      const catRows = [{ category_id: 10 }] as unknown as RowDataPacket[];
+      vi.mocked(db.query).mockResolvedValueOnce([catRows, []] as unknown as [RowDataPacket[], unknown]);
+
+      // 2. ผลลัพธ์รูปภาพแรก (ได้แค่ 1 รูป จากที่ต้องการ 2 รูป)
+      const primaryRows = [
+        { id: 1, title: 'แมว', imageUrl: 'cat.jpg', audioUrl: 'cat.mp3', audioTitle: 'แมว', audioGen: 1 }
+      ] as unknown as RowDataPacket[];
+      vi.mocked(db.query).mockResolvedValueOnce([primaryRows, []] as unknown as [RowDataPacket[], unknown]);
+
+      // 3. Fallback query เพื่อเติมให้ครบอีก 1 รูป
+      const fallbackRows = [
+        { id: 2, title: 'สุนัข', imageUrl: 'dog.jpg', audioUrl: 'dog.mp3', audioTitle: 'สุนัข', audioGen: 1 }
+      ] as unknown as RowDataPacket[];
+      vi.mocked(db.query).mockResolvedValueOnce([fallbackRows, []] as unknown as [RowDataPacket[], unknown]);
+
+      const images = await GameMatchingModel.getRandomImages(2, [99], 5);
+      expect(images).toHaveLength(2);
+      expect(images[0].id).toBe(1);
+      expect(images[1].id).toBe(2);
+      expect(db.query).toHaveBeenCalledTimes(3);
+    });
+  });
 });
