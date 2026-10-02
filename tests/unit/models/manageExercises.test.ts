@@ -70,4 +70,47 @@ describe('ManageExercisesModel (Unit Tests)', () => {
       expect(mockConnection.release).toHaveBeenCalled();
     });
   });
+
+  describe('addExercise & updateExerciseName & getExerciseImageCount', () => {
+    it('addExercise ควรโยน Error เมื่อมีชื่อแบบฝึกหัดซ้ำในระบบ', async () => {
+      vi.mocked(db.query).mockResolvedValueOnce([[{ exercises_id: 1 }] as RowDataPacket[], []] as unknown as [RowDataPacket[], unknown]);
+
+      await expect(ManageExercisesModel.addExercise('แบบฝึกหัดชุดที่ 1'))
+        .rejects.toThrow('มีชุดแบบฝึกหัดชื่อนี้อยู่ในระบบแล้ว');
+    });
+
+    it('addExercise ควรสร้างแบบฝึกหัดใหม่สำเร็จเมื่อชื่อไม่ซ้ำ', async () => {
+      vi.mocked(db.query)
+        .mockResolvedValueOnce([[], []] as unknown as [RowDataPacket[], unknown]) // active check
+        .mockResolvedValueOnce([[], []] as unknown as [RowDataPacket[], unknown]); // removed check
+      vi.mocked(db.execute).mockResolvedValueOnce([{ insertId: 5 } as ResultSetHeader, []] as unknown as [ResultSetHeader, unknown]);
+
+      const result = await ManageExercisesModel.addExercise('ชุดผลไม้รวม');
+      expect(result.success).toBe(true);
+      expect(db.execute).toHaveBeenCalledWith(
+        'INSERT INTO exercises_data (exercises_name, remove) VALUES (?, 0)',
+        ['ชุดผลไม้รวม']
+      );
+    });
+
+    it('updateExerciseName ควรอัปเดตชื่อแบบฝึกหัดใน exercises_data', async () => {
+      vi.mocked(db.query)
+        .mockResolvedValueOnce([[], []] as unknown as [RowDataPacket[], unknown]) // active check
+        .mockResolvedValueOnce([[], []] as unknown as [RowDataPacket[], unknown]); // removed check
+      vi.mocked(db.execute).mockResolvedValueOnce([{ affectedRows: 1 } as ResultSetHeader, []] as unknown as [ResultSetHeader, unknown]);
+
+      await ManageExercisesModel.updateExerciseName('ชื่อเดิม', 'ชื่อใหม่');
+      expect(db.execute).toHaveBeenCalledWith(
+        'UPDATE exercises_data SET exercises_name = ? WHERE exercises_name = ?',
+        ['ชื่อใหม่', 'ชื่อเดิม']
+      );
+    });
+
+    it('getExerciseImageCount ควรคืนจำนวนภาพในแบบฝึกหัด', async () => {
+      vi.mocked(db.query).mockResolvedValueOnce([[{ count: 20 }] as RowDataPacket[], []] as unknown as [RowDataPacket[], unknown]);
+
+      const count = await ManageExercisesModel.getExerciseImageCount(1);
+      expect(count).toBe(20);
+    });
+  });
 });

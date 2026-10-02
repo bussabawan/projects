@@ -56,4 +56,45 @@ describe('ManageCategoriesModel (Unit Tests)', () => {
       );
     });
   });
+
+  describe('updateCategoryName & deleteCategory', () => {
+    it('updateCategoryName ควรอัปเดตชื่อหมวดหมู่ใน category_data', async () => {
+      vi.mocked(db.query)
+        .mockResolvedValueOnce([[], []] as unknown as [RowDataPacket[], unknown]) // active check
+        .mockResolvedValueOnce([[], []] as unknown as [RowDataPacket[], unknown]); // removed check
+      vi.mocked(db.execute).mockResolvedValueOnce([{ affectedRows: 1 } as ResultSetHeader, []] as unknown as [ResultSetHeader, unknown]);
+
+      await ManageCategoriesModel.updateCategoryName('สัตว์', 'สัตว์ป่า');
+      expect(db.execute).toHaveBeenCalledWith(
+        'UPDATE category_data SET category_name = ? WHERE category_name = ?',
+        ['สัตว์ป่า', 'สัตว์']
+      );
+    });
+
+    it('deleteCategory ควร soft delete category_data และ photo_in_category', async () => {
+      const mockConnection = {
+        beginTransaction: vi.fn().mockResolvedValue(undefined),
+        execute: vi.fn().mockResolvedValue([{ affectedRows: 1 } as ResultSetHeader, []]),
+        query: vi.fn().mockResolvedValue([[{ category_id: 1 }] as RowDataPacket[], []]),
+        commit: vi.fn().mockResolvedValue(undefined),
+        rollback: vi.fn().mockResolvedValue(undefined),
+        release: vi.fn().mockResolvedValue(undefined)
+      };
+
+      vi.mocked(db.getConnection).mockResolvedValueOnce(mockConnection as unknown as PoolConnection);
+
+      await ManageCategoriesModel.deleteCategory('สัตว์');
+
+      expect(mockConnection.beginTransaction).toHaveBeenCalled();
+      expect(mockConnection.execute).toHaveBeenCalledWith(
+        'UPDATE category_data SET remove = 1 WHERE category_name = ?',
+        ['สัตว์']
+      );
+      expect(mockConnection.execute).toHaveBeenCalledWith(
+        'UPDATE photo_in_category SET remove = 1 WHERE category_id IN (?)',
+        [1]
+      );
+      expect(mockConnection.commit).toHaveBeenCalled();
+    });
+  });
 });

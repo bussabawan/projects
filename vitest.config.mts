@@ -9,6 +9,7 @@ export default defineConfig({
     environment: 'node', // Default to node for Server Actions, Models, Services
     setupFiles: ['./tests/setup.ts'],
     alias: [
+      { find: '@/auth.config', replacement: path.resolve(import.meta.dirname, './auth.config.ts') },
       { find: '@/auth', replacement: path.resolve(import.meta.dirname, './auth.ts') },
       { find: '@', replacement: path.resolve(import.meta.dirname, './src') }
     ],

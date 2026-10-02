@@ -165,4 +165,56 @@ describe('ManageUsersModel (Unit Tests)', () => {
       expect(mockConnection.commit).toHaveBeenCalled();
     });
   });
+
+  describe('updateUser', () => {
+    it('updateUser ควรโยน Error เมื่อมี username ซ้ำกับผู้ใช้อื่น', async () => {
+      const mockConnection = {
+        beginTransaction: vi.fn().mockResolvedValue(undefined),
+        execute: vi.fn().mockResolvedValueOnce([[{ user_id: 2 }] as RowDataPacket[], []]),
+        rollback: vi.fn().mockResolvedValue(undefined),
+        release: vi.fn().mockResolvedValue(undefined)
+      } as unknown as PoolConnection;
+
+      vi.mocked(db.getConnection).mockResolvedValueOnce(mockConnection);
+
+      await expect(
+        ManageUsersModel.updateUser(10, { user_name: 'duplicate_user' })
+      ).rejects.toThrow('Username already exists');
+
+      expect(mockConnection.rollback).toHaveBeenCalled();
+    });
+
+    it('updateUser ควรอัปเดตข้อมูลและรีเฟรชชุดแบบฝึกหัดใน patient_data สำเร็จ', async () => {
+      const mockConnection = {
+        beginTransaction: vi.fn().mockResolvedValue(undefined),
+        execute: vi.fn()
+          .mockResolvedValueOnce([[], []]) // soft-deleted check
+          .mockResolvedValueOnce([{ affectedRows: 1 } as ResultSetHeader, []]) // update users_data
+          .mockResolvedValueOnce([[{ role: 1 }] as RowDataPacket[], []]) // check role
+          .mockResolvedValueOnce([{ affectedRows: 1 } as ResultSetHeader, []]) // delete patient_data
+          .mockResolvedValueOnce([{ affectedRows: 1 } as ResultSetHeader, []]), // insert new patient_data
+        commit: vi.fn().mockResolvedValue(undefined),
+        rollback: vi.fn().mockResolvedValue(undefined),
+        release: vi.fn().mockResolvedValue(undefined)
+      } as unknown as PoolConnection;
+
+      vi.mocked(db.getConnection).mockResolvedValueOnce(mockConnection);
+
+      const result = await ManageUsersModel.updateUser(10, {
+        full_name: 'สมชาย รักเรียน',
+        exercises_id: [2]
+      });
+
+      expect(result).toBe(true);
+      expect(mockConnection.execute).toHaveBeenCalledWith(
+        expect.stringContaining('UPDATE users_data SET'),
+        expect.arrayContaining(['สมชาย รักเรียน', 10])
+      );
+      expect(mockConnection.execute).toHaveBeenCalledWith(
+        'DELETE FROM patient_data WHERE user_id = ?',
+        [10]
+      );
+      expect(mockConnection.commit).toHaveBeenCalled();
+    });
+  });
 });
