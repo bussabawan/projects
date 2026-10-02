@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import { getSession, signOut } from "next-auth/react";
 import Loader from "@/app/components/Loader/Loader";
 import AboutModal from "@/app/components/AboutModal/AboutModal";
+import Footer from "@/app/components/Footer/Footer";
 import styles from "./user.module.css";
 
 export default function UserLayout({
@@ -133,7 +134,10 @@ export default function UserLayout({
   const isGamesActive = activeTab === 'games';
 
   return (
-    <div className={`${styles.layoutContainer} ${isGameInnerPage ? styles.noBottomPadding : ''} ${isSummaryPage ? styles.summaryLayout : ''}`}>
+    <div 
+      className={`${styles.layoutContainer} ${isGameInnerPage ? styles.noBottomPadding : ''} ${isSummaryPage ? styles.summaryLayout : ''}`}
+      onDragStart={(e) => e.preventDefault()}
+    >
       {!isGameInnerPage && (
       <aside className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ""}`}>
         <button className={styles.toggleBtn} onClick={toggleSidebar} aria-label="Toggle Sidebar">
@@ -224,7 +228,7 @@ export default function UserLayout({
             <span className={styles.manualText}>ผู้จัดทำ</span>
           </button>
 
-          <Link href="/user/manual" onClick={() => handleLinkClick('/user/manual')} className={styles.manualBtn}>
+          <a href="/api/manuals/user-manual.pdf" target="_blank" rel="noopener noreferrer" className={styles.manualBtn}>
             <span className={styles.menuIcon}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
@@ -233,7 +237,7 @@ export default function UserLayout({
               </svg>
             </span>
             <span className={styles.manualText}>คู่มือ</span>
-          </Link>
+          </a>
           
           <div className={styles.userInfo}>
             <div className={styles.avatar}>
@@ -277,18 +281,21 @@ export default function UserLayout({
       )}
 
       <main className={isGameInnerPage ? styles.fullMainContent : styles.mainContent}>
-        {isPageLoading ? (
-          <Loader text="กำลังโหลดข้อมูล..." />
-        ) : (
-          children
-        )}
+        <div className={isGameInnerPage ? '' : styles.innerContent}>
+          {isPageLoading ? (
+            <Loader text="กำลังโหลดข้อมูล..." />
+          ) : (
+            children
+          )}
+        </div>
+        {!isGameInnerPage && <Footer />}
       </main>
 
       {/* Mobile Manual Button */}
       {!isGameInnerPage && (
-      <Link href="/user/manual" onClick={() => handleLinkClick('/user/manual')} className={styles.mobileManualBtn} aria-label="Manual">
+      <a href="/api/manuals/user-manual.pdf" target="_blank" rel="noopener noreferrer" className={styles.mobileManualBtn} aria-label="Manual">
         ?
-      </Link>
+      </a>
       )}
 
       <AboutModal isOpen={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)} />

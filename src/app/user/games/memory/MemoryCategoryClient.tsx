@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Loader from '@/app/components/Loader/Loader';
+import { BrainIcon } from '@/app/components/Icons';
 import styles from './memory.module.css';
 
 interface Exercise {
@@ -76,7 +77,7 @@ export default function MemoryCategoryClient() {
         <div className={styles.titleRow}>
           <div className={styles.titleWithIcon}>
             <div className={styles.titleIcon}>
-              <span style={{ fontSize: '2rem', lineHeight: 1 }}>🧠</span>
+              <BrainIcon size="2rem" style={{ color: '#ec4899' }} />
             </div>
             <h1 className={styles.title}>ความจำ</h1>
           </div>

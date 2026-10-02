@@ -78,8 +78,8 @@ const useHoldToIncrement = (playClick: () => void) => {
           if (!doUpdate()) {
             stopHold();
           }
-        }, 70);
-      }, 400);
+        }, 150);
+      }, 600);
     }
   };
 

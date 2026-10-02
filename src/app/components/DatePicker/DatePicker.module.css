@@ -54,6 +54,18 @@
     box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
     animation: fadeIn 0.2s ease;
   }
+  
+  .alignRight {
+    left: auto;
+    right: 0;
+    transform: none;
+  }
+  
+  .alignLeft {
+    left: 0;
+    right: auto;
+    transform: none;
+  }
 }
 
 @keyframes slideUp {

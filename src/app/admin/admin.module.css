@@ -271,12 +271,19 @@
 
 .mainContent {
   flex: 1;
-  padding: 3rem 4rem 6rem 4rem; /* Restore normal bottom padding */
+  padding: 0;
   transition: padding 0.3s ease;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+}
+
+.innerContent {
+  padding: 3rem 4rem 2rem 4rem; /* Desktop padding */
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .pageTitle {
@@ -538,7 +545,11 @@
     }
   
     .mainContent {
-      padding: 5rem 1.5rem 1.5rem 1.5rem;
+      padding: 0;
+    }
+  
+    .innerContent {
+      padding: 5rem 1.5rem 6rem 1.5rem; /* Mobile padding, 6rem bottom for sidebar/footer */
     }
   
     .pageTitle {
@@ -636,7 +647,7 @@
     .statValue {
       font-size: 5.5rem;
     }
-    .mainContent {
+    .innerContent {
       padding: 4rem 6rem 6rem 6rem;
     }
 }

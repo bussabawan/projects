@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Loader from '@/app/components/Loader/Loader';
+import { PuzzleIcon } from '@/app/components/Icons';
 import styles from './matching.module.css';
 import { useDebounce } from '@/app/hooks/useDebounce';
 
@@ -64,7 +65,7 @@ export default function MatchingCategoryClient() {
         <div className={styles.titleRow}>
           <div className={styles.titleWithIcon}>
             <div className={styles.titleIcon}>
-              <span style={{ fontSize: '2rem', lineHeight: 1 }}>🧩</span>
+              <PuzzleIcon size="2rem" style={{ color: '#10b981' }} />
             </div>
             <h1 className={styles.title}>จับคู่</h1>
           </div>

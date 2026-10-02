@@ -246,7 +246,8 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                     onClose={() => setIsStartPickerOpen(false)} 
                     onSelect={(date) => { setStartDate(date); }} 
                     initialDate={startDate} 
-                    title="เลือกวันที่เริ่มต้น" 
+                    title="เลือกวันที่เริ่มต้น"
+                    align="right"
                   />
                 </div>
                 <span>ถึง</span>
@@ -265,7 +266,8 @@ const PatientStatsPopup: React.FC<PatientStatsPopupProps> = ({ isOpen, onClose, 
                     onClose={() => setIsEndPickerOpen(false)} 
                     onSelect={(date) => { setEndDate(date); }} 
                     initialDate={endDate} 
-                    title="เลือกวันที่สิ้นสุด" 
+                    title="เลือกวันที่สิ้นสุด"
+                    align="right"
                   />
                 </div>
               </div>

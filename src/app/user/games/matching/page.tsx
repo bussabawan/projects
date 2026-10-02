@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 import styles from './matching.module.css';
+import { PuzzleIcon } from '@/app/components/Icons';
 
 const MatchingCategoryClient = dynamic(() => import('./MatchingCategoryClient'), {
   ssr: false,
@@ -12,7 +13,7 @@ const MatchingCategoryClient = dynamic(() => import('./MatchingCategoryClient'),
         <div className={styles.titleRow}>
           <div className={styles.titleWithIcon}>
             <div className={styles.titleIcon}>
-              <span style={{ fontSize: '2rem', lineHeight: 1 }}>🧩</span>
+              <PuzzleIcon size="2rem" style={{ color: '#10b981' }} />
             </div>
             <h1 className={styles.title}>จับคู่</h1>
           </div>

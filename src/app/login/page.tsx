@@ -7,6 +7,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import AboutModal from '@/app/components/AboutModal/AboutModal';
 import Loader from '@/app/components/Loader/Loader';
+import Footer from '@/app/components/Footer/Footer';
 
 function LoginContent() {
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
@@ -17,6 +18,17 @@ function LoginContent() {
   const [error, setError] = useState<string | React.ReactNode>('');
   const [loading, setLoading] = useState(false);
   const [failedAttempts, setFailedAttempts] = useState(0);
+
+  const maxAttemptsErrorMsg = (
+    <>
+      คุณใส่รหัสผิดเกิน 10 ครั้ง <br />
+      กรุณาติดต่อโรงพยาบาลเวชชารักษ์ ลำปาง <br />
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: 'middle', marginRight: '4px' }}>
+        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+      </svg>
+      โทร 0-5401-9662 ต่อ 411
+    </>
+  );
 
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -31,7 +43,7 @@ function LoginContent() {
       if (storedAttempts) {
         setFailedAttempts(parseInt(storedAttempts, 10));
         if (parseInt(storedAttempts, 10) >= 10) {
-          setError('คุณใส่รหัสผิดเกิน 10 ครั้ง กรุณาติดต่อผู้ดูแลระบบ');
+          setError(maxAttemptsErrorMsg);
         }
       }
     }, 0);
@@ -42,7 +54,7 @@ function LoginContent() {
     e.preventDefault();
     
     if (failedAttempts >= 10) {
-      setError('คุณใส่รหัสผิดเกิน 10 ครั้ง กรุณาติดต่อผู้ดูแลระบบ');
+      setError(maxAttemptsErrorMsg);
       return;
     }
     
@@ -76,7 +88,7 @@ function LoginContent() {
           localStorage.setItem('login_failed_attempts', newCount.toString());
           
           if (newCount >= 10) {
-            setError("คุณใส่รหัสผิดเกิน 10 ครั้ง กรุณาติดต่อผู้ดูแลระบบ");
+            setError(maxAttemptsErrorMsg);
           } else {
             setError(
               <>
@@ -104,15 +116,6 @@ function LoginContent() {
 
   return (
     <div className={styles.container}>
-      <button onClick={() => setIsAboutModalOpen(true)} className={styles.creatorsBtn} aria-label="เกี่ยวกับผู้จัดทำ" title="เกี่ยวกับผู้จัดทำ">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="2" y="5" width="20" height="14" rx="3" />
-          <circle cx="8" cy="9" r="1.5" />
-          <path d="M4.5 16a3.5 3.5 0 0 1 7 0" />
-          <line x1="14" y1="10" x2="18" y2="10" />
-          <line x1="14" y1="14" x2="18" y2="14" />
-        </svg>
-      </button>
       <div className={styles.logoContainer}>
         <Image
           src="/vejjarak_logo.webp"
@@ -199,6 +202,13 @@ function LoginContent() {
       </div>
 
       <AboutModal isOpen={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)} />
+      
+      {/* Spacer to force scroll */}
+      <div style={{ flex: 1, minHeight: '15vh' }}></div>
+
+      <div style={{ width: 'calc(100% + 2rem)', marginLeft: '-1rem', marginRight: '-1rem', marginBottom: '-1rem', marginTop: 'auto' }}>
+        <Footer alwaysShowAbout={true} />
+      </div>
     </div>
   );
 }

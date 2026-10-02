@@ -14,24 +14,7 @@ import { motion} from 'framer-motion';
 // Global cache for audio objects to prevent double loading
 const audioCache = new Map<string, HTMLAudioElement>();
 
-// Volume Icon SVG
-const VolumeIcon = ({ isMuted }: { isMuted: boolean }) => (
-  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    {isMuted ? (
-      <>
-        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-        <line x1="23" y1="9" x2="17" y2="15"></line>
-        <line x1="17" y1="9" x2="23" y2="15"></line>
-      </>
-    ) : (
-      <>
-        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
-      </>
-    )}
-  </svg>
-);
+
 
 // Exit / End Game Icon SVG
 const ExitIcon = () => (
@@ -298,6 +281,7 @@ export default function MatchingGamePage() {
   };
 
   const handleChoiceClick = (choiceId: number, audioUrl?: string) => {
+    if (playingSource === `choice-${choiceId}`) return;
     playClick();
     playAudio(audioUrl, `choice-${choiceId}`);
     if (feedback !== null || isFinished) return; // Prevent clicking while showing feedback
@@ -431,9 +415,24 @@ export default function MatchingGamePage() {
           <div className={styles.progressText}>
             ข้อ {currentIndex + 1} จาก {questions.length}
           </div>
-          <button className={styles.audioBtn} onClick={toggleMute} aria-label="Toggle Audio">
-            <VolumeIcon isMuted={isMuted} />
-          </button>
+          <div className={styles.audioSwitchWrapper} onClick={toggleMute}>
+            <span className={styles.audioSwitchLabel}>เปิด/ปิด เสียงเกม</span>
+            <button className={`${styles.audioSwitch} ${!isMuted ? styles.switchOn : styles.switchOff}`}>
+              <div className={styles.switchThumb}>
+                {!isMuted ? (
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                  </svg>
+                ) : (
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                )}
+              </div>
+            </button>
+          </div>
         </div>
         <div className={styles.progressBarWrapper}>
           <div 
@@ -449,7 +448,10 @@ export default function MatchingGamePage() {
       <div className={styles.gameArea}>
         <motion.div 
           className={styles.targetContainer} 
-          onClick={() => playAudio(currentQ.target.audioUrl, 'target')}
+          onClick={() => {
+            if (playingSource === 'target') return;
+            playAudio(currentQ.target.audioUrl, 'target');
+          }}
           style={{ cursor: currentQ.target.audioUrl && !isMuted ? 'pointer' : 'default' }}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}

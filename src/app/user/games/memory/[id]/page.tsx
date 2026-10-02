@@ -106,8 +106,8 @@ const useHoldToIncrement = (playClick: () => void) => {
           if (!doUpdate()) {
             stopHold();
           }
-        }, 70); // 70ms per tick for fast increment with rapid sound
-      }, 400); // wait 400ms before repeating
+        }, 150); // 150ms per tick for increment with rapid sound
+      }, 600); // wait 600ms before repeating
     } else {
       // If hitting bound on first click, maybe still play a sound or not.
       // Usually we play click even if disabled, but disabled buttons won't trigger onMouseDown anyway.

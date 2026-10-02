@@ -233,8 +233,8 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
 
   if (role === 2) {
     return (
-      <div className={styles.modalOverlay} onClick={onClose}>
-        <div className={styles.modalContentStaff} onClick={e => e.stopPropagation()}>
+      <div className={styles.modalOverlay} onMouseDown={onClose}>
+        <div className={styles.modalContentStaff} onMouseDown={e => e.stopPropagation()}>
           <div className={styles.modalHeaderStaff}>
             <h2 className={styles.modalTitleStaff}>
               {isEditing ? 'แก้ไขข้อมูลเจ้าหน้าที่' : 'เพิ่มข้อมูลเจ้าหน้าที่'}
@@ -297,8 +297,8 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
   }
 
   return (
-    <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalContentStaff} onClick={e => e.stopPropagation()}>
+    <div className={styles.modalOverlay} onMouseDown={onClose}>
+      <div className={styles.modalContentStaff} onMouseDown={e => e.stopPropagation()}>
         <div className={styles.modalHeaderStaff}>
           <h2 className={styles.modalTitleStaff}>
             {isEditing ? 'แก้ไขข้อมูลผู้ป่วย' : 'เพิ่มข้อมูลผู้ป่วย'}

@@ -10,6 +10,7 @@ interface DatePickerProps {
   onSelect: (dateStr: string) => void;
   initialDate: string;
   title: string;
+  align?: 'left' | 'center' | 'right';
 }
 
 const THAI_MONTHS = [
@@ -20,7 +21,7 @@ const THAI_MONTHS = [
 // Monday is the first day of the week based on the image (จ อ พ พฤ ศ ส อา)
 const DAYS_OF_WEEK = ['จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส', 'อา'];
 
-export default function DatePicker({ isOpen, onClose, onSelect, initialDate, title }: DatePickerProps) {
+export default function DatePicker({ isOpen, onClose, onSelect, initialDate, title, align = 'center' }: DatePickerProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDateStr, setSelectedDateStr] = useState('');
   
@@ -128,7 +129,10 @@ export default function DatePicker({ isOpen, onClose, onSelect, initialDate, tit
   return (
     <>
       <div className={styles.backdrop} onClick={onClose} />
-      <div className={styles.bottomSheet} onClick={(e) => e.stopPropagation()}>
+      <div 
+        className={`${styles.bottomSheet} ${align === 'right' ? styles.alignRight : align === 'left' ? styles.alignLeft : ''}`} 
+        onClick={(e) => e.stopPropagation()}
+      >
         {title && <div className={styles.titlePill}>{title}</div>}
         
         <div className={styles.header}>

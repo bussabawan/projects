@@ -36,30 +36,64 @@
   gap: 1.5rem;
 }
 
-.audioBtn {
-  background-color: #ffffff;
-  border: 1px solid #cbd5e1;
-  border-radius: 50%;
-  width: 48px;
-  height: 48px;
-  cursor: pointer;
-  color: #111111;
+.audioSwitchWrapper {
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.08);
+  gap: 10px;
+  margin-left: 15px;
+  cursor: pointer;
 }
 
-.audioBtn svg {
+.audioSwitchLabel {
+  font-size: 1rem;
+  color: #333;
+}
+
+.audioSwitch {
+  position: relative;
+  width: 50px;
+  height: 28px;
+  border-radius: 14px;
+  border: none;
+  background-color: #cbd5e1;
+  transition: background-color 0.3s;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.audioSwitch.switchOn {
+  background-color: #10b981;
+}
+
+.audioSwitch.switchOff {
+  background-color: #94a3b8;
+}
+
+.switchThumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
   width: 24px;
   height: 24px;
+  border-radius: 50%;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.audioBtn:hover {
-  background-color: #f1f5f9;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+.audioSwitch.switchOn .switchThumb {
+  transform: translateX(22px);
+  color: #10b981;
+}
+
+.audioSwitch.switchOff .switchThumb {
+  transform: translateX(0);
+  color: #94a3b8;
 }
 
 .endGameBtn {
@@ -416,21 +450,6 @@
       font-size: 1rem;
     }
   
-    .audioBtn {
-      width: 40px;
-      height: 40px;
-      padding: 0;
-    }
-
-    .audioBtn svg {
-      width: 20px;
-      height: 20px;
-    }
-  
-    .progressSection {
-      margin-bottom: 1.5rem;
-    }
-
     .progressContainer {
       display: flex;
       flex-direction: row;
@@ -484,7 +503,9 @@
 
 /* 5. Mobile Portrait (max-width: 480px) */
 @media (max-width: 480px) {
-
+  .audioSwitchLabel {
+    display: none;
+  }
 }
 
 /* Custom Breakpoint */
@@ -496,6 +517,10 @@
   
     .choicesContainer {
       max-width: 450px;
+    }
+
+    .audioSwitchLabel {
+      display: none;
     }
 }
 

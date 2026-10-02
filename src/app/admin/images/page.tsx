@@ -110,7 +110,7 @@ export default function ManageImagesPage() {
           if (img.audioUrl) {
             preloadPromises.push(new Promise((resolve) => {
               const baseAudioUrl = img.audioUrl!.startsWith('/') || img.audioUrl!.startsWith('blob:') ? img.audioUrl! : `/api/uploads/${img.audioUrl}`;
-              const fullAudioUrl = !img.audioUrl!.startsWith('blob:') ? `${baseAudioUrl}?t=${cacheBuster}` : baseAudioUrl;
+              const fullAudioUrl = !img.audioUrl!.startsWith('blob:') ? `${baseAudioUrl}${baseAudioUrl.includes('?') ? '&' : '?'}t=${cacheBuster}` : baseAudioUrl;
               if (!audioCache.current[fullAudioUrl]) {
                 const audio = new window.Audio(fullAudioUrl);
                 audio.preload = 'auto';
@@ -296,13 +296,6 @@ export default function ManageImagesPage() {
       });
       const result = await res.json();
       if (result.success) {
-        // Update the restored item with the new payload
-        await fetch(`/api/admin/images/${duplicateToRestore.id}`, {
-          method: 'PUT',
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(duplicateToRestore.data)
-        });
-
         // Delete the original item if it was an edit
         if (duplicateToRestore.originalEditId && duplicateToRestore.originalEditId !== duplicateToRestore.id) {
           await fetch(`/api/admin/images/${duplicateToRestore.originalEditId}`, {
@@ -310,24 +303,8 @@ export default function ManageImagesPage() {
           });
         }
 
-        const updatedImg = {
-          id: duplicateToRestore.id,
-          title: duplicateToRestore.data.title as string,
-          imageUrl: duplicateToRestore.data.imageUrl as string,
-          audioUrl: (duplicateToRestore.data.audioUrl as string) || "",
-          audioTime: duplicateToRestore.data.audioTime as number | undefined,
-          audioTitle: (duplicateToRestore.data.audioTitle as string) || "",
-          audioGen: duplicateToRestore.data.audioGen as number
-        };
-
-        setImages(prev => {
-          if (duplicateToRestore.originalEditId) {
-            return prev.map(img => img.id === duplicateToRestore.originalEditId ? updatedImg : img);
-          }
-          return [updatedImg, ...prev];
-        });
-
         setCacheBuster(Date.now()); // Reload cache when restoring image/audio
+        fetchImages(true); // Refetch from server to get the actual restored data
         setIsModalOpen(false);
         setEditingImage(null);
         setIsProcessing(false);
