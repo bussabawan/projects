@@ -7,6 +7,8 @@
   width: 100vw;
   overflow: hidden;
   background-color: #eaeaea;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .sidebar {
@@ -334,10 +336,6 @@
   color: #111;
   line-height: 1;
 }
-
-/* Full HD Desktop Responsive (1920x1080) */
-
-/* Mobile Responsive */
 
 /* ==========================================================================
    Responsive Design (Media Queries)

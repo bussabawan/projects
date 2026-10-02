@@ -214,12 +214,12 @@ export default function AdminLayout({
             <span className={styles.manualText}>ผู้จัดทำ</span>
           </button>
 
-          <Link href="/admin/manual" onClick={() => handleLinkClick('/admin/manual')} className={styles.manualBtn}>
+          <a href="/api/manuals/staff-manual.pdf" target="_blank" rel="noopener noreferrer" className={styles.manualBtn}>
             <span className={styles.menuIcon}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
             </span>
             <span className={styles.manualText}>คู่มือ</span>
-          </Link>
+          </a>
           
           <div className={styles.userInfo}>
             <div className={styles.avatar}>

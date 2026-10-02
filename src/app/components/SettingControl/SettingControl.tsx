@@ -28,11 +28,11 @@ export default function SettingControl({
       <div className={styles.controlGroup}>
         <button 
           className={styles.controlBtn} 
-          onMouseDown={() => startHold(setter, value, -1, min, max)}
-          onMouseUp={stopHold}
-          onMouseLeave={stopHold}
-          onTouchStart={() => startHold(setter, value, -1, min, max)}
-          onTouchEnd={stopHold}
+          onPointerDown={() => startHold(setter, value, -1, min, max)}
+          onPointerUp={stopHold}
+          onPointerLeave={stopHold}
+          onPointerCancel={stopHold}
+          onContextMenu={(e) => e.preventDefault()}
           disabled={value <= min}
         >
           -
@@ -45,11 +45,11 @@ export default function SettingControl({
         />
         <button 
           className={styles.controlBtn} 
-          onMouseDown={() => startHold(setter, value, 1, min, max)}
-          onMouseUp={stopHold}
-          onMouseLeave={stopHold}
-          onTouchStart={() => startHold(setter, value, 1, min, max)}
-          onTouchEnd={stopHold}
+          onPointerDown={() => startHold(setter, value, 1, min, max)}
+          onPointerUp={stopHold}
+          onPointerLeave={stopHold}
+          onPointerCancel={stopHold}
+          onContextMenu={(e) => e.preventDefault()}
           disabled={value >= max}
         >
           +

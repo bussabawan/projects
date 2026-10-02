@@ -49,16 +49,6 @@ export default function Footer() {
           เงื่อนไขการให้บริการ<span className={styles.desktopOnly}> | </span><span className={styles.mobileBreak}></span>
           นโยบายความเป็นส่วนตัว
         </Link>
-        <div className={styles.manualsContainer}>
-          <a href="/manuals/user-manual.pdf" target="_blank" rel="noopener noreferrer" className={styles.manualLink}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
-            คู่มือการใช้งาน (ผู้ป่วย)
-          </a>
-          <a href="/manuals/staff-manual.pdf" target="_blank" rel="noopener noreferrer" className={styles.manualLink}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
-            คู่มือการใช้งาน (เจ้าหน้าที่)
-          </a>
-        </div>
       </div>
       <AboutModal isOpen={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)} />
     </div>

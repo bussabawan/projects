@@ -329,6 +329,7 @@ export default function MemoryGamePlayPage() {
 
 
   const handleOptionClick = async (selectedChoice: ImageInfo) => {
+    if (playingSource === `choice-${selectedChoice.id}`) return;
     handlePlayClick();
     const audioPromise = playAudio(selectedChoice.audioUrl, `choice-${selectedChoice.id}`);
     
@@ -510,7 +511,7 @@ export default function MemoryGamePlayPage() {
         <div className={styles.progressInfo}>
           ข้อ {currentQuestionIndex + 1} จาก {questions.length}
           <div className={styles.audioSwitchWrapper} onClick={toggleMute}>
-            <span className={styles.audioSwitchLabel}>เปิด/ปิดเสียงเอฟเฟค</span>
+            <span className={styles.audioSwitchLabel}>เปิด/ปิด เสียงเกม</span>
             <button className={`${styles.audioSwitch} ${!isMuted ? styles.switchOn : styles.switchOff}`}>
               <div className={styles.switchThumb}>
                 {!isMuted ? (
@@ -551,7 +552,10 @@ export default function MemoryGamePlayPage() {
               <motion.div 
                 key={idx}
                 className={styles.targetCard} 
-                onClick={() => playAudio(target.audioUrl, `target-${target.id}`)}
+                onClick={() => {
+                  if (playingSource === `target-${target.id}`) return;
+                  playAudio(target.audioUrl, `target-${target.id}`);
+                }}
                 style={{ cursor: 'pointer' }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
