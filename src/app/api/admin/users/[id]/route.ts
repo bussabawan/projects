@@ -23,6 +23,9 @@ export async function PUT(
         body.password = 'API Login google';
       }
     }
+    if (body.login_quota !== undefined) {
+      body.login_quota = Number(body.login_quota);
+    }
     if (body.exercises_id !== undefined && body.exercises_id !== null) {
       if (Array.isArray(body.exercises_id)) {
         body.exercises_id = body.exercises_id.map(Number);

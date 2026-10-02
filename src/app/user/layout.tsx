@@ -50,23 +50,50 @@ export default function UserLayout({
     }
   };
 
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [loadingText, setLoadingText] = useState("กำลังประมวลผล...");
+
   useEffect(() => {
+    let isMounted = true;
     const fetchUser = async () => {
       try {
         const session = await getSession();
+        if (!isMounted) return;
+
         if (session && session.user) {
           const user = session.user as Record<string, unknown>;
-          const nameToDisplay = user.fullName || user.name || user.id || "";
-          setUserName(`${nameToDisplay}`);
-          return;
+          if (user.role === 2) {
+            setLoadingText("กำลังนำคุณไปยังหน้าผู้ดูแล...");
+            setTimeout(() => {
+              if (isMounted) {
+                router.replace('/admin');
+              }
+            }, 800);
+            return;
+          }
+
+          if (user.role === 1) {
+            const nameToDisplay = user.fullName || user.name || user.id || "";
+            setUserName(`${nameToDisplay}`);
+            setIsAuthorized(true);
+            return;
+          }
         }
       } catch (e) {
         console.error("Failed to get NextAuth session:", e);
       }
+
+      if (isMounted) {
+        router.replace('/login');
+      }
     };
 
     fetchUser();
-  }, []);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [router]);
 
   const handleLogout = React.useCallback(async () => {
     await signOut({ redirect: false });
@@ -132,6 +159,21 @@ export default function UserLayout({
   const isSummaryPage = pathname.startsWith("/user/games/summary");
   const isHistoryActive = activeTab === 'history';
   const isGamesActive = activeTab === 'games';
+
+  if (!isAuthorized) {
+    return (
+      <div style={{
+        display: 'flex',
+        minHeight: '100vh',
+        width: '100vw',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#f8fafc',
+      }}>
+        <Loader text={loadingText} />
+      </div>
+    );
+  }
 
   return (
     <div 
@@ -281,14 +323,14 @@ export default function UserLayout({
       )}
 
       <main className={isGameInnerPage ? styles.fullMainContent : styles.mainContent}>
-        <div className={isGameInnerPage ? '' : styles.innerContent}>
+        <div className={isGameInnerPage ? styles.gameInnerWrapper : styles.innerContent}>
           {isPageLoading ? (
             <Loader text="กำลังโหลดข้อมูล..." />
           ) : (
             children
           )}
         </div>
-        {!isGameInnerPage && <Footer />}
+        <Footer alwaysShowAbout={isGameInnerPage} />
       </main>
 
       {/* Mobile Manual Button */}

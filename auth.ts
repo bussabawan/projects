@@ -27,20 +27,33 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.username || !credentials?.password) {
-          throw new CustomAuthError('Please enter username and password');
+          throw new CustomAuthError('EMPTY_CREDENTIALS');
         }
         
         try {
-          // Use our existing authentication model
-          const user = await UserModel.authenticate(credentials.username as string, credentials.password as string);
+          const authResult = await UserModel.authenticate(
+            credentials.username as string, 
+            credentials.password as string
+          );
           
-          if (!user) {
-            throw new CustomAuthError('Invalid username or password');
+          if (authResult.isLocked || authResult.errorType === 'LOCKED') {
+            throw new CustomAuthError('LOCKED_MAX_ATTEMPTS');
+          }
+
+          if (authResult.errorType === 'STAFF_GOOGLE_ONLY') {
+            throw new CustomAuthError('STAFF_GOOGLE_ONLY');
+          }
+
+          if (!authResult.user) {
+            const remaining = authResult.remainingAttempts ?? 9;
+            throw new CustomAuthError(`REMAINING_${remaining}`);
           }
           
+          const user = authResult.user;
+
           // Staff (2) must use Google Login
           if (user.role === 2) {
-            throw new CustomAuthError('เจ้าหน้าที่กรุณาเข้าสู่ระบบผ่าน E-mail (Google) เท่านั้น');
+            throw new CustomAuthError('STAFF_GOOGLE_ONLY');
           }
           
           // Allow login for patients (1)
@@ -51,7 +64,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               email: user.user_name, // Map username to email field for NextAuth compatibility
               role: user.role,
               fullName: user.full_name,
-            }
+            };
           }
           
           throw new CustomAuthError('คุณไม่มีสิทธิ์เข้าใช้งานระบบ');

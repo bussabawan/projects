@@ -5,7 +5,7 @@ import { getSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
 import styles from "./admin.module.css";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Loader from "@/app/components/Loader/Loader";
 import AboutModal from "@/app/components/AboutModal/AboutModal";
 import Footer from "@/app/components/Footer/Footer";
@@ -16,12 +16,16 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(false);
   const [userName, setUserName] = useState("กำลังโหลด...");
   const pathname = usePathname();
   const [activePath, setActivePath] = useState(pathname);
+
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [loadingText, setLoadingText] = useState("กำลังประมวลผล...");
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -39,23 +43,45 @@ export default function AdminLayout({
   };
 
   useEffect(() => {
+    let isMounted = true;
     const fetchUser = async () => {
       try {
         const session = await getSession();
+        if (!isMounted) return;
+
         if (session && session.user) {
           const user = session.user as Record<string, unknown>;
-          setUserName(`คุณ ${user.fullName || user.name || "Admin"}`);
-          return;
+          if (user.role === 1) {
+            setLoadingText("กำลังนำคุณกลับไปยังหน้าตามสิทธิ์...");
+            setTimeout(() => {
+              if (isMounted) {
+                router.replace('/user/games');
+              }
+            }, 800);
+            return;
+          }
+
+          if (user.role === 2) {
+            setUserName(`คุณ ${user.fullName || user.name || "Admin"}`);
+            setIsAuthorized(true);
+            return;
+          }
         }
       } catch (e) {
         console.error("Failed to get NextAuth session:", e);
       }
       
-      setUserName("Admin");
+      if (isMounted) {
+        router.replace('/login');
+      }
     };
 
     fetchUser();
-  }, []);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [router]);
 
   const handleLogout = useCallback(async () => {
     try {
@@ -95,6 +121,21 @@ export default function AdminLayout({
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
   };
+
+  if (!isAuthorized) {
+    return (
+      <div style={{
+        display: 'flex',
+        minHeight: '100vh',
+        width: '100vw',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#f8fafc',
+      }}>
+        <Loader text={loadingText} />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.layoutContainer}>

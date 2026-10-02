@@ -66,6 +66,7 @@ export async function POST(request: Request) {
       user_name: body.user_name,
       full_name: body.full_name,
       role: roleId,
+      login_quota: body.login_quota !== undefined ? Number(body.login_quota) : 0,
       password: password,
       exercises_id: parsedExercisesId
     });

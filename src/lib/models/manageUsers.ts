@@ -7,6 +7,7 @@ export interface UserInfo {
   user_name: string;
   full_name: string;
   role: number;
+  login_quota?: number;
   update_time: Date;
   exercises_id?: number | string | null;
   exercises_name?: string | null;
@@ -33,7 +34,7 @@ export class ManageUsersModel extends BaseModel {
       // Patient Query
       baseQuery = `
         SELECT 
-          u.user_id, u.user_name, u.full_name, u.role, u.update_time,
+          u.user_id, u.user_name, u.full_name, u.role, u.login_quota, u.update_time,
           GROUP_CONCAT(p.exercises_id) as exercises_id,
           GROUP_CONCAT(ex.exercises_name SEPARATOR '||') as exercises_name
         FROM users_data u
@@ -50,7 +51,7 @@ export class ManageUsersModel extends BaseModel {
       // Staff Query
       baseQuery = `
         SELECT 
-          u.user_id, u.user_name, u.full_name, u.role, u.update_time
+          u.user_id, u.user_name, u.full_name, u.role, u.login_quota, u.update_time
         FROM users_data u
         WHERE u.role = ? AND u.remove = 0
       `;
@@ -73,7 +74,7 @@ export class ManageUsersModel extends BaseModel {
     }
 
     if (role === 1) {
-      baseQuery += ` GROUP BY u.user_id, u.user_name, u.full_name, u.role, u.update_time`;
+      baseQuery += ` GROUP BY u.user_id, u.user_name, u.full_name, u.role, u.login_quota, u.update_time`;
     }
 
     baseQuery += ` ORDER BY u.user_id ASC LIMIT ? OFFSET ?`;
@@ -91,7 +92,7 @@ export class ManageUsersModel extends BaseModel {
   /**
    * Create a new user (and patient data if role === 1)
    */
-  static async createUser(userData: { user_name: string, full_name: string, role: number, password?: string, exercises_id?: number | number[] }): Promise<number> {
+  static async createUser(userData: { user_name: string, full_name: string, role: number, login_quota?: number, password?: string, exercises_id?: number | number[] }): Promise<number> {
     return this.transaction(async (connection) => {
       // Ensure no duplicate username
       const [existing] = await connection.execute<RowDataPacket[]>(
@@ -117,9 +118,10 @@ export class ManageUsersModel extends BaseModel {
         finalPassword = await bcrypt.hash(finalPassword, salt);
       }
       
+      const loginQuota = userData.login_quota ?? 0;
       const [userResult] = await connection.execute<ResultSetHeader>(
-        'INSERT INTO users_data (user_name, full_name, password, role, remove, update_time) VALUES (?, ?, ?, ?, 0, NOW())',
-        [userData.user_name, userData.full_name, finalPassword, userData.role]
+        'INSERT INTO users_data (user_name, full_name, password, role, login_quota, remove, update_time) VALUES (?, ?, ?, ?, ?, 0, NOW())',
+        [userData.user_name, userData.full_name, finalPassword, userData.role, loginQuota]
       );
 
       const userId = userResult.insertId;
@@ -147,7 +149,7 @@ export class ManageUsersModel extends BaseModel {
   /**
    * Update existing user
    */
-  static async updateUser(userId: number, userData: { user_name?: string, full_name?: string, role?: number, password?: string, exercises_id?: number | number[] }): Promise<boolean> {
+  static async updateUser(userId: number, userData: { user_name?: string, full_name?: string, role?: number, login_quota?: number, password?: string, exercises_id?: number | number[] }): Promise<boolean> {
     return this.transaction(async (connection) => {
       const updateFields: string[] = [];
       const updateValues: (string | number | boolean | null)[] = [];
@@ -195,6 +197,10 @@ export class ManageUsersModel extends BaseModel {
       if (userData.role !== undefined) {
         updateFields.push('role = ?');
         updateValues.push(userData.role);
+      }
+      if (userData.login_quota !== undefined) {
+        updateFields.push('login_quota = ?');
+        updateValues.push(userData.login_quota);
       }
       if (userData.password) {
         let finalPassword = userData.password;

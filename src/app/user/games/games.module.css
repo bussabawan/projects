@@ -54,6 +54,7 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   text-decoration: none;
   box-sizing: border-box;
+  text-align: center;
 }
 
 .gameCard:hover {

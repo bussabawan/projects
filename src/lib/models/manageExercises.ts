@@ -13,16 +13,54 @@ export class ManageExercisesModel extends BaseModel {
    */
   static getExercises = async (): Promise<ExerciseInfo[]> => {
     const rows = await this.query<RowDataPacket>(
-      `SELECT ed.exercises_id, ed.exercises_name 
+      `SELECT 
+         ed.exercises_id, 
+         ed.exercises_name,
+         COALESCE(
+           (
+             SELECT pie.photo_id
+             FROM photo_in_exercises pie
+             JOIN photo_data pd ON pie.photo_id = pd.photo_id
+             WHERE pie.exercises_id = ed.exercises_id
+               AND pie.remove = 0
+               AND pd.remove = 0
+             ORDER BY pie.photo_id ASC
+             LIMIT 1
+           ),
+           (
+             SELECT pd.photo_id
+             FROM category_in_exercises cie
+             JOIN photo_in_category pic ON cie.category_id = pic.category_id
+             JOIN photo_data pd ON pic.photo_id = pd.photo_id
+             WHERE cie.exercises_id = ed.exercises_id
+               AND cie.remove = 0 
+               AND pic.remove = 0 
+               AND pd.remove = 0
+             ORDER BY pd.photo_id ASC
+             LIMIT 1
+           )
+         ) as thumbnail_id
        FROM exercises_data ed 
        WHERE ed.remove = 0 
-         AND EXISTS (
-           SELECT 1
-           FROM photo_in_exercises pie
-           JOIN photo_data pd ON pie.photo_id = pd.photo_id
-           WHERE pie.exercises_id = ed.exercises_id
-             AND pie.remove = 0
-             AND pd.remove = 0
+         AND (
+           EXISTS (
+             SELECT 1
+             FROM photo_in_exercises pie
+             JOIN photo_data pd ON pie.photo_id = pd.photo_id
+             WHERE pie.exercises_id = ed.exercises_id
+               AND pie.remove = 0
+               AND pd.remove = 0
+           )
+           OR EXISTS (
+             SELECT 1
+             FROM category_in_exercises cie
+             JOIN photo_in_category pic ON cie.category_id = pic.category_id
+             JOIN photo_data pd ON pic.photo_id = pd.photo_id
+             WHERE cie.exercises_id = ed.exercises_id
+               AND cie.remove = 0 
+               AND pic.remove = 0 
+               AND pd.remove = 0
+           )
          )
        ORDER BY ed.exercises_id ASC`
     );
