@@ -207,7 +207,7 @@ function LoginContent() {
       <div style={{ flex: 1, minHeight: '15vh' }}></div>
 
       <div style={{ width: 'calc(100% + 2rem)', marginLeft: '-1rem', marginRight: '-1rem', marginBottom: '-1rem', marginTop: 'auto' }}>
-        <Footer />
+        <Footer alwaysShowAbout={true} />
       </div>
     </div>
   );

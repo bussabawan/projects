@@ -283,7 +283,7 @@
   padding: 3rem 4rem 2rem 4rem; /* Desktop padding */
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* Force scrolling to see the footer */
+  flex: 1;
 }
 
 .pageTitle {
@@ -647,7 +647,7 @@
     .statValue {
       font-size: 5.5rem;
     }
-    .mainContent {
+    .innerContent {
       padding: 4rem 6rem 6rem 6rem;
     }
 }
