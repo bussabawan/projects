@@ -9,8 +9,6 @@ import AboutModal from '@/app/components/AboutModal/AboutModal';
 import Loader from '@/app/components/Loader/Loader';
 import Footer from '@/app/components/Footer/Footer';
 
-import { checkUserLoginQuota } from '@/app/actions/authActions';
-
 const maxAttemptsErrorMsg = (
   <>
     คุณใส่รหัสผิดเกิน 10 ครั้ง <br />
@@ -30,7 +28,7 @@ function LoginContent() {
   const [passwordEmpty, setPasswordEmpty] = useState(false);
   const [error, setError] = useState<string | React.ReactNode>('');
   const [loading, setLoading] = useState(false);
-  const [isAccountLocked, setIsAccountLocked] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState(0);
 
   const searchParams = useSearchParams();
   const router = useRouter();
