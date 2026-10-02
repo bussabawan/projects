@@ -7,8 +7,16 @@ export interface User {
   user_name: string;
   full_name: string;
   role: number;
+  login_quota?: number;
   remove: number;
   update_time: Date;
+}
+
+export interface AuthenticateResult {
+  user: User | null;
+  isLocked?: boolean;
+  remainingAttempts?: number;
+  errorType?: 'NOT_FOUND' | 'LOCKED' | 'STAFF_GOOGLE_ONLY' | 'WRONG_PASSWORD';
 }
 
 export class UserModel extends BaseModel {
@@ -17,7 +25,7 @@ export class UserModel extends BaseModel {
    */
   static async findByUserName(userName: string): Promise<User | null> {
     const userRow = await this.findOne<User & RowDataPacket>(
-      'SELECT user_id, user_name, full_name, role, remove, update_time FROM users_data WHERE user_name = ? AND (remove = 0 OR remove IS NULL)',
+      'SELECT user_id, user_name, full_name, role, login_quota, remove, update_time FROM users_data WHERE user_name = ? AND (remove = 0 OR remove IS NULL)',
       [userName]
     );
     
@@ -25,35 +33,77 @@ export class UserModel extends BaseModel {
   }
 
   /**
-   * Authenticate user with username and password
+   * Get current login quota (failed attempts) by username
    */
-  static async authenticate(userName: string, password: string): Promise<User | null> {
+  static async getLoginQuota(userName: string): Promise<number | null> {
+    const userRow = await this.findOne<{ login_quota: number } & RowDataPacket>(
+      'SELECT login_quota FROM users_data WHERE user_name = ? AND (remove = 0 OR remove IS NULL)',
+      [userName]
+    );
+    return userRow ? (userRow.login_quota ?? 0) : null;
+  }
+
+  /**
+   * Reset login quota to 0 for a user
+   */
+  static async resetLoginQuota(userId: number): Promise<void> {
+    await this.execute(
+      'UPDATE users_data SET login_quota = 0 WHERE user_id = ?',
+      [userId]
+    );
+  }
+
+  /**
+   * Authenticate user with username and password, tracking login_quota
+   */
+  static async authenticate(userName: string, password: string): Promise<AuthenticateResult> {
     const userRow = await this.findOne<(User & { stored_password: string }) & RowDataPacket>(
-      'SELECT user_id, user_name, full_name, password as stored_password, role, remove, update_time FROM users_data WHERE user_name = ? AND (remove = 0 OR remove IS NULL)',
+      'SELECT user_id, user_name, full_name, password as stored_password, role, login_quota, remove, update_time FROM users_data WHERE user_name = ? AND (remove = 0 OR remove IS NULL)',
       [userName]
     );
     
     if (!userRow) {
-      return null;
+      return { user: null, errorType: 'NOT_FOUND', remainingAttempts: 9 };
+    }
+
+    const currentQuota = userRow.login_quota ?? 0;
+    if (currentQuota >= 10) {
+      return { user: null, isLocked: true, errorType: 'LOCKED', remainingAttempts: 0 };
     }
 
     // For Google API logins, passwords aren't verified this way.
     // If somehow a google user tries to login with a normal form, they shouldn't be able to unless they have a real password.
     if (userRow.stored_password === 'API Login google') {
-       return null; 
+       return { user: null, errorType: 'STAFF_GOOGLE_ONLY' }; 
     }
     
     // Compare provided password with hashed password
     const isMatch = await bcrypt.compare(password, userRow.stored_password);
     
     if (!isMatch) {
-      return null;
+      const newQuota = currentQuota + 1;
+      await this.execute(
+        'UPDATE users_data SET login_quota = ? WHERE user_id = ?',
+        [newQuota, userRow.user_id]
+      );
+      if (newQuota >= 10) {
+        return { user: null, isLocked: true, errorType: 'LOCKED', remainingAttempts: 0 };
+      }
+      return { user: null, errorType: 'WRONG_PASSWORD', remainingAttempts: 10 - newQuota };
     }
     
+    // Successful login: reset login_quota to 0
+    if (currentQuota > 0) {
+      await this.execute(
+        'UPDATE users_data SET login_quota = 0 WHERE user_id = ?',
+        [userRow.user_id]
+      );
+    }
+
     // Remove password from returned object
     const { stored_password, ...userWithoutPassword } = userRow;
     void stored_password; // bypass unused-var warning
-    return userWithoutPassword as User;
+    return { user: { ...userWithoutPassword, login_quota: 0 } as User };
   }
 
   /**

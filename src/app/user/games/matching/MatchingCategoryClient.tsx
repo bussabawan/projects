@@ -8,11 +8,51 @@ import { PuzzleIcon } from '@/app/components/Icons';
 import styles from './matching.module.css';
 import { useDebounce } from '@/app/hooks/useDebounce';
 
+interface Exercise {
+  exercises_id: number;
+  exercises_name: string;
+  thumbnail_id?: number;
+}
+
+const preloadImages = (items: { thumbnail_id?: number }[]): Promise<void> => {
+  if (typeof window === 'undefined') return Promise.resolve();
+
+  const validItems = items.filter((item) => Boolean(item.thumbnail_id));
+  if (validItems.length === 0) return Promise.resolve();
+
+  const promises = validItems.map(
+    (item) =>
+      new Promise<void>((resolve) => {
+        const img = new window.Image();
+        let finished = false;
+        const done = () => {
+          if (!finished) {
+            finished = true;
+            resolve();
+          }
+        };
+
+        img.onload = () => {
+          if ('decode' in img && typeof img.decode === 'function') {
+            img.decode().then(done).catch(done);
+          } else {
+            done();
+          }
+        };
+        img.onerror = done;
+        img.src = `/api/files/${item.thumbnail_id}?type=image`;
+      })
+  );
+
+  const timeoutPromise = new Promise<void>((resolve) => setTimeout(resolve, 2500));
+  return Promise.race([Promise.all(promises), timeoutPromise]).then(() => undefined);
+};
+
 export default function MatchingCategoryClient() {
   const [activeTab, setActiveTab] = useState<'image' | 'word'>('image');
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
-  const [exercises, setExercises] = useState<{exercises_id: number, exercises_name: string, thumbnail_id?: number}[]>([]);
+  const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,8 +76,11 @@ export default function MatchingCategoryClient() {
       try {
         const res = await fetch('/api/user/exercises');
         const json = await res.json();
-        if (json.success && isMounted) {
-          setExercises(prev => prev.length === 0 ? json.data : prev);
+        if (json.success && Array.isArray(json.data) && isMounted) {
+          await preloadImages(json.data);
+          if (isMounted) {
+            setExercises(json.data);
+          }
         } else if (!json.success) {
           console.error(json.error);
         }
@@ -58,6 +101,16 @@ export default function MatchingCategoryClient() {
   const filteredExercises = exercises.filter(ex => 
     ex.exercises_name.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
   );
+
+  if (loading) {
+    return (
+      <div className={styles.container}>
+        <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+          <Loader text="กำลังโหลดหมวดหมู่แบบฝึกหัด..." />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
@@ -108,9 +161,9 @@ export default function MatchingCategoryClient() {
       </div>
 
       <div className={styles.categoriesGrid}>
-        {loading || searchQuery !== debouncedSearchQuery ? (
+        {searchQuery !== debouncedSearchQuery ? (
           <div style={{ gridColumn: '1 / -1', width: '100%', minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Loader text={searchQuery.trim() ? "กำลังค้นหาแบบฝึกหัด..." : "กำลังโหลดหมวดหมู่แบบฝึกหัด..."} />
+            <Loader text="กำลังค้นหาแบบฝึกหัด..." />
           </div>
         ) : filteredExercises.length > 0 ? (
           filteredExercises.map((ex) => (
@@ -122,7 +175,8 @@ export default function MatchingCategoryClient() {
                   width={200}
                   height={200}
                   className={styles.categoryImage} 
-                  loading="lazy"
+                  priority
+                  unoptimized
                 />
               )}
               <span className={styles.categoryText}>{ex.exercises_name}</span>

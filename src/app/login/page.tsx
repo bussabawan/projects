@@ -9,6 +9,8 @@ import AboutModal from '@/app/components/AboutModal/AboutModal';
 import Loader from '@/app/components/Loader/Loader';
 import Footer from '@/app/components/Footer/Footer';
 
+import { checkUserLoginQuota } from '@/app/actions/authActions';
+
 const maxAttemptsErrorMsg = (
   <>
     คุณใส่รหัสผิดเกิน 10 ครั้ง <br />
@@ -28,7 +30,7 @@ function LoginContent() {
   const [passwordEmpty, setPasswordEmpty] = useState(false);
   const [error, setError] = useState<string | React.ReactNode>('');
   const [loading, setLoading] = useState(false);
-  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [isAccountLocked, setIsAccountLocked] = useState(false);
 
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -39,25 +41,24 @@ function LoginContent() {
       if (errParam === 'AccessDenied') {
         setError('คุณไม่มีสิทธิ์เข้าใช้งาน หรือบัญชีนี้ไม่ใช่สำหรับเจ้าหน้าที่');
       }
-      const storedAttempts = localStorage.getItem('login_failed_attempts');
-      if (storedAttempts) {
-        setFailedAttempts(parseInt(storedAttempts, 10));
-        if (parseInt(storedAttempts, 10) >= 10) {
-          setError(maxAttemptsErrorMsg);
-        }
-      }
     }, 0);
     return () => clearTimeout(timer);
   }, [searchParams]);
 
+  const handleUsernameBlur = async () => {
+    if (username.trim()) {
+      const quotaInfo = await checkUserLoginQuota(username.trim());
+      if (quotaInfo.isLocked) {
+        setIsAccountLocked(true);
+        setError(maxAttemptsErrorMsg);
+      } else {
+        setIsAccountLocked(false);
+      }
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (failedAttempts >= 10) {
-      setError(maxAttemptsErrorMsg);
-      return;
-    }
-    
     setError('');
 
     let hasError = false;
@@ -75,35 +76,55 @@ function LoginContent() {
     setLoading(true);
 
     try {
+      const trimmedUsername = username.trim();
+
+      // Pre-check if account is already locked in DB
+      const preCheck = await checkUserLoginQuota(trimmedUsername);
+      if (preCheck.isLocked) {
+        setIsAccountLocked(true);
+        setError(maxAttemptsErrorMsg);
+        setLoading(false);
+        return;
+      }
+
       const res = await signIn('credentials', {
         redirect: false,
-        username,
+        username: trimmedUsername,
         password,
       });
 
       if (res?.error) {
-        if (res.error === 'CredentialsSignin') {
-          const newCount = failedAttempts + 1;
-          setFailedAttempts(newCount);
-          localStorage.setItem('login_failed_attempts', newCount.toString());
-          
-          if (newCount >= 10) {
-            setError(maxAttemptsErrorMsg);
+        let code = res.code || res.error;
+
+        // If code is generic CredentialsSignin, check quota via server action to get exact DB state
+        if (code === 'CredentialsSignin' || !code.startsWith('REMAINING_')) {
+          const quotaInfo = await checkUserLoginQuota(trimmedUsername);
+          if (quotaInfo.isLocked) {
+            code = 'LOCKED_MAX_ATTEMPTS';
           } else {
-            setError(
-              <>
-                Username หรือ Password ไม่ถูกต้อง หากเป็นเจ้าหน้าที่กรุณาเข้าสู่ระบบผ่านบัญชี Google <br />
-                (เหลือโอกาสอีก {10 - newCount} ครั้ง)
-              </>
-            );
+            code = `REMAINING_${quotaInfo.remaining}`;
           }
+        }
+
+        if (code === 'LOCKED_MAX_ATTEMPTS') {
+          setIsAccountLocked(true);
+          setError(maxAttemptsErrorMsg);
+        } else if (code === 'STAFF_GOOGLE_ONLY') {
+          setError('เจ้าหน้าที่กรุณาเข้าสู่ระบบผ่าน E-mail (Google) เท่านั้น');
+        } else if (code.startsWith('REMAINING_')) {
+          const remaining = code.replace('REMAINING_', '');
+          setError(
+            <>
+              Username หรือ Password ไม่ถูกต้อง หากเป็นเจ้าหน้าที่กรุณาเข้าสู่ระบบผ่านบัญชี Google <br />
+              (เหลือโอกาสอีก {remaining} ครั้ง)
+            </>
+          );
         } else {
-          setError("เกิดข้อผิดพลาด: " + res.error);
+          setError('Username หรือ Password ไม่ถูกต้อง');
         }
         setLoading(false);
       } else if (res?.ok) {
         // Successful login
-        localStorage.removeItem('login_failed_attempts');
         router.push('/');
         router.refresh(); // Force refresh to update layout session state
       }
@@ -136,7 +157,7 @@ function LoginContent() {
             <h3 className={styles.subtitle}>Cog-kit : ระบบฝึกการรับรู้ด้านสมาธิและความจำ</h3>
             <form className={styles.form} onSubmit={handleLogin} noValidate>
               {error && (
-                <div key={failedAttempts} className={styles.errorAlert}>
+                <div className={styles.errorAlert}>
                   <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
                     <circle cx="12" cy="12" r="10"></circle>
                     <line x1="12" y1="8" x2="12" y2="12"></line>
@@ -156,6 +177,7 @@ function LoginContent() {
                     setUsername(e.target.value);
                     setUsernameEmpty(false);
                   }}
+                  onBlur={handleUsernameBlur}
                   placeholder={usernameEmpty ? 'โปรดกรอก Username' : ''}
                 />
               </div>
@@ -176,7 +198,7 @@ function LoginContent() {
               </div>
 
               <div className={styles.actions}>
-                <button type="submit" className={styles.loginBtn} disabled={loading || failedAttempts >= 10}>
+                <button type="submit" className={styles.loginBtn} disabled={loading || isAccountLocked}>
                   {loading ? 'Logging in...' : 'Log in'}
                 </button>
                 <button 
