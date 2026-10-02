@@ -6,7 +6,7 @@ import { statSync, existsSync, createReadStream } from 'fs';
 export const dynamic = 'force-dynamic';
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ filename: string }> }
 ) {
   const session = await auth();
@@ -40,7 +40,10 @@ export async function GET(
     // Convert Node.js stream to Web Stream
     const webStream = new ReadableStream({
       start(controller) {
-        readStream.on('data', (chunk: Buffer) => controller.enqueue(new Uint8Array(chunk)));
+        readStream.on('data', (chunk: Buffer | string) => {
+          const bytes = typeof chunk === 'string' ? Buffer.from(chunk) : chunk;
+          controller.enqueue(new Uint8Array(bytes));
+        });
         readStream.on('end', () => controller.close());
         readStream.on('error', (error: Error) => controller.error(error));
       },
