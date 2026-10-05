@@ -407,20 +407,21 @@
   
     .sidebar, .sidebar.collapsed {
       position: fixed;
-      bottom: 1.5rem;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 90% !important;
-      max-width: 340px !important;
-      height: 55px;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      transform: none;
+      width: 100% !important;
+      max-width: none !important;
+      height: 75px;
       background-color: white;
-      border-radius: 30px;
+      border-radius: 24px 24px 0 0;
       flex-direction: row;
-      padding: 4px;
+      padding: 0 1rem;
       align-items: center;
       justify-content: center;
-      z-index: 99999;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      z-index: 100;
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.06);
       box-sizing: border-box;
     }
   
@@ -430,14 +431,10 @@
   
     .menu, .collapsed .menu {
       flex-direction: row;
-      justify-content: center;
+      justify-content: space-around;
       width: 100%;
-      height: 100%;
       padding: 0;
       margin: 0;
-      gap: 0;
-      position: relative;
-      z-index: 1;
     }
     
     .activePill {
@@ -447,36 +444,35 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: #2a0350;
-      border-radius: 26px;
+      background-color: #F3E8FF;
+      border-radius: inherit;
       z-index: 0;
     }
   
     .menuItem, .collapsed .menuItem {
-      padding: 0;
+      padding: 0.7rem;
       background: transparent;
-      flex: 1;
-      height: 100%;
-      border-radius: 26px;
+      width: auto;
+      height: 45px;
+      flex: 0 0 auto;
+      border-radius: 25px;
       gap: 0.5rem;
       display: flex;
       justify-content: center;
       align-items: center;
-      color: #111;
+      color: #6B7280;
     }
   
     .menuItem.active, .collapsed .menuItem.active {
       background-color: transparent;
       box-shadow: none;
+      color: #6B21A8;
     }
   
     .menuText, .collapsed .menuText {
       display: block !important;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       font-weight: 500;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
   
     .sidebarBottom, .collapsed .sidebarBottom {
@@ -510,8 +506,8 @@
     .mobileHomeBtn, .mobileLogoutBtn {
       color: #333;
       background-color: #fff;
-      width: 56px;
-      height: 56px;
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -531,7 +527,7 @@
     }
   
     .innerContent {
-      padding: 1.5rem 1.5rem 6rem 1.5rem; /* added bottom padding for sidebar clearance on mobile */
+      padding: 1.5rem 1.5rem 1rem 1.5rem; /* added bottom padding for sidebar clearance on mobile */
     }
   
     .mainContent {

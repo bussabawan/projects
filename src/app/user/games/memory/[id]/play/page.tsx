@@ -636,7 +636,7 @@ export default function MemoryGamePlayPage() {
                 whileTap={{ scale: 0.95 }}
               >
                 {mode === 'word' ? (
-                  <h1 className={styles.targetWord} style={{ fontSize: currentQ.targets.length > 4 ? '3rem' : '5rem' }}>{target.title}</h1>
+                  <h1 className={styles.targetWord}>{target.title}</h1>
                 ) : (
                   <Image src={target.imageUrl} alt={`Target ${idx}`} width={300} height={300} priority unoptimized={true} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                 )}

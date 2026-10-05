@@ -5,6 +5,7 @@ import styles from './login.module.css';
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
+import { checkUserLoginQuota } from '@/app/actions/authActions';
 import AboutModal from '@/app/components/AboutModal/AboutModal';
 import Loader from '@/app/components/Loader/Loader';
 import Footer from '@/app/components/Footer/Footer';
@@ -29,6 +30,7 @@ function LoginContent() {
   const [error, setError] = useState<string | React.ReactNode>('');
   const [loading, setLoading] = useState(false);
   const [failedAttempts, setFailedAttempts] = useState(0);
+  const [isAccountLocked, setIsAccountLocked] = useState(false);
 
   const searchParams = useSearchParams();
   const router = useRouter();

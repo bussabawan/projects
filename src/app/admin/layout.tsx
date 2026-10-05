@@ -272,7 +272,7 @@ export default function AdminLayout({
             </div>
             <div className={styles.userName}>{userName}</div>
             <button className={styles.logoutBtn} aria-label="Logout" title="Logout" onClick={handleLogout}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                 <polyline points="16 17 21 12 16 7"></polyline>
                 <line x1="21" y1="12" x2="9" y2="12"></line>
@@ -293,9 +293,9 @@ export default function AdminLayout({
         <Footer />
       </main>
       
-      <Link href="/admin/manual" onClick={() => handleLinkClick('/admin/manual')} className={styles.mobileManualBtn} aria-label="คู่มือ">
+      <a href="/api/manuals/staff-manual.pdf" target="_blank" rel="noopener noreferrer" className={styles.mobileManualBtn} aria-label="คู่มือ">
         ?
-      </Link>
+      </a>
       
       <AboutModal isOpen={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)} />
     </div>

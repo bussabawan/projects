@@ -568,11 +568,14 @@
     }
   
     .targetCard {
-      width: 95%;
+      width: 100%;
+      aspect-ratio: auto;
+      min-height: 80px;
+      height: 12vh;
     }
   
     .targetWord {
-      font-size: 2.5rem;
+      font-size: clamp(1.2rem, 5vw, 2rem);
     }
   
     .optionsGrid {
@@ -580,26 +583,23 @@
     }
     
     .optionCard {
-      aspect-ratio: 1/1;
+      aspect-ratio: auto;
+      min-height: 80px;
+      height: 12vh;
     }
   
     .grid2 {
       grid-template-columns: 1fr;
     }
 
-    .grid3, .grid4, .grid5, .grid6 {
+    .grid3, .grid4, .grid5, .grid6, .grid7, .grid8, .grid9, .grid10, .grid11, .grid12, .grid13, .grid14, .grid15 {
       grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .grid7, .grid8, .grid9, .grid10, .grid11, .grid12, .grid13, .grid14, .grid15 {
-      grid-template-columns: repeat(3, 1fr);
     }
   
     .targetsGrid { gap: 10px; }
     .targetsGrid.grid1 { grid-template-columns: 1fr; }
-    .targetsGrid.grid2, .targetsGrid.grid4 { grid-template-columns: repeat(2, 1fr); }
-    .targetsGrid.grid3, .targetsGrid.grid5, .targetsGrid.grid6, .targetsGrid.grid7, .targetsGrid.grid8, .targetsGrid.grid9, .targetsGrid.grid10 { 
-      grid-template-columns: repeat(3, 1fr); 
+    .targetsGrid.grid2, .targetsGrid.grid3, .targetsGrid.grid4, .targetsGrid.grid5, .targetsGrid.grid6, .targetsGrid.grid7, .targetsGrid.grid8, .targetsGrid.grid9, .targetsGrid.grid10 { 
+      grid-template-columns: repeat(2, 1fr); 
     }
   
     .countdownText {
