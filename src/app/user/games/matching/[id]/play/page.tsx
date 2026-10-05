@@ -375,6 +375,12 @@ export default function MatchingGamePage() {
 
     const currentQ = questions[currentIndex];
     
+    // Play choice audio if available
+    const selectedChoice = currentQ.choices.find(c => c.id === choiceId);
+    if (selectedChoice && selectedChoice.audioUrl) {
+      playAudio(selectedChoice.audioUrl, `choice-${choiceId}`);
+    }
+    
     if (choiceId === currentQ.target.id) {
       setFeedback('correct');
       setCorrectChoiceId(choiceId);

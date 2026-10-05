@@ -37,12 +37,9 @@ export default function SettingControl({
         >
           -
         </button>
-        <input 
-          type="number" 
-          className={styles.controlValue} 
-          value={value} 
-          readOnly 
-        />
+        <div className={styles.controlValue}>
+          {value}
+        </div>
         <button 
           className={styles.controlBtn} 
           onPointerDown={() => startHold(setter, value, 1, min, max)}

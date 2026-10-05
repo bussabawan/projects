@@ -415,10 +415,6 @@ export default function MemoryGamePlayPage() {
     setClickCount(prev => prev + 1);
     
     if (wrongGuesses.includes(selectedChoice.id)) {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        setPlayingSource(null);
-      }
       setFeedback('wrong');
       playFeedbackSound('wrong', () => {
         setFeedback(null);
@@ -475,10 +471,6 @@ export default function MemoryGamePlayPage() {
         });
       }
     } else {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        setPlayingSource(null);
-      }
       setIncorrectCount(prev => prev + 1);
       setWrongGuesses(prev => [...prev, selectedChoice.id]);
       setFeedback('wrong');

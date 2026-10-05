@@ -61,6 +61,7 @@
   align-items: center;
   position: relative;
   overflow: hidden;
+  container-type: inline-size;
 }
 
 .questionBadge {
@@ -102,12 +103,13 @@
 }
 
 .wordText {
-  font-size: 2.5rem;
+  font-size: clamp(1rem, 15cqi, 3rem);
   font-weight: 500;
   color: #000;
   text-align: center;
   padding: 10px;
-  word-break: break-word;
+  word-break: keep-all;
+  overflow-wrap: break-word;
   z-index: 20;
 }
 

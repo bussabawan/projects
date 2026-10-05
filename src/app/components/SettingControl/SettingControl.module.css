@@ -57,20 +57,15 @@
 
 .controlValue {
   width: 60px;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   font-size: 2rem;
   color: var(--color-primary);
   background: transparent;
   border: none;
   font-weight: bold;
-  -moz-appearance: textfield;
-  appearance: textfield;
-}
-
-.controlValue::-webkit-outer-spin-button,
-.controlValue::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+  user-select: none;
 }
 
 /* 4. Tablet Portrait / Mobile Landscape (max-width: 768px) */
