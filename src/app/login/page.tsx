@@ -9,6 +9,7 @@ import { checkUserLoginQuota } from '@/app/actions/authActions';
 import AboutModal from '@/app/components/AboutModal/AboutModal';
 import Loader from '@/app/components/Loader/Loader';
 import Footer from '@/app/components/Footer/Footer';
+import { checkUserLoginQuota } from '@/app/actions/authActions';
 
 const maxAttemptsErrorMsg = (
   <>
@@ -29,7 +30,6 @@ function LoginContent() {
   const [passwordEmpty, setPasswordEmpty] = useState(false);
   const [error, setError] = useState<string | React.ReactNode>('');
   const [loading, setLoading] = useState(false);
-  const [failedAttempts, setFailedAttempts] = useState(0);
   const [isAccountLocked, setIsAccountLocked] = useState(false);
 
   const searchParams = useSearchParams();

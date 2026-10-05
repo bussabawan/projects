@@ -1,17 +1,70 @@
-import NextAuth, { CredentialsSignin } from "next-auth"
+import NextAuth, { CredentialsSignin, type NextAuthConfig } from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { UserModel } from "@/lib/models/user"
 import { authConfig } from "./auth.config"
 
-class CustomAuthError extends CredentialsSignin {
+export class CustomAuthError extends CredentialsSignin {
   constructor(message: string) {
     super(message);
     this.code = message;
   }
 }
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
+export async function authorizeUser(credentials: Partial<Record<string, unknown>> | null | undefined) {
+  if (!credentials?.username || !credentials?.password) {
+    throw new CustomAuthError('EMPTY_CREDENTIALS');
+  }
+  
+  try {
+    const authResult = await UserModel.authenticate(
+      credentials.username as string, 
+      credentials.password as string
+    );
+    
+    if (authResult.isLocked || authResult.errorType === 'LOCKED') {
+      throw new CustomAuthError('LOCKED_MAX_ATTEMPTS');
+    }
+
+    if (authResult.errorType === 'STAFF_GOOGLE_ONLY') {
+      throw new CustomAuthError('STAFF_GOOGLE_ONLY');
+    }
+
+    if (!authResult.user) {
+      const remaining = authResult.remainingAttempts ?? 9;
+      throw new CustomAuthError(`REMAINING_${remaining}`);
+    }
+    
+    const user = authResult.user;
+
+    // Staff (2) must use Google Login
+    if (user.role === 2) {
+      throw new CustomAuthError('STAFF_GOOGLE_ONLY');
+    }
+    
+    // Allow login for patients (1)
+    if (user.role === 1) {
+      return {
+        id: user.user_id.toString(),
+        name: user.full_name || user.user_name,
+        email: user.user_name, // Map username to email field for NextAuth compatibility
+        role: user.role,
+        fullName: user.full_name,
+      };
+    }
+    
+    throw new CustomAuthError('คุณไม่มีสิทธิ์เข้าใช้งานระบบ');
+  } catch (error: unknown) {
+    console.error("[Auth Error] Credentials authorize error:", error);
+    if (error instanceof CustomAuthError) {
+      throw error;
+    }
+    const err = error as Error;
+    throw new CustomAuthError(err.message || 'Login failed');
+  }
+}
+
+export const authOptions: NextAuthConfig = {
   ...authConfig,
   trustHost: true,
   providers: [
@@ -25,58 +78,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         username: { label: "Username", type: "text" },
         password: { label: "Password", type: "password" }
       },
-      async authorize(credentials) {
-        if (!credentials?.username || !credentials?.password) {
-          throw new CustomAuthError('EMPTY_CREDENTIALS');
-        }
-        
-        try {
-          const authResult = await UserModel.authenticate(
-            credentials.username as string, 
-            credentials.password as string
-          );
-          
-          if (authResult.isLocked || authResult.errorType === 'LOCKED') {
-            throw new CustomAuthError('LOCKED_MAX_ATTEMPTS');
-          }
-
-          if (authResult.errorType === 'STAFF_GOOGLE_ONLY') {
-            throw new CustomAuthError('STAFF_GOOGLE_ONLY');
-          }
-
-          if (!authResult.user) {
-            const remaining = authResult.remainingAttempts ?? 9;
-            throw new CustomAuthError(`REMAINING_${remaining}`);
-          }
-          
-          const user = authResult.user;
-
-          // Staff (2) must use Google Login
-          if (user.role === 2) {
-            throw new CustomAuthError('STAFF_GOOGLE_ONLY');
-          }
-          
-          // Allow login for patients (1)
-          if (user.role === 1) {
-            return {
-              id: user.user_id.toString(),
-              name: user.full_name || user.user_name,
-              email: user.user_name, // Map username to email field for NextAuth compatibility
-              role: user.role,
-              fullName: user.full_name,
-            };
-          }
-          
-          throw new CustomAuthError('คุณไม่มีสิทธิ์เข้าใช้งานระบบ');
-        } catch (error: unknown) {
-          console.error("[Auth Error] Credentials authorize error:", error);
-          if (error instanceof CustomAuthError) {
-            throw error;
-          }
-          const err = error as Error;
-          throw new CustomAuthError(err.message || 'Login failed');
-        }
-      }
+      authorize: authorizeUser,
     })
   ],
   callbacks: {
@@ -154,4 +156,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     maxAge: 7 * 24 * 60 * 60, // 7 days (Patient rolling session)
     updateAge: 24 * 60 * 60,  // Update session cookie every 24 hours
   },
-})
+};
+
+export const { handlers, signIn, signOut, auth } = NextAuth(authOptions);
+
