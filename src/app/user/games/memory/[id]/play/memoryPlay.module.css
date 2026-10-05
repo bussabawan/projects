@@ -519,7 +519,7 @@
     .timerContainer {
       background-color: white;
       color: black;
-      font-size: 1.5rem;
+      font-size: 1.6rem;
       padding: 5px 15px;
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -551,7 +551,11 @@
     }
 
     .progressInfo {
-      font-size: 1.25rem;
+      font-size: 1.rem;
+    }
+    
+    .progressPercentText {
+      font-size: 1.2rem;
     }
   
     .audioBtn {
@@ -575,7 +579,7 @@
     }
   
     .targetWord {
-      font-size: clamp(1.2rem, 5vw, 2rem);
+      font-size: clamp(1.5rem, 8vw, 3rem);
     }
   
     .optionsGrid {
@@ -606,7 +610,7 @@
   
     .countdownText {
       margin-top: 15px;
-      font-size: 1rem;
+      font-size: 1.3rem;
       align-self: flex-end;
     }
 }

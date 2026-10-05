@@ -85,10 +85,22 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
     setError("");
     setLoading(true);
 
-    if (role === 1 && (!formData.exercises_id || formData.exercises_id.length === 0)) {
-      setError("กรุณาเลือกชุดแบบฝึกหัดเริ่มต้นอย่างน้อย 1 ชุด");
-      setLoading(false);
-      return;
+    if (role === 1) {
+      if (!formData.exercises_id || formData.exercises_id.length === 0) {
+        setError("กรุณาเลือกชุดแบบฝึกหัดเริ่มต้นอย่างน้อย 1 ชุด");
+        setLoading(false);
+        return;
+      }
+      if (!isEditing && !formData.password) {
+        setError("กรุณากรอกรหัสผ่าน");
+        setLoading(false);
+        return;
+      }
+      if (formData.password && (formData.password.length < 6 || formData.password.length > 200)) {
+        setError("รหัสผ่านต้องมีความยาว 6-200 ตัวอักษร");
+        setLoading(false);
+        return;
+      }
     }
 
     if (role === 2) {
@@ -347,8 +359,9 @@ export default function UserFormModal({ user, role, onClose, onSave }: UserFormM
                       onChange={handleChange}
                       placeholder={isEditing ? "(เว้นว่างถ้าไม่เปลี่ยน)" : ""}
                       style={{ paddingRight: '2.5rem' }}
-                      minLength={isEditing ? undefined : 6}
+                      minLength={6}
                       maxLength={200}
+                      required={!isEditing}
                     />
                     <button 
                       type="button"
