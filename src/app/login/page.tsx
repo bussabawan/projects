@@ -9,7 +9,6 @@ import { checkUserLoginQuota } from '@/app/actions/authActions';
 import AboutModal from '@/app/components/AboutModal/AboutModal';
 import Loader from '@/app/components/Loader/Loader';
 import Footer from '@/app/components/Footer/Footer';
-import { checkUserLoginQuota } from '@/app/actions/authActions';
 
 const maxAttemptsErrorMsg = (
   <>
